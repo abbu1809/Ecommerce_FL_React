@@ -3,10 +3,26 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
+import Home from "./pages/Home";
+import Product from "./pages/Product";
+import ProductList from "./pages/ProductList";
+import Cart from "./pages/Cart";
+import Wishlist from "./pages/Wishlist";
 import { useAuthStore } from "./store/useAuth";
 
 const App = () => {
   const { isAuthenticated } = useAuthStore();
+
+  // Initialize products
+  React.useEffect(() => {
+    const initializeStore = async () => {
+      // Import dynamically to avoid circular dependencies
+      const { useProductStore } = await import("./store/useProduct");
+      useProductStore.getState().fetchProducts();
+    };
+
+    initializeStore();
+  }, []);
 
   return (
     <BrowserRouter>
@@ -29,18 +45,14 @@ const App = () => {
         <Route
           path="/login"
           element={!isAuthenticated ? <Login /> : <Navigate to="/" />}
-        />
-
-        {/* Protected Routes will be added here */}
-        <Route
-          path="/"
-          element={
-            <div className="text-center p-8">
-              <h1 className="text-3xl font-bold">Welcome to Anand Mobiles</h1>
-              <p className="mt-4">Your Trusted Mobile Partner</p>
-            </div>
-          }
-        />
+        />{" "}
+        {/* Public Routes */}
+        <Route path="/" element={<Home />} />
+        <Route path="/products" element={<ProductList />} />
+        <Route path="/products/:id" element={<Product />} />
+        <Route path="/category/:category" element={<ProductList />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/wishlist" element={<Wishlist />} />
       </Routes>
     </BrowserRouter>
   );
