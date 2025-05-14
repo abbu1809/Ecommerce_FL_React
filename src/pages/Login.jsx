@@ -1,0 +1,150 @@
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import FormWrapper from "../components/UI/FormWrapper";
+import Input from "../components/UI/Input";
+import Button from "../components/UI/Button";
+import { useAuthStore } from "../store/useAuth";
+
+const Login = () => {
+  const navigate = useNavigate();
+  const { login, error, clearError, isLoading } = useAuthStore();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [rememberMe, setRememberMe] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear specific field error when user starts typing
+    if (formErrors[name]) {
+      setFormErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+    if (error) {
+      clearError();
+    }
+  };
+
+  const validateForm = () => {
+    const errors = {};
+
+    if (!formData.email.trim()) {
+      errors.email = "Email is required";
+    } else if (
+      !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formData.email)
+    ) {
+      errors.email = "Invalid email address";
+    }
+
+    if (!formData.password) {
+      errors.password = "Password is required";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      await login({
+        ...formData,
+        rememberMe,
+      });
+      navigate("/"); // Redirect to home page after successful login
+    } catch {
+      // Error is handled by the store and displayed below
+    }
+  };
+  return (
+    <FormWrapper title="Welcome back to Anand Mobiles">
+      <div className="mt-4 text-center text-sm text-gray-600">
+        Sign in to access your account, track orders, and get personalized deals
+      </div>
+      <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <div className="rounded-md shadow-sm space-y-4">
+          <Input
+            label="Email Address"
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            error={formErrors.email}
+            placeholder="you@example.com"
+            icon="email"
+          />
+
+          <Input
+            label="Password"
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            error={formErrors.password}
+            placeholder="••••••••"
+            icon="lock"
+          />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                name="remember-me"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={() => setRememberMe(!rememberMe)}
+                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+              />
+              <label
+                htmlFor="remember-me"
+                className="ml-2 block text-sm text-gray-900"
+              >
+                Remember me
+              </label>
+            </div>
+
+            <div className="text-sm">
+              <a
+                href="#"
+                className="font-medium text-indigo-600 hover:text-indigo-500"
+              >
+                Forgot your password?
+              </a>
+            </div>
+          </div>
+        </div>{" "}
+        {error && (
+          <div className="text-red-500 text-sm text-center">{error}</div>
+        )}
+        <Button
+          type="submit"
+          isLoading={isLoading}
+          variant="primary"
+          size="lg"
+          fullWidth={true}
+        >
+          Sign in
+        </Button>
+        <div className="text-sm text-center">
+          Don't have an account?{" "}
+          <Link
+            to="/signup"
+            className="font-medium text-indigo-600 hover:text-indigo-500"
+          >
+            Sign up
+          </Link>
+        </div>
+      </form>
+    </FormWrapper>
+  );
+};
+
+export default Login;

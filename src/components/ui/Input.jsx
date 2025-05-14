@@ -1,145 +1,112 @@
 import React from "react";
-import { motion } from "framer-motion";
-import PropTypes from "prop-types";
 
 const Input = ({
-  id,
-  name,
+  label,
   type = "text",
-  placeholder,
+  name,
   value,
   onChange,
-  label,
+  required = false,
   error,
-  className = "",
-  leftIcon,
-  rightIcon,
-  isFullWidth = false,
-  isDisabled = false,
-  isRequired = false,
-  ...props
+  placeholder,
+  icon = null,
 }) => {
-  const sizeClasses = {
-    sm: `${leftIcon ? "pl-8" : "pl-3"} ${
-      rightIcon ? "pr-8" : "pr-3"
-    } py-1.5 text-sm`,
-    md: `${leftIcon ? "pl-10" : "pl-4"} ${
-      rightIcon ? "pr-10" : "pr-4"
-    } py-2 text-base`,
-    lg: `${leftIcon ? "pl-12" : "pl-5"} ${
-      rightIcon ? "pr-12" : "pr-5"
-    } py-2.5 text-lg`,
-  };
+  // Icon mapping function
+  const getIcon = (iconName) => {
+    const iconClasses = "h-5 w-5 text-gray-400";
 
-  const size = props.size || "md";
-  const rounded = props.rounded || "md";
-
-  const roundedClasses = {
-    none: "rounded-none",
-    sm: "rounded-sm",
-    md: "rounded-md",
-    lg: "rounded-lg",
-    xl: "rounded-xl",
-    full: "rounded-full",
-  };
-
-  return (
-    <div className={`${isFullWidth ? "w-full" : ""} ${className}`}>
-      {label && (
-        <label
-          htmlFor={id || name}
-          className="block text-sm font-medium text-gray-700 mb-1.5"
-        >
-          {label}
-          {isRequired && <span className="text-rose-600 ml-1">*</span>}
-        </label>
-      )}
-      <div className="relative">
-        {leftIcon && (
-          <div
-            className={`absolute inset-y-0 left-0 ${
-              size === "sm" ? "pl-2.5" : size === "lg" ? "pl-3.5" : "pl-3"
-            } flex items-center pointer-events-none text-gray-400`}
-          >
-            {leftIcon}
-          </div>
-        )}
-        <motion.input
-          id={id || name}
-          name={name}
-          type={type}
-          placeholder={placeholder}
-          value={value}
-          onChange={onChange}
-          disabled={isDisabled}
-          required={isRequired}
-          className={`shadow-sm block ${
-            roundedClasses[rounded]
-          } border focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 ${
-            sizeClasses[size]
-          } ${error ? "border-rose-500" : "border-gray-300"} ${
-            isFullWidth ? "w-full" : ""
-          } ${
-            isDisabled
-              ? "bg-gray-100 text-gray-500 cursor-not-allowed"
-              : "bg-white"
-          } transition-all duration-200`}
-          whileFocus={{
-            boxShadow: "0 0 0 3px rgba(124, 58, 237, 0.15)",
-          }}
-          {...props}
-        />
-        {rightIcon && (
-          <div
-            className={`absolute inset-y-0 right-0 ${
-              size === "sm" ? "pr-2.5" : size === "lg" ? "pr-3.5" : "pr-3"
-            } flex items-center pointer-events-none text-gray-400`}
-          >
-            {rightIcon}
-          </div>
-        )}
-      </div>
-      {error && (
-        <p
-          className="mt-1.5 text-sm text-rose-600 flex items-center"
-          id={`${id || name}-error`}
-        >
+    switch (iconName) {
+      case "email":
+        return (
           <svg
-            className="w-3.5 h-3.5 mr-1.5 flex-shrink-0"
-            fill="currentColor"
-            viewBox="0 0 20 20"
+            className={iconClasses}
             xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+          </svg>
+        );
+
+      case "lock":
+        return (
+          <svg
+            className={iconClasses}
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
           >
             <path
               fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
               clipRule="evenodd"
-            ></path>
+            />
           </svg>
-          {error}
-        </p>
-      )}
+        );
+
+      case "user":
+        return (
+          <svg
+            className={iconClasses}
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+              clipRule="evenodd"
+            />
+          </svg>
+        );
+
+      case "phone":
+        return (
+          <svg
+            className={iconClasses}
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+          </svg>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="mb-4">
+      <label htmlFor={name} className="block text-sm font-medium text-gray-700">
+        {label}
+      </label>
+      <div className="mt-1 relative rounded-md shadow-sm">
+        {icon && (
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            {getIcon(icon)}
+          </div>
+        )}
+        <input
+          type={type}
+          name={name}
+          id={name}
+          value={value}
+          onChange={onChange}
+          required={required}
+          placeholder={placeholder}
+          className={`block w-full ${
+            icon ? "pl-10" : "px-3"
+          } py-2 bg-white border ${
+            error ? "border-red-500" : "border-gray-300"
+          } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
+        />
+      </div>
+      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
     </div>
   );
-};
-
-Input.propTypes = {
-  id: PropTypes.string,
-  name: PropTypes.string,
-  type: PropTypes.string,
-  placeholder: PropTypes.string,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  onChange: PropTypes.func,
-  label: PropTypes.string,
-  error: PropTypes.string,
-  className: PropTypes.string,
-  leftIcon: PropTypes.node,
-  rightIcon: PropTypes.node,
-  isFullWidth: PropTypes.bool,
-  isDisabled: PropTypes.bool,
-  isRequired: PropTypes.bool,
-  size: PropTypes.oneOf(["sm", "md", "lg"]),
-  rounded: PropTypes.oneOf(["none", "sm", "md", "lg", "xl", "full"]),
 };
 
 export default Input;
