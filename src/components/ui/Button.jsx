@@ -13,23 +13,23 @@ const Button = ({
   icon = null,
 }) => {
   const baseClasses =
-    "flex justify-center items-center font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 ";
+    "flex justify-center items-center font-medium rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 ";
 
   const variants = {
     primary:
-      "text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 border-transparent",
+      "text-white bg-teal-600 hover:bg-teal-700 focus:ring-teal-500 border-transparent",
     secondary:
-      "text-indigo-700 bg-white hover:bg-gray-50 focus:ring-indigo-500 border border-indigo-600",
+      "text-teal-700 bg-white hover:bg-gray-50 focus:ring-teal-500 border border-teal-600",
     outline:
-      "text-gray-700 bg-transparent hover:bg-gray-50 border border-gray-300 focus:ring-indigo-500",
+      "text-gray-700 bg-white hover:bg-gray-50 border border-gray-300 focus:ring-teal-500",
     danger:
       "text-white bg-red-600 hover:bg-red-700 focus:ring-red-500 border-transparent",
   };
 
   const sizes = {
-    sm: "py-1 px-3 text-xs",
+    sm: "py-1.5 px-3 text-xs",
     md: "py-2 px-4 text-sm",
-    lg: "py-3 px-6 text-base",
+    lg: "py-2.5 px-5 text-base",
   };
 
   const widthClass = fullWidth ? "w-full" : "";
@@ -66,7 +66,7 @@ const Button = ({
       className={`${baseClasses} ${variants[variant]} ${
         sizes[size]
       } ${widthClass} ${className} ${
-        disabled || isLoading ? "opacity-50 cursor-not-allowed" : ""
+        disabled || isLoading ? "opacity-60 cursor-not-allowed" : ""
       }`}
     >
       {isLoading && <LoadingSpinner />}

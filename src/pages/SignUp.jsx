@@ -86,11 +86,13 @@ const SignUp = () => {
   };
 
   return (
-    <FormWrapper title="Create your account at Anand Mobiles">
-      <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-        <div className="rounded-md shadow-sm space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            {" "}
+    <FormWrapper title="Join Anand Mobiles">
+      <div className="mt-3 text-center text-sm text-gray-500">
+        Create an account to enjoy personalized shopping experience
+      </div>
+      <form className="mt-7 space-y-5" onSubmit={handleSubmit}>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
               label="First Name"
               name="firstName"
@@ -111,7 +113,7 @@ const SignUp = () => {
               placeholder="Doe"
               icon="user"
             />
-          </div>{" "}
+          </div>
           <Input
             label="Email Address"
             type="email"
@@ -134,46 +136,64 @@ const SignUp = () => {
             placeholder="1234567890"
             icon="phone"
           />
-          <Input
-            label="Password"
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            error={formErrors.password}
-            placeholder="••••••••"
-            icon="lock"
-          />
-          <Input
-            label="Confirm Password"
-            type="password"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
-            error={formErrors.confirmPassword}
-            placeholder="••••••••"
-            icon="lock"
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              label="Password"
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              error={formErrors.password}
+              placeholder="••••••••"
+              icon="lock"
+            />
+            <Input
+              label="Confirm Password"
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              error={formErrors.confirmPassword}
+              placeholder="••••••••"
+              icon="lock"
+            />
+          </div>
         </div>
+
         {error && (
-          <div className="text-red-500 text-sm text-center">{error}</div>
-        )}{" "}
-        <Button
-          type="submit"
-          isLoading={isLoading}
-          variant="primary"
-          size="lg"
-          fullWidth={true}
-        >
-          {isLoading ? "Creating account..." : "Sign up"}
-        </Button>
+          <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded-md">
+            {error}
+          </div>
+        )}
+
+        <div className="pt-2 mt-2">
+          <Button
+            type="submit"
+            isLoading={isLoading}
+            variant="primary"
+            size="lg"
+            fullWidth={true}
+          >
+            {isLoading ? "Creating account..." : "Create account"}
+          </Button>
+        </div>
+
+        <div className="relative my-5">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-200"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-3 bg-gray-50 text-gray-500">or</span>
+          </div>
+        </div>
+
         <div className="text-sm text-center">
           Already have an account?{" "}
           <Link
             to="/login"
-            className="font-medium text-indigo-600 hover:text-indigo-500"
+            className="font-medium text-teal-600 hover:text-teal-500 transition-colors duration-200"
           >
             Sign in
           </Link>

@@ -79,11 +79,14 @@ const Input = ({
   };
 
   return (
-    <div className="mb-4">
-      <label htmlFor={name} className="block text-sm font-medium text-gray-700">
-        {label}
+    <div className="mb-3">
+      <label
+        htmlFor={name}
+        className="block text-sm font-medium text-gray-700 mb-1"
+      >
+        {label} {required && <span className="text-red-500">*</span>}
       </label>
-      <div className="mt-1 relative rounded-md shadow-sm">
+      <div className="relative rounded-md">
         {icon && (
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             {getIcon(icon)}
@@ -99,12 +102,30 @@ const Input = ({
           placeholder={placeholder}
           className={`block w-full ${
             icon ? "pl-10" : "px-3"
-          } py-2 bg-white border ${
-            error ? "border-red-500" : "border-gray-300"
-          } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
+          } py-2.5 bg-white border ${
+            error
+              ? "border-red-500 ring-1 ring-red-500"
+              : "border-gray-300 focus:ring-teal-500 focus:border-teal-500"
+          } rounded-lg shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 sm:text-sm`}
         />
       </div>
-      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+      {error && (
+        <p className="mt-1 text-sm text-red-500 flex items-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4 mr-1"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+              clipRule="evenodd"
+            />
+          </svg>
+          {error}
+        </p>
+      )}
     </div>
   );
 };

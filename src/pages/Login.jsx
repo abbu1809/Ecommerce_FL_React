@@ -64,12 +64,13 @@ const Login = () => {
     }
   };
   return (
-    <FormWrapper title="Welcome back to Anand Mobiles">
-      <div className="mt-4 text-center text-sm text-gray-600">
-        Sign in to access your account, track orders, and get personalized deals
+    <FormWrapper title="Welcome back">
+      <div className="mt-4 text-center text-sm text-gray-500">
+        Sign in to access your account, track orders, and explore our latest
+        products
       </div>
       <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-        <div className="rounded-md shadow-sm space-y-4">
+        <div className="rounded-md space-y-5">
           <Input
             label="Email Address"
             type="email"
@@ -93,7 +94,7 @@ const Login = () => {
             placeholder="••••••••"
             icon="lock"
           />
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mt-1">
             <div className="flex items-center">
               <input
                 id="remember-me"
@@ -101,11 +102,11 @@ const Login = () => {
                 type="checkbox"
                 checked={rememberMe}
                 onChange={() => setRememberMe(!rememberMe)}
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
               />
               <label
                 htmlFor="remember-me"
-                className="ml-2 block text-sm text-gray-900"
+                className="ml-2 block text-sm text-gray-700"
               >
                 Remember me
               </label>
@@ -114,32 +115,44 @@ const Login = () => {
             <div className="text-sm">
               <a
                 href="#"
-                className="font-medium text-indigo-600 hover:text-indigo-500"
+                className="font-medium text-teal-600 hover:text-teal-500 transition-colors duration-200"
               >
-                Forgot your password?
+                Forgot password?
               </a>
             </div>
           </div>
-        </div>{" "}
+        </div>
         {error && (
-          <div className="text-red-500 text-sm text-center">{error}</div>
+          <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded-md">
+            {error}
+          </div>
         )}
-        <Button
-          type="submit"
-          isLoading={isLoading}
-          variant="primary"
-          size="lg"
-          fullWidth={true}
-        >
-          Sign in
-        </Button>
+        <div className="pt-2">
+          <Button
+            type="submit"
+            isLoading={isLoading}
+            variant="primary"
+            size="lg"
+            fullWidth={true}
+          >
+            {isLoading ? "Signing in..." : "Sign in"}
+          </Button>
+        </div>
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-200"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-3 bg-gray-50 text-gray-500">or</span>
+          </div>
+        </div>
         <div className="text-sm text-center">
           Don't have an account?{" "}
           <Link
             to="/signup"
-            className="font-medium text-indigo-600 hover:text-indigo-500"
+            className="font-medium text-teal-600 hover:text-teal-500 transition-colors duration-200"
           >
-            Sign up
+            Create an account
           </Link>
         </div>
       </form>
