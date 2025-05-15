@@ -1,15 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const Logo = ({ size = "medium" }) => {
+const Logo = ({ size = "medium", linkWrapper = true }) => {
   const sizes = {
     small: "h-8 w-auto",
     medium: "h-12 w-auto",
     large: "h-16 w-auto",
   };
 
-  return (
-    <Link to="/" className="flex items-center">
+  const content = (
+    <>
       <img
         src="/logo.jpg"
         alt="Anand Mobiles"
@@ -18,8 +18,18 @@ const Logo = ({ size = "medium" }) => {
       <span className="ml-2 text-xl font-bold text-gray-900 hidden sm:inline-block">
         Anand Mobiles
       </span>
-    </Link>
+    </>
   );
+
+  if (linkWrapper) {
+    return (
+      <Link to="/" className="flex items-center">
+        {content}
+      </Link>
+    );
+  }
+
+  return <div className="flex items-center">{content}</div>;
 };
 
 export default Logo;
