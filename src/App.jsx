@@ -14,6 +14,9 @@ import Product from "./pages/Product";
 import ProductList from "./pages/ProductList";
 import Cart from "./pages/Cart";
 import Wishlist from "./pages/Wishlist";
+import OrderStatus from "./pages/OrderStatus";
+import OrderTracking from "./pages/OrderTracking";
+import OrderTrackingDetail from "./pages/OrderTrackingDetail";
 import { useAuthStore } from "./store/useAuth";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -95,6 +98,9 @@ const App = () => {
           <Route path="/category/:category" element={<ProductList />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/orders" element={<OrderStatus />} />
+          <Route path="/order-tracking" element={<OrderTracking />} />
+          <Route path="/order-tracking/:id" element={<OrderTrackingDetail />} />
         </Route>
         {/* Admin Routes */}
         <Route
