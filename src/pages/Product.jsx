@@ -1,15 +1,13 @@
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import {
-  FiArrowLeft,
-  FiHeart,
-  FiShoppingCart,
-  FiShare2,
-  FiStar,
-  FiTruck,
-} from "react-icons/fi";
-import Button from "../components/UI/Button";
+import { FiArrowLeft } from "react-icons/fi";
 import { ROUTES } from "../utils/constants";
+import Breadcrumb from "../components/Breadcrumb/Breadcrumb";
+import ProductImageGallery from "../components/Product/ProductImageGallery";
+import ProductInfo from "../components/Product/ProductInfo";
+import ProductQuantitySelector from "../components/Product/ProductQuantitySelector";
+import ProductActions from "../components/Product/ProductActions";
+import ProductTabs from "../components/Product/ProductTabs";
 
 const Product = () => {
   const { id } = useParams();
@@ -94,28 +92,18 @@ const Product = () => {
     // You could dispatch an action to a global store here
   };
 
+  // Breadcrumb items
+  const breadcrumbItems = [
+    { label: "Home", link: ROUTES.HOME },
+    { label: product.category, link: ROUTES.PRODUCTS },
+    { label: product.brand, link: `/brand/${product.brand}` },
+    { label: product.name },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
-        {/* Breadcrumbs */}
-        <nav className="flex items-center text-sm text-gray-500 mb-6">
-          <Link to={ROUTES.HOME} className="hover:text-orange-500">
-            Home
-          </Link>
-          <span className="mx-2">/</span>
-          <Link to={ROUTES.PRODUCTS} className="hover:text-orange-500">
-            {product.category}
-          </Link>
-          <span className="mx-2">/</span>
-          <Link
-            to={`/brand/${product.brand}`}
-            className="hover:text-orange-500"
-          >
-            {product.brand}
-          </Link>
-          <span className="mx-2">/</span>
-          <span className="text-gray-800">{product.name}</span>
-        </nav>
+        <Breadcrumb items={breadcrumbItems} />
 
         <Link
           to={ROUTES.PRODUCTS}
@@ -128,263 +116,41 @@ const Product = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 p-6">
             {/* Product Images - Left Column on Desktop */}
             <div className="lg:col-span-2">
-              <div className="mb-4 rounded-lg overflow-hidden">
-                <img
-                  src={product.images[activeImage]}
-                  alt={`${product.name} view ${activeImage + 1}`}
-                  className="w-full h-auto object-contain aspect-square"
-                />
-              </div>
-              <div className="grid grid-cols-4 gap-2">
-                {product.images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setActiveImage(index)}
-                    className={`border-2 rounded p-1 ${
-                      activeImage === index
-                        ? "border-orange-500"
-                        : "border-gray-200"
-                    }`}
-                  >
-                    <img
-                      src={image}
-                      alt={`${product.name} thumbnail ${index + 1}`}
-                      className="w-full h-auto object-cover aspect-square"
-                    />
-                  </button>
-                ))}
-              </div>
+              <ProductImageGallery
+                images={product.images}
+                activeImage={activeImage}
+                setActiveImage={setActiveImage}
+              />
             </div>
 
             {/* Product Details - Right Column on Desktop */}
             <div className="lg:col-span-3 flex flex-col">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                {product.name}
-              </h1>
-
-              <div className="flex items-center mb-3">
-                <div className="flex items-center text-yellow-500">
-                  {[...Array(5)].map((_, index) => (
-                    <FiStar
-                      key={index}
-                      className={`${
-                        index < Math.floor(product.rating) ? "fill-current" : ""
-                      } ${
-                        index === Math.floor(product.rating) &&
-                        product.rating % 1 > 0
-                          ? "fill-current text-yellow-500/50"
-                          : ""
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-sm text-gray-500 ml-2">
-                  {product.rating} ({product.reviews} reviews)
-                </span>
-              </div>
-
-              <div className="mb-6">
-                <div className="flex items-baseline">
-                  <span className="text-3xl font-bold text-gray-900">
-                    ₹{product.discountPrice.toLocaleString()}
-                  </span>
-                  {product.discount && (
-                    <>
-                      <span className="text-lg text-gray-500 line-through ml-2">
-                        ₹{product.price.toLocaleString()}
-                      </span>
-                      <span className="ml-2 text-green-600 font-medium">
-                        {product.discount} off
-                      </span>
-                    </>
-                  )}
-                </div>
-                <p className="text-green-600 text-sm mt-1">
-                  ✓ In Stock ({product.stock} available)
-                </p>
-              </div>
+              <ProductInfo product={product} />
 
               <div className="border-t border-gray-200 py-4">
-                <div className="flex items-center mb-4">
-                  <span className="text-gray-700 mr-4">Quantity:</span>
-                  <div className="flex items-center border border-gray-300 rounded">
-                    <button
-                      onClick={decrementQuantity}
-                      className="px-3 py-1 text-lg"
-                      disabled={quantity <= 1}
-                    >
-                      -
-                    </button>
-                    <input
-                      type="number"
-                      min="1"
-                      max={product.stock}
-                      value={quantity}
-                      onChange={handleQuantityChange}
-                      className="w-12 text-center border-x border-gray-300"
-                    />
-                    <button
-                      onClick={incrementQuantity}
-                      className="px-3 py-1 text-lg"
-                      disabled={quantity >= product.stock}
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
+                <ProductQuantitySelector
+                  quantity={quantity}
+                  setQuantity={setQuantity}
+                  stock={product.stock}
+                  handleQuantityChange={handleQuantityChange}
+                  incrementQuantity={incrementQuantity}
+                  decrementQuantity={decrementQuantity}
+                />
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                  <Button
-                    onClick={addToCart}
-                    className="bg-orange-500 hover:bg-orange-600"
-                  >
-                    <FiShoppingCart className="mr-2" />
-                    Add to Cart
-                  </Button>
-
-                  <Button
-                    onClick={addToWishlist}
-                    variant="outline"
-                    className="border border-orange-500 text-orange-500 hover:bg-orange-50"
-                  >
-                    <FiHeart className="mr-2" />
-                    Add to Wishlist
-                  </Button>
-                </div>
-
-                <div className="flex items-center justify-end">
-                  <button className="inline-flex items-center text-gray-600 hover:text-orange-500">
-                    <FiShare2 className="mr-1" />
-                    <span>Share</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="mt-4 space-y-3">
-                <div className="flex items-center text-sm text-gray-600">
-                  <FiTruck className="mr-2" />
-                  <span>Free delivery available</span>
-                </div>
-                <div className="flex items-center text-sm text-gray-600">
-                  <svg
-                    className="h-5 w-5 mr-2"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M20 4H4c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12zM6 10h2v2H6v-2zm0 4h8v2H6v-2zm10 0h2v2h-2v-2zm-6-4h8v2h-8v-2z"></path>
-                  </svg>
-                  <span>EMI options available</span>
-                </div>
+                <ProductActions
+                  addToCart={addToCart}
+                  addToWishlist={addToWishlist}
+                />
               </div>
             </div>
           </div>
 
           {/* Product Details Tabs */}
-          <div className="border-t border-gray-200 mt-6">
-            <div className="flex border-b border-gray-200">
-              <button
-                onClick={() => setActiveTab("description")}
-                className={`px-6 py-3 text-sm font-medium ${
-                  activeTab === "description"
-                    ? "text-orange-500 border-b-2 border-orange-500"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                Description
-              </button>
-              <button
-                onClick={() => setActiveTab("specifications")}
-                className={`px-6 py-3 text-sm font-medium ${
-                  activeTab === "specifications"
-                    ? "text-orange-500 border-b-2 border-orange-500"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                Specifications
-              </button>
-              <button
-                onClick={() => setActiveTab("reviews")}
-                className={`px-6 py-3 text-sm font-medium ${
-                  activeTab === "reviews"
-                    ? "text-orange-500 border-b-2 border-orange-500"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                Reviews ({product.reviews})
-              </button>
-            </div>
-
-            <div className="p-6">
-              {activeTab === "description" && (
-                <div>
-                  <p className="text-gray-700 mb-4">{product.description}</p>
-                  <h3 className="font-semibold text-lg mb-2">Key Features:</h3>
-                  <ul className="list-disc pl-5 space-y-1">
-                    {product.features.map((feature, index) => (
-                      <li key={index} className="text-gray-700">
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {activeTab === "specifications" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
-                  {Object.entries(product.specifications).map(
-                    ([key, value]) => (
-                      <div key={key} className="border-b border-gray-200 pb-2">
-                        <div className="flex justify-between">
-                          <span className="font-medium text-gray-800">
-                            {key}
-                          </span>
-                          <span className="text-gray-600">{value}</span>
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              )}
-
-              {activeTab === "reviews" && (
-                <div className="space-y-4">
-                  <div className="flex items-center">
-                    <div className="flex items-center text-yellow-500">
-                      {[...Array(5)].map((_, index) => (
-                        <FiStar
-                          key={index}
-                          className={`${
-                            index < Math.floor(product.rating)
-                              ? "fill-current"
-                              : ""
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-gray-700 ml-2">
-                      {product.rating} out of 5
-                    </span>
-                  </div>
-
-                  <p className="text-gray-600">
-                    Based on {product.reviews} reviews
-                  </p>
-
-                  <Button variant="outline" fullWidth={false}>
-                    Write a Review
-                  </Button>
-
-                  <div className="mt-6">
-                    <p>
-                      This is a placeholder for customer reviews. In a real
-                      application, this would display actual customer reviews
-                      fetched from a database.
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          <ProductTabs
+            product={product}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
         </div>
       </div>
     </div>

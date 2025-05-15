@@ -9,6 +9,8 @@ import {
   FiInstagram,
   FiTwitter,
   FiYoutube,
+  FiArrowRight,
+  FiChevronRight,
 } from "react-icons/fi";
 import { ROUTES } from "../utils/constants";
 
@@ -83,296 +85,348 @@ const Footer = () => {
     "Extended warranty options available",
   ];
 
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer
-      className="py-10 shadow-inner"
-      style={{
-        backgroundColor: "var(--bg-dark)",
-        color: "var(--text-on-dark-bg)",
-      }}
-    >
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-          <div>
-            <Logo linkWrapper={false} className="mb-4" />
-            <p
-              className="text-sm max-w-xs mb-4"
-              style={{ color: "var(--text-on-dark-bg)" }}
-            >
-              Your trusted electronics partner offering the latest mobiles,
-              laptops, and accessories at competitive prices with excellent
-              customer service.
-            </p>
-            <div className="flex space-x-4">
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:opacity-80 transition-opacity"
-                style={{ color: "var(--text-on-dark-bg)" }}
-                aria-label="Facebook"
+    <footer className="relative overflow-hidden">
+      {/* Decorative elements */}
+      <div
+        className="absolute top-0 left-0 w-64 h-64 rounded-full opacity-5"
+        style={{
+          backgroundColor: "var(--brand-primary)",
+          transform: "translate(-50%, -50%)",
+        }}
+      />
+      <div
+        className="absolute bottom-0 right-0 w-96 h-96 rounded-full opacity-5"
+        style={{
+          backgroundColor: "var(--brand-primary)",
+          transform: "translate(30%, 30%)",
+        }}
+      />
+
+      {/* Main footer */}
+      <div
+        className="pt-16 pb-8"
+        style={{
+          backgroundColor: "var(--bg-dark)",
+          color: "var(--text-on-dark-bg)",
+        }}
+      >
+        <div className="container mx-auto px-4">
+          {/* Top footer section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            {/* Company info */}
+            <div className="space-y-5">
+              <Logo linkWrapper={false} />
+              <p
+                className="text-sm max-w-xs"
+                style={{ color: "var(--text-on-dark-bg)", lineHeight: "1.6" }}
               >
-                <FiFacebook className="w-5 h-5" />
-              </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:opacity-80 transition-opacity"
+                Your trusted electronics partner offering the latest mobiles,
+                laptops, and accessories at competitive prices with excellent
+                customer service.
+              </p>
+              <div
+                className="flex space-x-4 pt-2"
                 style={{ color: "var(--text-on-dark-bg)" }}
-                aria-label="Instagram"
               >
-                <FiInstagram className="w-5 h-5" />
-              </a>
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:opacity-80 transition-opacity"
-                style={{ color: "var(--text-on-dark-bg)" }}
-                aria-label="Twitter"
-              >
-                <FiTwitter className="w-5 h-5" />
-              </a>
-              <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:opacity-80 transition-opacity"
-                style={{ color: "var(--text-on-dark-bg)" }}
-                aria-label="YouTube"
-              >
-                <FiYoutube className="w-5 h-5" />
-              </a>
+                {[
+                  {
+                    icon: <FiFacebook />,
+                    label: "Facebook",
+                    url: "https://facebook.com",
+                  },
+                  {
+                    icon: <FiInstagram />,
+                    label: "Instagram",
+                    url: "https://instagram.com",
+                  },
+                  {
+                    icon: <FiTwitter />,
+                    label: "Twitter",
+                    url: "https://twitter.com",
+                  },
+                  {
+                    icon: <FiYoutube />,
+                    label: "YouTube",
+                    url: "https://youtube.com",
+                  },
+                ].map((social, index) => (
+                  <a
+                    key={index}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
+                    style={{
+                      backgroundColor: "rgba(255,255,255,0.08)",
+                      color: "var(--text-on-dark-bg)",
+                    }}
+                    aria-label={social.label}
+                  >
+                    {social.icon}
+                  </a>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div>
-            <h3
-              className="font-semibold text-lg mb-4"
-              style={{ color: "var(--brand-primary)" }}
-            >
-              Quick Links
-            </h3>
-            <ul className="space-y-2">
-              {quickLinks.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    to={link.path}
-                    className="text-sm hover:text-orange-400 transition-colors flex items-center"
-                    style={{ color: "var(--text-on-dark-bg)" }}
-                  >
-                    <span
-                      className="mr-2 text-orange-500"
-                      style={{ color: "var(--brand-primary)" }}
+            {/* Quick Links */}
+            <div className="space-y-4">
+              <h3
+                className="font-semibold text-lg relative inline-block pb-2"
+                style={{ color: "var(--text-on-dark-bg)" }}
+              >
+                Quick Links
+                <span
+                  className="absolute bottom-0 left-0 h-0.5 w-3/4"
+                  style={{ backgroundColor: "var(--brand-primary)" }}
+                />
+              </h3>
+              <ul className="space-y-3">
+                {quickLinks.map((link) => (
+                  <li key={link.name} className="group">
+                    <Link
+                      to={link.path}
+                      className="text-sm flex items-center group-hover:translate-x-1 transition-transform duration-300"
+                      style={{ color: "var(--text-on-dark-bg)" }}
                     >
-                      ›
-                    </span>{" "}
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+                      <FiChevronRight
+                        style={{ color: "var(--brand-primary)" }}
+                        className="mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      />
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          <div>
-            <h3
-              className="font-semibold text-lg mb-4"
-              style={{ color: "var(--brand-primary)" }}
-            >
-              Customer Service
-            </h3>
-            <ul className="space-y-2">
-              {customerServiceLinks.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    to={link.path}
-                    className="text-sm hover:text-orange-400 transition-colors flex items-center"
-                    style={{ color: "var(--text-on-dark-bg)" }}
-                  >
-                    <span
-                      className="mr-2 text-orange-500"
-                      style={{ color: "var(--brand-primary)" }}
+            {/* Customer Service */}
+            <div className="space-y-4">
+              <h3
+                className="font-semibold text-lg relative inline-block pb-2"
+                style={{ color: "var(--text-on-dark-bg)" }}
+              >
+                Customer Service
+                <span
+                  className="absolute bottom-0 left-0 h-0.5 w-3/4"
+                  style={{ backgroundColor: "var(--brand-primary)" }}
+                />
+              </h3>
+              <ul className="space-y-3">
+                {customerServiceLinks.map((link) => (
+                  <li key={link.name} className="group">
+                    <Link
+                      to={link.path}
+                      className="text-sm flex items-center group-hover:translate-x-1 transition-transform duration-300"
+                      style={{ color: "var(--text-on-dark-bg)" }}
                     >
-                      ›
-                    </span>{" "}
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+                      <FiChevronRight
+                        style={{ color: "var(--brand-primary)" }}
+                        className="mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      />
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          <div>
-            <h3
-              className="font-semibold text-lg mb-4"
-              style={{ color: "var(--brand-primary)" }}
-            >
-              Contact Us
-            </h3>
-            <ul className="space-y-3">
-              <li>
-                <div className="flex items-center group">
-                  <FiPhone
-                    className="w-4 h-4 mr-2 flex-shrink-0"
-                    style={{ color: "var(--brand-primary)" }}
-                  />
+            {/* Contact Us */}
+            <div className="space-y-4">
+              <h3
+                className="font-semibold text-lg relative inline-block pb-2"
+                style={{ color: "var(--text-on-dark-bg)" }}
+              >
+                Contact Us
+                <span
+                  className="absolute bottom-0 left-0 h-0.5 w-3/4"
+                  style={{ backgroundColor: "var(--brand-primary)" }}
+                />
+              </h3>
+              <ul className="space-y-3">
+                <li>
                   <a
                     href="tel:1800-123-4567"
-                    className="text-sm hover:text-orange-400 transition-colors"
+                    className="text-sm flex items-center transition-colors duration-300 hover:text-white"
                     style={{ color: "var(--text-on-dark-bg)" }}
                   >
-                    1800-123-4567
+                    <div
+                      className="p-2 mr-3 rounded-full"
+                      style={{ backgroundColor: "rgba(245, 158, 11, 0.1)" }}
+                    >
+                      <FiPhone
+                        className="w-4 h-4"
+                        style={{ color: "var(--brand-primary)" }}
+                      />
+                    </div>
+                    <span>1800-123-4567</span>
                   </a>
-                </div>
-              </li>
-              <li>
-                <div className="flex items-center group">
-                  <FiMail
-                    className="w-4 h-4 mr-2 flex-shrink-0"
-                    style={{ color: "var(--brand-primary)" }}
-                  />
+                </li>
+                <li>
                   <a
                     href="mailto:info@anandmobiles.com"
-                    className="text-sm hover:text-orange-400 transition-colors"
+                    className="text-sm flex items-center transition-colors duration-300 hover:text-white"
                     style={{ color: "var(--text-on-dark-bg)" }}
                   >
-                    info@anandmobiles.com
+                    <div
+                      className="p-2 mr-3 rounded-full"
+                      style={{ backgroundColor: "rgba(245, 158, 11, 0.1)" }}
+                    >
+                      <FiMail
+                        className="w-4 h-4"
+                        style={{ color: "var(--brand-primary)" }}
+                      />
+                    </div>
+                    <span>info@anandmobiles.com</span>
                   </a>
-                </div>
-              </li>
-              <li>
-                <div className="flex group">
-                  <FiMapPin
-                    className="w-4 h-4 mr-2 flex-shrink-0 mt-1"
-                    style={{ color: "var(--brand-primary)" }}
-                  />
-                  <p
-                    className="text-sm"
-                    style={{ color: "var(--text-on-dark-bg)" }}
-                  >
-                    123 Retail Park, Main Street,
-                    <br /> Bhopal, MP - 462001
-                  </p>
-                </div>
-              </li>
-              <li>
-                <div className="flex items-center group">
-                  <FiClock
-                    className="w-4 h-4 mr-2 flex-shrink-0"
-                    style={{ color: "var(--brand-primary)" }}
-                  />
-                  <p
-                    className="text-sm"
-                    style={{ color: "var(--text-on-dark-bg)" }}
-                  >
-                    Mon-Sat: 10:00 AM - 8:00 PM
-                  </p>
-                </div>
-              </li>
-            </ul>
+                </li>
+                <li>
+                  <div className="text-sm flex transition-colors duration-300">
+                    <div
+                      className="p-2 mr-3 rounded-full flex-shrink-0 self-start mt-1"
+                      style={{ backgroundColor: "rgba(245, 158, 11, 0.1)" }}
+                    >
+                      <FiMapPin
+                        className="w-4 h-4"
+                        style={{ color: "var(--brand-primary)" }}
+                      />
+                    </div>
+                    <span style={{ color: "var(--text-on-dark-bg)" }}>
+                      123 Retail Park, Main Street,
+                      <br /> Bhopal, MP - 462001
+                    </span>
+                  </div>
+                </li>
+                <li>
+                  <div className="text-sm flex items-center transition-colors duration-300">
+                    <div
+                      className="p-2 mr-3 rounded-full"
+                      style={{ backgroundColor: "rgba(245, 158, 11, 0.1)" }}
+                    >
+                      <FiClock
+                        className="w-4 h-4"
+                        style={{ color: "var(--brand-primary)" }}
+                      />
+                    </div>
+                    <span style={{ color: "var(--text-on-dark-bg)" }}>
+                      Mon-Sat: 10:00 AM - 8:00 PM
+                    </span>
+                  </div>
+                </li>
+              </ul>
+            </div>
           </div>
-        </div>
 
-        <div
-          className="border-t border-b py-6 mb-6 transition-all"
-          style={{ borderColor: "rgba(255,255,255,0.1)" }}
-        >
-          <div className="flex flex-col items-center">
-            <p
-              className="text-sm mb-4 text-center font-medium"
-              style={{ color: "var(--brand-primary)" }}
-            >
-              Payment Methods Accepted
-            </p>
-            <div className="flex flex-wrap justify-center gap-3">
-              {paymentMethods.map((payment) => (
+          {/* Middle section - Payment methods */}
+          <div
+            className="rounded-2xl p-6 mb-8 relative overflow-hidden"
+            style={{
+              backgroundColor: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.05)",
+            }}
+          >
+            <div className="flex flex-col items-center">
+              <h4
+                className="text-base font-medium mb-5 relative inline-block"
+                style={{ color: "var(--brand-primary)" }}
+              >
+                Payment Methods We Accept
                 <span
-                  key={payment}
-                  className="px-3 py-1.5 text-xs rounded-md transition-transform hover:scale-105"
+                  className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-0.5 w-1/2"
+                  style={{ backgroundColor: "var(--brand-primary)" }}
+                ></span>
+              </h4>
+              <div className="flex flex-wrap justify-center gap-3">
+                {paymentMethods.map((payment) => (
+                  <span
+                    key={payment}
+                    className="px-4 py-2 text-sm rounded-md transition-all duration-300 hover:scale-105"
+                    style={{
+                      backgroundColor: "rgba(255,255,255,0.05)",
+                      color: "var(--text-on-dark-bg)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                    }}
+                  >
+                    {payment}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Policies section */}
+          <div
+            className="mb-8 rounded-2xl overflow-hidden"
+            style={{
+              backgroundColor: "rgba(245, 158, 11, 0.05)",
+              border: "1px solid rgba(245, 158, 11, 0.15)",
+            }}
+          >
+            <h4
+              className="font-medium text-center py-3"
+              style={{
+                color: "var(--text-on-brand)",
+                backgroundColor: "var(--brand-primary)",
+              }}
+            >
+              Our Store Policies
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-4">
+              {specialPolicies.map((policy) => (
+                <div
+                  key={policy}
+                  className="text-sm flex items-center p-2 rounded-md"
                   style={{
-                    backgroundColor: "rgba(255,255,255,0.08)",
+                    backgroundColor: "rgba(255,255,255,0.05)",
                     color: "var(--text-on-dark-bg)",
-                    border: "1px solid rgba(255,255,255,0.1)",
                   }}
                 >
-                  {payment}
-                </span>
+                  <span
+                    className="w-2 h-2 rounded-full mr-2 flex-shrink-0"
+                    style={{ backgroundColor: "var(--brand-primary)" }}
+                  ></span>
+                  {policy}
+                </div>
               ))}
             </div>
           </div>
-        </div>
 
-        <div
-          className="mb-6 p-4 rounded-lg transition-all hover:shadow-md"
-          style={{
-            backgroundColor: "rgba(245, 158, 11, 0.08)",
-            border: "1px solid rgba(245, 158, 11, 0.2)",
-          }}
-        >
-          <h4
-            className="font-medium text-center mb-3"
-            style={{ color: "var(--brand-primary)" }}
+          {/* Copyright */}
+          <div
+            className="pt-6 border-t text-center"
+            style={{
+              borderColor: "rgba(255,255,255,0.08)",
+              color: "var(--text-on-dark-bg)",
+            }}
           >
-            Special Policies
-          </h4>
-          <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-            {specialPolicies.map((policy) => (
-              <li
-                key={policy}
-                className="text-xs flex items-center justify-center text-center px-2 py-1 rounded-md"
-                style={{
-                  backgroundColor: "rgba(255,255,255,0.05)",
-                  color: "var(--text-on-dark-bg)",
-                }}
+            <p className="text-xs mb-3">
+              &copy; {currentYear} Anand Mobiles. All rights reserved.
+            </p>
+            <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs">
+              <Link
+                to="/privacy-policy"
+                className="hover:text-white transition-colors duration-300"
+                style={{ color: "var(--text-on-dark-bg)" }}
               >
-                <span
-                  className="mr-1 text-sm"
-                  style={{ color: "var(--brand-primary)" }}
-                >
-                  •
-                </span>
-                {policy}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div
-          className="text-center text-xs"
-          style={{ color: "var(--text-on-dark-bg)" }}
-        >
-          <p
-            className="hover:text-orange-400 transition-colors mb-2"
-            style={{ color: "var(--text-on-dark-bg)" }}
-          >
-            &copy; {new Date().getFullYear()} Anand Mobiles. All rights
-            reserved.
-          </p>
-          <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
-            <Link
-              to="/privacy-policy"
-              className="hover:text-orange-400 transition-colors"
-              style={{ color: "var(--text-on-dark-bg)" }}
-            >
-              Privacy Policy
-            </Link>
-            <span style={{ color: "var(--text-on-dark-bg)" }}>•</span>
-            <Link
-              to="/terms-conditions"
-              className="hover:text-orange-400 transition-colors"
-              style={{ color: "var(--text-on-dark-bg)" }}
-            >
-              Terms & Conditions
-            </Link>
-            <span style={{ color: "var(--text-on-dark-bg)" }}>•</span>
-            <Link
-              to="/return-policy"
-              className="hover:text-orange-400 transition-colors"
-              style={{ color: "var(--text-on-dark-bg)" }}
-            >
-              Return Policy
-            </Link>
+                Privacy Policy
+              </Link>
+              <Link
+                to="/terms-conditions"
+                className="hover:text-white transition-colors duration-300"
+                style={{ color: "var(--text-on-dark-bg)" }}
+              >
+                Terms & Conditions
+              </Link>
+              <Link
+                to="/return-policy"
+                className="hover:text-white transition-colors duration-300"
+                style={{ color: "var(--text-on-dark-bg)" }}
+              >
+                Return Policy
+              </Link>
+            </div>
           </div>
         </div>
       </div>

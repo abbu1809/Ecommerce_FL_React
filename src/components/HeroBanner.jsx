@@ -1,102 +1,193 @@
+import React from "react";
 import Button from "./UI/Button";
 
 const HeroBanner = ({ banner }) => {
   return (
-    <section className="relative py-4">
+    <section className="relative py-6 overflow-hidden">
       <div className="container mx-auto px-4">
         <div
-          className="relative overflow-hidden rounded-xl my-4 transform transition-transform hover:scale-[1.01] duration-300"
+          className="relative overflow-hidden rounded-2xl transform hover:scale-[1.01] transition-all duration-700 ease-in-out animate-fadeIn"
           style={{
-            boxShadow: "var(--shadow-large)",
+            boxShadow:
+              "var(--shadow-large), 0 15px 30px -10px rgba(245, 158, 11, 0.2)",
             borderRadius: "var(--rounded-xl)",
           }}
         >
-          {" "}
+          {/* High-quality image with subtle zoom effect */}
           <img
             src={banner.image}
             alt={banner.title}
-            className="w-full h-[300px] sm:h-[350px] md:h-[400px] object-cover object-center transition-transform duration-700 hover:scale-105"
-            style={{ backgroundColor: banner.backgroundColor }}
+            className="w-full h-[350px] sm:h-[450px] md:h-[500px] object-cover object-center transition-transform duration-10000 hover:scale-110"
+            style={{
+              backgroundColor: banner.backgroundColor,
+              transformOrigin: "center",
+            }}
             loading="eager"
           />
-          {/* Gradient overlay with animation */}
+
+          {/* Enhanced gradient overlay with improved animation */}
           <div
-            className="absolute inset-0 flex flex-col justify-center px-6 md:px-12 animate-[fadeIn_0.5s_ease-in-out]"
+            className="absolute inset-0 flex flex-col justify-center px-8 md:px-14"
             style={{
               background:
-                "linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.2) 100%)",
+                "linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.65) 40%, rgba(0,0,0,0.2) 100%)",
+              backdropFilter: "blur(2px)",
             }}
           >
-            <div className="max-w-lg">
-              {" "}
+            <div className="max-w-lg relative">
+              {/* Animated badge */}
               <span
-                className="inline-block px-4 py-1.5 mb-4 rounded-full text-sm font-medium animate-pulse"
+                className="inline-block px-5 py-2 mb-5 rounded-full text-sm font-medium shadow-lg transform hover:scale-105 transition-transform duration-300 animate-fadeIn"
                 style={{
                   backgroundColor: "var(--brand-primary)",
                   color: "var(--text-on-brand)",
-                  boxShadow: "var(--shadow-small)",
+                  boxShadow: "0 8px 25px rgba(245, 158, 11, 0.5)",
+                  backdropFilter: "blur(4px)",
+                  animationDelay: "0.2s",
                 }}
               >
                 {banner.tag || "Special Offer"}
               </span>
+
+              {/* Animated headline with text reveal effect */}
               <h1
-                className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2 leading-tight"
-                style={{ color: "var(--text-on-brand)" }}
+                className="text-3xl sm:text-5xl md:text-6xl font-bold mb-4 leading-tight drop-shadow-lg animate-fadeIn"
+                style={{
+                  color: "var(--text-on-brand)",
+                  textShadow: "0 2px 10px rgba(0,0,0,0.4)",
+                  letterSpacing: "-0.02em",
+                  animationDelay: "0.4s",
+                }}
               >
                 {banner.title}
               </h1>
+
+              {/* Animated subtitle */}
               <p
-                className="text-lg sm:text-xl mb-6 opacity-90"
-                style={{ color: "var(--text-on-brand-muted)" }}
+                className="text-lg sm:text-xl md:text-2xl mb-8 leading-relaxed max-w-xl animate-fadeIn"
+                style={{
+                  color: "var(--text-on-brand-muted)",
+                  textShadow: "0 1px 3px rgba(0,0,0,0.3)",
+                  animationDelay: "0.6s",
+                }}
               >
                 {banner.subtitle}
               </p>
-              <div className="flex flex-wrap gap-3">
-                {" "}
+
+              {/* Animated buttons with improved effects */}
+              <div
+                className="flex flex-wrap gap-4 animate-fadeIn"
+                style={{ animationDelay: "0.8s" }}
+              >
                 <Button
                   variant="primary"
                   fullWidth={false}
                   size="lg"
-                  className="transition-all duration-300 hover:translate-y-[-2px]"
+                  className="transition-all duration-500 hover:translate-y-[-4px] hover:shadow-xl relative overflow-hidden group"
                   style={{
                     backgroundColor: "var(--brand-primary)",
                     color: "var(--text-on-brand)",
-                    boxShadow: "var(--shadow-medium)",
+                    boxShadow: "0 10px 25px -5px rgba(245, 158, 11, 0.5)",
                     borderRadius: "var(--rounded-md)",
+                    padding: "0.85rem 2rem",
                   }}
                 >
-                  {banner.cta || "Shop Now"}
-                </Button>{" "}
+                  <span className="relative z-10 text-base font-semibold flex items-center gap-2">
+                    {banner.cta || "Shop Now"}
+                    <svg
+                      className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M14 5l7 7m0 0l-7 7m7-7H3"
+                      />
+                    </svg>
+                  </span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 transform -skew-x-30 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out"></span>
+                </Button>
+
                 <Button
                   variant="outline"
                   fullWidth={false}
                   size="lg"
-                  className="transition-all duration-300 hover:translate-y-[-2px]"
+                  className="transition-all duration-500 hover:translate-y-[-4px] hover:shadow-xl relative overflow-hidden group"
                   style={{
-                    backgroundColor: "rgba(255, 255, 255, 0.1)",
-                    backdropFilter: "blur(4px)",
-                    borderColor: "var(--text-on-brand-muted)",
+                    backgroundColor: "rgba(255, 255, 255, 0.12)",
+                    backdropFilter: "blur(8px)",
+                    borderColor: "rgba(255, 255, 255, 0.4)",
                     color: "var(--text-on-brand)",
                     borderRadius: "var(--rounded-md)",
+                    padding: "0.85rem 2rem",
+                    boxShadow: "0 8px 20px rgba(0, 0, 0, 0.15)",
                   }}
                 >
-                  Learn More
+                  <span className="relative z-10 text-base font-semibold">
+                    Learn More
+                  </span>
+                  <span className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
                 </Button>
               </div>
             </div>
           </div>
-          {/* Decorative elements */}
-          <div className="absolute top-0 right-0 w-48 h-48 opacity-20 rotate-45 translate-x-24 -translate-y-12">
+
+          {/* Enhanced decorative elements */}
+          <div
+            className="absolute top-0 right-0 w-64 h-64 opacity-20 rotate-45 translate-x-20 -translate-y-20 animate-pulse"
+            style={{ animationDuration: "5s" }}
+          >
             <div
               className="w-full h-full rounded-full"
-              style={{ backgroundColor: "var(--brand-primary)" }}
-            />
+              style={{
+                background:
+                  "radial-gradient(circle, var(--brand-primary) 0%, transparent 70%)",
+                filter: "blur(40px)",
+              }}
+            ></div>
           </div>
-          <div className="absolute bottom-0 right-1/4 w-24 h-24 opacity-10">
+          <div
+            className="absolute top-1/2 right-1/3 w-40 h-40 opacity-15 rotate-12 animate-pulse"
+            style={{ animationDuration: "8s" }}
+          >
             <div
               className="w-full h-full rounded-full"
-              style={{ backgroundColor: "var(--brand-secondary)" }}
-            />
+              style={{
+                background:
+                  "radial-gradient(circle, var(--brand-secondary) 0%, transparent 70%)",
+                filter: "blur(30px)",
+              }}
+            ></div>
+          </div>
+          <div
+            className="absolute bottom-10 right-1/4 w-32 h-32 opacity-10 animate-pulse"
+            style={{ animationDuration: "12s" }}
+          >
+            <div
+              className="w-full h-full rounded-full"
+              style={{
+                background:
+                  "radial-gradient(circle, var(--text-on-brand) 0%, transparent 70%)",
+                filter: "blur(25px)",
+              }}
+            ></div>
+          </div>
+          <div
+            className="absolute bottom-0 left-1/4 w-20 h-20 opacity-10 rotate-90 animate-pulse"
+            style={{ animationDuration: "10s" }}
+          >
+            <div
+              className="w-full h-full rounded-full"
+              style={{
+                background:
+                  "radial-gradient(circle, var(--brand-primary) 0%, transparent 70%)",
+                filter: "blur(15px)",
+              }}
+            ></div>
           </div>
         </div>
       </div>

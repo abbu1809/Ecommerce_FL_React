@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { FiSearch, FiSliders, FiX, FiHeart, FiFilter } from "react-icons/fi";
-import Button from "../components/UI/Button";
+import { useParams } from "react-router-dom";
 import { ROUTES } from "../utils/constants";
+import Breadcrumb from "../components/Breadcrumb/Breadcrumb";
+import ProductFilter from "../components/ProductList/ProductFilter";
+import ProductSorting from "../components/ProductList/ProductSorting";
+import ProductGrid from "../components/ProductList/ProductGrid";
+import NoResultsFound from "../components/ProductList/NoResultsFound";
 
 const ProductList = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [products, setProducts] = useState([]);
+  const { category } = useParams();
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -110,9 +112,6 @@ const ProductList = () => {
   const brands = Array.from(
     new Set(mockProducts.map((product) => product.brand))
   );
-  const categories = Array.from(
-    new Set(mockProducts.map((product) => product.category))
-  );
 
   const toggleBrandFilter = (brand) => {
     if (selectedBrands.includes(brand)) {
@@ -134,6 +133,17 @@ const ProductList = () => {
     if (selectedBrands.length > 0) {
       filteredProducts = filteredProducts.filter((product) =>
         selectedBrands.includes(product.brand)
+      );
+    }
+
+    // Apply category filter from URL if present
+    if (category) {
+      // This would use a more sophisticated matching in a real app
+      // (e.g. converting URL-friendly format to display format)
+      const formattedCategory = category.replace("-", " ");
+      filteredProducts = filteredProducts.filter(
+        (product) =>
+          product.category.toLowerCase() === formattedCategory.toLowerCase()
       );
     }
 
@@ -159,280 +169,72 @@ const ProductList = () => {
   // Simulate loading data
   useEffect(() => {
     // In a real application, you would fetch data from an API here
-    setTimeout(() => {
-      setProducts(mockProducts);
+    const timer = setTimeout(() => {
       setLoading(false);
     }, 800);
-  }, []);
 
+    return () => clearTimeout(timer);
+  }, []);
   const filteredProducts = applyFilters();
+  // Add resetFilters function
+  const resetFilters = () => {
+    setSelectedBrands([]);
+    setPriceRange({ min: 0, max: 150000 });
+  };
+
+  // Breadcrumb items
+  const breadcrumbItems = [
+    { label: "Home", link: ROUTES.HOME },
+    {
+      label: category
+        ? category.charAt(0).toUpperCase() + category.slice(1).replace("-", " ")
+        : "Products",
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: "var(--bg-secondary)" }}
+    >
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row justify-between items-start gap-6">
-          {/* Mobile Filter Button */}
-          <div className="w-full md:hidden mb-4">
-            <Button
-              onClick={() => setShowFilters(!showFilters)}
-              className="bg-white border border-gray-300 text-gray-700"
-              variant="outline"
-            >
-              <FiFilter className="mr-2" />
-              {showFilters ? "Hide Filters" : "Show Filters"}
-            </Button>
-          </div>
-
-          {/* Filter Sidebar */}
-          <div
-            className={`
-              ${showFilters ? "block" : "hidden md:block"}
-              w-full md:w-1/4 bg-white rounded-lg shadow-sm p-4 sticky top-4
-            `}
+        {/* Page Header */}
+        <div className="mb-8">
+          <h1
+            className="text-3xl font-bold"
+            style={{ color: "var(--text-primary)" }}
           >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Filters</h2>
-              <button
-                onClick={() => {
-                  setSelectedBrands([]);
-                  setPriceRange({ min: 0, max: 150000 });
-                }}
-                className="text-sm text-orange-500 hover:text-orange-600"
-              >
-                Clear All
-              </button>
-            </div>
+            {category
+              ? category.charAt(0).toUpperCase() +
+                category.slice(1).replace("-", " ")
+              : "All Products"}
+          </h1>
+          <Breadcrumb items={breadcrumbItems} />
+        </div>
 
-            {/* Brand Filter */}
-            <div className="mb-6">
-              <h3 className="text-gray-800 font-medium mb-3">Brand</h3>
-              <div className="space-y-2">
-                {brands.map((brand) => (
-                  <div key={brand} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id={`brand-${brand}`}
-                      checked={selectedBrands.includes(brand)}
-                      onChange={() => toggleBrandFilter(brand)}
-                      className="h-4 w-4 text-orange-500 rounded border-gray-300 focus:ring-orange-500"
-                    />
-                    <label
-                      htmlFor={`brand-${brand}`}
-                      className="ml-2 text-gray-700"
-                    >
-                      {brand}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Price Range Filter */}
-            <div className="mb-6">
-              <h3 className="text-gray-800 font-medium mb-3">Price Range</h3>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-600">
-                  ₹{priceRange.min.toLocaleString()}
-                </span>
-                <span className="text-sm text-gray-600">
-                  ₹{priceRange.max.toLocaleString()}
-                </span>
-              </div>
-              <div className="mb-4">
-                <input
-                  type="range"
-                  min="0"
-                  max="150000"
-                  value={priceRange.min}
-                  onChange={(e) => handlePriceChange(e, "min")}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                />
-              </div>
-              <div>
-                <input
-                  type="range"
-                  min="0"
-                  max="150000"
-                  value={priceRange.max}
-                  onChange={(e) => handlePriceChange(e, "max")}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                />
-              </div>
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <div>
-                  <label
-                    htmlFor="min-price"
-                    className="block text-sm text-gray-600"
-                  >
-                    Min
-                  </label>
-                  <input
-                    type="number"
-                    id="min-price"
-                    value={priceRange.min}
-                    onChange={(e) => handlePriceChange(e, "min")}
-                    className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="max-price"
-                    className="block text-sm text-gray-600"
-                  >
-                    Max
-                  </label>
-                  <input
-                    type="number"
-                    id="max-price"
-                    value={priceRange.max}
-                    onChange={(e) => handlePriceChange(e, "max")}
-                    className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Apply Filters Button (Mobile Only) */}
-            <div className="md:hidden">
-              <Button
-                onClick={() => setShowFilters(false)}
-                className="bg-orange-500 hover:bg-orange-600"
-              >
-                Apply Filters
-              </Button>
-            </div>
-          </div>
+        <div className="flex flex-col md:flex-row justify-between items-start gap-6">
+          <ProductFilter
+            showFilters={showFilters}
+            setShowFilters={setShowFilters}
+            brands={brands}
+            selectedBrands={selectedBrands}
+            toggleBrandFilter={toggleBrandFilter}
+            priceRange={priceRange}
+            setPriceRange={setPriceRange}
+            handlePriceChange={handlePriceChange}
+          />
 
           {/* Product Grid */}
           <div className="w-full md:w-3/4">
             {/* Results Header */}
-            <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                <div className="mb-4 md:mb-0">
-                  <h1 className="text-xl font-bold text-gray-800">
-                    {filteredProducts.length} Products Found
-                  </h1>
-                </div>
-                <div className="flex items-center">
-                  <label
-                    htmlFor="sort-by"
-                    className="text-sm text-gray-600 mr-2 whitespace-nowrap"
-                  >
-                    Sort by:
-                  </label>
-                  <select
-                    id="sort-by"
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="border border-gray-300 rounded px-2 py-1 text-sm bg-white"
-                  >
-                    <option value="popularity">Popularity</option>
-                    <option value="rating">Rating</option>
-                    <option value="price-low">Price: Low to High</option>
-                    <option value="price-high">Price: High to Low</option>
-                  </select>
-                </div>
-              </div>
-            </div>
+            <ProductSorting sortBy={sortBy} setSortBy={setSortBy} />
 
             {/* Products Grid */}
-            {loading ? (
-              <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    className="bg-white rounded-lg shadow-sm overflow-hidden transition-transform hover:transform hover:scale-[1.02]"
-                  >
-                    <Link
-                      to={`/products/${product.id}`}
-                      className="block relative"
-                    >
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-48 object-contain p-4"
-                      />
-                      {product.discount && (
-                        <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-medium px-2 py-1 rounded">
-                          {product.discount} OFF
-                        </span>
-                      )}
-                    </Link>
-                    <div className="p-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="text-xs text-gray-500 mb-1">
-                            {product.brand} • {product.category}
-                          </p>
-                          <h3 className="font-medium text-gray-900 mb-1 truncate">
-                            <Link to={`/products/${product.id}`}>
-                              {product.name}
-                            </Link>
-                          </h3>
-                          <div className="flex items-center mb-2">
-                            <div className="flex items-center text-yellow-500 text-sm">
-                              {[...Array(5)].map((_, i) => (
-                                <span key={i}>★</span>
-                              ))}
-                            </div>
-                            <span className="text-xs text-gray-500 ml-1">
-                              {product.rating}
-                            </span>
-                          </div>
-                          <div className="flex items-center">
-                            <p className="font-bold">
-                              ₹{product.discountPrice.toLocaleString()}
-                            </p>
-                            {product.discount && (
-                              <p className="text-sm text-gray-500 line-through ml-2">
-                                ₹{product.price.toLocaleString()}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <button className="text-gray-400 hover:text-red-500">
-                          <FiHeart className="text-xl" />
-                        </button>
-                      </div>
-                      <div className="mt-4">
-                        <Button
-                          fullWidth={true}
-                          className="bg-orange-500 hover:bg-orange-600"
-                        >
-                          Add to Cart
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <ProductGrid products={filteredProducts} loading={loading} />
 
             {/* No Results */}
             {!loading && filteredProducts.length === 0 && (
-              <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-                <p className="text-xl font-medium text-gray-800 mb-2">
-                  No products found
-                </p>
-                <p className="text-gray-600 mb-4">
-                  Try adjusting your filters or search term
-                </p>
-                <Button
-                  onClick={() => {
-                    setSelectedBrands([]);
-                    setPriceRange({ min: 0, max: 150000 });
-                  }}
-                  variant="outline"
-                  fullWidth={false}
-                  className="mx-auto"
-                >
-                  Clear Filters
-                </Button>
-              </div>
+              <NoResultsFound resetFilters={resetFilters} />
             )}
           </div>
         </div>

@@ -17,6 +17,10 @@ import Wishlist from "./pages/Wishlist";
 import { useAuthStore } from "./store/useAuth";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import AdminLogin from "./pages/Admin/AdminLogin";
+import AdminRegister from "./pages/Admin/AdminRegister";
+import AdminLayout from "./components/Admin/AdminLayout";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
 
 // Layout component that will be used across all pages
 const Layout = () => {
@@ -84,6 +88,42 @@ const App = () => {
           <Route path="/category/:category" element={<ProductList />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/wishlist" element={<Wishlist />} />
+        </Route>
+
+        {/* Admin Routes */}
+        <Route
+          path="/admin/login"
+          element={
+            !isAuthenticated ? (
+              <AdminLogin />
+            ) : (
+              <Navigate to="/admin/dashboard" />
+            )
+          }
+        />
+        <Route
+          path="/admin/register"
+          element={
+            !isAuthenticated ? (
+              <AdminRegister />
+            ) : (
+              <Navigate to="/admin/dashboard" />
+            )
+          }
+        />
+        <Route element={<AdminLayout />}>
+          <Route
+            path="/admin/dashboard"
+            element={
+              !isAuthenticated ? (
+                <AdminDashboard />
+              ) : (
+                <Navigate to="/admin/login" />
+              )
+            }
+          />
+          {/* TODO: Add other admin-specific routes here, e.g., for managing products, orders, users */}
+          {/* <Route path="/admin/products" element={isAuthenticated ? <AdminProducts /> : <Navigate to="/admin/login" />} /> */}
         </Route>
       </Routes>
     </BrowserRouter>

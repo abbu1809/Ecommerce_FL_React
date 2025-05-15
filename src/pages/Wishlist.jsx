@@ -5,7 +5,6 @@ import Button from "../components/UI/Button";
 import { ROUTES } from "../utils/constants";
 
 const Wishlist = () => {
-  // In a real app, this would come from a context or store
   const [wishlistItems, setWishlistItems] = useState([
     {
       id: 2,
@@ -38,35 +37,69 @@ const Wishlist = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div
+      className="min-h-screen py-8"
+      style={{ backgroundColor: "var(--bg-secondary)" }}
+    >
       <div className="container mx-auto px-4">
         {/* Breadcrumbs */}
-        <nav className="flex items-center text-sm text-gray-500 mb-6">
-          <Link to={ROUTES.HOME} className="hover:text-orange-500">
+        <nav className="flex items-center text-sm mb-6">
+          <Link
+            to={ROUTES.HOME}
+            className="hover:underline transition-colors duration-200"
+            style={{ color: "var(--text-secondary)" }}
+          >
             Home
           </Link>
-          <span className="mx-2">/</span>
-          <span className="text-gray-800">My Wishlist</span>
+          <span className="mx-2" style={{ color: "var(--text-secondary)" }}>
+            /
+          </span>
+          <span style={{ color: "var(--text-primary)" }}>My Wishlist</span>
         </nav>
 
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">My Wishlist</h1>
+        <h1
+          className="text-2xl font-bold mb-6"
+          style={{ color: "var(--text-primary)" }}
+        >
+          My Wishlist
+        </h1>
 
         {wishlistItems.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-md p-8 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-              <FiHeart className="h-8 w-8 text-gray-500" />
+          <div
+            className="rounded-lg p-8 text-center transition-shadow duration-300"
+            style={{
+              backgroundColor: "var(--bg-primary)",
+              boxShadow: "var(--shadow-medium)",
+            }}
+          >
+            <div
+              className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-6"
+              style={{ backgroundColor: "var(--bg-accent-light)" }}
+            >
+              <FiHeart
+                className="h-10 w-10"
+                style={{ color: "var(--brand-primary)" }}
+              />
             </div>
-            <h2 className="text-xl font-semibold mb-2">
+            <h2
+              className="text-xl font-semibold mb-3"
+              style={{ color: "var(--text-primary)" }}
+            >
               Your wishlist is empty
             </h2>
-            <p className="text-gray-600 mb-6">
+            <p className="mb-8" style={{ color: "var(--text-secondary)" }}>
               Save items you like to your wishlist and they'll appear here
             </p>
             <Link to={ROUTES.PRODUCTS}>
               <Button
                 variant="primary"
                 fullWidth={false}
-                className="bg-orange-500 hover:bg-orange-600"
+                className="px-6"
+                style={{
+                  backgroundColor: "var(--brand-primary)",
+                  color: "var(--text-on-brand)",
+                  "&:hover": { backgroundColor: "var(--brand-primary-hover)" },
+                }}
               >
                 Continue Shopping
               </Button>
@@ -77,55 +110,98 @@ const Wishlist = () => {
             {wishlistItems.map((item) => (
               <div
                 key={item.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden"
+                className="rounded-lg overflow-hidden transition-all duration-300 hover:-translate-y-1"
+                style={{
+                  backgroundColor: "var(--bg-primary)",
+                  boxShadow: "var(--shadow-medium)",
+                }}
               >
-                <div className="p-4">
-                  <div className="flex items-start">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="h-24 w-24 object-contain rounded"
-                    />
-                    <div className="ml-4 flex-1">
+                <div className="p-5">
+                  <div className="flex items-start space-x-4">
+                    <div
+                      className="bg-white p-2 rounded-md flex items-center justify-center"
+                      style={{ boxShadow: "var(--shadow-small)" }}
+                    >
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="h-24 w-24 object-contain"
+                      />
+                    </div>
+                    <div className="flex-1">
                       <div className="flex justify-between">
                         <div>
-                          <p className="text-xs text-gray-500 mb-1">
+                          <p
+                            className="text-xs mb-1"
+                            style={{ color: "var(--text-secondary)" }}
+                          >
                             {item.category}
                           </p>
                           <Link
                             to={`/products/${item.id}`}
-                            className="text-gray-800 font-medium hover:text-orange-500"
+                            className="font-medium hover:underline line-clamp-2"
+                            style={{ color: "var(--text-primary)" }}
                           >
                             {item.name}
                           </Link>
-                          <p className="font-bold mt-1">
+                          <p
+                            className="font-bold mt-1 text-lg"
+                            style={{ color: "var(--brand-primary)" }}
+                          >
                             ₹{item.price.toLocaleString()}
                           </p>
                         </div>
                         <button
                           onClick={() => removeFromWishlist(item.id)}
-                          className="text-gray-400 hover:text-red-500"
+                          className="p-2 rounded-full transition-colors hover:bg-gray-100"
+                          style={{ color: "var(--text-secondary)" }}
+                          aria-label="Remove from wishlist"
                         >
-                          <FiTrash2 />
+                          <FiTrash2 className="h-5 w-5" />
                         </button>
                       </div>
 
                       <div className="mt-4">
                         {item.stock ? (
-                          <p className="text-green-600 text-sm mb-2">
-                            ✓ In Stock
+                          <p
+                            className="text-sm mb-3 flex items-center"
+                            style={{ color: "var(--success-color)" }}
+                          >
+                            <span
+                              className="inline-block w-2 h-2 rounded-full mr-2"
+                              style={{
+                                backgroundColor: "var(--success-color)",
+                              }}
+                            ></span>
+                            In Stock
                           </p>
                         ) : (
-                          <p className="text-red-600 text-sm mb-2">
-                            ✕ Out of Stock
+                          <p
+                            className="text-sm mb-3 flex items-center"
+                            style={{ color: "var(--error-color)" }}
+                          >
+                            <span
+                              className="inline-block w-2 h-2 rounded-full mr-2"
+                              style={{ backgroundColor: "var(--error-color)" }}
+                            ></span>
+                            Out of Stock
                           </p>
                         )}
 
                         <Button
-                          className="bg-orange-500 hover:bg-orange-600"
+                          fullWidth={true}
                           disabled={!item.stock}
+                          icon={<FiShoppingCart />}
+                          style={{
+                            backgroundColor: item.stock
+                              ? "var(--brand-primary)"
+                              : "var(--bg-secondary)",
+                            color: item.stock
+                              ? "var(--text-on-brand)"
+                              : "var(--text-secondary)",
+                            cursor: item.stock ? "pointer" : "not-allowed",
+                          }}
                         >
-                          <FiShoppingCart className="mr-2" />
                           Add to Cart
                         </Button>
                       </div>

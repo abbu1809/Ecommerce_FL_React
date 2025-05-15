@@ -13,13 +13,15 @@ const Input = ({
 }) => {
   // Icon mapping function
   const getIcon = (iconName) => {
-    const iconClasses = "h-5 w-5 text-gray-400";
+    const iconClasses = "h-5 w-5";
+    const iconStyle = { color: "var(--text-secondary)" };
 
     switch (iconName) {
       case "email":
         return (
           <svg
             className={iconClasses}
+            style={iconStyle}
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
             fill="currentColor"
@@ -33,6 +35,7 @@ const Input = ({
         return (
           <svg
             className={iconClasses}
+            style={iconStyle}
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
             fill="currentColor"
@@ -49,6 +52,7 @@ const Input = ({
         return (
           <svg
             className={iconClasses}
+            style={iconStyle}
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
             fill="currentColor"
@@ -65,6 +69,7 @@ const Input = ({
         return (
           <svg
             className={iconClasses}
+            style={iconStyle}
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
             fill="currentColor"
@@ -78,13 +83,28 @@ const Input = ({
     }
   };
 
+  const inputStyle = {
+    borderRadius: "var(--rounded-md)",
+    backgroundColor: error ? "var(--bg-primary)" : "var(--bg-primary)",
+    borderColor: error ? "var(--error-color)" : "var(--border-primary)",
+  };
+
+  const labelStyle = {
+    color: "var(--text-primary)",
+  };
+
+  const errorStyle = {
+    color: "var(--error-color)",
+  };
+
   return (
-    <div className="mb-3">
+    <div className="mb-4">
       <label
         htmlFor={name}
-        className="block text-sm font-medium text-gray-700 mb-1"
+        className="block text-sm font-medium mb-1.5"
+        style={labelStyle}
       >
-        {label} {required && <span className="text-red-500">*</span>}
+        {label} {required && <span style={errorStyle}>*</span>}
       </label>
       <div className="relative rounded-md">
         {icon && (
@@ -101,19 +121,29 @@ const Input = ({
           required={required}
           placeholder={placeholder}
           className={`block w-full ${
-            icon ? "pl-10" : "px-3"
-          } py-2.5 bg-white border ${
-            error
-              ? "border-red-500 ring-1 ring-red-500"
-              : "border-gray-300 focus:ring-teal-500 focus:border-teal-500"
-          } rounded-lg shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 sm:text-sm`}
+            icon ? "pl-10" : "px-4"
+          } py-3 border shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 sm:text-sm ${
+            error ? "focus:ring-red-500" : "focus:ring-opacity-50"
+          }`}
+          style={{
+            ...inputStyle,
+            boxShadow: error
+              ? "0 0 0 1px var(--error-color)"
+              : "var(--shadow-small)",
+            ...(error
+              ? {}
+              : {
+                  focusBorderColor: "var(--brand-primary)",
+                  focusRing: "var(--brand-primary)",
+                }),
+          }}
         />
       </div>
       {error && (
-        <p className="mt-1 text-sm text-red-500 flex items-center">
+        <p className="mt-2 text-sm flex items-center" style={errorStyle}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4 mr-1"
+            className="h-4 w-4 mr-1.5"
             viewBox="0 0 20 20"
             fill="currentColor"
           >

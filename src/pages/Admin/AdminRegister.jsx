@@ -3,17 +3,17 @@ import { useNavigate, Link } from "react-router-dom";
 import FormWrapper from "../../components/UI/FormWrapper";
 import Input from "../../components/UI/Input";
 import Button from "../../components/UI/Button";
-import { useAuthStore } from "../../store/useAuth"; // Assuming admin uses the same auth store or a similar one
+import { useAuthStore } from "../../store/useAuth"; // Assuming admin uses the same auth store or a similar one for registration
 
-const AdminLogin = () => {
+const AdminRegister = () => {
   const navigate = useNavigate();
   // TODO: Replace with admin-specific auth logic if different
-  const { login, error, clearError, isLoading } = useAuthStore();
+  const { register, error, clearError, isLoading } = useAuthStore();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
+    secretKey: "", // Added secret key
   });
-
   const [formErrors, setFormErrors] = useState({});
 
   const handleChange = (e) => {
@@ -38,7 +38,14 @@ const AdminLogin = () => {
     }
     if (!formData.password) {
       errors.password = "Password is required";
+    } else if (formData.password.length < 6) {
+      errors.password = "Password must be at least 6 characters";
     }
+    if (!formData.secretKey.trim()) {
+      errors.secretKey = "Secret Key is required";
+    }
+    // TODO: Add more robust validation for secretKey if needed
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -49,19 +56,19 @@ const AdminLogin = () => {
       return;
     }
     try {
-      // TODO: Replace with admin-specific login logic
-      await login(formData);
-      navigate("/admin/dashboard"); // Redirect to admin dashboard or appropriate page
+      // TODO: Replace with admin-specific registration logic, including secret key validation
+      await register(formData);
+      navigate("/admin/login"); // Redirect to admin login page after successful registration
     } catch (err) {
       // Error is handled by the store or displayed
-      console.error("Admin login failed:", err);
+      console.error("Admin registration failed:", err);
     }
   };
 
   return (
-    <FormWrapper title="Admin Portal Login">
+    <FormWrapper title="Create Admin Account">
       <div className="mt-4 text-center text-sm text-gray-500">
-        Sign in to manage the application.
+        Register to gain administrative access.
       </div>
       <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
         <div className="rounded-md space-y-5">
@@ -87,6 +94,17 @@ const AdminLogin = () => {
             placeholder="••••••••"
             icon="lock"
           />
+          <Input
+            label="Secret Key"
+            type="password" // Mask secret key input
+            name="secretKey"
+            value={formData.secretKey}
+            onChange={handleChange}
+            required
+            error={formErrors.secretKey}
+            placeholder="Enter your secret key"
+            icon="key" // Assuming you have a key icon
+          />
         </div>
         {error && (
           <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded-md">
@@ -101,15 +119,16 @@ const AdminLogin = () => {
             size="lg"
             fullWidth={true}
           >
-            {isLoading ? "Signing in..." : "Sign in"}
+            {isLoading ? "Creating Account..." : "Create Account"}
           </Button>
         </div>
         <div className="text-sm text-center mt-4">
+          Already have an admin account?{" "}
           <Link
-            to="/admin/register"
+            to="/admin/login"
             className="font-medium text-teal-600 hover:text-teal-500 transition-colors duration-200"
           >
-            Create an admin account
+            Sign in
           </Link>
         </div>
       </form>
@@ -117,4 +136,4 @@ const AdminLogin = () => {
   );
 };
 
-export default AdminLogin;
+export default AdminRegister;

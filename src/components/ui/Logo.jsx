@@ -10,20 +10,33 @@ const Logo = ({ size = "medium", linkWrapper = true }) => {
 
   const content = (
     <>
-      <img
-        src="/logo.jpg"
-        alt="Anand Mobiles"
-        className={`${sizes[size]} rounded-md`}
-      />
-      <span className="ml-2 text-xl font-bold text-gray-900 hidden sm:inline-block">
-        Anand Mobiles
+      <div className="relative">
+        <img
+          src="/logo.jpg"
+          alt="Anand Mobiles"
+          className={`${sizes[size]} rounded-md transition-transform duration-300 hover:scale-105`}
+          style={{
+            borderRadius: "var(--rounded-md)",
+            boxShadow: "var(--shadow-small)",
+          }}
+        />
+      </div>
+      <span
+        className="ml-2.5 text-white text-xl font-bold hidden sm:inline-block transition-colors duration-300"
+        
+      >
+        <span>Anand</span> Mobiles
       </span>
     </>
   );
 
   if (linkWrapper) {
     return (
-      <Link to="/" className="flex items-center">
+      <Link
+        to="/"
+        className="flex items-center hover:opacity-90 transition-opacity duration-300"
+        aria-label="Anand Mobiles Home"
+      >
         {content}
       </Link>
     );
