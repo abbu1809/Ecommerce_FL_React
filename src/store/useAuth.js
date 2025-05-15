@@ -3,7 +3,7 @@ import { authService } from "../services/authService";
 
 export const useAuthStore = create((set) => ({
   user: null,
-  isAuthenticated: false,
+  isAuthenticated: true,
   isLoading: false,
   error: null,
 
@@ -17,7 +17,6 @@ export const useAuthStore = create((set) => ({
         isLoading: false,
       });
       return data;
-      // eslint-disable-next-line no-unused-vars
     } catch (error) {
       set({
         error:

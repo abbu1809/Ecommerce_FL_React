@@ -17,10 +17,18 @@ import Wishlist from "./pages/Wishlist";
 import { useAuthStore } from "./store/useAuth";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import AdminLogin from "./pages/Admin/AdminLogin";
-import AdminRegister from "./pages/Admin/AdminRegister";
 import AdminLayout from "./components/Admin/AdminLayout";
-import AdminDashboard from "./pages/Admin/AdminDashboard";
+import {
+  AdminLogin,
+  AdminRegister,
+  AdminDashboard,
+  AdminProducts,
+  AdminInventory,
+  AdminOrders,
+  AdminUsers,
+  AdminReturns,
+  AdminContent,
+} from "./pages/Admin";
 
 // Layout component that will be used across all pages
 const Layout = () => {
@@ -79,7 +87,6 @@ const App = () => {
           path="/login"
           element={!isAuthenticated ? <Login /> : <Navigate to="/" />}
         />
-
         {/* Public Routes with Layout */}
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
@@ -89,7 +96,6 @@ const App = () => {
           <Route path="/cart" element={<Cart />} />
           <Route path="/wishlist" element={<Wishlist />} />
         </Route>
-
         {/* Admin Routes */}
         <Route
           path="/admin/login"
@@ -110,20 +116,71 @@ const App = () => {
               <Navigate to="/admin/dashboard" />
             )
           }
-        />
+        />{" "}
         <Route element={<AdminLayout />}>
+          {" "}
           <Route
             path="/admin/dashboard"
             element={
-              !isAuthenticated ? (
+              isAuthenticated ? (
                 <AdminDashboard />
               ) : (
                 <Navigate to="/admin/login" />
               )
             }
           />
-          {/* TODO: Add other admin-specific routes here, e.g., for managing products, orders, users */}
-          {/* <Route path="/admin/products" element={isAuthenticated ? <AdminProducts /> : <Navigate to="/admin/login" />} /> */}
+          <Route
+            path="/admin/products"
+            element={
+              isAuthenticated ? (
+                <AdminProducts />
+              ) : (
+                <Navigate to="/admin/login" />
+              )
+            }
+          />
+          <Route
+            path="/admin/inventory"
+            element={
+              isAuthenticated ? (
+                <AdminInventory />
+              ) : (
+                <Navigate to="/admin/login" />
+              )
+            }
+          />
+          <Route
+            path="/admin/orders"
+            element={
+              isAuthenticated ? <AdminOrders /> : <Navigate to="/admin/login" />
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              isAuthenticated ? <AdminUsers /> : <Navigate to="/admin/login" />
+            }
+          />
+          <Route
+            path="/admin/returns"
+            element={
+              isAuthenticated ? (
+                <AdminReturns />
+              ) : (
+                <Navigate to="/admin/login" />
+              )
+            }
+          />
+          <Route
+            path="/admin/content"
+            element={
+              isAuthenticated ? (
+                <AdminContent />
+              ) : (
+                <Navigate to="/admin/login" />
+              )
+            }
+          />
         </Route>
       </Routes>
     </BrowserRouter>
