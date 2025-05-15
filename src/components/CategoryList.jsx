@@ -3,8 +3,11 @@ import { Link } from "react-router-dom";
 
 const CategoryList = ({ categories }) => {
   return (
-    <div className="categories">
-      <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+    <div className="py-10">
+      <h2
+        style={{ color: "var(--text-primary)" }}
+        className="text-3xl font-bold mb-10 text-center"
+      >
         Shop by Category
       </h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -12,13 +15,24 @@ const CategoryList = ({ categories }) => {
           <Link
             key={category.id}
             to={category.path}
-            className="group p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+            className="group p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300"
+            style={{
+              backgroundColor: "var(--bg-primary)",
+              borderRadius: "var(--rounded-lg)",
+              boxShadow: "var(--shadow-small)",
+            }}
           >
             <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 mb-4 rounded-full bg-teal-100 flex items-center justify-center group-hover:bg-teal-200 transition-colors duration-200">
-                {/* You can add category icons here */}
+              <div
+                className="w-16 h-16 mb-4 rounded-full flex items-center justify-center transition-colors duration-200"
+                style={{
+                  backgroundColor: "var(--bg-accent-light)",
+                  color: "var(--brand-primary)",
+                }}
+              >
+                {/* Category icon container */}
                 <svg
-                  className="w-8 h-8 text-teal-600"
+                  className="w-8 h-8"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -32,9 +46,22 @@ const CategoryList = ({ categories }) => {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-teal-600 transition-colors duration-200">
+              <h3
+                className="text-lg font-semibold transition-colors duration-200"
+                style={{
+                  color: "var(--text-primary)",
+                }}
+              >
                 {category.name}
               </h3>
+              <span
+                className="mt-2 text-sm opacity-0 group-hover:opacity-100 transition-all duration-300"
+                style={{
+                  color: "var(--brand-primary)",
+                }}
+              >
+                Browse Now
+              </span>
             </div>
           </Link>
         ))}

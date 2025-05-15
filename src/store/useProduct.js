@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { products, categories, brands, getFeaturedProducts } from "../data/products";
 
 export const useProductStore = create((set, get) => ({
   products: [],
@@ -13,9 +14,9 @@ export const useProductStore = create((set, get) => ({
     set({ loading: true });
 
     try {
-      // In a real app, this would be an API call
-      // For now, we're using mock data
-      const mockProducts = [
+      // Using the product data from our data file
+      // In a production app, this would typically be from an API call
+      // const mockProducts = [
         {
           id: 1,
           name: "Samsung Galaxy S25 Edge",

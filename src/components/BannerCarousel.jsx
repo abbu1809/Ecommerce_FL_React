@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Button from "./UI/Button";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi"; // Add this import
 
 const BannerCarousel = ({ banners }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -28,7 +29,10 @@ const BannerCarousel = ({ banners }) => {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-lg">
+    <div
+      className="relative overflow-hidden rounded-lg shadow-md"
+      style={{ boxShadow: "var(--shadow-medium)" }}
+    >
       <div
         className="flex transition-transform duration-500 ease-in-out"
         style={{
@@ -48,21 +52,40 @@ const BannerCarousel = ({ banners }) => {
               className="w-full h-[400px] object-cover"
               style={{ backgroundColor: banner.backgroundColor }}
             />
-            <div className="absolute inset-0 flex flex-col justify-center px-12 bg-gradient-to-r from-black/60 to-transparent">
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-2">
-                {banner.title}
-              </h2>
-              <p className="text-xl md:text-2xl text-white mb-6">
-                {banner.subtitle}
-              </p>
-              <Button
-                variant="primary"
-                fullWidth={false}
-                className="bg-orange-500 hover:bg-orange-600"
-                size="lg"
-              >
-                {banner.cta}
-              </Button>
+            <div
+              className="absolute inset-0 flex flex-col justify-center px-6 md:px-12 bg-gradient-to-r from-black/70 to-transparent"
+              style={{
+                background:
+                  "linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)",
+              }}
+            >
+              <div className="max-w-lg">
+                <h2
+                  className="text-3xl md:text-5xl font-bold mb-2"
+                  style={{ color: "var(--text-on-brand)" }}
+                >
+                  {banner.title}
+                </h2>
+                <p
+                  className="text-lg md:text-2xl mb-8"
+                  style={{ color: "var(--text-on-brand-muted)" }}
+                >
+                  {banner.subtitle}
+                </p>
+                <Button
+                  variant="primary"
+                  fullWidth={false}
+                  style={{
+                    backgroundColor: "var(--brand-primary)",
+                    color: "var(--text-on-brand)",
+                    borderRadius: "var(--rounded-md)",
+                  }}
+                  className="hover:opacity-90 transition-opacity shadow-lg"
+                  size="lg"
+                >
+                  {banner.cta}
+                </Button>
+              </div>
             </div>
           </div>
         ))}
@@ -71,50 +94,46 @@ const BannerCarousel = ({ banners }) => {
       {/* Navigation buttons */}
       <button
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-colors duration-200"
+        className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full transition-all duration-200 shadow-lg"
+        style={{
+          backgroundColor: "var(--bg-primary)",
+          color: "var(--brand-primary)",
+          boxShadow: "var(--shadow-medium)",
+        }}
+        aria-label="Previous slide"
       >
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
+        <FiChevronLeft className="w-6 h-6" />
       </button>
       <button
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-colors duration-200"
+        className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full transition-all duration-200 shadow-lg"
+        style={{
+          backgroundColor: "var(--bg-primary)",
+          color: "var(--brand-primary)",
+          boxShadow: "var(--shadow-medium)",
+        }}
+        aria-label="Next slide"
       >
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 5l7 7-7 7"
-          />
-        </svg>
+        <FiChevronRight className="w-6 h-6" />
       </button>
 
       {/* Slide indicators */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-3">
         {banners.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`w-2 h-2 rounded-full transition-colors duration-200 ${
-              currentSlide === index ? "bg-white" : "bg-white/50"
-            }`}
+            className={`w-3 h-3 rounded-full transition-all duration-300`}
+            style={{
+              backgroundColor:
+                currentSlide === index
+                  ? "var(--brand-primary)"
+                  : "var(--bg-primary)",
+              opacity: currentSlide === index ? 1 : 0.6,
+              transform: currentSlide === index ? "scale(1.2)" : "scale(1)",
+              boxShadow: "var(--shadow-small)",
+            }}
+            aria-label={`Go to slide ${index + 1}`}
           />
         ))}
       </div>
