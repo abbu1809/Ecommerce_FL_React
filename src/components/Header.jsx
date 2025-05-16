@@ -7,6 +7,7 @@ import {
   FiHeart,
   FiMenu,
   FiX,
+  FiCalendar,
 } from "react-icons/fi";
 import { ROUTES } from "../utils/constants";
 import Logo from "./UI/Logo";
@@ -129,14 +130,14 @@ const Header = ({ categories }) => {
                   className="w-full py-3 px-5 pr-12 rounded-full focus:outline-none transition-all duration-300"
                   style={{
                     backgroundColor: isSearchFocused
-                      ? "rgba(255, 255, 255, 0.2)"
-                      : "rgba(255, 255, 255, 0.15)",
-                    color: "var(--text-on-brand)",
+                      ? "rgba(255, 255, 255, 0.9)"
+                      : "rgba(255, 255, 255, 0.8)",
+                    color: "#333",
                     borderColor: "rgba(255, 255, 255, 0.2)",
                     boxShadow: isSearchFocused
-                      ? "0 0 20px rgba(255, 255, 255, 0.15)"
+                      ? "0 0 20px rgba(255, 255, 255, 0.3)"
                       : "var(--shadow-small)",
-                    caretColor: "var(--text-on-brand)",
+                    caretColor: "#333",
                   }}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -146,7 +147,7 @@ const Header = ({ categories }) => {
                 <button
                   className="absolute right-0 top-0 bottom-0 px-4 flex items-center justify-center transition-transform duration-300 hover:scale-110 active:scale-95"
                   style={{
-                    color: "var(--text-on-brand)",
+                    color: "#333",
                   }}
                   aria-label="Search"
                 >
@@ -186,7 +187,6 @@ const Header = ({ categories }) => {
                   </p>
                 </div>
               </div>
-
               <Link
                 to={ROUTES.WISHLIST}
                 className="hidden sm:flex flex-col items-center transition-all duration-300 hover:translate-y-[-2px] group"
@@ -215,7 +215,35 @@ const Header = ({ categories }) => {
                   Wishlist
                 </p>
               </Link>
-
+              <Link
+                to={ROUTES.ORDERS}
+                className="hidden sm:flex flex-col items-center transition-all duration-300 hover:translate-y-[-2px] group"
+              >
+                {" "}
+                <div className="relative">
+                  <div className="absolute -inset-1.5 bg-white/10 rounded-full blur-md group-hover:bg-white/20 transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
+                  <FiCalendar
+                    className="text-xl relative z-10"
+                    style={{ color: "var(--text-on-brand)" }}
+                  />
+                  <span
+                    className="absolute -top-2 -right-2 z-20 text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold shadow-lg animate-pulse"
+                    style={{
+                      backgroundColor: "var(--bg-primary)",
+                      color: "var(--brand-primary)",
+                      boxShadow: "0 0 10px rgba(255,255,255,0.3)",
+                    }}
+                  >
+                    0
+                  </span>
+                </div>
+                <p
+                  className="text-xs font-semibold mt-1"
+                  style={{ color: "var(--text-on-brand)" }}
+                >
+                  Orders
+                </p>
+              </Link>
               <Link
                 to={ROUTES.CART}
                 className="flex flex-col items-center transition-all duration-300 hover:translate-y-[-2px] group"
@@ -243,10 +271,9 @@ const Header = ({ categories }) => {
                 >
                   ₹ 0
                 </p>
-              </Link>
-
+              </Link>{" "}
               <Link
-                to={isAuthenticated ? ROUTES.PROFILE : ROUTES.LOGIN}
+                to={isAuthenticated ? "/profile" : ROUTES.LOGIN}
                 className="flex flex-col items-center transition-all duration-300 hover:translate-y-[-2px] group"
               >
                 <div className="relative">
@@ -281,8 +308,8 @@ const Header = ({ categories }) => {
             placeholder="Search products..."
             className="w-full py-2 px-4 pr-10 rounded-full text-sm focus:outline-none"
             style={{
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
-              color: "var(--text-on-brand)",
+              backgroundColor: "rgba(255, 255, 255, 0.8)",
+              color: "#333",
               borderColor: "rgba(255, 255, 255, 0.2)",
               boxShadow: "var(--shadow-small)",
             }}
@@ -291,7 +318,7 @@ const Header = ({ categories }) => {
           />
           <button
             className="absolute right-0 top-0 bottom-0 px-3 flex items-center justify-center"
-            style={{ color: "var(--text-on-brand)" }}
+            style={{ color: "#333" }}
           >
             <FiSearch className="text-lg" />
           </button>
@@ -362,9 +389,62 @@ const Header = ({ categories }) => {
                     style={{ color: "var(--text-primary)" }}
                   />
                 </button>
-              </div>
-
+              </div>{" "}
               <div className="py-4">
+                {/* Account section in mobile menu */}
+                {isAuthenticated && (
+                  <div className="mb-4">
+                    <h3
+                      className="px-4 text-xs uppercase font-semibold mb-2"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      My Account
+                    </h3>
+                    <ul>
+                      <li>
+                        <Link
+                          to="/profile"
+                          className="block px-4 py-2.5 hover:bg-gray-50 transition-colors"
+                          style={{ color: "var(--text-primary)" }}
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          Profile
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to="/profile/addresses"
+                          className="block px-4 py-2.5 hover:bg-gray-50 transition-colors"
+                          style={{ color: "var(--text-primary)" }}
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          My Addresses
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to="/orders"
+                          className="block px-4 py-2.5 hover:bg-gray-50 transition-colors"
+                          style={{ color: "var(--text-primary)" }}
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          Orders
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to="/wishlist"
+                          className="block px-4 py-2.5 hover:bg-gray-50 transition-colors"
+                          style={{ color: "var(--text-primary)" }}
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          Wishlist
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
+                )}
+
                 <h3
                   className="px-4 text-xs uppercase font-semibold mb-2"
                   style={{ color: "var(--text-secondary)" }}

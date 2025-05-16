@@ -17,10 +17,21 @@ import Wishlist from "./pages/Wishlist";
 import OrderStatus from "./pages/OrderStatus";
 import OrderTracking from "./pages/OrderTracking";
 import OrderTrackingDetail from "./pages/OrderTrackingDetail";
+import Account from "./pages/Account";
 import { useAuthStore } from "./store/useAuth";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import AdminLayout from "./components/Admin/AdminLayout";
+import {
+  PartnerLogin,
+  PartnerRegister,
+  DeliveryDashboard,
+  DeliveryAssignmentList,
+  DeliveryStatusUpdate,
+  DeliveryHistory,
+  DeliverySettings,
+  AdminVerify,
+} from "./pages/Delivery";
 import {
   AdminLogin,
   AdminRegister,
@@ -30,6 +41,7 @@ import {
   AdminOrders,
   AdminUsers,
   AdminReturns,
+  AdminReviews,
   AdminContent,
 } from "./pages/Admin";
 
@@ -90,6 +102,29 @@ const App = () => {
           path="/login"
           element={!isAuthenticated ? <Login /> : <Navigate to="/" />}
         />
+        {/* Delivery Partner Routes - keeping these outside the main Layout */}
+        <Route path="/delivery">
+          <Route path="login" element={<PartnerLogin />} />
+          <Route path="register" element={<PartnerRegister />} />
+
+          {/* Protected Delivery Partner Routes 
+              TODO: Implement a useDeliveryAuth hook for partner authentication
+              and protect these routes similar to admin routes */}
+          <Route path="dashboard" element={<DeliveryDashboard />} />
+          <Route path="assignments" element={<DeliveryAssignmentList />} />
+          <Route path="update/:id" element={<DeliveryStatusUpdate />} />
+          <Route path="status-update" element={<DeliveryStatusUpdate />} />
+          <Route path="history" element={<DeliveryHistory />} />
+          <Route path="settings" element={<DeliverySettings />} />
+
+          {/* This route is for admin verification of delivery partners */}
+          <Route
+            path="verification"
+            element={
+              isAuthenticated ? <AdminVerify /> : <Navigate to="/admin/login" />
+            }
+          />
+        </Route>
         {/* Public Routes with Layout */}
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
@@ -101,6 +136,10 @@ const App = () => {
           <Route path="/orders" element={<OrderStatus />} />
           <Route path="/order-tracking" element={<OrderTracking />} />
           <Route path="/order-tracking/:id" element={<OrderTrackingDetail />} />
+
+          {/* Account Routes */}
+          <Route path="/profile" element={<Account />} />
+          <Route path="/profile/:section" element={<Account />} />
         </Route>
         {/* Admin Routes */}
         <Route
@@ -176,12 +215,22 @@ const App = () => {
                 <Navigate to="/admin/login" />
               )
             }
-          />
+          />{" "}
           <Route
             path="/admin/content"
             element={
               isAuthenticated ? (
                 <AdminContent />
+              ) : (
+                <Navigate to="/admin/login" />
+              )
+            }
+          />
+          <Route
+            path="/admin/reviews"
+            element={
+              isAuthenticated ? (
+                <AdminReviews />
               ) : (
                 <Navigate to="/admin/login" />
               )

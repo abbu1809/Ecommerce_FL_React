@@ -11,11 +11,13 @@ export const ROUTES = {
   LOGIN: "/login",
   SIGNUP: "/signup",
   PROFILE: "/profile",
+  PROFILE_SECTION: "/profile/:section",
   PRODUCTS: "/products",
   PRODUCT_DETAIL: "/products/:id",
   CART: "/cart",
   CHECKOUT: "/checkout",
   ORDERS: "/orders",
+  WISHLIST: "/wishlist",
 };
 
 // UI Constants
