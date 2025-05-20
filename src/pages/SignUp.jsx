@@ -83,8 +83,9 @@ const SignUp = () => {
       const userData = {
         email: formData.email,
         password: formData.password,
-        display_name: `${formData.firstName} ${formData.lastName}`,
-        phone_number: formData.phone,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
       };
       const response = await signup(userData);
       console.log("Signup successful:", response);
