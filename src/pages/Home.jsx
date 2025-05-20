@@ -2,8 +2,16 @@ import BannerCarousel from "../components/BannerCarousel";
 import CategoryList from "../components/CategoryList";
 import FeaturedProductList from "../components/FeaturedProductList";
 import HeroBanner from "../components/HeroBanner";
+import { useEffect } from "react";
+import { useProductStore } from "../store/useProduct";
 
 const Home = () => {
+  const { products, fetchProducts } = useProductStore();
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
   // Mock data for categories - focused on electronics product catalog
   const categories = [
     { id: 1, name: "Smartphones", path: "/category/smartphones" },
@@ -103,6 +111,29 @@ const Home = () => {
             Special Offers
           </h2>
           <BannerCarousel banners={banners} />
+        </div>
+      </section>
+
+      {/* Fetched Products Section - Example of rendering fetched products */}
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6">Our Products</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {products.map((product) => (
+              <div key={product.id} className="border p-4 rounded-lg">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-48 object-cover mb-4 rounded"
+                />
+                <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
+                <p className="text-gray-700 mb-2">{product.category}</p>
+                <p className="text-xl font-bold text-primary">
+                  ${product.price / 100}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </div>

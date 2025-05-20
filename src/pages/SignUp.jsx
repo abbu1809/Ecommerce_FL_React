@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import FormWrapper from "../components/UI/FormWrapper";
 import Input from "../components/UI/Input";
@@ -6,6 +6,8 @@ import Button from "../components/UI/Button";
 import { useAuthStore } from "../store/useAuth";
 import { FiUser, FiMail, FiPhone, FiLock, FiAlertCircle } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
+import { auth, provider } from "../firebase";
+import { signInWithPopup } from "firebase/auth";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -21,6 +23,7 @@ const SignUp = () => {
   });
 
   const [formErrors, setFormErrors] = useState({});
+  const [touched, setTouched] = useState({});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -73,6 +76,63 @@ const SignUp = () => {
     return Object.keys(errors).length === 0;
   };
 
+  const validateField = useCallback(() => {
+    const errors = {};
+
+    if (touched.firstName && !formData.firstName.trim()) {
+      errors.firstName = "First name is required";
+    }
+
+    if (touched.lastName && !formData.lastName.trim()) {
+      errors.lastName = "Last name is required";
+    }
+
+    if (touched.email) {
+      if (!formData.email.trim()) {
+        errors.email = "Email is required";
+      } else if (
+        !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formData.email)
+      ) {
+        errors.email = "Invalid email address";
+      }
+    }
+
+    if (touched.password) {
+      if (!formData.password) {
+        errors.password = "Password is required";
+      } else if (formData.password.length < 6) {
+        errors.password = "Password must be at least 6 characters long";
+      }
+    }
+
+    if (
+      touched.confirmPassword &&
+      formData.password !== formData.confirmPassword
+    ) {
+      errors.confirmPassword = "Passwords do not match";
+    }
+
+    if (touched.phone) {
+      if (!formData.phone.trim()) {
+        errors.phone = "Phone number is required";
+      } else if (!/^\d{10}$/.test(formData.phone)) {
+        errors.phone = "Invalid phone number";
+      }
+    }
+
+    setFormErrors(errors);
+  }, [formData, touched]);
+
+  // Validate the form fields whenever formData or touched changes
+  useEffect(() => {
+    validateField();
+  }, [formData, touched, validateField]);
+
+  const handleBlur = (e) => {
+    const { name } = e.target;
+    setTouched((prev) => ({ ...prev, [name]: true }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
@@ -93,6 +153,20 @@ const SignUp = () => {
     } catch (err) {
       console.error("Signup error:", err);
       // Error is handled by the store and displayed below
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const idToken = await result.user.getIdToken();
+
+      // Send the ID token to the backend for user creation
+      const response = await signup({ idToken });
+      console.log("Google signup successful:", response);
+      navigate("/"); // Redirect to home page after successful signup
+    } catch (err) {
+      console.error("Google signup error:", err);
     }
   };
 
@@ -123,6 +197,7 @@ const SignUp = () => {
               name="firstName"
               value={formData.firstName}
               onChange={handleChange}
+              onBlur={handleBlur}
               required
               error={formErrors.firstName}
               placeholder="John"
@@ -133,6 +208,7 @@ const SignUp = () => {
               name="lastName"
               value={formData.lastName}
               onChange={handleChange}
+              onBlur={handleBlur}
               required
               error={formErrors.lastName}
               placeholder="Doe"
@@ -145,6 +221,7 @@ const SignUp = () => {
             name="email"
             value={formData.email}
             onChange={handleChange}
+            onBlur={handleBlur}
             required
             error={formErrors.email}
             placeholder="you@example.com"
@@ -156,6 +233,7 @@ const SignUp = () => {
             name="phone"
             value={formData.phone}
             onChange={handleChange}
+            onBlur={handleBlur}
             required
             error={formErrors.phone}
             placeholder="1234567890"
@@ -168,6 +246,7 @@ const SignUp = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
+              onBlur={handleBlur}
               required
               error={formErrors.password}
               placeholder="••••••••"
@@ -179,6 +258,7 @@ const SignUp = () => {
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
+              onBlur={handleBlur}
               required
               error={formErrors.confirmPassword}
               placeholder="••••••••"
@@ -231,22 +311,20 @@ const SignUp = () => {
         </div>{" "}
         <div className="flex justify-center">
           {/* Social login buttons */}{" "}
-          {["Google"].map((provider) => (
-            <button
-              key={provider}
-              type="button"
-              className="flex items-center justify-center py-3 px-6 border rounded-md hover:shadow-md transition-all duration-300"
-              style={{
-                borderColor: "var(--border-primary)",
-                borderRadius: "var(--rounded-md)",
-                color: "var(--text-primary)",
-                backgroundColor: "var(--bg-primary)",
-              }}
-            >
-              {provider === "Google" && <FcGoogle className="w-5 h-5 mr-2" />}
-              {provider}
-            </button>
-          ))}
+          <button
+            type="button"
+            onClick={handleGoogleSignup}
+            className="flex items-center justify-center py-3 px-6 border rounded-md hover:shadow-md transition-all duration-300"
+            style={{
+              borderColor: "var(--border-primary)",
+              borderRadius: "var(--rounded-md)",
+              color: "var(--text-primary)",
+              backgroundColor: "var(--bg-primary)",
+            }}
+          >
+            <FcGoogle className="w-5 h-5 mr-2" />
+            Sign up with Google
+          </button>
         </div>
         <div
           className="text-sm text-center mt-6"

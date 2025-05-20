@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import FormWrapper from "../components/UI/FormWrapper";
 import Input from "../components/UI/Input";
@@ -17,7 +17,35 @@ const Login = () => {
 
   const [rememberMe, setRememberMe] = useState(false);
   const [formErrors, setFormErrors] = useState({});
+  const [touched, setTouched] = useState({
+    email: false,
+    password: false,
+  });
 
+  const validateField = useCallback(() => {
+    const errors = {};
+
+    if (touched.email) {
+      if (!formData.email.trim()) {
+        errors.email = "Email is required";
+      } else if (
+        !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formData.email)
+      ) {
+        errors.email = "Invalid email address";
+      }
+    }
+
+    if (touched.password && !formData.password) {
+      errors.password = "Password is required";
+    }
+
+    setFormErrors(errors);
+  }, [formData.email, formData.password, touched]);
+
+  useEffect(() => {
+    validateField();
+  }, [formData, touched, validateField]);
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -28,6 +56,11 @@ const Login = () => {
     if (error) {
       clearError();
     }
+  };
+
+  const handleBlur = (e) => {
+    const { name } = e.target;
+    setTouched((prev) => ({ ...prev, [name]: true }));
   };
 
   const validateForm = () => {
@@ -94,6 +127,7 @@ const Login = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 required
                 error={formErrors.email}
                 placeholder="you@example.com"
@@ -106,6 +140,7 @@ const Login = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 required
                 error={formErrors.password}
                 placeholder="••••••••"

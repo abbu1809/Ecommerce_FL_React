@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import api from "../services/api";
 import { TOKEN_KEY, USER_KEY } from "../utils/constants";
+import { auth, provider } from "../firebase";
+import { signInWithPopup } from "firebase/auth"; // Import signInWithPopup
 
 export const useAuthStore = create((set) => ({
   user: null,
@@ -104,6 +106,62 @@ export const useAuthStore = create((set) => ({
           error.response?.data?.detail ||
           error.response?.data?.error ||
           "Signup failed. Please try again.",
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
+  googleSignup: async (idToken) => {
+    try {
+      set({ isLoading: true, error: null });
+
+      // Extract user details from the ID token
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      console.log("Google user:", user);
+      const { email, displayName } = user;
+      let first_name = "";
+      let last_name = "";
+
+      if (displayName) {
+        const nameParts = displayName.split(" ");
+        first_name = nameParts[0] || "";
+        last_name = nameParts.slice(1).join(" ") || "";
+      }
+
+      // Direct API call to signup endpoint for Google
+      const response = await api.post("/users/signup", {
+        idToken,
+        email,
+        first_name,
+        last_name,
+      });
+
+      const data = response.data;
+
+      // Store user data in localStorage
+      const userData = {
+        uid: data.user_id,
+        email: data.email,
+        first_name: data.first_name,
+        last_name: data.last_name,
+      };
+      localStorage.setItem(USER_KEY, JSON.stringify(userData));
+
+      // Update store with user data
+      set({
+        user: userData,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      return data;
+    } catch (error) {
+      set({
+        error:
+          error.response?.data?.detail ||
+          error.response?.data?.error ||
+          "Google signup failed. Please try again.",
         isLoading: false,
       });
       throw error;

@@ -1,39 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FiShoppingCart, FiTrash2, FiHeart } from "react-icons/fi";
 import Button from "../components/UI/Button";
 import { ROUTES } from "../utils/constants";
+import { useProductStore } from "../store/useProduct";
 
 const Wishlist = () => {
-  const [wishlistItems, setWishlistItems] = useState([
-    {
-      id: 2,
-      name: "Apple iPhone 15 Pro",
-      price: 109999,
-      image: "https://via.placeholder.com/150x150?text=iPhone+15+Pro",
-      category: "Mobiles",
-      stock: true,
-    },
-    {
-      id: 6,
-      name: "Dell XPS 13",
-      price: 124999,
-      image: "https://via.placeholder.com/150x150?text=Dell+XPS",
-      category: "Laptops",
-      stock: true,
-    },
-    {
-      id: 8,
-      name: "MacBook Air M3",
-      price: 109999,
-      image: "https://via.placeholder.com/150x150?text=MacBook+Air",
-      category: "Laptops",
-      stock: false,
-    },
-  ]);
+  const { products, fetchProducts } = useProductStore();
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const removeFromWishlist = (id) => {
-    setWishlistItems(wishlistItems.filter((item) => item.id !== id));
+    console.log(`Remove product with ID: ${id}`);
   };
 
   return (
@@ -64,7 +44,7 @@ const Wishlist = () => {
           My Wishlist
         </h1>
 
-        {wishlistItems.length === 0 ? (
+        {products.length === 0 ? (
           <div
             className="rounded-lg p-8 text-center transition-shadow duration-300"
             style={{
@@ -107,7 +87,7 @@ const Wishlist = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {wishlistItems.map((item) => (
+            {products.map((item) => (
               <div
                 key={item.id}
                 className="rounded-lg overflow-hidden transition-all duration-300 hover:-translate-y-1"

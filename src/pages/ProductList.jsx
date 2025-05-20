@@ -6,6 +6,7 @@ import ProductFilter from "../components/ProductList/ProductFilter";
 import ProductSorting from "../components/ProductList/ProductSorting";
 import ProductGrid from "../components/ProductList/ProductGrid";
 import NoResultsFound from "../components/ProductList/NoResultsFound";
+import { useProductStore } from "../store/useProduct";
 
 const ProductList = () => {
   const { category } = useParams();
@@ -16,6 +17,12 @@ const ProductList = () => {
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [priceRange, setPriceRange] = useState({ min: 0, max: 150000 });
   const [sortBy, setSortBy] = useState("popularity");
+
+  const { products, fetchProducts } = useProductStore();
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   // Mock data
   const mockProducts = [
