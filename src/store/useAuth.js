@@ -1,9 +1,9 @@
 import { create } from "zustand";
-import { authService } from "../services/authService";
+// import { authService } from "../services/authService";
 
 export const useAuthStore = create((set) => ({
   user: null,
-  isAuthenticated: true,
+  isAuthenticated: false, // Initially set to false until authentication check
   isLoading: false,
   error: null,
 
@@ -11,8 +11,13 @@ export const useAuthStore = create((set) => ({
     try {
       set({ isLoading: true, error: null });
       const data = await authService.login(credentials);
+      // Store user data in the store
       set({
-        user: data.user,
+        user: data.user || {
+          uid: data.uid,
+          email: data.email,
+          display_name: data.display_name,
+        },
         isAuthenticated: true,
         isLoading: false,
       });
@@ -20,6 +25,7 @@ export const useAuthStore = create((set) => ({
     } catch (error) {
       set({
         error:
+          error.response?.data?.detail ||
           error.response?.data?.message ||
           "Login failed. Please check your credentials.",
         isLoading: false,
@@ -33,16 +39,21 @@ export const useAuthStore = create((set) => ({
       set({ isLoading: true, error: null });
       const data = await authService.signup(userData);
       set({
-        user: data.user,
+        user: data.user || {
+          uid: data.uid,
+          email: data.email,
+          display_name: data.display_name,
+        },
         isAuthenticated: true,
         isLoading: false,
       });
       return data;
-      // eslint-disable-next-line no-unused-vars
     } catch (error) {
       set({
         error:
-          error.response?.data?.message || "Signup failed. Please try again.",
+          error.response?.data?.detail ||
+          error.response?.data?.message ||
+          "Signup failed. Please try again.",
         isLoading: false,
       });
       throw error;
@@ -65,14 +76,13 @@ export const useAuthStore = create((set) => ({
         set({ user: null, isAuthenticated: false, isLoading: false });
         return null;
       }
-      // eslint-disable-next-line no-unused-vars
-    } catch (error) {
+    } catch (err) {
       authService.logout();
       set({
         user: null,
         isAuthenticated: false,
         isLoading: false,
-        error: "Session expired",
+        error: err.message || "Session expired",
       });
       return null;
     }

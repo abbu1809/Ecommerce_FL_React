@@ -1,39 +1,97 @@
 import React, { useState, useEffect } from "react";
-import Button from "./UI/Button";
+import { motion, AnimatePresence } from "framer-motion";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
-const BannerCarousel = ({ banners }) => {
-  const [currentSlide, setCurrentSlide] = useState(0);
+// Define the product images with correct paths for Vite
+const productImages = [
+  {
+    id: 1,
+    image: "mobile1.png",
+    backgroundColor: "#f8fafc",
+  },
+  {
+    id: 2,
+    image: "laptops.png",
+    backgroundColor: "#f1f5f9",
+  },
+  {
+    id: 3,
+    image: "tv1.png",
+    backgroundColor: "#e2e8f0",
+  },
+  {
+    id: 4,
+    image: "tablets1.png",
+    backgroundColor: "#f1f5f9",
+  },
+  {
+    id: 5,
+    image: "accessories.png",
+    backgroundColor: "#f8fafc",
+  },
+  {
+    id: 6,
+    image: "blf.png",
+    backgroundColor: "#f1f5f9",
+  },
+];
 
-  // Auto-advance slides
+const BannerCarousel = ({ banners = productImages }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [[page, direction], setPage] = useState([0, 0]);
+
+  // Auto-advance the slider
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((current) =>
-        current === banners.length - 1 ? 0 : current + 1
-      );
-    }, 6000);
+    const timer = setTimeout(() => {
+      const newIndex = (currentIndex + 1) % banners.length;
+      setPage([newIndex, 1]); // 1 for forward direction
+      setCurrentIndex(newIndex);
+    }, 5000);
 
-    return () => clearInterval(timer);
-  }, [banners.length]);
+    return () => clearTimeout(timer);
+  }, [currentIndex, banners.length]);
 
-  const nextSlide = () => {
-    setCurrentSlide((current) =>
-      current === banners.length - 1 ? 0 : current + 1
-    );
+  // Handle manual navigation
+  const handlePrevious = () => {
+    const newIndex = (currentIndex - 1 + banners.length) % banners.length;
+    setPage([newIndex, -1]); // -1 for backward direction
+    setCurrentIndex(newIndex);
   };
 
-  const prevSlide = () => {
-    setCurrentSlide((current) =>
-      current === 0 ? banners.length - 1 : current - 1
-    );
+  const handleNext = () => {
+    const newIndex = (currentIndex + 1) % banners.length;
+    setPage([newIndex, 1]); // 1 for forward direction
+    setCurrentIndex(newIndex);
   };
 
+  // Variants for Framer Motion
+  const slideVariants = {
+    enter: (direction) => ({
+      x: direction > 0 ? 1000 : -1000,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction) => ({
+      x: direction < 0 ? 1000 : -1000,
+      opacity: 0,
+    }),
+  };
+
+  // Transition for animation
+  const slideTransition = {
+    duration: 0.6,
+    ease: "easeInOut",
+  };
   return (
     <div
       className="relative overflow-hidden rounded-xl"
       style={{
         boxShadow: "var(--shadow-large)",
         borderRadius: "var(--rounded-xl)",
+        height: "400px",
       }}
     >
       {/* Progress bar - automatic animation */}
@@ -41,147 +99,139 @@ const BannerCarousel = ({ banners }) => {
         <div
           className="h-full"
           style={{
-            width: `${((currentSlide + 1) / banners.length) * 100}%`,
+            width: `${((currentIndex + 1) / banners.length) * 100}%`,
             backgroundColor: "var(--brand-primary)",
-            transition: "width 6s linear",
+            transition: "width 5s linear",
           }}
         ></div>
       </div>
 
-      <div
-        className="flex transition-transform duration-700 ease-out"
-        style={{
-          transform: `translateX(-${currentSlide * 100}%)`,
-          width: `${banners.length * 100}%`,
-        }}
-      >
-        {banners.map((banner) => (
-          <div
-            key={banner.id}
-            className="relative w-full overflow-hidden"
-            style={{ flex: `0 0 ${100 / banners.length}%` }}
+      {/* Slider with Framer Motion */}
+      <div className="relative w-full h-full overflow-hidden">
+        <AnimatePresence initial={false} custom={direction}>
+          <motion.div
+            key={page}
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={slideTransition}
+            className="absolute inset-0"
           >
-            <img
-              src={banner.image}
-              alt={banner.title}
-              className="w-full h-[250px] sm:h-[350px] md:h-[400px] object-cover transform transition-all duration-3000"
+            {" "}
+            {/* High-quality image with subtle zoom effect */}
+            <motion.img
+              src={`/${banners[currentIndex].image}`}
+              alt="Product"
+              className="w-full h-full object-contain"
               style={{
                 backgroundColor:
-                  banner.backgroundColor || "var(--brand-primary)",
-                transformOrigin: "center",
-                transform: "scale(1.05)",
+                  banners[currentIndex].backgroundColor || "#f1f5f9",
               }}
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.5 }}
+              loading="eager"
             />
-            <div
-              className="absolute inset-0 flex flex-col justify-center px-6 sm:px-10 md:px-14"
-              style={{
-                background:
-                  "linear-gradient(45deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.2) 100%)",
-                backdropFilter: "blur(2px)",
+            {/* Decorative elements */}
+            <motion.div
+              className="absolute top-0 right-0 w-64 h-64 opacity-20 rotate-45 translate-x-20 -translate-y-20"
+              animate={{
+                rotate: [45, 55, 45],
+                opacity: [0.2, 0.25, 0.2],
+              }}
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                ease: "easeInOut",
               }}
             >
-              <div className="max-w-lg animate-fadeIn">
-                <div
-                  className="w-max mb-2 px-3 py-1 text-xs font-medium rounded-full"
-                  style={{
-                    backgroundColor: "var(--brand-primary)",
-                    color: "var(--text-on-brand)",
-                  }}
-                >
-                  Limited Time Offer
-                </div>
-                <h2
-                  className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight"
-                  style={{
-                    color: "var(--text-on-brand)",
-                    textShadow: "0 2px 4px rgba(0,0,0,0.3)",
-                  }}
-                >
-                  {banner.title}
-                </h2>
-                <p
-                  className="text-base md:text-xl mb-6 opacity-95 leading-relaxed max-w-md"
-                  style={{
-                    color: "var(--text-on-brand-muted)",
-                    textShadow: "0 1px 2px rgba(0,0,0,0.2)",
-                  }}
-                >
-                  {banner.subtitle}
-                </p>
-                <Button
-                  variant="primary"
-                  fullWidth={false}
-                  className="hover:shadow-glow transition-all duration-300"
-                  size="lg"
-                  icon={
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="mr-1"
-                    >
-                      <path
-                        d="M5 12H19M19 12L12 5M19 12L12 19"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  }
-                >
-                  {banner.cta}
-                </Button>
-              </div>
-            </div>
-          </div>
-        ))}
+              <div
+                className="w-full h-full rounded-full"
+                style={{
+                  background:
+                    "radial-gradient(circle, var(--brand-primary) 0%, transparent 70%)",
+                  filter: "blur(40px)",
+                }}
+              ></div>
+            </motion.div>
+            <motion.div
+              className="absolute bottom-10 right-1/4 w-32 h-32 opacity-10"
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.1, 0.15, 0.1],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            >
+              <div
+                className="w-full h-full rounded-full"
+                style={{
+                  background:
+                    "radial-gradient(circle, var(--text-on-brand) 0%, transparent 70%)",
+                  filter: "blur(25px)",
+                }}
+              ></div>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* Navigation buttons */}
-      <button
-        onClick={prevSlide}
-        className="absolute left-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full shadow-lg opacity-70 hover:opacity-100 transition-all duration-300 hover:scale-110"
+      <motion.button
+        initial={{ opacity: 0.6 }}
+        whileHover={{ opacity: 1, scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={handlePrevious}
+        className="absolute left-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full shadow-lg z-10"
         style={{
-          backgroundColor: "var(--bg-primary)",
+          backgroundColor: "rgba(255, 255, 255, 0.25)",
+          backdropFilter: "blur(4px)",
           color: "var(--brand-primary)",
           boxShadow: "var(--shadow-medium)",
         }}
         aria-label="Previous slide"
       >
         <FiChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
-      </button>
-      <button
-        onClick={nextSlide}
-        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full shadow-lg opacity-70 hover:opacity-100 transition-all duration-300 hover:scale-110"
+      </motion.button>
+
+      <motion.button
+        initial={{ opacity: 0.6 }}
+        whileHover={{ opacity: 1, scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={handleNext}
+        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full shadow-lg z-10"
         style={{
-          backgroundColor: "var(--bg-primary)",
+          backgroundColor: "rgba(255, 255, 255, 0.25)",
+          backdropFilter: "blur(4px)",
           color: "var(--brand-primary)",
           boxShadow: "var(--shadow-medium)",
         }}
         aria-label="Next slide"
       >
         <FiChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
-      </button>
+      </motion.button>
 
       {/* Slide indicators */}
       <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex space-x-2 z-20">
         {banners.map((_, index) => (
-          <button
+          <motion.button
             key={index}
-            onClick={() => setCurrentSlide(index)}
-            className="w-2.5 h-2.5 rounded-full transition-all duration-300"
-            style={{
-              backgroundColor:
-                currentSlide === index
-                  ? "var(--brand-primary)"
-                  : "var(--bg-primary)",
-              opacity: currentSlide === index ? 1 : 0.6,
-              transform: currentSlide === index ? "scale(1.2)" : "scale(1)",
-              boxShadow: "var(--shadow-small)",
+            onClick={() => {
+              const direction = index > currentIndex ? 1 : -1;
+              setPage([index, direction]);
+              setCurrentIndex(index);
             }}
+            className={`h-2.5 rounded-full ${
+              index === currentIndex ? "w-8 bg-white" : "w-2.5 bg-white/50"
+            }`}
+            whileHover={{ scale: 1.2 }}
+            whileTap={{ scale: 0.9 }}
+            transition={{ duration: 0.2 }}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}

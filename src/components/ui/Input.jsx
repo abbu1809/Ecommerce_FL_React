@@ -110,7 +110,12 @@ const Input = ({
       <div className="relative rounded-md">
         {icon && (
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200">
-            {getIcon(icon)}
+            {typeof icon === "string"
+              ? getIcon(icon)
+              : React.cloneElement(icon, {
+                  className: "h-5 w-5",
+                  style: { color: "var(--text-secondary)" },
+                })}
           </div>
         )}
         <input
