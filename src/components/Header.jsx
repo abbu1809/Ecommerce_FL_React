@@ -108,15 +108,13 @@ const Header = ({ categories }) => {
                 />
               )}
             </button>
-
-            {/* Logo with enhanced animation */}
+            {/* Logo with enhanced animation */}{" "}
             <Link
               to={ROUTES.HOME}
               className="flex items-center transform hover:scale-105 transition duration-300 ease-in-out"
             >
-              <Logo linkWrapper={false} />
+              <Logo linkWrapper={false} titleColor="white" />
             </Link>
-
             {/* Enhanced Search Bar with animated focus state */}
             <div className="hidden md:block flex-1 max-w-2xl mx-6">
               <div
@@ -155,7 +153,6 @@ const Header = ({ categories }) => {
                 </button>
               </div>
             </div>
-
             {/* Right Header Menu with enhanced animations */}
             <div className="flex items-center gap-4 md:gap-6">
               <div className="group flex flex-col items-center cursor-pointer transition-all duration-300 hover:translate-y-[-2px] relative">
@@ -378,7 +375,11 @@ const Header = ({ categories }) => {
                 className="p-4 border-b"
                 style={{ borderColor: "var(--border-primary)" }}
               >
-                <Logo size="small" linkWrapper={false} />
+                <Logo
+                  size="small"
+                  linkWrapper={false}
+                  titleColor="var(--text-primary)"
+                />
                 <button
                   className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100"
                   onClick={() => setIsMenuOpen(false)}

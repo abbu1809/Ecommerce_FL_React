@@ -9,13 +9,11 @@ import { FcGoogle } from "react-icons/fc";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, error, clearError, isLoading } = useAuthStore();
+  const { login, googleSignup, error, clearError, isLoading } = useAuthStore();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-
-  const [rememberMe, setRememberMe] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const [touched, setTouched] = useState({
     email: false,
@@ -45,7 +43,7 @@ const Login = () => {
   useEffect(() => {
     validateField();
   }, [formData, touched, validateField]);
-  
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -97,12 +95,21 @@ const Login = () => {
       console.log("Login successful:", response);
       navigate("/"); // Redirect to home page after successful login
     } catch (err) {
-      console.error("Login error:", err);
-      // Error is handled by the store and displayed below
+      console.error("Login error:", err); // Error is handled by the store and displayed below
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const response = await googleSignup(); // Using googleSignup for both login and signup
+      console.log("Google login successful:", response);
+      navigate("/");
+    } catch (err) {
+      console.error("Google login error:", err);
     }
   };
   return (
-    <FormWrapper title="Welcome back">
+    <FormWrapper title="Welcome back" titleColor="var(--brand-primary)">
       <div
         className="mt-4 text-center text-sm"
         style={{ color: "var(--text-secondary)" }}
@@ -146,39 +153,6 @@ const Login = () => {
                 placeholder="••••••••"
                 icon={<FiLock />}
               />
-
-              <div className="flex items-center justify-between mt-1">
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={() => setRememberMe(!rememberMe)}
-                    className="h-4 w-4 border-gray-300 rounded transition-colors duration-200"
-                    style={{
-                      accentColor: "var(--brand-primary)",
-                    }}
-                  />
-                  <label
-                    htmlFor="remember-me"
-                    className="ml-2 block text-sm"
-                    style={{ color: "var(--text-secondary)" }}
-                  >
-                    Remember me
-                  </label>
-                </div>
-
-                <div className="text-sm">
-                  <a
-                    href="#"
-                    className="font-medium hover:underline transition-colors duration-200"
-                    style={{ color: "var(--brand-primary)" }}
-                  >
-                    Forgot password?
-                  </a>
-                </div>
-              </div>
             </div>
 
             {error && (
@@ -226,6 +200,7 @@ const Login = () => {
         <div className="flex justify-center mb-6">
           <button
             type="button"
+            onClick={handleGoogleLogin}
             className="flex justify-center items-center py-3 px-6 border rounded-md shadow-sm text-sm font-medium transition-colors duration-200"
             style={{
               borderColor: "var(--border-primary)",
@@ -239,7 +214,7 @@ const Login = () => {
           </button>
         </div>
         <div className="text-sm text-center mt-8 pb-4">
-          Don't have an account?
+          Don't have an account ? <br />
           <Link
             to="/signup"
             className="font-medium hover:underline transition-colors duration-200"

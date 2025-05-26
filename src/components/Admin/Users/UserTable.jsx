@@ -1,11 +1,5 @@
 import { useMemo } from "react";
-import {
-  FiEye,
-  FiUserX,
-  FiUserCheck,
-  FiUserPlus,
-  FiUserMinus,
-} from "react-icons/fi";
+import { FiEye, FiUserX, FiUserCheck } from "react-icons/fi";
 import useAdminStore from "../../../store/Admin/useAdminStore";
 
 // Role badge component
@@ -73,24 +67,26 @@ const StatusBadge = ({ status }) => {
 };
 
 const UserTable = ({ onSelectUser, filterView, searchQuery }) => {
-  const { users, updateUserStatus, updateUserRole } = useAdminStore();
-  const { list: userList, loading } = users;
-
-  // Filter users based on the selected view and search query
+  const { users, updateUserStatus } = useAdminStore();
+  const { list: userList, loading } = users; // Filter users based on the selected view and search query
   const filteredUsers = useMemo(() => {
     return userList.filter((user) => {
       // First filter by view/tab
       const viewMatch =
         filterView === "all" ||
-        (filterView === "customers" && user.role === "customer") ||
-        (filterView === "admins" && user.role === "admin") ||
-        (filterView === "banned" && user.status === "banned");
+        (filterView === "customers" &&
+          (user?.role === "customer" || !user?.role)) ||
+        (filterView === "banned" &&
+          (user?.is_banned || user?.status === "banned"));
 
       // Then filter by search query
+      const userName = `${user?.first_name || ""} ${
+        user?.last_name || ""
+      }`.trim();
       const searchMatch =
         !searchQuery ||
-        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchQuery.toLowerCase());
+        userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user?.email.toLowerCase().includes(searchQuery.toLowerCase());
 
       return viewMatch && searchMatch;
     });
@@ -163,20 +159,21 @@ const UserTable = ({ onSelectUser, filterView, searchQuery }) => {
               {filteredUsers.length > 0 ? (
                 filteredUsers.map((user) => (
                   <tr
-                    key={user.id}
+                    key={user?.id}
                     className="hover:bg-gray-50 transition-colors duration-150 cursor-pointer"
                     onClick={() => onSelectUser(user)}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
+                        {" "}
                         <div
                           className="h-10 w-10 rounded-full overflow-hidden bg-gray-100 border flex-shrink-0"
                           style={{ borderColor: "var(--border-primary)" }}
                         >
-                          {user.avatar ? (
+                          {user?.avatar ? (
                             <img
-                              src={user.avatar}
-                              alt={user.name}
+                              src={user?.avatar}
+                              alt={`${user?.first_name} ${user?.last_name}`}
                               className="h-full w-full object-cover"
                             />
                           ) : (
@@ -184,7 +181,8 @@ const UserTable = ({ onSelectUser, filterView, searchQuery }) => {
                               className="h-full w-full flex items-center justify-center text-lg font-semibold"
                               style={{ color: "var(--text-primary)" }}
                             >
-                              {user.name.charAt(0).toUpperCase()}
+                              {user?.first_name?.charAt(0).toUpperCase() ||
+                                user?.email?.charAt(0).toUpperCase()}
                             </div>
                           )}
                         </div>
@@ -193,13 +191,17 @@ const UserTable = ({ onSelectUser, filterView, searchQuery }) => {
                             className="text-sm font-medium"
                             style={{ color: "var(--text-primary)" }}
                           >
-                            {user.name}
+                            {`${user?.first_name || ""} ${
+                              user?.last_name || ""
+                            }`.trim() || user?.email}
                           </div>
                           <div
                             className="text-xs"
                             style={{ color: "var(--text-secondary)" }}
                           >
-                            Joined {user.registered}
+                            Joined{" "}
+                            {new Date(user?.created_at).toLocaleDateString() ||
+                              "N/A"}
                           </div>
                         </div>
                       </div>
@@ -209,14 +211,18 @@ const UserTable = ({ onSelectUser, filterView, searchQuery }) => {
                         className="text-sm"
                         style={{ color: "var(--text-primary)" }}
                       >
-                        {user.email}
+                        {user?.email}
                       </div>
-                    </td>
+                    </td>{" "}
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <RoleBadge role={user.role} />
-                    </td>
+                      <RoleBadge role={user?.role || "customer"} />
+                    </td>{" "}
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <StatusBadge status={user.status} />
+                      <StatusBadge
+                        status={
+                          user?.is_banned ? "banned" : user?.status || "active"
+                        }
+                      />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-col">
@@ -224,13 +230,13 @@ const UserTable = ({ onSelectUser, filterView, searchQuery }) => {
                           className="text-sm"
                           style={{ color: "var(--text-primary)" }}
                         >
-                          {user.orders} orders
+                          {user?.orders || 0} orders
                         </span>
                         <span
                           className="text-xs"
                           style={{ color: "var(--text-secondary)" }}
                         >
-                          ₹{user.totalSpent.toLocaleString()} total
+                          ₹{(user?.totalSpent || 0).toLocaleString()} total
                         </span>
                       </div>
                     </td>
@@ -246,52 +252,21 @@ const UserTable = ({ onSelectUser, filterView, searchQuery }) => {
                           onClick={() => onSelectUser(user)}
                         >
                           <FiEye size={18} />
-                        </button>
-
+                        </button>{" "}
                         <button
                           className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
                           style={{
-                            color:
-                              user.status === "banned"
-                                ? "var(--success-color)"
-                                : "var(--error-color)",
+                            color: user?.is_banned
+                              ? "var(--success-color)"
+                              : "var(--error-color)",
                           }}
-                          title={
-                            user.status === "banned" ? "Unban User" : "Ban User"
-                          }
-                          onClick={() =>
-                            updateUserStatus(
-                              user.id,
-                              user.status === "banned" ? "active" : "banned"
-                            )
-                          }
+                          title={user?.is_banned ? "Unban User" : "Ban User"}
+                          onClick={() => updateUserStatus(user?.id)}
                         >
-                          {user.status === "banned" ? (
+                          {user?.is_banned ? (
                             <FiUserCheck size={18} />
                           ) : (
                             <FiUserX size={18} />
-                          )}
-                        </button>
-
-                        <button
-                          className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
-                          style={{ color: "var(--brand-secondary)" }}
-                          title={
-                            user.role === "admin"
-                              ? "Remove Admin Role"
-                              : "Make Admin"
-                          }
-                          onClick={() =>
-                            updateUserRole(
-                              user.id,
-                              user.role === "admin" ? "customer" : "admin"
-                            )
-                          }
-                        >
-                          {user.role === "admin" ? (
-                            <FiUserMinus size={18} />
-                          ) : (
-                            <FiUserPlus size={18} />
                           )}
                         </button>
                       </div>

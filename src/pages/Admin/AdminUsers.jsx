@@ -6,7 +6,6 @@ import {
   FiUsers,
   FiUserCheck,
   FiUserX,
-  FiUserPlus,
 } from "react-icons/fi";
 import UserTable from "../../components/Admin/Users/UserTable";
 import UserDetail from "../../components/Admin/Users/UserDetail";
@@ -15,7 +14,7 @@ import useAdminStore from "../../store/Admin/useAdminStore";
 
 const AdminUsers = () => {
   const [selectedUser, setSelectedUser] = useState(null);
-  const [view, setView] = useState("all"); // all, customers, admins, banned
+  const [view, setView] = useState("all"); // all, customers, banned
   const [searchQuery, setSearchQuery] = useState("");
   const { users, fetchUsers } = useAdminStore();
   const { list: userList, loading } = users;
@@ -24,7 +23,6 @@ const AdminUsers = () => {
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
-
   // Quick stats for different user types
   const stats = [
     {
@@ -36,17 +34,12 @@ const AdminUsers = () => {
     },
     {
       name: "Customers",
-      value: userList.filter((user) => user.role === "customer").length || 0,
+      value:
+        userList.filter((user) => user.role === "customer" || !user.role)
+          .length || 0,
       icon: <FiUserCheck size={20} />,
       color: "var(--success-color)",
       view: "customers",
-    },
-    {
-      name: "Admins",
-      value: userList.filter((user) => user.role === "admin").length || 0,
-      icon: <FiUserPlus size={20} />,
-      color: "var(--brand-secondary)",
-      view: "admins",
     },
     {
       name: "Banned Users",
@@ -100,10 +93,9 @@ const AdminUsers = () => {
             Export Users
           </button>
         </div>
-      </div>
-
+      </div>{" "}
       {/* User stats cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {stats.map((stat, index) => (
           <button
             key={index}
@@ -148,7 +140,6 @@ const AdminUsers = () => {
           </button>
         ))}
       </div>
-
       <div className="mb-6">
         <div className="relative w-full md:w-80">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -172,7 +163,6 @@ const AdminUsers = () => {
           />
         </div>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <UserTable

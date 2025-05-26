@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import api from "../../services/api";
+import { adminApi } from "../../services/api";
 
 // Count items by status
 const getStatusCounts = (items, statusField = "status") => {
@@ -95,7 +95,7 @@ export const useAdminStore = create(
         ];
 
         // Get the first 5 orders for recent orders
-        const ordersResponse = await api.get("/admin/get_all_orders");
+        const ordersResponse = await adminApi.get("/admin/get_all_orders");
         const recentOrders = ordersResponse.data.orders.slice(0, 5);
 
         const salesData = [
@@ -135,7 +135,7 @@ export const useAdminStore = create(
       }));
 
       try {
-        const response = await api.get("/admin/get_all_orders");
+        const response = await adminApi.get("/admin/get_all_orders");
         const orders = response.data.orders;
         const statusCounts = getStatusCounts(orders);
 
@@ -165,7 +165,7 @@ export const useAdminStore = create(
 
       try {
         // This is a placeholder - you'll need to add the actual API endpoint for updating order status
-        const response = await api.post("/admin/update_order_status", {
+        const response = await adminApi.post("/admin/update_order_status", {
           order_id: orderId,
           status: status,
         });
@@ -211,7 +211,7 @@ export const useAdminStore = create(
       }));
 
       try {
-        const response = await api.get("/admin/get_all_products");
+        const response = await adminApi.get("/admin/get_all_products");
         const products = response.data.products;
 
         set({
@@ -243,7 +243,7 @@ export const useAdminStore = create(
 
       try {
         // This is a placeholder - you'll need to add the actual API endpoint for updating products
-        const response = await api.post("/admin/update_product", {
+        const response = await adminApi.post("/admin/update_product", {
           product_id: productId,
           ...productData,
         });
@@ -288,7 +288,7 @@ export const useAdminStore = create(
 
       try {
         // This is a placeholder - you'll need to add the actual API endpoint for adding products
-        const response = await api.post("/admin/add_product", productData);
+        const response = await adminApi.post("/admin/add_product", productData);
 
         if (response.data.success) {
           // Add the new product to the list
@@ -322,7 +322,9 @@ export const useAdminStore = create(
 
       try {
         // This is a placeholder - you'll need to add the actual API endpoint for deleting products
-        const response = await api.delete(`/admin/delete_product/${productId}`);
+        const response = await adminApi.delete(
+          `/admin/delete_product/${productId}`
+        );
 
         if (response.data.success) {
           // Remove the product from the list
@@ -354,7 +356,7 @@ export const useAdminStore = create(
       }));
 
       try {
-        const response = await api.get("/admin/get_all_users");
+        const response = await adminApi.get("/admin/get_all_users");
         const users = response.data.users;
         const statusCounts = getStatusCounts(users, "status");
 
@@ -376,23 +378,25 @@ export const useAdminStore = create(
         }));
       }
     },
-
-    updateUserStatus: async (userId, status) => {
+    updateUserStatus: async (userId) => {
       set((state) => ({
         users: { ...state.users, loading: true, error: null },
       }));
 
       try {
-        // This is a placeholder - you'll need to add the actual API endpoint for updating user status
-        const response = await api.post("/admin/update_user_status", {
-          user_id: userId,
-          status: status,
-        });
+        // Use the ban_user API endpoint to toggle user ban status
+        const response = await adminApi.patch(`/admin/users/ban/${userId}/`);
 
-        if (response.data.success) {
+        if (response.data.message) {
           set((state) => {
             const updatedList = state.users.list.map((user) =>
-              user.id === userId ? { ...user, status } : user
+              user.id === userId
+                ? {
+                    ...user,
+                    is_banned: response.data.is_banned,
+                    status: response.data.is_banned ? "banned" : "active",
+                  }
+                : user
             );
 
             const statusCounts = getStatusCounts(updatedList, "status");
@@ -426,7 +430,7 @@ export const useAdminStore = create(
 
       try {
         // This is a placeholder - you'll need to add the actual API endpoint for updating user role
-        const response = await api.post("/admin/update_user_role", {
+        const response = await adminApi.post("/admin/update_user_role", {
           user_id: userId,
           role: role,
         });

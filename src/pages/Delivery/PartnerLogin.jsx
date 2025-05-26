@@ -127,31 +127,6 @@ const PartnerLogin = () => {
           error={formErrors.password}
         />
 
-        <div className="flex items-center justify-between">
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={() => setRememberMe(!rememberMe)}
-              className="mr-2 h-4 w-4 focus:ring-indigo-500 border-gray-300 rounded"
-              style={{
-                borderColor: "var(--border-primary)",
-                color: "var(--brand-primary)",
-              }}
-            />
-            <span className="text-sm" style={{ color: "var(--text-primary)" }}>
-              Remember me
-            </span>
-          </label>
-          <Link
-            to="/delivery/forgot-password"
-            className="text-sm font-medium hover:underline"
-            style={{ color: "var(--brand-primary)" }}
-          >
-            Forgot password?
-          </Link>
-        </div>
-
         <Button
           type="submit"
           variant="primary"

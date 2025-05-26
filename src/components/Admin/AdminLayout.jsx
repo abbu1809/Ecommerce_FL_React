@@ -1,156 +1,62 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
-import useAdminStore from "../../store/Admin/useAdminStore";
+import { useState } from "react";
+import {
+  FiHome,
+  FiBox,
+  FiLayers,
+  FiShoppingCart,
+  FiUsers,
+  FiCornerDownLeft,
+  FiFileText,
+  FiStar,
+  FiChevronLeft,
+  FiChevronRight,
+  FiArrowLeft,
+} from "react-icons/fi";
 
 const AdminLayout = () => {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
-  const { orders, returns, fetchOrders, fetchReturns } = useAdminStore();
-
-  // Fetch orders and returns data on component mount
-  useEffect(() => {
-    fetchOrders();
-    fetchReturns();
-  }, [fetchOrders, fetchReturns]);
-
-  // Count pending items for badges
-  const pendingOrdersCount =
-    orders.list?.filter((order) => order.status === "pending")?.length || 0;
-  const pendingReturnsCount =
-    returns.list?.filter((ret) => ret.status === "pending")?.length || 0;
   const navLinks = [
     {
       name: "Dashboard",
       path: "/admin/dashboard",
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-        </svg>
-      ),
+      icon: <FiHome size={20} />,
     },
     {
       name: "Products",
       path: "/admin/products",
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z"
-            clipRule="evenodd"
-          />
-        </svg>
-      ),
+      icon: <FiBox size={20} />,
     },
     {
       name: "Inventory",
       path: "/admin/inventory",
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm0 2h10v7h-2l-1 2H8l-1-2H5V5z"
-            clipRule="evenodd"
-          />
-        </svg>
-      ),
+      icon: <FiLayers size={20} />,
     },
     {
       name: "Orders",
       path: "/admin/orders",
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-          <path
-            fillRule="evenodd"
-            d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"
-            clipRule="evenodd"
-          />
-        </svg>
-      ),
+      icon: <FiShoppingCart size={20} />,
     },
     {
       name: "Users",
       path: "/admin/users",
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-        </svg>
-      ),
+      icon: <FiUsers size={20} />,
     },
     {
       name: "Returns",
       path: "/admin/returns",
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M5 2a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2V4a2 2 0 00-2-2H5zm4.707 3.707a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L8.414 9H10a3 3 0 013 3v1a1 1 0 102 0v-1a5 5 0 00-5-5H8.414l1.293-1.293z"
-            clipRule="evenodd"
-          />
-        </svg>
-      ),
+      icon: <FiCornerDownLeft size={20} />,
     },
     {
       name: "Content",
       path: "/admin/content",
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-            clipRule="evenodd"
-          />
-        </svg>
-      ),
+      icon: <FiFileText size={20} />,
     },
     {
       name: "Reviews",
       path: "/admin/reviews",
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.799-2.034c-.784-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </svg>
-      ),
+      icon: <FiStar size={20} />,
     },
   ];
 
@@ -201,35 +107,9 @@ const AdminLayout = () => {
             }`}
           >
             {collapsed ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 5l7 7-7 7M5 5l7 7-7 7"
-                />
-              </svg>
+              <FiChevronRight size={24} />
             ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
-                />
-              </svg>
+              <FiChevronLeft size={24} />
             )}
           </button>
         </div>
@@ -280,18 +160,7 @@ const AdminLayout = () => {
             className="flex items-center px-4 py-2 rounded-md hover:bg-gray-700 hover:bg-opacity-30 transition-all duration-150 text-sm"
             style={{ borderRadius: "var(--rounded-md)" }}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
+            <FiArrowLeft size={20} />
             {!collapsed && <span className="ml-3">Back to Site</span>}
           </Link>
         </div>

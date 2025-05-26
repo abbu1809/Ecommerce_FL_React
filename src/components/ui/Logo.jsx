@@ -1,12 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const Logo = ({ size = "medium", linkWrapper = true }) => {
+const Logo = ({ size = "medium", linkWrapper = true, titleColor }) => {
   const sizes = {
     small: "h-8 w-auto",
     medium: "h-12 w-auto",
     large: "h-16 w-auto",
   };
+
+  // Use provided titleColor or default to brand primary color
+  const textColor = titleColor || "var(--brand-primary)";
 
   const content = (
     <>
@@ -22,8 +25,8 @@ const Logo = ({ size = "medium", linkWrapper = true }) => {
         />
       </div>
       <span
-        className="ml-2.5 text-white text-xl font-bold hidden sm:inline-block transition-colors duration-300"
-        
+        className="ml-2.5 text-xl font-bold hidden sm:inline-block transition-colors duration-300"
+        style={{ color: textColor }}
       >
         <span>Anand</span> Mobiles
       </span>

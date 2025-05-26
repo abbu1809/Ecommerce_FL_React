@@ -1,36 +1,70 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { FiSearch, FiDownload, FiFilter } from "react-icons/fi";
 import StockTable from "../../components/Admin/Inventory/StockTable";
 import BulkUpdateForm from "../../components/Admin/Inventory/BulkUpdateForm";
 import LowStockNotification from "../../components/Admin/Inventory/LowStockNotification";
+import useAdminProducts from "../../store/Admin/useAdminProducts";
+import useAdminInventory from "../../store/Admin/useAdminInventory";
 
 const AdminInventory = () => {
-  const [showBulkUpdate, setShowBulkUpdate] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [stockFilter, setStockFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Mock low stock products data
-  const lowStockProducts = [
-    {
-      id: 1,
-      name: "Samsung Galaxy Tab S8",
-      stock: 0,
-      minStock: 5,
-    },
-    {
-      id: 2,
-      name: "Apple MacBook Pro M1",
-      stock: 3,
-      minStock: 5,
-    },
-    {
-      id: 3,
-      name: "Dell XPS 13",
-      stock: 2,
-      minStock: 5,
-    },
-  ];
+  const { products, fetchProducts } = useAdminProducts();
+  const { getLowStockProducts, getInventoryStats } = useAdminInventory();
+
+  // Fetch products on component mount
+  useEffect(() => {
+    if (products.list.length === 0) {
+      fetchProducts();
+    }
+  }, [fetchProducts, products.list.length]);
+
+  // Get low stock products and inventory stats
+  const lowStockProducts = getLowStockProducts();
+  const inventoryStats = getInventoryStats();
+
+  // Export to CSV function
+  const exportToCSV = () => {
+    const headers = [
+      "Product Name",
+      "Brand",
+      "Category",
+      "Stock",
+      "Price",
+      "SKU",
+    ];
+    const csvData = products.list.map((product) => [
+      product.name,
+      product.brand,
+      product.category,
+      product.stock,
+      product.price,
+      `${product.brand.substring(0, 3).toUpperCase()}-${product.name
+        .substring(0, 3)
+        .toUpperCase()}-${product.category.substring(0, 2).toUpperCase()}-${
+        product.id
+      }`,
+    ]);
+
+    const csvContent = [headers, ...csvData]
+      .map((row) => row.map((field) => `"${field}"`).join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `inventory_${new Date().toISOString().split("T")[0]}.csv`
+    );
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div>
@@ -52,18 +86,7 @@ const AdminInventory = () => {
 
         <div className="flex mt-4 sm:mt-0 space-x-3">
           <button
-            onClick={() => setShowBulkUpdate(true)}
-            className="flex items-center px-4 py-2 rounded-md text-sm font-medium"
-            style={{
-              backgroundColor: "var(--brand-primary)",
-              color: "var(--text-on-brand)",
-              borderRadius: "var(--rounded-md)",
-            }}
-          >
-            Bulk Update Stock
-          </button>
-
-          <button
+            onClick={exportToCSV}
             className="flex items-center px-4 py-2 rounded-md text-sm font-medium border"
             style={{
               backgroundColor: "var(--bg-primary)",
@@ -74,7 +97,101 @@ const AdminInventory = () => {
           >
             <FiDownload className="mr-2" size={16} />
             Export CSV
-          </button>
+          </button>{" "}
+        </div>
+      </div>
+
+      {/* Inventory Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div
+          className="p-4 rounded-lg"
+          style={{
+            backgroundColor: "var(--bg-primary)",
+            border: "1px solid var(--border-primary)",
+          }}
+        >
+          <div className="flex items-center">
+            <div className="flex-1">
+              <p
+                className="text-sm font-medium"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                Total Products
+              </p>
+              <p
+                className="text-2xl font-bold"
+                style={{ color: "var(--text-primary)" }}
+              >
+                {inventoryStats.totalProducts}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          className="p-4 rounded-lg"
+          style={{
+            backgroundColor: "var(--bg-primary)",
+            border: "1px solid var(--border-primary)",
+          }}
+        >
+          <div className="flex items-center">
+            <div className="flex-1">
+              <p
+                className="text-sm font-medium"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                In Stock
+              </p>
+              <p className="text-2xl font-bold" style={{ color: "#16A34A" }}>
+                {inventoryStats.inStock}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          className="p-4 rounded-lg"
+          style={{
+            backgroundColor: "var(--bg-primary)",
+            border: "1px solid var(--border-primary)",
+          }}
+        >
+          <div className="flex items-center">
+            <div className="flex-1">
+              <p
+                className="text-sm font-medium"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                Low Stock
+              </p>
+              <p className="text-2xl font-bold" style={{ color: "#D97706" }}>
+                {inventoryStats.lowStock}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          className="p-4 rounded-lg"
+          style={{
+            backgroundColor: "var(--bg-primary)",
+            border: "1px solid var(--border-primary)",
+          }}
+        >
+          <div className="flex items-center">
+            <div className="flex-1">
+              <p
+                className="text-sm font-medium"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                Out of Stock
+              </p>
+              <p className="text-2xl font-bold" style={{ color: "#DC2626" }}>
+                {inventoryStats.outOfStock}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -127,10 +244,10 @@ const AdminInventory = () => {
               }}
             >
               <option value="all">All Categories</option>
-              <option value="smartphones">Smartphones</option>
-              <option value="laptops">Laptops</option>
-              <option value="tablets">Tablets</option>
-              <option value="accessories">Accessories</option>
+              <option value="Smartphone">Smartphones</option>
+              <option value="Laptop">Laptops</option>
+              <option value="Tablet">Tablets</option>
+              <option value="Accessory">Accessories</option>
             </select>
           </div>
         </div>
@@ -162,10 +279,6 @@ const AdminInventory = () => {
         stockFilter={stockFilter}
         searchQuery={searchQuery}
       />
-
-      {showBulkUpdate && (
-        <BulkUpdateForm onClose={() => setShowBulkUpdate(false)} />
-      )}
     </div>
   );
 };

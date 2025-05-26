@@ -1,13 +1,138 @@
-import React, { useState } from "react";
-import { FiPlus, FiFilter, FiSearch } from "react-icons/fi";
+import { useState, useEffect } from "react";
+import { FiPlus, FiSearch } from "react-icons/fi";
 import ProductTable from "../../components/Admin/Products/ProductTable";
 import AddProductForm from "../../components/Admin/Products/AddProductForm";
 import ProductCategoryManager from "../../components/Admin/Products/ProductCategoryManager";
+import ViewProductModal from "../../components/Admin/Products/ViewProductModal";
+import EditProductModal from "../../components/Admin/Products/EditProductModal";
+import useAdminProducts from "../../store/Admin/useAdminProducts";
 
 const AdminProducts = () => {
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [filterCategory, setFilterCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortOption, setSortOption] = useState("newest");
+
+  // State for product detail and edit modals
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showViewProduct, setShowViewProduct] = useState(false);
+  const [showEditProduct, setShowEditProduct] = useState(false);
+  const { updateProduct, addProduct, filterAndSortProducts, fetchProducts } =
+    useAdminProducts();
+
+  // Fetch products on component mount
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  // Apply filters and sorting whenever the filter criteria change
+  useEffect(() => {
+    filterAndSortProducts(filterCategory, searchQuery, sortOption);
+  }, [filterCategory, searchQuery, sortOption, filterAndSortProducts]);
+
+  // Handle sorting change
+  const handleSortChange = (e) => {
+    setSortOption(e.target.value);
+  };
+
+  // Handle clear filters
+  const handleClearFilters = () => {
+    setFilterCategory("all");
+    setSearchQuery("");
+    setSortOption("newest");
+  };
+
+  // Handle view product details
+  const handleViewProduct = (product) => {
+    setSelectedProduct(product);
+    setShowViewProduct(true);
+  };
+
+  // Handle edit product
+  const handleEditProduct = (product) => {
+    setShowViewProduct(false);
+    setSelectedProduct(product);
+    setShowEditProduct(true);
+  }; // Handle save product changes
+  const handleSaveProduct = async (updatedProduct) => {
+    try {
+      const productId = selectedProduct.id;
+
+      // Ensure we're not sending undefined or empty values for required fields
+      const requiredFields = [
+        "name",
+        "brand",
+        "category",
+        "price",
+        "stock",
+        "description",
+      ];
+      const missingFields = requiredFields.filter(
+        (field) => !updatedProduct[field]
+      );
+
+      if (missingFields.length > 0) {
+        console.error(`Missing required fields: ${missingFields.join(", ")}`);
+        // You could add a toast notification here for missing fields
+        return;
+      }
+
+      const result = await updateProduct(productId, updatedProduct);
+
+      if (result.success) {
+        setShowEditProduct(false);
+        // You could add a toast notification here for success
+        console.log(`Product updated successfully: ${productId}`);
+      } else {
+        // Show error message but don't close modal so user can fix issues
+        console.error(`Failed to update product: ${result.message}`);
+        // You could add a toast notification here for the specific error
+      }
+    } catch (error) {
+      console.error("Error in update product handler:", error);
+      // You could add a toast notification here for unexpected errors
+    }
+  };
+  // Handle add product
+  const handleAddProduct = async (productData) => {
+    try {
+      // Ensure all required fields are present before submitting
+      const requiredFields = [
+        "name",
+        "brand",
+        "category",
+        "price",
+        "stock",
+        "description",
+        "images",
+      ];
+      const missingFields = requiredFields.filter(
+        (field) => !productData[field]
+      );
+
+      if (missingFields.length > 0) {
+        console.error(`Missing required fields: ${missingFields.join(", ")}`);
+        // You could add a toast notification here for missing fields
+        return;
+      }
+
+      const result = await addProduct(productData);
+
+      if (result.success) {
+        setShowAddProduct(false);
+        // You could add a toast notification here for success
+        console.log(`Product added successfully with ID: ${result.product_id}`);
+      } else {
+        // Show error message but don't close modal so user can fix issues
+        console.error(`Failed to add product: ${result.message}`);
+        // You could add a toast notification here for the specific error
+      }
+    } catch (error) {
+      console.error("Error in add product handler:", error);
+      // You could add a toast notification here for unexpected errors
+    }
+  };
 
   return (
     <div>
@@ -32,19 +157,6 @@ const AdminProducts = () => {
             <FiPlus className="mr-2" size={16} />
             Add New Product
           </button>
-          <button
-            onClick={() => setShowCategoryManager(true)}
-            className="flex items-center px-4 py-2 rounded-md text-sm font-medium border"
-            style={{
-              backgroundColor: "var(--bg-primary)",
-              color: "var(--text-primary)",
-              borderColor: "var(--border-primary)",
-              borderRadius: "var(--rounded-md)",
-            }}
-          >
-            <FiFilter className="mr-2" size={16} />
-            Categories
-          </button>
         </div>
       </div>
 
@@ -60,6 +172,8 @@ const AdminProducts = () => {
             <input
               type="text"
               placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="block w-full pl-10 pr-3 py-2 border rounded-md text-sm"
               style={{
                 backgroundColor: "var(--bg-primary)",
@@ -84,13 +198,15 @@ const AdminProducts = () => {
             }}
           >
             <option value="all">All Categories</option>
-            <option value="smartphones">Smartphones</option>
-            <option value="laptops">Laptops</option>
-            <option value="tablets">Tablets</option>
-            <option value="accessories">Accessories</option>
+            <option value="Smartphone">Smartphones</option>
+            <option value="Laptop">Laptops</option>
+            <option value="Tablet">Tablets</option>
+            <option value="Accessory">Accessories</option>
           </select>
 
           <select
+            value={sortOption}
+            onChange={handleSortChange}
             className="border rounded-md py-2 px-3 text-sm"
             style={{
               backgroundColor: "var(--bg-primary)",
@@ -105,18 +221,54 @@ const AdminProducts = () => {
             <option value="name-asc">Sort: Name (A-Z)</option>
             <option value="stock-asc">Sort: Stock (Low to High)</option>
           </select>
+
+          <button
+            onClick={handleClearFilters}
+            className="px-4 py-2 rounded-md text-sm font-medium"
+            style={{
+              backgroundColor: "var(--brand-secondary)",
+              color: "var(--text-on-brand)",
+              borderRadius: "var(--rounded-md)",
+            }}
+          >
+            Clear Filters
+          </button>
         </div>
       </div>
 
-      <ProductTable />
+      <ProductTable
+        onViewProduct={handleViewProduct}
+        onEditProduct={handleEditProduct}
+      />
 
       {/* Modal forms rendered conditionally */}
       {showAddProduct && (
-        <AddProductForm onClose={() => setShowAddProduct(false)} />
+        <AddProductForm
+          onClose={() => setShowAddProduct(false)}
+          onSave={handleAddProduct}
+        />
       )}
 
       {showCategoryManager && (
         <ProductCategoryManager onClose={() => setShowCategoryManager(false)} />
+      )}
+
+      {/* View Product Modal */}
+      {showViewProduct && selectedProduct && (
+        <ViewProductModal
+          product={selectedProduct}
+          onClose={() => setShowViewProduct(false)}
+          onEdit={handleEditProduct}
+        />
+      )}
+
+      {/* Edit Product Modal */}
+      {showEditProduct && selectedProduct && (
+        <EditProductModal
+          product={selectedProduct}
+          onClose={() => setShowEditProduct(false)}
+          onSave={handleSaveProduct}
+        />
       )}
     </div>
   );

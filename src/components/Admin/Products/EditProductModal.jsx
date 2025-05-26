@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FiX, FiUpload, FiPlus, FiTrash2 } from "react-icons/fi";
 
-const AddProductForm = ({ onClose, onSave }) => {
+const EditProductModal = ({ product, onClose, onSave }) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     name: "",
@@ -20,9 +20,50 @@ const AddProductForm = ({ onClose, onSave }) => {
       storage: [],
     },
     featured: false,
-    rating: 0,
-    reviews: 0,
   });
+
+  // Initialize form with product data
+  useEffect(() => {
+    if (product) {
+      // Convert specifications object to our format
+      const formattedSpecs = product.specifications || {};
+
+      // Format features as array
+      const featuresArray = Array.isArray(product.features)
+        ? product.features
+        : [];
+
+      // Parse price, discount_price and stock to numbers
+      const price =
+        typeof product.price === "number"
+          ? product.price
+          : parseFloat(product.price || 0);
+      const discount_price =
+        typeof product.discount_price === "number"
+          ? product.discount_price
+          : parseFloat(product.discount_price || 0);
+      const stock =
+        typeof product.stock === "number"
+          ? product.stock
+          : parseInt(product.stock || 0, 10);
+
+      setFormData({
+        name: product.name || "",
+        description: product.description || "",
+        brand: product.brand || "",
+        category: product.category || "",
+        price: price,
+        discount_price: discount_price,
+        discount: product.discount || "",
+        stock: stock,
+        images: product.images || [],
+        specifications: formattedSpecs,
+        features: featuresArray,
+        variant: product.variant || { colors: [], storage: [] },
+        featured: product.featured || false,
+      });
+    }
+  }, [product]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -120,38 +161,9 @@ const AddProductForm = ({ onClose, onSave }) => {
     });
   };
 
-  // Handle image upload
-  const handleImageChange = (e) => {
-    // In a real app, you would upload to storage and get URLs
-    // For this example, we'll just use placeholders
-    const files = Array.from(e.target.files);
-    const imageUrls = files.map(
-      (_, index) =>
-        `https://via.placeholder.com/400?text=Product+Image+${index + 1}`
-    );
-
-    setFormData({
-      ...formData,
-      images: [...formData.images, ...imageUrls].slice(0, 5), // Limit to 5 images
-    });
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Convert string numbers to actual numbers
-    const processedData = {
-      ...formData,
-      price: parseFloat(formData.price) || 0,
-      discount_price: parseFloat(formData.discount_price) || 0,
-      stock: parseInt(formData.stock, 10) || 0,
-      rating: parseFloat(formData.rating) || 0,
-      reviews: parseInt(formData.reviews, 10) || 0,
-    };
-
-    if (onSave) {
-      onSave(processedData);
-    }
-    onClose();
+    onSave(formData);
   };
 
   return (
@@ -181,8 +193,8 @@ const AddProductForm = ({ onClose, onSave }) => {
             style={{ color: "var(--text-primary)" }}
           >
             {step === 1
-              ? "Add New Product - Basic Information"
-              : "Add New Product - Details & Media"}
+              ? "Edit Product - Basic Information"
+              : "Edit Product - Details & Media"}
           </h2>
           <button
             onClick={onClose}
@@ -688,14 +700,11 @@ const AddProductForm = ({ onClose, onSave }) => {
 
                   {formData.images.length < 5 && (
                     <div
-                      className="aspect-square border rounded-md flex items-center justify-center cursor-pointer"
+                      className="aspect-square border rounded-md flex items-center justify-center"
                       style={{
                         borderColor: "var(--border-primary)",
                         borderStyle: "dashed",
                       }}
-                      onClick={() =>
-                        document.getElementById("image-upload").click()
-                      }
                     >
                       <div className="flex flex-col items-center">
                         <FiUpload
@@ -708,14 +717,6 @@ const AddProductForm = ({ onClose, onSave }) => {
                         >
                           Add Image
                         </span>
-                        <input
-                          id="image-upload"
-                          type="file"
-                          accept="image/*"
-                          multiple
-                          onChange={handleImageChange}
-                          className="hidden"
-                        />
                       </div>
                     </div>
                   )}
@@ -777,7 +778,7 @@ const AddProductForm = ({ onClose, onSave }) => {
                       color: "var(--text-on-brand)",
                     }}
                   >
-                    Add Product
+                    Save Changes
                   </button>
                 </div>
               </div>
@@ -789,4 +790,4 @@ const AddProductForm = ({ onClose, onSave }) => {
   );
 };
 
-export default AddProductForm;
+export default EditProductModal;

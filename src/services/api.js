@@ -1,5 +1,10 @@
 import axios from "axios";
-import { API_URL, TOKEN_KEY, USER_KEY } from "../utils/constants";
+import {
+  API_URL,
+  TOKEN_KEY,
+  USER_KEY,
+  ADMIN_TOKEN_KEY,
+} from "../utils/constants";
 
 // Create an axios instance with base configuration
 const api = axios.create({
@@ -36,4 +41,39 @@ api.interceptors.response.use(
   }
 );
 
+// Create an admin API instance with separate token handling
+const adminApi = axios.create({
+  baseURL: API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+// Add a request interceptor for admin API to include the admin token
+adminApi.interceptors.request.use(
+  (config) => {
+    const adminToken = localStorage.getItem('admin_token');
+    if (adminToken) {
+      config.headers.Authorization = `Bearer ${adminToken}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add a response interceptor for admin API to handle unauthorized responses
+adminApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Handle unauthorized - clear admin auth state
+      localStorage.removeItem('admin_token');
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;
+export { adminApi };

@@ -19,6 +19,7 @@ import OrderTracking from "./pages/OrderTracking";
 import OrderTrackingDetail from "./pages/OrderTrackingDetail";
 import Account from "./pages/Account";
 import { useAuthStore } from "./store/useAuth";
+import { useAdminAuthStore } from "./store/Admin/useAdminAuth";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import AdminLayout from "./components/Admin/AdminLayout";
@@ -67,18 +68,26 @@ const Layout = () => {
 };
 
 const App = () => {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, checkAuthStatus } = useAuthStore();
+  const { isAuthenticated: isAdminAuthenticated, checkAdminAuthStatus } =
+    useAdminAuthStore();
 
-  // Initialize products
+  // Initialize products and authentication
   React.useEffect(() => {
     const initializeStore = async () => {
+      // Initialize authentication state from localStorage
+      checkAuthStatus();
+
+      // Initialize admin authentication state from localStorage
+      checkAdminAuthStatus();
+
       // Import dynamically to avoid circular dependencies
       const { useProductStore } = await import("./store/useProduct");
       useProductStore.getState().fetchProducts();
     };
 
     initializeStore();
-  }, []);
+  }, [checkAuthStatus, checkAdminAuthStatus]);
 
   return (
     <BrowserRouter>
@@ -106,7 +115,6 @@ const App = () => {
         <Route path="/delivery">
           <Route path="login" element={<PartnerLogin />} />
           <Route path="register" element={<PartnerRegister />} />
-
           {/* Protected Delivery Partner Routes 
               TODO: Implement a useDeliveryAuth hook for partner authentication
               and protect these routes similar to admin routes */}
@@ -115,13 +123,16 @@ const App = () => {
           <Route path="update/:id" element={<DeliveryStatusUpdate />} />
           <Route path="status-update" element={<DeliveryStatusUpdate />} />
           <Route path="history" element={<DeliveryHistory />} />
-          <Route path="settings" element={<DeliverySettings />} />
-
+          <Route path="settings" element={<DeliverySettings />} />{" "}
           {/* This route is for admin verification of delivery partners */}
           <Route
             path="verification"
             element={
-              isAuthenticated ? <AdminVerify /> : <Navigate to="/admin/login" />
+              isAdminAuthenticated ? (
+                <AdminVerify />
+              ) : (
+                <Navigate to="/admin/login" />
+              )
             }
           />
         </Route>
@@ -140,12 +151,12 @@ const App = () => {
           {/* Account Routes */}
           <Route path="/profile" element={<Account />} />
           <Route path="/profile/:section" element={<Account />} />
-        </Route>
+        </Route>{" "}
         {/* Admin Routes */}
         <Route
           path="/admin/login"
           element={
-            !isAuthenticated ? (
+            !isAdminAuthenticated ? (
               <AdminLogin />
             ) : (
               <Navigate to="/admin/dashboard" />
@@ -155,7 +166,7 @@ const App = () => {
         <Route
           path="/admin/register"
           element={
-            !isAuthenticated ? (
+            !isAdminAuthenticated ? (
               <AdminRegister />
             ) : (
               <Navigate to="/admin/dashboard" />
@@ -167,7 +178,7 @@ const App = () => {
           <Route
             path="/admin/dashboard"
             element={
-              isAuthenticated ? (
+              isAdminAuthenticated ? (
                 <AdminDashboard />
               ) : (
                 <Navigate to="/admin/login" />
@@ -177,7 +188,7 @@ const App = () => {
           <Route
             path="/admin/products"
             element={
-              isAuthenticated ? (
+              isAdminAuthenticated ? (
                 <AdminProducts />
               ) : (
                 <Navigate to="/admin/login" />
@@ -187,7 +198,7 @@ const App = () => {
           <Route
             path="/admin/inventory"
             element={
-              isAuthenticated ? (
+              isAdminAuthenticated ? (
                 <AdminInventory />
               ) : (
                 <Navigate to="/admin/login" />
@@ -197,19 +208,27 @@ const App = () => {
           <Route
             path="/admin/orders"
             element={
-              isAuthenticated ? <AdminOrders /> : <Navigate to="/admin/login" />
+              isAdminAuthenticated ? (
+                <AdminOrders />
+              ) : (
+                <Navigate to="/admin/login" />
+              )
             }
           />
           <Route
             path="/admin/users"
             element={
-              isAuthenticated ? <AdminUsers /> : <Navigate to="/admin/login" />
+              isAdminAuthenticated ? (
+                <AdminUsers />
+              ) : (
+                <Navigate to="/admin/login" />
+              )
             }
           />
           <Route
             path="/admin/returns"
             element={
-              isAuthenticated ? (
+              isAdminAuthenticated ? (
                 <AdminReturns />
               ) : (
                 <Navigate to="/admin/login" />
@@ -219,7 +238,7 @@ const App = () => {
           <Route
             path="/admin/content"
             element={
-              isAuthenticated ? (
+              isAdminAuthenticated ? (
                 <AdminContent />
               ) : (
                 <Navigate to="/admin/login" />
@@ -229,7 +248,7 @@ const App = () => {
           <Route
             path="/admin/reviews"
             element={
-              isAuthenticated ? (
+              isAdminAuthenticated ? (
                 <AdminReviews />
               ) : (
                 <Navigate to="/admin/login" />

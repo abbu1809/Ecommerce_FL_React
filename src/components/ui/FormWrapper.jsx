@@ -1,7 +1,7 @@
 import React from "react";
 import Logo from "./Logo";
 
-const FormWrapper = ({ children, title }) => {
+const FormWrapper = ({ children, title, titleColor }) => {
   return (
     <div
       className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden"
@@ -30,7 +30,7 @@ const FormWrapper = ({ children, title }) => {
         }}
       >
         <div className="flex flex-col items-center">
-          <Logo size="large" />
+          <Logo size="large" titleColor={titleColor} />
           <h2
             className="mt-6 text-center text-2xl font-bold"
             style={{ color: "var(--text-primary)" }}

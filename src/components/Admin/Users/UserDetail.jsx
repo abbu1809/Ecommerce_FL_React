@@ -2,8 +2,6 @@ import {
   FiMail,
   FiUserX,
   FiUserCheck,
-  FiUserPlus,
-  FiUserMinus,
   FiShoppingBag,
   FiLogIn,
   FiEdit,
@@ -12,9 +10,12 @@ import Button from "../../UI/Button";
 import useAdminStore from "../../../store/Admin/useAdminStore";
 
 const UserDetail = ({ user }) => {
-  const { updateUserStatus, updateUserRole } = useAdminStore();
+  const { updateUserStatus, users } = useAdminStore();
 
   if (!user) return null;
+
+  // Get the most current user data from the store to ensure we have the latest status
+  const currentUser = users.list.find((u) => u.id === user.id) || user;
 
   // Role badge component
   const getRoleBadge = (role) => {
@@ -89,15 +90,17 @@ const UserDetail = ({ user }) => {
         className="p-6 border-b"
         style={{ borderColor: "var(--border-primary)" }}
       >
+        {" "}
         <div className="flex items-center">
+          {" "}
           <div
             className="h-16 w-16 rounded-full overflow-hidden bg-gray-100 border-2 flex-shrink-0"
             style={{ borderColor: "var(--border-primary)" }}
           >
-            {user.avatar ? (
+            {currentUser?.avatar ? (
               <img
-                src={user.avatar}
-                alt={user.name}
+                src={currentUser?.avatar}
+                alt={`${currentUser?.first_name} ${currentUser?.last_name}`}
                 className="h-full w-full object-cover"
               />
             ) : (
@@ -105,7 +108,8 @@ const UserDetail = ({ user }) => {
                 className="h-full w-full flex items-center justify-center text-2xl font-semibold"
                 style={{ color: "var(--text-primary)" }}
               >
-                {user.name.charAt(0).toUpperCase()}
+                {currentUser?.first_name?.charAt(0).toUpperCase() ||
+                  currentUser?.email?.charAt(0).toUpperCase()}
               </div>
             )}
           </div>
@@ -114,19 +118,24 @@ const UserDetail = ({ user }) => {
               className="text-lg font-bold"
               style={{ color: "var(--text-primary)" }}
             >
-              {user.name}
+              {`${currentUser?.first_name || ""} ${
+                currentUser?.last_name || ""
+              }`.trim() || currentUser?.email}
             </h2>
             <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-              {user.email}
-            </p>
+              {currentUser?.email}
+            </p>{" "}
             <div className="mt-2 flex space-x-2">
-              {getRoleBadge(user.role)}
-              {getStatusBadge(user.status)}
+              {getRoleBadge(currentUser?.role || "customer")}
+              {getStatusBadge(
+                currentUser?.is_banned
+                  ? "banned"
+                  : currentUser?.status || "active"
+              )}
             </div>
           </div>
         </div>
       </div>
-
       <div
         className="p-6 space-y-5 overflow-auto"
         style={{ maxHeight: "calc(100vh - 300px)" }}
@@ -146,6 +155,7 @@ const UserDetail = ({ user }) => {
               borderRadius: "var(--rounded-md)",
             }}
           >
+            {" "}
             <div className="p-3 flex justify-between">
               <span
                 className="text-sm"
@@ -157,7 +167,9 @@ const UserDetail = ({ user }) => {
                 className="text-sm font-medium"
                 style={{ color: "var(--text-primary)" }}
               >
-                {user.registered}
+                {currentUser?.created_at
+                  ? new Date(currentUser.created_at).toLocaleDateString()
+                  : "N/A"}
               </span>
             </div>
             <div className="p-3 flex justify-between">
@@ -165,13 +177,27 @@ const UserDetail = ({ user }) => {
                 className="text-sm"
                 style={{ color: "var(--text-secondary)" }}
               >
-                Last Login
+                Phone Number
               </span>
               <span
                 className="text-sm font-medium"
                 style={{ color: "var(--text-primary)" }}
               >
-                {user.lastLogin}
+                {currentUser?.phone_number || "Not provided"}
+              </span>
+            </div>
+            <div className="p-3 flex justify-between">
+              <span
+                className="text-sm"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                Auth Provider
+              </span>
+              <span
+                className="text-sm font-medium"
+                style={{ color: "var(--text-primary)" }}
+              >
+                {currentUser?.auth_provider || "Email"}
               </span>
             </div>
             <div className="p-3 flex justify-between">
@@ -185,7 +211,7 @@ const UserDetail = ({ user }) => {
                 className="text-sm font-medium"
                 style={{ color: "var(--text-primary)" }}
               >
-                {user.orders}
+                {currentUser?.orders || 0}
               </span>
             </div>
             <div className="p-3 flex justify-between">
@@ -199,154 +225,12 @@ const UserDetail = ({ user }) => {
                 className="text-sm font-medium"
                 style={{ color: "var(--text-primary)" }}
               >
-                ₹{user.totalSpent.toLocaleString()}
+                ₹{(currentUser?.totalSpent || 0).toLocaleString()}
               </span>
             </div>
           </div>
         </div>
-
-        <div>
-          <h3
-            className="text-sm font-medium mb-2"
-            style={{ color: "var(--text-primary)" }}
-          >
-            Recent Activity
-          </h3>
-          <div className="space-y-3">
-            <div
-              className="p-3 rounded"
-              style={{
-                backgroundColor: "var(--bg-secondary)",
-                borderRadius: "var(--rounded-md)",
-              }}
-            >
-              <div className="flex">
-                <div className="mr-3">
-                  <div
-                    className="h-8 w-8 rounded-full flex items-center justify-center"
-                    style={{
-                      backgroundColor: "var(--brand-primary-light)",
-                      color: "var(--brand-primary)",
-                    }}
-                  >
-                    <FiShoppingBag size={16} />
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <p
-                    className="text-sm font-medium"
-                    style={{ color: "var(--text-primary)" }}
-                  >
-                    Placed an order
-                  </p>
-                  <p
-                    className="text-xs"
-                    style={{ color: "var(--text-secondary)" }}
-                  >
-                    Order #ORD-12345 - ₹
-                    {user.totalSpent > 100
-                      ? Math.round(
-                          user.totalSpent / user.orders
-                        ).toLocaleString()
-                      : "7,999"}
-                  </p>
-                  <p
-                    className="text-xs mt-1"
-                    style={{ color: "var(--text-tertiary)" }}
-                  >
-                    5 days ago
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div
-              className="p-3 rounded"
-              style={{
-                backgroundColor: "var(--bg-secondary)",
-                borderRadius: "var(--rounded-md)",
-              }}
-            >
-              <div className="flex">
-                <div className="mr-3">
-                  <div
-                    className="h-8 w-8 rounded-full flex items-center justify-center"
-                    style={{
-                      backgroundColor: "var(--success-color-light)",
-                      color: "var(--success-color)",
-                    }}
-                  >
-                    <FiLogIn size={16} />
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <p
-                    className="text-sm font-medium"
-                    style={{ color: "var(--text-primary)" }}
-                  >
-                    Logged in
-                  </p>
-                  <p
-                    className="text-xs"
-                    style={{ color: "var(--text-secondary)" }}
-                  >
-                    IP: 198.51.100.123
-                  </p>
-                  <p
-                    className="text-xs mt-1"
-                    style={{ color: "var(--text-tertiary)" }}
-                  >
-                    3 days ago
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div
-              className="p-3 rounded"
-              style={{
-                backgroundColor: "var(--bg-secondary)",
-                borderRadius: "var(--rounded-md)",
-              }}
-            >
-              <div className="flex">
-                <div className="mr-3">
-                  <div
-                    className="h-8 w-8 rounded-full flex items-center justify-center"
-                    style={{
-                      backgroundColor: "var(--warning-color-light)",
-                      color: "var(--warning-color)",
-                    }}
-                  >
-                    <FiEdit size={16} />
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <p
-                    className="text-sm font-medium"
-                    style={{ color: "var(--text-primary)" }}
-                  >
-                    Updated profile
-                  </p>
-                  <p
-                    className="text-xs"
-                    style={{ color: "var(--text-secondary)" }}
-                  >
-                    Changed shipping address
-                  </p>
-                  <p
-                    className="text-xs mt-1"
-                    style={{ color: "var(--text-tertiary)" }}
-                  >
-                    1 week ago
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
+      </div>{" "}
       <div
         className="p-4 border-t flex justify-end space-x-3"
         style={{
@@ -354,49 +238,26 @@ const UserDetail = ({ user }) => {
           borderColor: "var(--border-primary)",
         }}
       >
-        {user.status === "active" ? (
-          <Button
-            variant="danger"
-            size="sm"
-            icon={<FiUserX size={16} />}
-            onClick={() => updateUserStatus(user.id, "banned")}
-          >
-            Ban User
-          </Button>
-        ) : (
+        {" "}
+        {currentUser?.is_banned ? (
           <Button
             variant="primary"
             size="sm"
             icon={<FiUserCheck size={16} />}
-            onClick={() => updateUserStatus(user.id, "active")}
+            onClick={() => updateUserStatus(currentUser?.id)}
           >
             Unban User
           </Button>
-        )}
-
-        {user.role === "customer" ? (
-          <Button
-            variant="primary"
-            size="sm"
-            icon={<FiUserPlus size={16} />}
-            onClick={() => updateUserRole(user.id, "admin")}
-          >
-            Make Admin
-          </Button>
         ) : (
           <Button
-            variant="secondary"
+            variant="danger"
             size="sm"
-            icon={<FiUserMinus size={16} />}
-            onClick={() => updateUserRole(user.id, "customer")}
+            icon={<FiUserX size={16} />}
+            onClick={() => updateUserStatus(currentUser?.id)}
           >
-            Remove Admin
+            Ban User
           </Button>
         )}
-
-        <Button variant="primary" size="sm" icon={<FiMail size={16} />}>
-          Send Message
-        </Button>
       </div>
     </div>
   );

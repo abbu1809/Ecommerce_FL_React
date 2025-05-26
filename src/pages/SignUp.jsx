@@ -6,12 +6,10 @@ import Button from "../components/UI/Button";
 import { useAuthStore } from "../store/useAuth";
 import { FiUser, FiMail, FiPhone, FiLock, FiAlertCircle } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
-import { auth, provider } from "../firebase";
-import { signInWithPopup } from "firebase/auth";
 
 const SignUp = () => {
   const navigate = useNavigate();
-  const { signup, error, clearError, isLoading } = useAuthStore();
+  const { signup, googleSignup, error, clearError, isLoading } = useAuthStore();
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -155,23 +153,17 @@ const SignUp = () => {
       // Error is handled by the store and displayed below
     }
   };
-
   const handleGoogleSignup = async () => {
     try {
-      const result = await signInWithPopup(auth, provider);
-      const idToken = await result.user.getIdToken();
-
-      // Send the ID token to the backend for user creation
-      const response = await signup({ idToken });
+      const response = await googleSignup();
       console.log("Google signup successful:", response);
-      navigate("/"); // Redirect to home page after successful signup
+      navigate("/");
     } catch (err) {
       console.error("Google signup error:", err);
     }
   };
-
   return (
-    <FormWrapper title="Join Anand Mobiles">
+    <FormWrapper title="Join Anand Mobiles" titleColor="var(--brand-primary)">
       <div
         className="mt-3 text-center text-sm"
         style={{ color: "var(--text-secondary)" }}

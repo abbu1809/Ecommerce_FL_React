@@ -2,14 +2,71 @@ import { create } from "zustand";
 import api from "../services/api";
 import { TOKEN_KEY, USER_KEY } from "../utils/constants";
 import { auth, provider } from "../firebase";
-import { signInWithPopup } from "firebase/auth"; // Import signInWithPopup
+import { signInWithPopup } from "firebase/auth";
+
+// Helper function to safely parse JSON from localStorage
+const getStoredData = (key) => {
+  try {
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : null;
+  } catch (error) {
+    console.error(`Error parsing stored data for key ${key}:`, error);
+    return null;
+  }
+};
+
+// Helper function to safely store data in localStorage
+const storeData = (key, data) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+    return true;
+  } catch (error) {
+    console.error(`Error storing data for key ${key}:`, error);
+    return false;
+  }
+};
+
+// Helper function to persist user authentication data
+const persistAuthData = (token, userData) => {
+  try {
+    if (token) {
+      localStorage.setItem(TOKEN_KEY, token);
+    }
+    if (userData) {
+      storeData(USER_KEY, userData);
+    }
+    return true;
+  } catch (error) {
+    console.error("Error persisting auth data:", error);
+    return false;
+  }
+};
+
+// Helper function to clear all auth data
+const clearAuthData = () => {
+  try {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+  } catch (error) {
+    console.error("Error clearing auth data:", error);
+  }
+};
+
+// Initialize state with persisted data
+const getInitialState = () => {
+  const token = localStorage.getItem(TOKEN_KEY);
+  const userData = getStoredData(USER_KEY);
+
+  return {
+    user: userData,
+    isAuthenticated: !!(token && userData),
+    isLoading: false,
+    error: null,
+  };
+};
 
 export const useAuthStore = create((set) => ({
-  user: null,
-  isAuthenticated: false, // Initially set to false until authentication check
-  isLoading: false,
-  error: null,
-
+  ...getInitialState(),
   login: async (credentials) => {
     try {
       set({ isLoading: true, error: null });
@@ -22,28 +79,21 @@ export const useAuthStore = create((set) => ({
 
       const data = response.data;
 
-      // Store token in localStorage if received
-      if (data.token) {
-        localStorage.setItem(TOKEN_KEY, data.token);
+      // Prepare user data for consistent structure
+      const userData = {
+        uid: data.user_id,
+        email: data.email,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        phone: data.phone_number || data.phone || "",
+      };
 
-        // Store user data in localStorage
-        const userData = {
-          uid: data.user_id,
-          email: data.email,
-          first_name: data.first_name,
-          last_name: data.last_name,
-        };
-        localStorage.setItem(USER_KEY, JSON.stringify(userData));
-      }
+      // Persist authentication data
+      persistAuthData(data.token, userData);
 
-      // Store user data in the store
+      // Update store state
       set({
-        user: {
-          uid: data.user_id,
-          email: data.email,
-          first_name: data.first_name,
-          last_name: data.last_name,
-        },
+        user: userData,
         isAuthenticated: true,
         isLoading: false,
       });
@@ -64,7 +114,37 @@ export const useAuthStore = create((set) => ({
     try {
       set({ isLoading: true, error: null });
 
-      // Prepare request data
+      // Handle Google ID token signup
+      if (userData.idToken) {
+        const response = await api.post("/users/signup", {
+          idToken: userData.idToken,
+        });
+
+        const data = response.data;
+
+        // Prepare user data for consistent structure
+        const userInfo = {
+          uid: data.user_id,
+          email: data.email,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          phone: data.phone_number || "",
+        };
+
+        // Persist authentication data
+        persistAuthData(data.token, userInfo);
+
+        // Update store state
+        set({
+          user: userInfo,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+
+        return data;
+      }
+
+      // Regular email/password signup
       const requestData = {
         email: userData.email,
         password: userData.password,
@@ -80,31 +160,23 @@ export const useAuthStore = create((set) => ({
 
       // Direct API call to signup endpoint
       const response = await api.post("/users/signup", requestData);
-
       const data = response.data;
 
-      // Store token in localStorage if received
-      if (data.token) {
-        localStorage.setItem(TOKEN_KEY, data.token);
+      // Prepare user data for consistent structure
+      const userInfo = {
+        uid: data.user_id,
+        email: data.email,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        phone: data.phone_number || requestData.phone_number || "",
+      };
 
-        // Store user data in localStorage
-        const userData = {
-          uid: data.user_id,
-          email: data.email,
-          first_name: data.first_name,
-          last_name: data.last_name,
-        };
-        localStorage.setItem(USER_KEY, JSON.stringify(userData));
-      }
+      // Persist authentication data
+      persistAuthData(data.token, userInfo);
 
-      // Update store with user data
+      // Update store state
       set({
-        user: {
-          uid: data.user_id,
-          email: data.email,
-          first_name: data.first_name,
-          last_name: data.last_name,
-        },
+        user: userInfo,
         isAuthenticated: true,
         isLoading: false,
       });
@@ -121,51 +193,17 @@ export const useAuthStore = create((set) => ({
       throw error;
     }
   },
-  googleSignup: async (idToken) => {
+  googleSignup: async () => {
     try {
       set({ isLoading: true, error: null });
 
-      // Extract user details from the ID token
+      // Sign in with Google popup
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      console.log("Google user:", user);
-      const { email, displayName } = user;
-      let first_name = "";
-      let last_name = "";
+      const idToken = await user.getIdToken();
 
-      if (displayName) {
-        const nameParts = displayName.split(" ");
-        first_name = nameParts[0] || "";
-        last_name = nameParts.slice(1).join(" ") || "";
-      }
-
-      // Direct API call to signup endpoint for Google
-      const response = await api.post("/users/signup", {
-        idToken,
-        email,
-        first_name,
-        last_name,
-      });
-
-      const data = response.data;
-
-      // Store user data in localStorage
-      const userData = {
-        uid: data.user_id,
-        email: data.email,
-        first_name: data.first_name,
-        last_name: data.last_name,
-      };
-      localStorage.setItem(USER_KEY, JSON.stringify(userData));
-
-      // Update store with user data
-      set({
-        user: userData,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-
-      return data;
+      // Use the regular signup function with idToken
+      return await useAuthStore.getState().signup({ idToken });
     } catch (error) {
       set({
         error:
@@ -177,15 +215,19 @@ export const useAuthStore = create((set) => ({
       throw error;
     }
   },
+
   logout: () => {
-    // Clear token and user data from localStorage
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
+    // Clear all authentication data
+    clearAuthData();
 
     // Reset store state
-    set({ user: null, isAuthenticated: false, error: null });
+    set({
+      user: null,
+      isAuthenticated: false,
+      error: null,
+      isLoading: false,
+    });
   },
-
   checkAuthStatus: async () => {
     try {
       set({ isLoading: true });
@@ -196,28 +238,32 @@ export const useAuthStore = create((set) => ({
       if (token) {
         try {
           // Try to get user data from localStorage first
-          const userDataStr = localStorage.getItem(USER_KEY);
-          let userData = null;
+          let userData = getStoredData(USER_KEY);
 
-          if (userDataStr) {
-            userData = JSON.parse(userDataStr);
-          } else {
+          if (!userData) {
             // If user data not in localStorage, fetch from API
             const response = await api.get("/users/profile");
-            userData = response.data;
+            userData = {
+              uid: response.data.user_id || response.data.uid,
+              email: response.data.email,
+              first_name: response.data.first_name,
+              last_name: response.data.last_name,
+              phone: response.data.phone_number || response.data.phone || "",
+            };
 
             // Update localStorage with fresh data
-            if (userData) {
-              localStorage.setItem(USER_KEY, JSON.stringify(userData));
-            }
+            storeData(USER_KEY, userData);
           }
 
-          set({ user: userData, isAuthenticated: true, isLoading: false });
+          set({
+            user: userData,
+            isAuthenticated: true,
+            isLoading: false,
+          });
           return userData;
         } catch (err) {
           // If API call fails, clear auth state
-          localStorage.removeItem(TOKEN_KEY);
-          localStorage.removeItem(USER_KEY);
+          clearAuthData();
 
           set({
             user: null,
@@ -228,13 +274,16 @@ export const useAuthStore = create((set) => ({
           return null;
         }
       } else {
-        set({ user: null, isAuthenticated: false, isLoading: false });
+        set({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
         return null;
       }
     } catch (err) {
       // Clear auth state on error
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(USER_KEY);
+      clearAuthData();
 
       set({
         user: null,
@@ -242,6 +291,30 @@ export const useAuthStore = create((set) => ({
         isLoading: false,
         error: err.message || "Session expired",
       });
+      return null;
+    }
+  },
+
+  // Update user profile data
+  updateUserProfile: (updatedData) => {
+    const currentUser = useAuthStore.getState().user;
+    if (!currentUser) return;
+
+    const updatedUser = { ...currentUser, ...updatedData };
+
+    // Persist updated user data
+    storeData(USER_KEY, updatedUser);
+
+    // Update store state
+    set({ user: updatedUser });
+  },
+
+  // Get current authentication token
+  getToken: () => {
+    try {
+      return localStorage.getItem(TOKEN_KEY);
+    } catch (error) {
+      console.error("Error getting token:", error);
       return null;
     }
   },
