@@ -62,14 +62,24 @@ export const useAuthStore = create((set) => ({
   },
   signup: async (userData) => {
     try {
-      set({ isLoading: true, error: null }); // Direct API call to signup endpoint
-      const response = await api.post("/users/signup", {
+      set({ isLoading: true, error: null });
+
+      // Prepare request data
+      const requestData = {
         email: userData.email,
         password: userData.password,
         first_name: userData.firstName || userData.first_name || "",
         last_name: userData.lastName || userData.last_name || "",
         phone_number: userData.phone || userData.phone_number || "",
-      });
+      };
+
+      // Add metadata if provided
+      if (userData.metadata) {
+        requestData.metadata = userData.metadata;
+      }
+
+      // Direct API call to signup endpoint
+      const response = await api.post("/users/signup", requestData);
 
       const data = response.data;
 

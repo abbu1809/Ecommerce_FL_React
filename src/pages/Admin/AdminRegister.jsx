@@ -3,16 +3,16 @@ import { useNavigate, Link } from "react-router-dom";
 import FormWrapper from "../../components/UI/FormWrapper";
 import Input from "../../components/UI/Input";
 import Button from "../../components/UI/Button";
-import { useAuthStore } from "../../store/useAuth"; // Assuming admin uses the same auth store or a similar one for registration
+import { useAdminAuthStore } from "../../store/Admin/useAdminAuth"; // Updated to use admin-specific auth store
 
 const AdminRegister = () => {
   const navigate = useNavigate();
-  // TODO: Replace with admin-specific auth logic if different
-  const { register, error, clearError, isLoading } = useAuthStore();
+  // Use admin registration function from the admin auth store
+  const { adminRegister, error, clearError, isLoading } = useAdminAuthStore();
   const [formData, setFormData] = useState({
-    email: "",
+    username: "", // Changed from email to username as per useAdminAuth.js
     password: "",
-    secretKey: "", // Added secret key
+    secretKey: "", // Secret key for admin registration
   });
   const [formErrors, setFormErrors] = useState({});
 
@@ -29,12 +29,8 @@ const AdminRegister = () => {
 
   const validateForm = () => {
     const errors = {};
-    if (!formData.email.trim()) {
-      errors.email = "Email is required";
-    } else if (
-      !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formData.email)
-    ) {
-      errors.email = "Invalid email address";
+    if (!formData.username.trim()) {
+      errors.username = "Username is required";
     }
     if (!formData.password) {
       errors.password = "Password is required";
@@ -44,7 +40,6 @@ const AdminRegister = () => {
     if (!formData.secretKey.trim()) {
       errors.secretKey = "Secret Key is required";
     }
-    // TODO: Add more robust validation for secretKey if needed
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -56,8 +51,13 @@ const AdminRegister = () => {
       return;
     }
     try {
-      // TODO: Replace with admin-specific registration logic, including secret key validation
-      await register(formData);
+      // Call adminRegister with the form data
+      await adminRegister({
+        username: formData.username,
+        password: formData.password,
+        secretKey: formData.secretKey,
+      });
+
       navigate("/admin/login"); // Redirect to admin login page after successful registration
     } catch (err) {
       // Error is handled by the store or displayed
@@ -73,15 +73,15 @@ const AdminRegister = () => {
       <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
         <div className="rounded-md space-y-5">
           <Input
-            label="Email Address"
-            type="email"
-            name="email"
-            value={formData.email}
+            label="Username"
+            type="text"
+            name="username"
+            value={formData.username}
             onChange={handleChange}
             required
-            error={formErrors.email}
-            placeholder="admin@example.com"
-            icon="email"
+            error={formErrors.username}
+            placeholder="admin"
+            icon="user"
           />
           <Input
             label="Password"
