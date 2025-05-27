@@ -43,9 +43,13 @@ const ReviewList = ({
 
   const handleSortChange = (order) => {
     setSortOrder(order);
-    let sorted = [...filteredReviews];    switch (order) {
+    let sorted = [...filteredReviews];
+    switch (order) {
       case "newest":
-        sorted.sort((a, b) => new Date(b.date || b.created_at) - new Date(a.date || a.created_at));
+        sorted.sort(
+          (a, b) =>
+            new Date(b.date || b.created_at) - new Date(a.date || a.created_at)
+        );
         break;
       case "highest":
         sorted.sort((a, b) => b.rating - a.rating);
@@ -309,7 +313,8 @@ const ReviewList = ({
                     {review.title || "Review"}
                   </p>
                   <div className="flex items-center mt-1">
-                    <ReviewRatings rating={review.rating} readOnly={true} />                    <span
+                    <ReviewRatings rating={review.rating} readOnly={true} />{" "}
+                    <span
                       className="ml-2 text-xs"
                       style={{ color: "var(--text-secondary)" }}
                     >
@@ -363,7 +368,9 @@ const ReviewList = ({
                   </span>
                 </div>
 
-                <div className="flex items-center space-x-3">                  <button
+                <div className="flex items-center space-x-3">
+                  {" "}
+                  <button
                     onClick={() => handleHelpful(review.id)}
                     className="flex items-center text-xs"
                     style={{ color: "var(--text-secondary)" }}
@@ -371,7 +378,6 @@ const ReviewList = ({
                     <FiThumbsUp className="mr-1" />
                     Helpful ({review.helpful || 0})
                   </button>
-
                   <button
                     className="flex items-center text-xs"
                     style={{ color: "var(--text-secondary)" }}

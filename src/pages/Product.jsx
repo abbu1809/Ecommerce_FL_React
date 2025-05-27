@@ -118,21 +118,24 @@ const Product = () => {
         ? Math.round(
             ((product.price - product.discount_price) / product.price) * 100
           ) + "%"
-        : null),    rating: product.rating || product.average_rating || 0,
+        : null),
+    rating: product.rating || product.average_rating || 0,
     reviews: Array.isArray(product.reviews)
       ? product.reviews.length
       : product.reviews || product.review_count || 0,
-    reviewsData: Array.isArray(product.reviews) ? product.reviews.map(review => ({
-      id: review.id,
-      rating: review.rating,
-      comment: review.comment,
-      user: review.email ? review.email.split('@')[0] : 'Anonymous', // Extract username from email
-      userEmail: review.email,
-      date: review.created_at,
-      verified: true, // Assume verified since they come from API
-      helpful: 0, // Default value
-      title: `${review.rating} star review` // Generate a title based on rating
-    })) : [],
+    reviewsData: Array.isArray(product.reviews)
+      ? product.reviews.map((review) => ({
+          id: review.id,
+          rating: review.rating,
+          comment: review.comment,
+          user: review.email ? review.email.split("@")[0] : "Anonymous", // Extract username from email
+          userEmail: review.email,
+          date: review.created_at,
+          verified: true, // Assume verified since they come from API
+          helpful: 0, // Default value
+          title: `${review.rating} star review`, // Generate a title based on rating
+        }))
+      : [],
     stock: product.stock || product.quantity || product.inventory || 1,
     images: product.images ||
       product.image_urls ||

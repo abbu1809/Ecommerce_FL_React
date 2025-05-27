@@ -37,9 +37,10 @@ const ProductReviews = ({ productId, product }) => {
   const canAddReview = !!user;
 
   // Use API reviews data if available, otherwise fall back to local reviews
-  const displayReviews = product.reviewsData && product.reviewsData.length > 0 
-    ? product.reviewsData 
-    : productReviews[productId] || [];
+  const displayReviews =
+    product.reviewsData && product.reviewsData.length > 0
+      ? product.reviewsData
+      : productReviews[productId] || [];
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
@@ -49,14 +50,14 @@ const ProductReviews = ({ productId, product }) => {
       >
         Customer Reviews
       </h2>
-
       {/* API-based Review Form */}
       <div className="mb-8">
         <ReviewForm
           productId={productId}
           onReviewSubmitted={handleReviewSubmitted}
         />
-      </div>      {/* Existing Review List */}
+      </div>{" "}
+      {/* Existing Review List */}
       <ReviewList
         productId={productId}
         reviews={displayReviews}
