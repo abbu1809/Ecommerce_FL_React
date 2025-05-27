@@ -8,6 +8,7 @@ import AdminReviews from "./AdminReviews";
 import AdminContent from "./AdminContent";
 import AdminLogin from "./AdminLogin";
 import AdminRegister from "./AdminRegister";
+import AdminDeliveryPartners from "./AdminDeliveryPartners";
 
 export {
   AdminDashboard,
@@ -20,4 +21,5 @@ export {
   AdminContent,
   AdminLogin,
   AdminRegister,
+  AdminDeliveryPartners,
 };

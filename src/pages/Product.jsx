@@ -132,8 +132,12 @@ const Product = () => {
           userEmail: review.email,
           date: review.created_at,
           verified: true, // Assume verified since they come from API
-          helpful: 0, // Default value
+          helpful: review.helpful_count || 0, // Use helpful_count from API
+          helpful_count: review.helpful_count || 0, // Keep both for compatibility
+          is_marked_helpful: review.is_marked_helpful || false, // Track if current user marked as helpful
           title: `${review.rating} star review`, // Generate a title based on rating
+          reported_count: review.reported_count || 0, // Include reported count
+          helpful_users: review.helpful_users || [], // Include helpful users array
         }))
       : [],
     stock: product.stock || product.quantity || product.inventory || 1,

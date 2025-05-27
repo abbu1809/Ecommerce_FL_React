@@ -53,6 +53,13 @@ export const useAdminStore = create(
       statusCounts: {},
     },
 
+    // Delivery Partners data
+    deliveryPartners: {
+      list: [],
+      loading: false,
+      error: null,
+    },
+
     // Dashboard actions
     fetchDashboardData: async () => {
       set((state) => ({ dashboard: { ...state.dashboard, loading: true } }));
@@ -525,6 +532,134 @@ export const useAdminStore = create(
           },
         };
       });
+    },
+
+    // Delivery Partners actions
+    fetchDeliveryPartners: async () => {
+      set((state) => ({
+        deliveryPartners: {
+          ...state.deliveryPartners,
+          loading: true,
+          error: null,
+        },
+      }));
+
+      try {
+        // API call to get all delivery partners
+        const response = await adminApi.get("/partners/all/");
+
+        set({
+          deliveryPartners: {
+            list: response.data.partners,
+            loading: false,
+            error: null,
+          },
+        });
+        return response.data.partners;
+      } catch (error) {
+        set((state) => ({
+          deliveryPartners: {
+            ...state.deliveryPartners,
+            loading: false,
+            error:
+              error.response?.data?.error ||
+              "Failed to fetch delivery partners",
+          },
+        }));
+        throw error;
+      }
+    },
+
+    verifyDeliveryPartner: async (partnerId) => {
+      set((state) => ({
+        deliveryPartners: {
+          ...state.deliveryPartners,
+          loading: true,
+          error: null,
+        },
+      }));
+
+      try {
+        // API call to verify a delivery partner
+        const response = await adminApi.patch(
+          `/delivery/verify/${partnerId}/`,
+          {}
+        );
+
+        // Update the partner in the list
+        set((state) => {
+          const updatedList = state.deliveryPartners.list.map((partner) =>
+            partner.id === partnerId
+              ? { ...partner, is_verified: true }
+              : partner
+          );
+
+          return {
+            deliveryPartners: {
+              list: updatedList,
+              loading: false,
+              error: null,
+            },
+          };
+        });
+
+        return response.data;
+      } catch (error) {
+        set((state) => ({
+          deliveryPartners: {
+            ...state.deliveryPartners,
+            loading: false,
+            error:
+              error.response?.data?.error ||
+              "Failed to verify delivery partner",
+          },
+        }));
+        throw error;
+      }
+    },
+
+    assignDeliveryPartner: async (orderId, partnerId) => {
+      set((state) => ({
+        deliveryPartners: {
+          ...state.deliveryPartners,
+          loading: true,
+          error: null,
+        },
+      }));
+
+      try {
+        // API call to assign a delivery partner to an order
+        const response = await adminApi.post(
+          "/admin/assign_delivery_partner/",
+          {
+            order_id: orderId,
+            partner_id: partnerId,
+          }
+        );
+
+        // Refresh the orders list to reflect changes
+        await useAdminStore.getState().fetchOrders();
+
+        set((state) => ({
+          deliveryPartners: {
+            ...state.deliveryPartners,
+            loading: false,
+          },
+        }));
+
+        return response.data;
+      } catch (error) {
+        set((state) => ({
+          deliveryPartners: {
+            ...state.deliveryPartners,
+            loading: false,
+            error:
+              error.response?.data?.error ||
+              "Failed to assign delivery partner",
+          },
+        }));
+        throw error;
+      }
     },
   }))
 );

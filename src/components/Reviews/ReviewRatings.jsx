@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FaStar, FaRegStar, FaStarHalfAlt, FaCheck } from "react-icons/fa";
+import { toast } from "../../utils/toast";
 
 const ReviewRatings = ({
   rating = 0,
@@ -50,12 +51,11 @@ const ReviewRatings = ({
 
     return stars;
   };
-
   const handleSubmit = (e) => {
     e.preventDefault();
 
     if (rating === 0) {
-      alert("Please select a rating");
+      toast.warning("Please select a rating");
       return;
     }
 

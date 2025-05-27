@@ -5,75 +5,74 @@ import {
   FiMail,
   FiLock,
   FiPhone,
-  FiMapPin,
   FiTruck,
-  FiArrowRight,
+  FiAlertCircle,
 } from "react-icons/fi";
 import Button from "../../components/UI/Button";
 import Input from "../../components/UI/Input";
 import FormWrapper from "../../components/UI/FormWrapper";
-import { DeliveryLayout } from "../../components/Delivery";
+import { useDeliveryPartnerStore } from "../../store/Delivery/useDeliveryPartnerStore";
 
 const PartnerRegister = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const { registerPartner, loading, error } = useDeliveryPartnerStore();
+
   const [formData, setFormData] = useState({
-    fullName: "",
+    name: "",
     email: "",
     password: "",
     confirmPassword: "",
     phone: "",
-    address: "",
-    vehicleType: "bike",
-    vehicleNumber: "",
-    idProof: null,
   });
-  const [errors, setErrors] = useState({});
+
+  const [formErrors, setFormErrors] = useState({});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
-    });
+    }));
 
     // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors({
-        ...errors,
+    if (formErrors[name]) {
+      setFormErrors((prev) => ({
+        ...prev,
         [name]: "",
-      });
+      }));
     }
-  };
-
-  const handleFileChange = (e) => {
-    setFormData({
-      ...formData,
-      idProof: e.target.files[0],
-    });
   };
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.fullName) newErrors.fullName = "Full name is required";
-    if (!formData.email) newErrors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(formData.email))
+
+    if (!formData.name.trim()) {
+      newErrors.name = "Full name is required";
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email is invalid";
+    }
 
-    if (!formData.password) newErrors.password = "Password is required";
-    else if (formData.password.length < 6)
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    } else if (formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
+    }
 
-    if (formData.password !== formData.confirmPassword)
+    if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords don't match";
+    }
 
-    if (!formData.phone) newErrors.phone = "Phone number is required";
-    if (!formData.address) newErrors.address = "Address is required";
-    if (!formData.vehicleNumber)
-      newErrors.vehicleNumber = "Vehicle number is required";
-    if (!formData.idProof) newErrors.idProof = "ID proof is required";
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone number is required";
+    } else if (!/^\d{10}$/.test(formData.phone.replace(/\D/g, ""))) {
+      newErrors.phone = "Phone number must be 10 digits";
+    }
 
-    setErrors(newErrors);
+    setFormErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
@@ -82,13 +81,18 @@ const PartnerRegister = () => {
 
     if (!validateForm()) return;
 
-    setIsLoading(true);
+    // Create registration data matching backend requirements
+    const registrationData = {
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+      phone: formData.phone,
+    };
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await registerPartner(registrationData);
 
-      // Registration successful
+      // If successful, navigate to login with a success message
       navigate("/delivery/login", {
         state: {
           message:
@@ -96,222 +100,142 @@ const PartnerRegister = () => {
         },
       });
     } catch (error) {
-      setErrors({
-        form: "Registration failed. Please try again.",
-      });
-    } finally {
-      setIsLoading(false);
+      // Error is already handled by the store
+      console.error("Registration error:", error);
     }
   };
 
   return (
-    <DeliveryLayout hideMenu>
-      <div className="w-full max-w-3xl mx-auto">
-        <FormWrapper>
-          <div className="mb-6 text-center">
-            <h1
-              className="text-2xl font-bold mb-2"
-              style={{ color: "var(--text-primary)" }}
-            >
-              Become a Delivery Partner
-            </h1>
-            <p style={{ color: "var(--text-secondary)" }}>
-              Join our team and start earning. We'll review your application
-              within 24 hours.
-            </p>
-          </div>
-
-          {errors.form && (
-            <div
-              className="mb-4 p-3 rounded-md"
-              style={{
-                backgroundColor: "var(--error-color)20",
-                color: "var(--error-color)",
-              }}
-            >
-              {errors.form}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="Full Name"
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-                placeholder="Enter your full name"
-                icon={<FiUser />}
-                error={errors.fullName}
-              />
-
-              <Input
-                label="Email Address"
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Enter your email"
-                icon={<FiMail />}
-                error={errors.email}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="Password"
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Create a password"
-                icon={<FiLock />}
-                error={errors.password}
-              />
-
-              <Input
-                label="Confirm Password"
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Confirm your password"
-                icon={<FiLock />}
-                error={errors.confirmPassword}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="Phone Number"
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="Enter your phone number"
-                icon={<FiPhone />}
-                error={errors.phone}
-              />
-
-              <Input
-                label="Address"
-                type="text"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                placeholder="Enter your address"
-                icon={<FiMapPin />}
-                error={errors.address}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label
-                  className="block mb-2 text-sm font-medium"
-                  style={{ color: "var(--text-primary)" }}
-                >
-                  Vehicle Type
-                </label>
-                <div className="relative">
-                  <div
-                    className="absolute inset-y-0 left-0 flex items-center pl-3"
-                    style={{ color: "var(--text-secondary)" }}
-                  >
-                    <FiTruck />
-                  </div>
-                  <select
-                    name="vehicleType"
-                    value={formData.vehicleType}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 rounded-md text-sm"
-                    style={{
-                      backgroundColor: "var(--bg-primary)",
-                      color: "var(--text-primary)",
-                      borderColor: "var(--border-primary)",
-                      borderWidth: "1px",
-                    }}
-                  >
-                    <option value="bike">Bike/Scooter</option>
-                    <option value="car">Car</option>
-                    <option value="van">Van/Mini Truck</option>
-                  </select>
-                </div>
-              </div>
-
-              <Input
-                label="Vehicle Number"
-                type="text"
-                name="vehicleNumber"
-                value={formData.vehicleNumber}
-                onChange={handleChange}
-                placeholder="Enter vehicle registration number"
-                icon={<FiTruck />}
-                error={errors.vehicleNumber}
-              />
-            </div>
-
-            <div>
-              <label
-                className="block mb-2 text-sm font-medium"
-                style={{ color: "var(--text-primary)" }}
-              >
-                ID Proof (Driving License/Govt ID)
-              </label>
-              <div className="relative">
-                <input
-                  type="file"
-                  name="idProof"
-                  onChange={handleFileChange}
-                  className="w-full p-2 rounded-md text-sm border"
-                  style={{
-                    backgroundColor: "var(--bg-primary)",
-                    color: "var(--text-primary)",
-                    borderColor: errors.idProof
-                      ? "var(--error-color)"
-                      : "var(--border-primary)",
-                  }}
-                  accept="image/*,.pdf"
-                />
-                {errors.idProof && (
-                  <p
-                    className="text-xs mt-1"
-                    style={{ color: "var(--error-color)" }}
-                  >
-                    {errors.idProof}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <Button
-                type="submit"
-                fullWidth={true}
-                variant="primary"
-                isLoading={isLoading}
-                icon={<FiArrowRight />}
-              >
-                Register as Delivery Partner
-              </Button>
-            </div>
-
-            <div className="text-center mt-4">
-              <p style={{ color: "var(--text-secondary)" }}>
-                Already have an account?{" "}
-                <Link
-                  to="/delivery/login"
-                  style={{ color: "var(--brand-primary)", fontWeight: 500 }}
-                >
-                  Login here
-                </Link>
-              </p>
-            </div>
-          </form>
-        </FormWrapper>
+    <FormWrapper title="Become a Delivery Partner">
+      {/* Form Header with icon */}
+      <div className="flex justify-center mb-6">
+        <div
+          className="w-20 h-20 rounded-full flex items-center justify-center"
+          style={{
+            backgroundColor: "var(--bg-accent-light)",
+            color: "var(--brand-primary)",
+          }}
+        >
+          <FiTruck size={36} />
+        </div>
       </div>
-    </DeliveryLayout>
+
+      <p
+        className="text-center text-sm mb-6"
+        style={{ color: "var(--text-secondary)" }}
+      >
+        Register as a delivery partner and start earning with flexible hours
+      </p>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Display API errors */}
+        {error && (
+          <div
+            className="p-4 rounded-md animate-fadeIn flex items-center"
+            style={{
+              backgroundColor: "var(--error-color)15",
+              color: "var(--error-color)",
+            }}
+          >
+            <FiAlertCircle className="h-5 w-5 mr-2" />
+            {error}
+          </div>
+        )}
+
+        <Input
+          label="Full Name"
+          type="text"
+          name="name"
+          icon={<FiUser />}
+          value={formData.name}
+          onChange={handleChange}
+          required={true}
+          placeholder="Enter your full name"
+          error={formErrors.name}
+        />
+
+        <Input
+          label="Email"
+          type="email"
+          name="email"
+          icon={<FiMail />}
+          value={formData.email}
+          onChange={handleChange}
+          required={true}
+          placeholder="your@email.com"
+          error={formErrors.email}
+        />
+
+        <Input
+          label="Phone Number"
+          type="tel"
+          name="phone"
+          icon={<FiPhone />}
+          value={formData.phone}
+          onChange={handleChange}
+          required={true}
+          placeholder="Your phone number"
+          error={formErrors.phone}
+        />
+
+        <Input
+          label="Password"
+          type="password"
+          name="password"
+          icon={<FiLock />}
+          value={formData.password}
+          onChange={handleChange}
+          required={true}
+          placeholder="Create a strong password"
+          error={formErrors.password}
+        />
+
+        <Input
+          label="Confirm Password"
+          type="password"
+          name="confirmPassword"
+          icon={<FiLock />}
+          value={formData.confirmPassword}
+          onChange={handleChange}
+          required={true}
+          placeholder="Confirm your password"
+          error={formErrors.confirmPassword}
+        />
+
+        <div className="mt-6">
+          <Button
+            type="submit"
+            variant="primary"
+            fullWidth={true}
+            isLoading={loading}
+          >
+            {loading ? "Creating Account..." : "Register as Partner"}
+          </Button>
+        </div>
+
+        <div className="text-center mt-6">
+          <p style={{ color: "var(--text-secondary)" }} className="text-sm">
+            Already have an account?{" "}
+            <Link
+              to="/delivery/login"
+              className="font-medium hover:underline"
+              style={{ color: "var(--brand-primary)" }}
+            >
+              Log in here
+            </Link>
+          </p>
+        </div>
+
+        <div
+          className="text-xs text-center mt-4 px-4"
+          style={{ color: "var(--text-secondary)" }}
+        >
+          By registering, you agree to our Terms of Service and acknowledge that
+          your account requires admin verification before you can start
+          accepting deliveries.
+        </div>
+      </form>
+    </FormWrapper>
   );
 };
 

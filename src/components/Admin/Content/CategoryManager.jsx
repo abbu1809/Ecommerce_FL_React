@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Button from "../../UI/Button";
+import { toast } from "../../../utils/toast";
 
 // Mock category data
 const mockCategories = [
@@ -120,13 +121,12 @@ const CategoryManager = () => {
     });
     setShowAddForm(false);
   };
-
   const handleDeleteCategory = (id) => {
     // Check if the category has any children
     const hasChildren = categories.some((cat) => cat.parentId === id);
 
     if (hasChildren) {
-      alert(
+      toast.warning(
         "Cannot delete a category that has subcategories. Please delete or reassign subcategories first."
       );
       return;

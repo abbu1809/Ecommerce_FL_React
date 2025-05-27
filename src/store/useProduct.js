@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { API_URL } from "../utils/constants";
 import api from "../services/api";
+import { reviewService } from "../services/reviewService";
 
 export const useProductStore = create((set, get) => ({
   products: [],
@@ -181,9 +182,62 @@ export const useProductStore = create((set, get) => ({
       };
     }
   },
-
   // Clear review error
   clearReviewError: () => {
     set({ reviewError: null });
+  },
+
+  // Mark review as helpful
+  markReviewHelpful: async (productId, reviewId) => {
+    try {
+      const result = await reviewService.markReviewHelpful(productId, reviewId);
+
+      if (result.success) {
+        // Update the current product's reviews if it matches
+        const { currentProduct } = get();
+        if (currentProduct && currentProduct.id === productId) {
+          const updatedReviews = currentProduct.reviewsData.map((review) =>
+            review.id === reviewId
+              ? {
+                  ...review,
+                  helpful_count: result.data.helpful_count,
+                  is_marked_helpful: result.data.is_marked_helpful,
+                }
+              : review
+          );
+
+          set({
+            currentProduct: {
+              ...currentProduct,
+              reviewsData: updatedReviews,
+            },
+          });
+        }
+
+        return result;
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Error marking review as helpful:", error);
+      return {
+        success: false,
+        error: "Failed to mark review as helpful",
+      };
+    }
+  },
+
+  // Report review
+  reportReview: async (productId, reviewId) => {
+    try {
+      const result = await reviewService.reportReview(productId, reviewId);
+      return result;
+    } catch (error) {
+      console.error("Error reporting review:", error);
+      return {
+        success: false,
+        error: "Failed to report review",
+      };
+    }
   },
 }));

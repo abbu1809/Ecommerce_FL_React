@@ -12,6 +12,7 @@ import {
   FiChevronLeft,
   FiChevronRight,
   FiArrowLeft,
+  FiTruck,
 } from "react-icons/fi";
 
 const AdminLayout = () => {
@@ -57,6 +58,11 @@ const AdminLayout = () => {
       name: "Reviews",
       path: "/admin/reviews",
       icon: <FiStar size={20} />,
+    },
+    {
+      name: "Delivery Partners",
+      path: "/admin/delivery-partners",
+      icon: <FiTruck size={20} />,
     },
   ];
 

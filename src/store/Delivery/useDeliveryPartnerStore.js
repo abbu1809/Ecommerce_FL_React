@@ -1,0 +1,190 @@
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
+import axios from "axios";
+import { API_URL, DELIVERY_TOKEN_KEY } from "../../utils/constants";
+
+// Create a delivery partner API instance
+const deliveryApi = axios.create({
+  baseURL: API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+// Add a request interceptor to include the delivery partner token in requests
+deliveryApi.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem(DELIVERY_TOKEN_KEY);
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add a response interceptor to handle unauthorized access
+deliveryApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Handle unauthorized - clear delivery partner auth state
+      localStorage.removeItem(DELIVERY_TOKEN_KEY);
+    }
+    return Promise.reject(error);
+  }
+);
+
+export const useDeliveryPartnerStore = create(
+  devtools((set) => ({
+    // Auth state
+    isAuthenticated: !!localStorage.getItem(DELIVERY_TOKEN_KEY),
+    partner: JSON.parse(localStorage.getItem("delivery_partner") || "null"),
+    loading: false,
+    error: null,
+
+    // Dashboard data
+    assignedDeliveries: [],
+    deliveryHistory: [],
+
+    // Auth actions
+    registerPartner: async (partnerData) => {
+      set({ loading: true, error: null });
+      try {
+        const response = await deliveryApi.post(
+          "/partners/register/",
+          partnerData
+        );
+        set({
+          loading: false,
+          error: null,
+        });
+        return response.data;
+      } catch (error) {
+        set({
+          loading: false,
+          error: error.response?.data?.error || "Registration failed",
+        });
+        throw error;
+      }
+    },
+
+    loginPartner: async (credentials) => {
+      set({ loading: true, error: null });
+      try {
+        const response = await deliveryApi.post(
+          "/partners/login/",
+          credentials
+        );
+        const { token, partner_id } = response.data;
+
+        // Store token in localStorage
+        localStorage.setItem(DELIVERY_TOKEN_KEY, token);
+
+        // Get partner details or save basic info
+        const partnerData = {
+          id: partner_id,
+          email: credentials.email,
+        };
+        localStorage.setItem("delivery_partner", JSON.stringify(partnerData));
+
+        set({
+          isAuthenticated: true,
+          partner: partnerData,
+          loading: false,
+          error: null,
+        });
+        return response.data;
+      } catch (error) {
+        set({
+          loading: false,
+          error: error.response?.data?.error || "Login failed",
+        });
+        throw error;
+      }
+    },
+
+    logoutPartner: () => {
+      localStorage.removeItem(DELIVERY_TOKEN_KEY);
+      localStorage.removeItem("delivery_partner");
+      set({
+        isAuthenticated: false,
+        partner: null,
+        assignedDeliveries: [],
+        deliveryHistory: [],
+      });
+    },
+
+    // Delivery management actions
+    fetchAssignedDeliveries: async () => {
+      set({ loading: true, error: null });
+      try {
+        const response = await deliveryApi.get(
+          "/partners/deliveries/assigned/"
+        );
+        set({
+          assignedDeliveries: response.data.assigned_deliveries,
+          loading: false,
+          error: null,
+        });
+        return response.data.assigned_deliveries;
+      } catch (error) {
+        set({
+          loading: false,
+          error:
+            error.response?.data?.error ||
+            "Failed to fetch assigned deliveries",
+        });
+        throw error;
+      }
+    },
+
+    fetchDeliveryHistory: async () => {
+      set({ loading: true, error: null });
+      try {
+        const response = await deliveryApi.get("/partners/deliveries/history/");
+        set({
+          deliveryHistory: response.data.delivery_history,
+          loading: false,
+          error: null,
+        });
+        return response.data.delivery_history;
+      } catch (error) {
+        set({
+          loading: false,
+          error:
+            error.response?.data?.error || "Failed to fetch delivery history",
+        });
+        throw error;
+      }
+    },
+
+    updateDeliveryStatus: async (orderId, status) => {
+      set({ loading: true, error: null });
+      try {
+        const response = await deliveryApi.patch(
+          `/partners/deliveries/update_status/${orderId}/`,
+          { status }
+        );
+
+        // Update the local state by fetching fresh data
+        await useDeliveryPartnerStore.getState().fetchAssignedDeliveries();
+
+        set({ loading: false, error: null });
+        return response.data;
+      } catch (error) {
+        set({
+          loading: false,
+          error:
+            error.response?.data?.error || "Failed to update delivery status",
+        });
+        throw error;
+      }
+    },
+  }))
+);
+
+export { deliveryApi };
+export default useDeliveryPartnerStore;

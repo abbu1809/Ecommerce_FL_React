@@ -1,30 +1,38 @@
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import FormWrapper from "../../components/UI/FormWrapper";
 import Input from "../../components/UI/Input";
 import Button from "../../components/UI/Button";
-import { FiUser, FiLock, FiTruck } from "react-icons/fi";
-
-// This would use an actual auth store in a real implementation
-// import { useAuthStore } from "../../store/useDeliveryAuth";
+import { FiTruck, FiMail, FiLock, FiAlertCircle } from "react-icons/fi";
+import { useDeliveryPartnerStore } from "../../store/Delivery/useDeliveryPartnerStore";
+import toast from "react-hot-toast";
 
 const PartnerLogin = () => {
   const navigate = useNavigate();
-  // Mock auth functions, replace with real ones in actual implementation
-  const login = () => {
-    // Mock successful login - in real app this would connect to actual auth state
-    navigate("/delivery/assignments");
-  };
+  const location = useLocation();
+  const { loginPartner, isAuthenticated, partner, loading, error } =
+    useDeliveryPartnerStore();
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-
-  const [rememberMe, setRememberMe] = useState(false);
   const [formErrors, setFormErrors] = useState({});
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [registrationMessage, setRegistrationMessage] = useState("");
+
+  // Check if there's a registration success message passed via navigation
+  useEffect(() => {
+    if (location.state?.message) {
+      setRegistrationMessage(location.state.message);
+    }
+  }, [location.state]);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && partner) {
+      navigate("/delivery/dashboard");
+    }
+  }, [isAuthenticated, partner, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,10 +40,6 @@ const PartnerLogin = () => {
     // Clear specific field error when user starts typing
     if (formErrors[name]) {
       setFormErrors((prev) => ({ ...prev, [name]: "" }));
-    }
-    // Clear general error
-    if (error) {
-      setError("");
     }
   };
 
@@ -65,15 +69,22 @@ const PartnerLogin = () => {
 
     if (!validateForm()) return;
 
-    setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      login();
+      const response = await loginPartner(formData);
+
+      // If successful, the store will update the auth state and redirect will happen via useEffect
+      if (response) {
+        navigate("/delivery/dashboard");
+      }
     } catch (err) {
-      setError(err.message || "An error occurred during login");
-    } finally {
-      setIsLoading(false);
+      // Error handling is managed by the store
+      toast.error(
+        err.response?.data?.error || "Failed to login. Please try again."
+      );
+      if (err.response?.status === 403) {
+        // Special handling for unverified accounts
+        navigate("/delivery/admin-verify");
+      }
     }
   };
 
@@ -82,23 +93,61 @@ const PartnerLogin = () => {
       {/* Form Header with icon */}
       <div className="flex justify-center mb-6">
         <div
-          className="w-16 h-16 rounded-full flex items-center justify-center"
+          className="w-20 h-20 rounded-full flex items-center justify-center"
           style={{
             backgroundColor: "var(--bg-accent-light)",
             color: "var(--brand-primary)",
           }}
         >
-          <FiTruck size={32} />
+          <FiTruck size={36} />
         </div>
       </div>
 
+      <p
+        className="text-center text-sm mb-6"
+        style={{ color: "var(--text-secondary)" }}
+      >
+        Sign in to your delivery partner account to manage deliveries
+      </p>
+
       <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Display registration success message */}
+        {registrationMessage && (
+          <div
+            className="p-4 rounded-md animate-fadeIn flex items-center"
+            style={{
+              backgroundColor: "var(--success-color)20",
+              color: "var(--success-color)",
+            }}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            {registrationMessage}
+          </div>
+        )}
+
         {/* Display API errors */}
         {error && (
           <div
-            className="p-3 rounded-md animate-fadeIn bg-red-50"
-            style={{ color: "var(--error-color)" }}
+            className="p-4 rounded-md animate-fadeIn flex items-center"
+            style={{
+              backgroundColor: "var(--error-color)15",
+              color: "var(--error-color)",
+            }}
           >
+            <FiAlertCircle className="h-5 w-5 mr-2" />
             {error}
           </div>
         )}
@@ -107,7 +156,7 @@ const PartnerLogin = () => {
           label="Email"
           type="email"
           name="email"
-          icon="email"
+          icon={<FiMail />}
           value={formData.email}
           onChange={handleChange}
           required={true}
@@ -119,7 +168,7 @@ const PartnerLogin = () => {
           label="Password"
           type="password"
           name="password"
-          icon="password"
+          icon={<FiLock />}
           value={formData.password}
           onChange={handleChange}
           required={true}
@@ -131,12 +180,12 @@ const PartnerLogin = () => {
           type="submit"
           variant="primary"
           fullWidth={true}
-          isLoading={isLoading}
+          isLoading={loading}
         >
-          Log In
+          {loading ? "Signing In..." : "Sign In"}
         </Button>
 
-        <div className="text-center mt-4">
+        <div className="text-center mt-6">
           <p style={{ color: "var(--text-secondary)" }} className="text-sm">
             Don't have a partner account?{" "}
             <Link

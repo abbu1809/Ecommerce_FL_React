@@ -5,6 +5,7 @@ export const API_URL = "http://127.0.0.1:8000/api"; // Replace with your actual 
 export const TOKEN_KEY = "anand_mobiles_token";
 export const USER_KEY = "anand_mobiles_user";
 export const ADMIN_TOKEN_KEY = "admin_token";
+export const DELIVERY_TOKEN_KEY = "delivery_partner_token";
 
 // Route Constants
 export const ROUTES = {

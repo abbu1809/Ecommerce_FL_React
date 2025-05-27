@@ -4,3 +4,4 @@ export { default as StatusUpdateForm } from "./StatusUpdateForm";
 export { default as DeliveryHistoryItem } from "./DeliveryHistoryItem";
 export { default as DeliveryLayout } from "./DeliveryLayout";
 export { default as DeliverySidebar } from "./DeliverySidebar";
+export { default as DeliveryAuthGuard } from "./DeliveryAuthGuard";

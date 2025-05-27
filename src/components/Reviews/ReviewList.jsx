@@ -7,6 +7,9 @@ import {
   FiFlag,
 } from "react-icons/fi";
 import ReviewRatings from "./ReviewRatings";
+import { toast } from "../../utils/toast";
+import ConfirmModal from "../UI/ConfirmModal";
+import { useConfirmModal } from "../../hooks/useConfirmModal";
 
 const ReviewList = ({
   productId,
@@ -14,12 +17,25 @@ const ReviewList = ({
   onAddReview = () => {},
   canAddReview = false,
   showFilters = true,
+  onMarkHelpful = null,
+  onReportReview = null,
+  currentUser = null,
 }) => {
   const [filteredReviews, setFilteredReviews] = useState(reviews);
   const [filterRating, setFilterRating] = useState(0);
   const [isAddingReview, setIsAddingReview] = useState(false);
   const [newReview, setNewReview] = useState({ rating: 0, reviewText: "" });
   const [sortOrder, setSortOrder] = useState("newest"); // newest, highest, lowest, helpful
+  const [processingActions, setProcessingActions] = useState({}); // Track loading states for actions
+
+  const {
+    isOpen: confirmOpen,
+    modalConfig,
+    isLoading: confirmLoading,
+    showConfirm,
+    hideConfirm,
+    handleConfirm,
+  } = useConfirmModal();
 
   // Calculate average rating
   const avgRating =
@@ -80,16 +96,103 @@ const ReviewList = ({
 
     setIsAddingReview(false);
     setNewReview({ rating: 0, reviewText: "" });
-  };
-  // Mark review as helpful
-  const handleHelpful = (reviewId) => {
-    setFilteredReviews(
-      filteredReviews.map((review) =>
-        review.id === reviewId
-          ? { ...review, helpful: (review.helpful || 0) + 1 }
-          : review
-      )
-    );
+  }; // Mark review as helpful
+  const handleHelpful = async (reviewId) => {
+    // Check if user is logged in
+    if (!currentUser) {
+      toast.warning("Please log in to mark reviews as helpful");
+      return;
+    }
+
+    // If API function is available, use it
+    if (onMarkHelpful) {
+      setProcessingActions((prev) => ({ ...prev, [reviewId]: "helpful" }));
+
+      try {
+        const result = await onMarkHelpful(productId, reviewId);
+
+        if (result.success) {
+          // Update the local state to reflect the change
+          setFilteredReviews((prevReviews) =>
+            prevReviews.map((review) =>
+              review.id === reviewId
+                ? {
+                    ...review,
+                    helpful: result.data.helpful_count,
+                    // Track if current user has marked it helpful
+                    userMarkedHelpful: result.data.is_marked_helpful,
+                  }
+                : review
+            )
+          );
+        } else {
+          toast.error(result.error || "Failed to mark review as helpful");
+        }
+      } catch (error) {
+        console.error("Error marking review as helpful:", error);
+        toast.error("Failed to mark review as helpful. Please try again.");
+      } finally {
+        setProcessingActions((prev) => {
+          const newState = { ...prev };
+          delete newState[reviewId];
+          return newState;
+        });
+      }
+    } else {
+      // Fallback to local state update
+      setFilteredReviews(
+        filteredReviews.map((review) =>
+          review.id === reviewId
+            ? { ...review, helpful: (review.helpful || 0) + 1 }
+            : review
+        )
+      );
+      toast.success("Review marked as helpful!");
+    }
+  }; // Report review
+  const handleReportReview = async (reviewId) => {
+    // Check if user is logged in
+    if (!currentUser) {
+      toast.warning("Please log in to report reviews");
+      return;
+    }
+
+    // Show confirm modal instead of window.confirm
+    showConfirm({
+      title: "Report Review",
+      message:
+        "Are you sure you want to report this review? This action will flag it for moderator review.",
+      confirmText: "Report",
+      cancelText: "Cancel",
+      type: "warning",
+      onConfirm: async () => {
+        // If API function is available, use it
+        if (onReportReview) {
+          setProcessingActions((prev) => ({ ...prev, [reviewId]: "report" }));
+
+          try {
+            const result = await onReportReview(productId, reviewId);
+
+            if (result.success) {
+              toast.success(result.message || "Review reported successfully");
+            } else {
+              toast.error(result.error || "Failed to report review");
+            }
+          } catch (error) {
+            console.error("Error reporting review:", error);
+            toast.error("Failed to report review. Please try again.");
+          } finally {
+            setProcessingActions((prev) => {
+              const newState = { ...prev };
+              delete newState[reviewId];
+              return newState;
+            });
+          }
+        } else {
+          toast.success("Review reported successfully");
+        }
+      },
+    });
   };
 
   // Calculate rating distribution
@@ -333,7 +436,7 @@ const ReviewList = ({
                   </div>
                 </div>
 
-                {review.verified && (
+                {review.is_verified && (
                   <div className="flex items-center">
                     <span
                       className="text-xs font-medium px-2 py-1 rounded-full"
@@ -366,25 +469,61 @@ const ReviewList = ({
                   >
                     {review.user || "Anonymous"}
                   </span>
-                </div>
-
+                </div>{" "}
                 <div className="flex items-center space-x-3">
-                  {" "}
                   <button
                     onClick={() => handleHelpful(review.id)}
-                    className="flex items-center text-xs"
-                    style={{ color: "var(--text-secondary)" }}
+                    disabled={
+                      processingActions[review.id] === "helpful" ||
+                      review.userMarkedHelpful ||
+                      review.is_marked_helpful ||
+                      (currentUser && review.userEmail === currentUser.email)
+                    }
+                    className={`flex items-center text-xs transition-colors disabled:opacity-50 ${
+                      review.userMarkedHelpful || review.is_marked_helpful
+                        ? "text-blue-600"
+                        : "hover:text-blue-600"
+                    }`}
+                    style={{
+                      color:
+                        review.userMarkedHelpful || review.is_marked_helpful
+                          ? "#2563eb"
+                          : "var(--text-secondary)",
+                    }}
+                    title={
+                      currentUser && review.userEmail === currentUser.email
+                        ? "You cannot mark your own review as helpful"
+                        : review.userMarkedHelpful || review.is_marked_helpful
+                        ? "You marked this review as helpful"
+                        : "Mark this review as helpful"
+                    }
                   >
                     <FiThumbsUp className="mr-1" />
-                    Helpful ({review.helpful || 0})
+                    {processingActions[review.id] === "helpful"
+                      ? "Loading..."
+                      : `Helpful (${
+                          review.helpful_count || review.helpful || 0
+                        })`}
                   </button>
+
                   <button
-                    className="flex items-center text-xs"
+                    onClick={() => handleReportReview(review.id)}
+                    disabled={
+                      processingActions[review.id] === "report" ||
+                      (currentUser && review.userEmail === currentUser.email)
+                    }
+                    className="flex items-center text-xs transition-colors hover:text-red-600 disabled:opacity-50"
                     style={{ color: "var(--text-secondary)" }}
-                    title="Report review"
+                    title={
+                      currentUser && review.userEmail === currentUser.email
+                        ? "You cannot report your own review"
+                        : "Report review"
+                    }
                   >
                     <FiFlag className="mr-1" />
-                    Report
+                    {processingActions[review.id] === "report"
+                      ? "Reporting..."
+                      : "Report"}
                   </button>
                 </div>
               </div>
@@ -403,6 +542,19 @@ const ReviewList = ({
           </div>
         )}
       </div>
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={confirmOpen}
+        onClose={hideConfirm}
+        onConfirm={handleConfirm}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        confirmText={modalConfig.confirmText}
+        cancelText={modalConfig.cancelText}
+        type={modalConfig.type}
+        isLoading={confirmLoading}
+      />
     </div>
   );
 };

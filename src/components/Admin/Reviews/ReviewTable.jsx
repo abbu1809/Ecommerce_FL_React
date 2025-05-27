@@ -9,6 +9,9 @@ import {
   FiFlag,
 } from "react-icons/fi";
 import useReviewStore from "../../../store/useReviewStore";
+import { useConfirmModal } from "../../../hooks/useConfirmModal";
+import ConfirmModal from "../../UI/ConfirmModal";
+import { toast } from "../../../utils/toast";
 
 const ReviewTable = () => {
   const {
@@ -18,6 +21,15 @@ const ReviewTable = () => {
     toggleFlaggedStatus,
     fetchReviews,
   } = useReviewStore();
+
+  const {
+    isOpen: confirmModalIsOpen,
+    modalConfig,
+    isLoading: confirmLoading,
+    showConfirm,
+    hideConfirm,
+    handleConfirm,
+  } = useConfirmModal();
 
   useEffect(() => {
     // Fetch reviews if we don't have any yet
@@ -34,10 +46,25 @@ const ReviewTable = () => {
 
   // Handle delete review
   const handleDeleteReview = (id) => {
-    if (window.confirm("Are you sure you want to delete this review?")) {
-      setReviews(reviews.filter((review) => review.id !== id));
-    }
+    showConfirm({
+      title: "Delete Review",
+      message:
+        "Are you sure you want to delete this review? This action cannot be undone.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          await deleteReview(id);
+          toast.success("Review deleted successfully");
+        } catch (error) {
+          console.error("Error deleting review:", error);
+          toast.error("Failed to delete review");
+        }
+      },
+    });
   };
+
   // Handle status change
   const handleUpdateStatus = (id, status) => {
     updateReviewStatus(id, status);
@@ -45,11 +72,7 @@ const ReviewTable = () => {
 
   // Handle flagged state change
   const toggleFlagged = (id) => {
-    setReviews(
-      reviews.map((review) =>
-        review.id === id ? { ...review, flagged: !review.flagged } : review
-      )
-    );
+    toggleFlaggedStatus(id);
   };
 
   // Apply filters
@@ -512,9 +535,22 @@ const ReviewTable = () => {
                 {page}
               </button>
             ))}
-          </div>
+          </div>{" "}
         </div>
       </div>
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={confirmModalIsOpen}
+        onClose={hideConfirm}
+        onConfirm={handleConfirm}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        confirmText={modalConfig.confirmText}
+        cancelText={modalConfig.cancelText}
+        type={modalConfig.type}
+        isLoading={confirmLoading}
+      />
     </div>
   );
 };

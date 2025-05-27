@@ -183,7 +183,6 @@ const SignUp = () => {
         />
         <div className="space-y-4 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {" "}
             <Input
               label="First Name"
               name="firstName"
@@ -206,7 +205,7 @@ const SignUp = () => {
               placeholder="Doe"
               icon={<FiUser />}
             />
-          </div>{" "}
+          </div>
           <Input
             label="Email Address"
             type="email"
@@ -218,7 +217,7 @@ const SignUp = () => {
             error={formErrors.email}
             placeholder="you@example.com"
             icon={<FiMail />}
-          />{" "}
+          />
           <Input
             label="Phone Number"
             type="tel"
@@ -243,7 +242,7 @@ const SignUp = () => {
               error={formErrors.password}
               placeholder="••••••••"
               icon={<FiLock />}
-            />{" "}
+            />
             <Input
               label="Confirm Password"
               type="password"
@@ -257,7 +256,7 @@ const SignUp = () => {
               icon={<FiLock />}
             />
           </div>
-        </div>{" "}
+        </div>
         {error && (
           <div
             className="text-sm text-center p-3 rounded-md animate-fadeIn flex items-center justify-center"
@@ -300,9 +299,9 @@ const SignUp = () => {
               or continue with
             </span>
           </div>
-        </div>{" "}
+        </div>
         <div className="flex justify-center">
-          {/* Social login buttons */}{" "}
+          {/* Social login buttons */}
           <button
             type="button"
             onClick={handleGoogleSignup}

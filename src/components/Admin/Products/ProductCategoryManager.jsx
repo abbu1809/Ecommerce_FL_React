@@ -1,7 +1,19 @@
 import React, { useState } from "react";
 import { FiX, FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
+import { useConfirmModal } from "../../../hooks/useConfirmModal";
+import ConfirmModal from "../../UI/ConfirmModal";
+import { toast } from "../../../utils/toast";
 
 const ProductCategoryManager = ({ onClose }) => {
+  const {
+    isOpen: confirmModalIsOpen,
+    modalConfig,
+    isLoading: confirmLoading,
+    showConfirm,
+    hideConfirm,
+    handleConfirm,
+  } = useConfirmModal();
+
   // Mock categories data
   const [categories, setCategories] = useState([
     {
@@ -115,11 +127,24 @@ const ProductCategoryManager = ({ onClose }) => {
     });
     setEditMode(false);
   };
-
   const deleteCategory = (id) => {
-    if (window.confirm("Are you sure you want to delete this category?")) {
-      setCategories(categories.filter((cat) => cat.id !== id));
-    }
+    const category = categories.find((cat) => cat.id === id);
+    showConfirm({
+      title: "Delete Category",
+      message: `Are you sure you want to delete "${category?.name}"? This action cannot be undone.`,
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          setCategories(categories.filter((cat) => cat.id !== id));
+          toast.success("Category deleted successfully");
+        } catch (error) {
+          console.error("Error deleting category:", error);
+          toast.error("Failed to delete category");
+        }
+      },
+    });
   };
 
   return (
@@ -380,9 +405,22 @@ const ProductCategoryManager = ({ onClose }) => {
             }}
           >
             Close
-          </button>
+          </button>{" "}
         </div>
       </div>
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={confirmModalIsOpen}
+        onClose={hideConfirm}
+        onConfirm={handleConfirm}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        confirmText={modalConfig.confirmText}
+        cancelText={modalConfig.cancelText}
+        type={modalConfig.type}
+        isLoading={confirmLoading}
+      />
     </div>
   );
 };

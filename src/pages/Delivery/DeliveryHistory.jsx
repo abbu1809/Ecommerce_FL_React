@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FiSearch, FiFilter, FiDownload, FiCalendar } from "react-icons/fi";
 import { DeliveryLayout, DeliveryHistoryItem } from "../../components/Delivery";
+import { toast } from "../../utils/toast";
 
 const DeliveryHistory = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -158,11 +159,10 @@ const DeliveryHistory = () => {
 
     setFilteredDeliveries(filtered);
   }, [searchTerm, statusFilter, dateFilter, deliveries]);
-
   const handleExportHistory = () => {
     // In a real implementation, this would generate a CSV or PDF
     console.log("Exporting delivery history...");
-    alert("Delivery history exported successfully!");
+    toast.success("Delivery history exported successfully!");
   };
 
   return (

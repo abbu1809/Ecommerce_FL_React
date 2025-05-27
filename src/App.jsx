@@ -23,6 +23,7 @@ import { useAdminAuthStore } from "./store/Admin/useAdminAuth";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import AdminLayout from "./components/Admin/AdminLayout";
+import { DeliveryAuthGuard } from "./components/Delivery";
 import {
   PartnerLogin,
   PartnerRegister,
@@ -44,6 +45,7 @@ import {
   AdminReturns,
   AdminReviews,
   AdminContent,
+  AdminDeliveryPartners,
 } from "./pages/Admin";
 
 // Layout component that will be used across all pages
@@ -113,18 +115,62 @@ const App = () => {
         />
         {/* Delivery Partner Routes - keeping these outside the main Layout */}
         <Route path="/delivery">
+          {/* Public delivery routes */}
           <Route path="login" element={<PartnerLogin />} />
           <Route path="register" element={<PartnerRegister />} />
-          {/* Protected Delivery Partner Routes 
-              TODO: Implement a useDeliveryAuth hook for partner authentication
-              and protect these routes similar to admin routes */}
-          <Route path="dashboard" element={<DeliveryDashboard />} />
-          <Route path="assignments" element={<DeliveryAssignmentList />} />
-          <Route path="update/:id" element={<DeliveryStatusUpdate />} />
-          <Route path="status-update" element={<DeliveryStatusUpdate />} />
-          <Route path="history" element={<DeliveryHistory />} />
-          <Route path="settings" element={<DeliverySettings />} />{" "}
-          {/* This route is for admin verification of delivery partners */}
+          <Route path="admin-verify" element={<AdminVerify />} />
+
+          {/* Protected Delivery Partner Routes */}
+          <Route
+            path="dashboard"
+            element={
+              <DeliveryAuthGuard>
+                <DeliveryDashboard />
+              </DeliveryAuthGuard>
+            }
+          />
+          <Route
+            path="assignments"
+            element={
+              <DeliveryAuthGuard>
+                <DeliveryAssignmentList />
+              </DeliveryAuthGuard>
+            }
+          />
+          <Route
+            path="update/:id"
+            element={
+              <DeliveryAuthGuard>
+                <DeliveryStatusUpdate />
+              </DeliveryAuthGuard>
+            }
+          />
+          <Route
+            path="status-update"
+            element={
+              <DeliveryAuthGuard>
+                <DeliveryStatusUpdate />
+              </DeliveryAuthGuard>
+            }
+          />
+          <Route
+            path="history"
+            element={
+              <DeliveryAuthGuard>
+                <DeliveryHistory />
+              </DeliveryAuthGuard>
+            }
+          />
+          <Route
+            path="settings"
+            element={
+              <DeliveryAuthGuard>
+                <DeliverySettings />
+              </DeliveryAuthGuard>
+            }
+          />
+
+          {/* Admin verification route for delivery partners */}
           <Route
             path="verification"
             element={
@@ -250,6 +296,16 @@ const App = () => {
             element={
               isAdminAuthenticated ? (
                 <AdminReviews />
+              ) : (
+                <Navigate to="/admin/login" />
+              )
+            }
+          />
+          <Route
+            path="/admin/delivery-partners"
+            element={
+              isAdminAuthenticated ? (
+                <AdminDeliveryPartners />
               ) : (
                 <Navigate to="/admin/login" />
               )

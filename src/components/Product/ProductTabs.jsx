@@ -4,11 +4,8 @@ import Button from "../../components/UI/Button";
 import ProductReviews from "./ProductReviews";
 
 const ProductTabs = ({ product, activeTab, setActiveTab }) => {
-  // Use API reviews data if available, otherwise fall back to product.reviews
-  const reviewsCount =
-    product.reviewsData && Array.isArray(product.reviewsData)
-      ? product.reviewsData.length
-      : product.reviews || 0;
+  // Ensure reviews property exists
+  const reviews = product.reviews || 0;
 
   return (
     <div
@@ -32,18 +29,20 @@ const ProductTabs = ({ product, activeTab, setActiveTab }) => {
           icon={<FiInfo />}
           label="Description"
         />
+
         <TabButton
           id="specifications"
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           label="Specifications"
-        />{" "}
+        />
+
         <TabButton
           id="reviews"
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           icon={<FiMessageSquare />}
-          label={`Reviews (${reviewsCount})`}
+          label={`Reviews (${reviews})`}
         />
       </div>
 
