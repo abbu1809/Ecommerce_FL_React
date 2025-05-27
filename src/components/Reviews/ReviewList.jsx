@@ -43,11 +43,9 @@ const ReviewList = ({
 
   const handleSortChange = (order) => {
     setSortOrder(order);
-    let sorted = [...filteredReviews];
-
-    switch (order) {
+    let sorted = [...filteredReviews];    switch (order) {
       case "newest":
-        sorted.sort((a, b) => new Date(b.date) - new Date(a.date));
+        sorted.sort((a, b) => new Date(b.date || b.created_at) - new Date(a.date || a.created_at));
         break;
       case "highest":
         sorted.sort((a, b) => b.rating - a.rating);
@@ -56,7 +54,7 @@ const ReviewList = ({
         sorted.sort((a, b) => a.rating - b.rating);
         break;
       case "helpful":
-        sorted.sort((a, b) => b.helpful - a.helpful);
+        sorted.sort((a, b) => (b.helpful || 0) - (a.helpful || 0));
         break;
       default:
         break;
@@ -79,13 +77,12 @@ const ReviewList = ({
     setIsAddingReview(false);
     setNewReview({ rating: 0, reviewText: "" });
   };
-
   // Mark review as helpful
   const handleHelpful = (reviewId) => {
     setFilteredReviews(
       filteredReviews.map((review) =>
         review.id === reviewId
-          ? { ...review, helpful: review.helpful + 1 }
+          ? { ...review, helpful: (review.helpful || 0) + 1 }
           : review
       )
     );
@@ -312,18 +309,21 @@ const ReviewList = ({
                     {review.title || "Review"}
                   </p>
                   <div className="flex items-center mt-1">
-                    <ReviewRatings rating={review.rating} readOnly={true} />
-                    <span
+                    <ReviewRatings rating={review.rating} readOnly={true} />                    <span
                       className="ml-2 text-xs"
                       style={{ color: "var(--text-secondary)" }}
                     >
-                      {typeof review.date === "string"
-                        ? new Date(review.date).toLocaleDateString("en-IN", {
+                      {(() => {
+                        const dateStr = review.date || review.created_at;
+                        if (typeof dateStr === "string") {
+                          return new Date(dateStr).toLocaleDateString("en-IN", {
                             day: "numeric",
                             month: "short",
                             year: "numeric",
-                          })
-                        : review.date}
+                          });
+                        }
+                        return dateStr;
+                      })()}
                     </span>
                   </div>
                 </div>
@@ -363,14 +363,13 @@ const ReviewList = ({
                   </span>
                 </div>
 
-                <div className="flex items-center space-x-3">
-                  <button
+                <div className="flex items-center space-x-3">                  <button
                     onClick={() => handleHelpful(review.id)}
                     className="flex items-center text-xs"
                     style={{ color: "var(--text-secondary)" }}
                   >
                     <FiThumbsUp className="mr-1" />
-                    Helpful ({review.helpful})
+                    Helpful ({review.helpful || 0})
                   </button>
 
                   <button

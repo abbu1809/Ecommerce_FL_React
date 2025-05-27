@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 import ReviewList from "../../components/Reviews/ReviewList";
+import ReviewForm from "./ReviewForm";
 import useReviewStore from "../../store/useReviewStore";
 import { useAuthStore } from "../../store/useAuth";
 
 const ProductReviews = ({ productId, product }) => {
   const { reviews, productReviews, addReview, fetchReviews } = useReviewStore();
-
   const { user } = useAuthStore();
 
   useEffect(() => {
@@ -15,12 +15,15 @@ const ProductReviews = ({ productId, product }) => {
     }
   }, [reviews.length, fetchReviews]);
 
-  // Get reviews for this product
-  const productSpecificReviews = useMemo(() => {
-    return productReviews[productId] || [];
-  }, [productId, productReviews]);
+  // Handle review submitted from ReviewForm
+  const handleReviewSubmitted = (reviewData) => {
+    // You can refresh the reviews or update local state here
+    console.log("Review submitted successfully:", reviewData);
+    // Optionally refetch reviews or update the current product
+    fetchReviews();
+  };
 
-  // Handle adding a new review
+  // Handle adding a new review (for the existing local review system)
   const handleAddReview = (reviewData) => {
     addReview({
       productId,
@@ -30,9 +33,14 @@ const ProductReviews = ({ productId, product }) => {
       ...reviewData,
     });
   };
-
   // Check if user can add a review (simplified - in a real app this would check purchase history)
   const canAddReview = !!user;
+
+  // Use API reviews data if available, otherwise fall back to local reviews
+  const displayReviews = product.reviewsData && product.reviewsData.length > 0 
+    ? product.reviewsData 
+    : productReviews[productId] || [];
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <h2
@@ -42,9 +50,16 @@ const ProductReviews = ({ productId, product }) => {
         Customer Reviews
       </h2>
 
+      {/* API-based Review Form */}
+      <div className="mb-8">
+        <ReviewForm
+          productId={productId}
+          onReviewSubmitted={handleReviewSubmitted}
+        />
+      </div>      {/* Existing Review List */}
       <ReviewList
         productId={productId}
-        reviews={productReviews[productId] || []}
+        reviews={displayReviews}
         onAddReview={handleAddReview}
         canAddReview={canAddReview}
         showFilters={true}

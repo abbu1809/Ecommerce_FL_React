@@ -9,116 +9,30 @@ import NoResultsFound from "../components/ProductList/NoResultsFound";
 import { useProductStore } from "../store/useProduct";
 
 const ProductList = () => {
-  const { category } = useParams();
-  const [loading, setLoading] = useState(true);
+  let { category } = useParams();
+  category = category
+    ? category.charAt(0).toUpperCase() + category.slice(1).replace(/s$/, "")
+    : null;
   const [showFilters, setShowFilters] = useState(false);
-
   // Filter states
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [priceRange, setPriceRange] = useState({ min: 0, max: 150000 });
   const [sortBy, setSortBy] = useState("popularity");
 
-  const { products, fetchProducts } = useProductStore();
+  const { products, brands, loading, fetchProducts } = useProductStore();
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
-
-  // Mock data
-  const mockProducts = [
-    {
-      id: 1,
-      name: "Samsung Galaxy S25 Edge",
-      price: 89999,
-      discountPrice: 84999,
-      discount: "5%",
-      rating: 4.5,
-      image: "https://via.placeholder.com/300x300?text=Samsung+S25",
-      brand: "Samsung",
-      category: "Mobiles",
-    },
-    {
-      id: 2,
-      name: "Apple iPhone 15 Pro",
-      price: 119999,
-      discountPrice: 109999,
-      discount: "8%",
-      rating: 4.8,
-      image: "https://via.placeholder.com/300x300?text=iPhone+15+Pro",
-      brand: "Apple",
-      category: "Mobiles",
-    },
-    {
-      id: 3,
-      name: "Xiaomi Redmi Note 13 Pro",
-      price: 29999,
-      discountPrice: 26999,
-      discount: "10%",
-      rating: 4.2,
-      image: "https://via.placeholder.com/300x300?text=Redmi+Note+13",
-      brand: "Xiaomi",
-      category: "Mobiles",
-    },
-    {
-      id: 4,
-      name: "OnePlus 12",
-      price: 64999,
-      discountPrice: 62999,
-      discount: "3%",
-      rating: 4.4,
-      image: "https://via.placeholder.com/300x300?text=OnePlus+12",
-      brand: "OnePlus",
-      category: "Mobiles",
-    },
-    {
-      id: 5,
-      name: "Google Pixel 9",
-      price: 74999,
-      discountPrice: 71999,
-      discount: "4%",
-      rating: 4.6,
-      image: "https://via.placeholder.com/300x300?text=Pixel+9",
-      brand: "Google",
-      category: "Mobiles",
-    },
-    {
-      id: 6,
-      name: "Dell XPS 13",
-      price: 129999,
-      discountPrice: 124999,
-      discount: "4%",
-      rating: 4.7,
-      image: "https://via.placeholder.com/300x300?text=Dell+XPS",
-      brand: "Dell",
-      category: "Laptops",
-    },
-    {
-      id: 7,
-      name: "HP Spectre x360",
-      price: 134999,
-      discountPrice: 129999,
-      discount: "4%",
-      rating: 4.5,
-      image: "https://via.placeholder.com/300x300?text=HP+Spectre",
-      brand: "HP",
-      category: "Laptops",
-    },
-    {
-      id: 8,
-      name: "MacBook Air M3",
-      price: 114999,
-      discountPrice: 109999,
-      discount: "4%",
-      rating: 4.8,
-      image: "https://via.placeholder.com/300x300?text=MacBook+Air",
-      brand: "Apple",
-      category: "Laptops",
-    },
-  ];
-
-  const brands = Array.from(
-    new Set(mockProducts.map((product) => product.brand))
-  );
+  // Transform products from store to match the expected format
+  const transformedProducts = (products || []).map((product) => ({
+    ...product,
+    discountPrice: product.discount_price || product.price,
+    image:
+      product.images && product.images.length > 0
+        ? product.images[0]
+        : "https://via.placeholder.com/300x300?text=No+Image",
+  }));
 
   const toggleBrandFilter = (brand) => {
     if (selectedBrands.includes(brand)) {
@@ -132,9 +46,8 @@ const ProductList = () => {
     const value = parseInt(e.target.value);
     setPriceRange({ ...priceRange, [bound]: value });
   };
-
   const applyFilters = () => {
-    let filteredProducts = [...mockProducts];
+    let filteredProducts = [...transformedProducts];
 
     // Apply brand filter
     if (selectedBrands.length > 0) {
@@ -173,16 +86,8 @@ const ProductList = () => {
     return filteredProducts;
   };
 
-  // Simulate loading data
-  useEffect(() => {
-    // In a real application, you would fetch data from an API here
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 800);
-
-    return () => clearTimeout(timer);
-  }, []);
   const filteredProducts = applyFilters();
+
   // Add resetFilters function
   const resetFilters = () => {
     setSelectedBrands([]);

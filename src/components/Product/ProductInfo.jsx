@@ -86,7 +86,6 @@ const ProductInfo = ({ product }) => {
             </>
           )}
         </div>
-
         {/* Availability badge */}
         <div className="flex items-center mt-3">
           <div
@@ -102,8 +101,96 @@ const ProductInfo = ({ product }) => {
           >
             ({product.stock} available)
           </span>
-        </div>
+        </div>{" "}
       </div>
+
+      {/* Product Variants */}
+      {(product.colors?.length > 0 ||
+        product.ramOptions?.length > 0 ||
+        product.storageOptions?.length > 0) && (
+        <div className="space-y-4">
+          {/* Color variants */}
+          {product.colors?.length > 0 && (
+            <div>
+              <h4
+                className="text-sm font-medium mb-2"
+                style={{ color: "var(--text-primary)" }}
+              >
+                Available Colors:
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {product.colors.map((color, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 text-xs font-medium rounded-full border"
+                    style={{
+                      backgroundColor: "var(--bg-secondary)",
+                      color: "var(--text-secondary)",
+                      borderColor: "var(--border-primary)",
+                    }}
+                  >
+                    {color}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* RAM variants */}
+          {product.ramOptions?.length > 0 && (
+            <div>
+              <h4
+                className="text-sm font-medium mb-2"
+                style={{ color: "var(--text-primary)" }}
+              >
+                RAM Options:
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {product.ramOptions.map((ram, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 text-xs font-medium rounded-full border"
+                    style={{
+                      backgroundColor: "var(--bg-secondary)",
+                      color: "var(--text-secondary)",
+                      borderColor: "var(--border-primary)",
+                    }}
+                  >
+                    {ram}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Storage variants */}
+          {product.storageOptions?.length > 0 && (
+            <div>
+              <h4
+                className="text-sm font-medium mb-2"
+                style={{ color: "var(--text-primary)" }}
+              >
+                Storage Options:
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {product.storageOptions.map((storage, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 text-xs font-medium rounded-full border"
+                    style={{
+                      backgroundColor: "var(--bg-secondary)",
+                      color: "var(--text-secondary)",
+                      borderColor: "var(--border-primary)",
+                    }}
+                  >
+                    {storage}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Additional info badges */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
