@@ -286,7 +286,6 @@ const ReviewList = ({
           </div>
         )}
       </div>
-
       {/* Add review form */}
       {isAddingReview && (
         <div
@@ -327,10 +326,9 @@ const ReviewList = ({
             </button>
           </div>
         </div>
-      )}
-
+      )}{" "}
       {/* Review filters */}
-      {showFilters && filteredReviews.length > 0 && (
+      {showFilters && reviews.length > 0 && (
         <div
           className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b"
           style={{ borderColor: "var(--border-secondary)" }}
@@ -394,7 +392,6 @@ const ReviewList = ({
           </div>
         </div>
       )}
-
       {/* Review list */}
       <div className="space-y-6">
         {filteredReviews.length > 0 ? (
@@ -542,7 +539,6 @@ const ReviewList = ({
           </div>
         )}
       </div>
-
       {/* Confirm Modal */}
       <ConfirmModal
         isOpen={confirmOpen}

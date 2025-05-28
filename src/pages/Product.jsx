@@ -18,6 +18,11 @@ const Product = () => {
   const { currentProduct, loading, error, fetchProduct, clearCurrentProduct } =
     useProductStore();
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   useEffect(() => {
     if (id) {
       console.log("Fetching product with ID:", id);

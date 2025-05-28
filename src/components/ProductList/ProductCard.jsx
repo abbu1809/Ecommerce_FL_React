@@ -2,9 +2,34 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { FiHeart, FiShoppingCart } from "react-icons/fi";
 import { FaStar, FaRegStar, FaStarHalfAlt } from "react-icons/fa";
+import { toast } from "react-hot-toast";
 import Button from "../../components/UI/Button";
+import { useCartStore } from "../../store/useCart";
+import { useWishlistStore } from "../../store/useWishlist";
 
 const ProductCard = ({ product }) => {
+  const { addItem: addToCart } = useCartStore();
+  const {
+    addItem: addToWishlist,
+    isInWishlist,
+    removeItem: removeFromWishlist,
+  } = useWishlistStore();
+  const isWishlisted = isInWishlist(product.id);
+
+  const handleAddToCart = () => {
+    addToCart(product, 1);
+    toast.success(`${product.name} added to cart!`);
+  };
+
+  const handleWishlistToggle = () => {
+    if (isWishlisted) {
+      removeFromWishlist(product.id);
+      toast.success(`${product.name} removed from wishlist!`);
+    } else {
+      addToWishlist(product);
+      toast.success(`${product.name} added to wishlist!`);
+    }
+  };
   // Function to render star ratings
   const renderStarRating = (rating) => {
     const stars = [];
@@ -94,19 +119,25 @@ const ProductCard = ({ product }) => {
                 </p>
               )}
             </div>
-          </div>
+          </div>{" "}
           <button
+            onClick={handleWishlistToggle}
             className="flex items-center justify-center h-8 w-8 rounded-full transition-colors"
             style={{
-              backgroundColor: "var(--bg-accent-light)",
-              color: "var(--brand-primary)",
+              backgroundColor: isWishlisted
+                ? "var(--brand-primary)"
+                : "var(--bg-accent-light)",
+              color: isWishlisted ? "white" : "var(--brand-primary)",
             }}
           >
-            <FiHeart className="text-lg" />
+            <FiHeart
+              className={`text-lg ${isWishlisted ? "fill-current" : ""}`}
+            />
           </button>
-        </div>
+        </div>{" "}
         <div className="mt-3">
           <Button
+            onClick={handleAddToCart}
             fullWidth={true}
             className="flex items-center justify-center"
             icon={<FiShoppingCart className="mr-1.5" />}

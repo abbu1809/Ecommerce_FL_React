@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   FiSearch,
   FiShoppingCart,
@@ -12,11 +12,27 @@ import {
 import { ROUTES } from "../utils/constants";
 import Logo from "./UI/Logo";
 import { useAuthStore } from "../store/useAuth";
-import { Link } from "react-router-dom";
+import { useCartStore } from "../store/useCart";
+import { useWishlistStore } from "../store/useWishlist";
+import { Link, useNavigate } from "react-router-dom";
+import { useProductStore } from "../store/useProduct";
 
 const Header = ({ categories }) => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const desktopSuggestionsRef = useRef(null);
+  const mobileSuggestionsRef = useRef(null);
   const { isAuthenticated } = useAuthStore();
+  const {
+    items: cartItems,
+    itemCount: cartItemCount,
+    totalAmount,
+    fetchCart,
+  } = useCartStore();
+  const { items: wishlistItems, fetchWishlist } = useWishlistStore();
+  const { searchProducts } = useProductStore();
   const [location, setLocation] = useState({
     city: "Bhopal",
     loading: false,
@@ -24,6 +40,50 @@ const Header = ({ categories }) => {
   });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const isClickOutsideDesktop =
+        desktopSuggestionsRef.current &&
+        !desktopSuggestionsRef.current.contains(event.target);
+
+      const isClickOutsideMobile =
+        mobileSuggestionsRef.current &&
+        !mobileSuggestionsRef.current.contains(event.target);
+
+      if (isClickOutsideDesktop && isClickOutsideMobile) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Update search suggestions when query changes
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setSearchSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    const results = searchProducts(searchQuery);
+    // Limit to 5 suggestions
+    setSearchSuggestions(results.slice(0, 5));
+    setShowSuggestions(true);
+  }, [searchQuery, searchProducts]);
+
+  // Fetch cart and wishlist data when component mounts or authentication state changes
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchCart();
+      fetchWishlist();
+    }
+  }, [isAuthenticated, fetchCart, fetchWishlist]);
 
   useEffect(() => {
     const getUserLocation = () => {
@@ -77,6 +137,38 @@ const Header = ({ categories }) => {
 
     getUserLocation();
   }, []);
+
+  // Handle search form submission
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      // Use searchProducts from product store to find matching products
+      const searchResults = searchProducts(searchQuery);
+      console.log("Search results:", searchResults);
+      // Navigate to search results page with query parameter
+      navigate(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
+      // Clear the suggestions
+      setShowSuggestions(false);
+    }
+  };
+
+  // Handle search in mobile view
+  const handleMobileSearch = (e) => {
+    if (e.key === "Enter" && searchQuery.trim()) {
+      const searchResults = searchProducts(searchQuery);
+      console.log("Mobile search results:", searchResults);
+      navigate(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
+      setShowSuggestions(false);
+    }
+  };
+
+  // Handle selecting a product from suggestions
+  const handleSelectProduct = (productId) => {
+    navigate(`/products/${productId}`);
+    setShowSuggestions(false);
+    setSearchQuery("");
+  };
+
   return (
     <header className="relative z-20">
       {/* Top header with elevated design */}
@@ -122,35 +214,106 @@ const Header = ({ categories }) => {
                   isSearchFocused ? "ring-4 ring-white/20 rounded-full" : ""
                 }`}
               >
-                <input
-                  type="text"
-                  placeholder="Search for Products, Brands, Offers"
-                  className="w-full py-3 px-5 pr-12 rounded-full focus:outline-none transition-all duration-300"
-                  style={{
-                    backgroundColor: isSearchFocused
-                      ? "rgba(255, 255, 255, 0.9)"
-                      : "rgba(255, 255, 255, 0.8)",
-                    color: "#333",
-                    borderColor: "rgba(255, 255, 255, 0.2)",
-                    boxShadow: isSearchFocused
-                      ? "0 0 20px rgba(255, 255, 255, 0.3)"
-                      : "var(--shadow-small)",
-                    caretColor: "#333",
-                  }}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setIsSearchFocused(true)}
-                  onBlur={() => setIsSearchFocused(false)}
-                />
-                <button
-                  className="absolute right-0 top-0 bottom-0 px-4 flex items-center justify-center transition-transform duration-300 hover:scale-110 active:scale-95"
-                  style={{
-                    color: "#333",
-                  }}
-                  aria-label="Search"
-                >
-                  <FiSearch className="text-xl filter drop-shadow-lg" />
-                </button>
+                <form onSubmit={handleSearch} className="w-full">
+                  <input
+                    type="text"
+                    placeholder="Search for Products, Brands, Offers"
+                    className="w-full py-3 px-5 pr-12 rounded-full focus:outline-none transition-all duration-300"
+                    style={{
+                      backgroundColor: isSearchFocused
+                        ? "rgba(255, 255, 255, 0.9)"
+                        : "rgba(255, 255, 255, 0.8)",
+                      color: "#333",
+                      borderColor: "rgba(255, 255, 255, 0.2)",
+                      boxShadow: isSearchFocused
+                        ? "0 0 20px rgba(255, 255, 255, 0.3)"
+                        : "var(--shadow-small)",
+                      caretColor: "#333",
+                    }}
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      if (e.target.value.trim() === "") {
+                        setShowSuggestions(false);
+                      }
+                    }}
+                    onFocus={() => {
+                      if (
+                        searchQuery.trim() !== "" &&
+                        searchSuggestions.length > 0
+                      ) {
+                        setShowSuggestions(true);
+                      }
+                    }}
+                    onBlur={() => setIsSearchFocused(false)}
+                  />
+                  <button
+                    type="submit"
+                    className="absolute right-0 top-0 bottom-0 px-4 flex items-center justify-center transition-transform duration-300 hover:scale-110 active:scale-95"
+                    style={{
+                      color: "#333",
+                    }}
+                    aria-label="Search"
+                  >
+                    <FiSearch className="text-xl filter drop-shadow-lg" />
+                  </button>
+                </form>
+                {/* Search suggestions dropdown */}
+                {showSuggestions && searchSuggestions.length > 0 && (
+                  <div
+                    ref={desktopSuggestionsRef}
+                    className="absolute left-0 right-0 z-10 mt-1 bg-white rounded-md shadow-lg overflow-hidden"
+                    style={{
+                      maxHeight: "400px",
+                      overflowY: "auto",
+                    }}
+                  >
+                    <ul className="py-1">
+                      {searchSuggestions.map((product) => (
+                        <li key={product.id}>
+                          <div
+                            className="px-4 py-2 hover:bg-gray-100 flex items-center cursor-pointer"
+                            onClick={() => handleSelectProduct(product.id)}
+                          >
+                            <div className="w-10 h-10 flex-shrink-0 mr-3 bg-gray-200 rounded overflow-hidden">
+                              <img
+                                src={
+                                  product.images && product.images.length > 0
+                                    ? product.images[0]
+                                    : "https://via.placeholder.com/40"
+                                }
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-gray-900 truncate">
+                                {product.name}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {product.brand} • {product.category}
+                              </p>
+                            </div>
+                            <div className="ml-3 text-sm font-medium text-gray-900">
+                              ₹{product.discount_price || product.price}
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                      <li>
+                        <div
+                          className="px-4 py-2 text-center text-sm text-brand-primary hover:bg-gray-50 cursor-pointer font-medium"
+                          onClick={() => {
+                            handleSearch({ preventDefault: () => {} });
+                            setShowSuggestions(false);
+                          }}
+                        >
+                          View all results
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                )}
               </div>
             </div>
             {/* Right Header Menu with enhanced animations */}
@@ -202,7 +365,7 @@ const Header = ({ categories }) => {
                       boxShadow: "0 0 10px rgba(255,255,255,0.3)",
                     }}
                   >
-                    0
+                    {wishlistItems.length}
                   </span>
                 </div>
                 <p
@@ -223,16 +386,7 @@ const Header = ({ categories }) => {
                     className="text-xl relative z-10"
                     style={{ color: "var(--text-on-brand)" }}
                   />
-                  <span
-                    className="absolute -top-2 -right-2 z-20 text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold shadow-lg animate-pulse"
-                    style={{
-                      backgroundColor: "var(--bg-primary)",
-                      color: "var(--brand-primary)",
-                      boxShadow: "0 0 10px rgba(255,255,255,0.3)",
-                    }}
-                  >
-                    0
-                  </span>
+                  {/* Orders don't need a count badge */}
                 </div>
                 <p
                   className="text-xs font-semibold mt-1"
@@ -259,14 +413,14 @@ const Header = ({ categories }) => {
                       boxShadow: "0 0 10px rgba(255,255,255,0.3)",
                     }}
                   >
-                    0
+                    {cartItemCount}
                   </span>
                 </div>
                 <p
                   className="text-xs font-semibold mt-1"
                   style={{ color: "var(--text-on-brand)" }}
                 >
-                  ₹ 0
+                  ₹ {totalAmount.toFixed(2)}
                 </p>
               </Link>{" "}
               <Link
@@ -312,13 +466,89 @@ const Header = ({ categories }) => {
             }}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleMobileSearch} // Handle search on Enter key
+            onFocus={() => {
+              if (searchQuery.trim() !== "" && searchSuggestions.length > 0) {
+                setShowSuggestions(true);
+              }
+            }}
           />
           <button
+            onClick={() => {
+              if (searchQuery.trim()) {
+                const searchResults = searchProducts(searchQuery);
+                console.log("Mobile search results:", searchResults);
+                navigate(
+                  `/search?query=${encodeURIComponent(searchQuery.trim())}`
+                );
+              }
+            }}
             className="absolute right-0 top-0 bottom-0 px-3 flex items-center justify-center"
             style={{ color: "#333" }}
           >
             <FiSearch className="text-lg" />
           </button>
+
+          {/* Mobile search suggestions dropdown */}
+          {showSuggestions && searchSuggestions.length > 0 && (
+            <div
+              ref={mobileSuggestionsRef}
+              className="absolute left-0 right-0 z-50 mt-1 bg-white rounded-md shadow-lg overflow-hidden"
+              style={{
+                maxHeight: "300px",
+                overflowY: "auto",
+              }}
+            >
+              <ul className="py-1">
+                {searchSuggestions.map((product) => (
+                  <li key={product.id}>
+                    <div
+                      className="px-3 py-2 hover:bg-gray-100 flex items-center cursor-pointer"
+                      onClick={() => handleSelectProduct(product.id)}
+                    >
+                      <div className="w-8 h-8 flex-shrink-0 mr-2 bg-gray-200 rounded overflow-hidden">
+                        <img
+                          src={
+                            product.images && product.images.length > 0
+                              ? product.images[0]
+                              : "https://via.placeholder.com/32"
+                          }
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs font-medium text-gray-900 truncate">
+                          {product.name}
+                        </p>
+                        <p className="text-xs text-gray-500">{product.brand}</p>
+                      </div>
+                      <div className="ml-2 text-xs font-medium text-gray-900">
+                        ₹{product.discount_price || product.price}
+                      </div>
+                    </div>
+                  </li>
+                ))}
+                <li>
+                  <div
+                    className="px-3 py-2 text-center text-xs text-brand-primary hover:bg-gray-50 cursor-pointer font-medium"
+                    onClick={() => {
+                      if (searchQuery.trim()) {
+                        navigate(
+                          `/search?query=${encodeURIComponent(
+                            searchQuery.trim()
+                          )}`
+                        );
+                        setShowSuggestions(false);
+                      }
+                    }}
+                  >
+                    View all results
+                  </div>
+                </li>
+              </ul>
+            </div>
+          )}
         </div>
       </div>
 

@@ -27,13 +27,17 @@ export const useProductStore = create((set, get) => ({
       );
       const brands = Array.from(
         new Set(response.data.products.map((p) => p.brand))
-      );
-
-      // Select featured products (could be based on ratings or other factors)
+      ); // Select featured products - prioritize products marked as featured, then by rating
       const featuredProducts = response.data.products
-        .filter((p) => p.rating >= 4.5)
-        .sort(() => 0.5 - Math.random())
-        .slice(0, 4);
+        .filter((p) => p.featured === true || p.rating >= 4.5)
+        .sort((a, b) => {
+          // Featured products first
+          if (a.featured && !b.featured) return -1;
+          if (!a.featured && b.featured) return 1;
+          // Then by rating
+          return (b.rating || 0) - (a.rating || 0);
+        })
+        .slice(0, 8); // Show up to 8 featured products
 
       set({
         products: response.data.products,
@@ -112,15 +116,60 @@ export const useProductStore = create((set, get) => ({
   // Search products
   searchProducts: (query) => {
     const { products } = get();
-    const searchTerm = query.toLowerCase().trim();
 
-    return products.filter(
-      (product) =>
-        product.name.toLowerCase().includes(searchTerm) ||
-        product.description.toLowerCase().includes(searchTerm) ||
-        product.brand.toLowerCase().includes(searchTerm) ||
-        product.category.toLowerCase().includes(searchTerm)
-    );
+    if (!query || query.trim() === "") {
+      return [];
+    }
+
+    const searchTerm = query.toLowerCase().trim();
+    const searchTerms = searchTerm.split(/\s+/); // Split into individual words
+
+    // Score each product based on how well it matches the search terms
+    const scoredProducts = products.map((product) => {
+      let score = 0;
+
+      // Name match (highest weight)
+      if (product.name.toLowerCase().includes(searchTerm)) {
+        score += 100; // Direct match in name
+      }
+
+      // Check individual words in name
+      searchTerms.forEach((term) => {
+        if (product.name.toLowerCase().includes(term)) {
+          score += 50; // Word match in name
+        }
+      });
+
+      // Brand match
+      if (product.brand?.toLowerCase().includes(searchTerm)) {
+        score += 40; // Direct match in brand
+      }
+
+      // Category match
+      if (product.category?.toLowerCase().includes(searchTerm)) {
+        score += 30; // Direct match in category
+      }
+
+      // Description match
+      if (product.description?.toLowerCase().includes(searchTerm)) {
+        score += 20; // Direct match in description
+      }
+
+      // Individual word matches in description
+      searchTerms.forEach((term) => {
+        if (product.description?.toLowerCase().includes(term)) {
+          score += 10; // Word match in description
+        }
+      });
+
+      return { product, score };
+    });
+
+    // Filter products with score > 0 and sort by score
+    return scoredProducts
+      .filter((item) => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map((item) => item.product);
   },
 
   // Add review for a product
@@ -238,6 +287,38 @@ export const useProductStore = create((set, get) => ({
         success: false,
         error: "Failed to report review",
       };
+    }
+  },
+
+  // Fetch featured products specifically
+  fetchFeaturedProducts: async () => {
+    set({ loading: true });
+
+    try {
+      const response = await api.get(`${API_URL}/products/products`);
+
+      // Get featured products - first those marked as featured, then high-rated ones
+      const featuredProducts = response.data.products
+        .filter((p) => p.featured === true || p.rating >= 4.5)
+        .sort((a, b) => {
+          // Featured products first
+          if (a.featured && !b.featured) return -1;
+          if (!a.featured && b.featured) return 1;
+          // Then by rating
+          return (b.rating || 0) - (a.rating || 0);
+        })
+        .slice(0, 8); // Show up to 8 featured products
+
+      set({
+        featuredProducts,
+        loading: false,
+      });
+    } catch (error) {
+      console.error("Error fetching featured products:", error);
+      set({
+        error: "Failed to fetch featured products. Please try again later.",
+        loading: false,
+      });
     }
   },
 }));

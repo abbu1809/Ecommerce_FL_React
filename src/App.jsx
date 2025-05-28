@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Product from "./pages/Product";
 import ProductList from "./pages/ProductList";
+import SearchResults from "./pages/SearchResults"; // Add the new import
 import Cart from "./pages/Cart";
 import Wishlist from "./pages/Wishlist";
 import OrderStatus from "./pages/OrderStatus";
@@ -193,7 +194,8 @@ const App = () => {
           <Route path="/orders" element={<OrderStatus />} />
           <Route path="/order-tracking" element={<OrderTracking />} />
           <Route path="/order-tracking/:id" element={<OrderTrackingDetail />} />
-
+          <Route path="/search" element={<SearchResults />} />{" "}
+          {/* New search route */}
           {/* Account Routes */}
           <Route path="/profile" element={<Account />} />
           <Route path="/profile/:section" element={<Account />} />

@@ -3,17 +3,40 @@ import { Link } from "react-router-dom";
 import { FiShoppingCart, FiTrash2, FiHeart } from "react-icons/fi";
 import Button from "../components/UI/Button";
 import { ROUTES } from "../utils/constants";
-import { useProductStore } from "../store/useProduct";
+import { useWishlistStore } from "../store/useWishlist";
+import { useCartStore } from "../store/useCart";
+import { useAuthStore } from "../store/useAuth";
+import {
+  showAddToCartToast,
+  showRemoveFromWishlistToast,
+} from "../utils/toast";
 
 const Wishlist = () => {
-  const { products, fetchProducts } = useProductStore();
+  const {
+    items: wishlistItems,
+    fetchWishlist,
+    removeItem,
+  } = useWishlistStore();
+  const { addItem: addToCart } = useCartStore();
+  const { isAuthenticated } = useAuthStore();
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    // Load wishlist data when component mounts
+    fetchWishlist();
+  }, [fetchWishlist, isAuthenticated]);
 
-  const removeFromWishlist = (id) => {
-    console.log(`Remove product with ID: ${id}`);
+  const handleRemoveFromWishlist = async (id) => {
+    const success = await removeItem(id);
+    if (success) {
+      showRemoveFromWishlistToast();
+    }
+  };
+
+  const handleAddToCart = async (item) => {
+    const success = await addToCart(item, 1);
+    if (success) {
+      showAddToCartToast(item.name);
+    }
   };
 
   return (
@@ -44,7 +67,7 @@ const Wishlist = () => {
           My Wishlist
         </h1>
 
-        {products.length === 0 ? (
+        {wishlistItems.length === 0 ? (
           <div
             className="rounded-lg p-8 text-center transition-shadow duration-300"
             style={{
@@ -87,7 +110,7 @@ const Wishlist = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((item) => (
+            {wishlistItems.map((item) => (
               <div
                 key={item.id}
                 className="rounded-lg overflow-hidden transition-all duration-300 hover:-translate-y-1"
@@ -130,19 +153,18 @@ const Wishlist = () => {
                           >
                             ₹{item.price.toLocaleString()}
                           </p>
-                        </div>
+                        </div>{" "}
                         <button
-                          onClick={() => removeFromWishlist(item.id)}
+                          onClick={() => handleRemoveFromWishlist(item.id)}
                           className="p-2 rounded-full transition-colors hover:bg-gray-100"
                           style={{ color: "var(--text-secondary)" }}
                           aria-label="Remove from wishlist"
                         >
                           <FiTrash2 className="h-5 w-5" />
                         </button>
-                      </div>
-
+                      </div>{" "}
                       <div className="mt-4">
-                        {item.stock ? (
+                        {item.stock !== 0 ? (
                           <p
                             className="text-sm mb-3 flex items-center"
                             style={{ color: "var(--success-color)" }}
@@ -166,20 +188,23 @@ const Wishlist = () => {
                             ></span>
                             Out of Stock
                           </p>
-                        )}
-
+                        )}{" "}
                         <Button
                           fullWidth={true}
-                          disabled={!item.stock}
+                          onClick={() => handleAddToCart(item)}
+                          disabled={item.stock === 0}
                           icon={<FiShoppingCart />}
                           style={{
-                            backgroundColor: item.stock
-                              ? "var(--brand-primary)"
-                              : "var(--bg-secondary)",
-                            color: item.stock
-                              ? "var(--text-on-brand)"
-                              : "var(--text-secondary)",
-                            cursor: item.stock ? "pointer" : "not-allowed",
+                            backgroundColor:
+                              item.stock !== 0
+                                ? "var(--brand-primary)"
+                                : "var(--bg-secondary)",
+                            color:
+                              item.stock !== 0
+                                ? "var(--text-on-brand)"
+                                : "var(--text-secondary)",
+                            cursor:
+                              item.stock !== 0 ? "pointer" : "not-allowed",
                           }}
                         >
                           Add to Cart

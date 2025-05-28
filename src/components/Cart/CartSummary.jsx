@@ -1,18 +1,7 @@
-import React, { useState } from "react";
 import Button from "../../components/UI/Button";
-import { FiCheck, FiTag, FiCreditCard, FiShoppingBag } from "react-icons/fi";
+import { FiCreditCard, FiShoppingBag } from "react-icons/fi";
 
 const CartSummary = ({ subtotal, tax, shipping, total }) => {
-  const [promoCode, setPromoCode] = useState("");
-  const [promoApplied, setPromoApplied] = useState(false);
-
-  const handleApplyPromo = () => {
-    if (promoCode.trim()) {
-      setPromoApplied(true);
-      setTimeout(() => setPromoApplied(false), 3000);
-    }
-  };
-
   return (
     <div className="lg:col-span-1 sticky top-4">
       <div
@@ -107,55 +96,6 @@ const CartSummary = ({ subtotal, tax, shipping, total }) => {
           </div>
         </div>
 
-        <div
-          className="mt-8 p-5 rounded-xl"
-          style={{
-            background: "var(--bg-accent-light)",
-            boxShadow: "var(--shadow-small)",
-          }}
-        >
-          <h3
-            className="font-semibold mb-3 flex items-center"
-            style={{ color: "var(--text-primary)" }}
-          >
-            <FiTag className="mr-2" style={{ color: "var(--brand-primary)" }} />
-            Have a Promo Code?
-          </h3>
-          <div className="flex">
-            <input
-              type="text"
-              value={promoCode}
-              onChange={(e) => setPromoCode(e.target.value)}
-              placeholder="Enter code"
-              className="flex-1 px-4 py-2.5 rounded-l-lg focus:outline-none text-sm"
-              style={{
-                border: "1px solid var(--border-primary)",
-                borderRight: "none",
-                backgroundColor: "var(--bg-primary)",
-              }}
-            />
-            <button
-              onClick={handleApplyPromo}
-              className="px-4 py-2.5 rounded-r-lg font-medium transition-all duration-300 flex items-center"
-              style={{
-                background: promoApplied
-                  ? "var(--success-color)"
-                  : "var(--brand-primary)",
-                color: "var(--text-on-brand)",
-                boxShadow: "var(--shadow-small)",
-              }}
-            >
-              {promoApplied ? (
-                <>
-                  <FiCheck className="mr-1" /> Applied
-                </>
-              ) : (
-                "Apply"
-              )}
-            </button>
-          </div>
-        </div>
-
         <div className="mt-8">
           <Button
             className="text-base py-3.5 transition-all duration-300 transform hover:translate-y-[-2px] rounded-lg font-medium"
@@ -167,39 +107,6 @@ const CartSummary = ({ subtotal, tax, shipping, total }) => {
           >
             <FiCreditCard className="mr-2" /> Proceed to Checkout
           </Button>
-
-          <div className="mt-6">
-            <p
-              className="text-center mb-4 text-sm"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              or checkout with
-            </p>
-            <div className="flex justify-center space-x-4">
-              <button
-                className="rounded-lg px-6 py-2.5 font-medium text-sm transition-all duration-300 flex items-center justify-center"
-                style={{
-                  background: "var(--bg-secondary)",
-                  color: "var(--text-primary)",
-                  boxShadow: "var(--shadow-small)",
-                  border: "1px solid var(--border-primary)",
-                }}
-              >
-                GPay
-              </button>
-              <button
-                className="rounded-lg px-6 py-2.5 font-medium text-sm transition-all duration-300 flex items-center justify-center"
-                style={{
-                  background: "var(--bg-secondary)",
-                  color: "var(--text-primary)",
-                  boxShadow: "var(--shadow-small)",
-                  border: "1px solid var(--border-primary)",
-                }}
-              >
-                PayPal
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>

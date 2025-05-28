@@ -2,15 +2,70 @@ import BannerCarousel from "../components/BannerCarousel";
 import CategoryList from "../components/CategoryList";
 import FeaturedProductList from "../components/FeaturedProductList";
 import HeroBanner from "../components/HeroBanner";
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useProductStore } from "../store/useProduct";
+import { useInView } from "react-intersection-observer";
+import ProductCard from "../components/ProductList/ProductCard";
+import { FiArrowDown } from "react-icons/fi";
 
 const Home = () => {
-  const { products, fetchProducts } = useProductStore();
+  const { products, featuredProducts, fetchProducts } = useProductStore();
+  const [displayedProducts, setDisplayedProducts] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const PRODUCTS_PER_PAGE = 8;
+
+  // Reference for infinite scroll trigger
+  const { ref, inView } = useInView({
+    threshold: 0.1,
+    triggerOnce: false,
+  });
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+
+  // Load initial products
+  useEffect(() => {
+    if (products && products.length > 0) {
+      setDisplayedProducts(products.slice(0, PRODUCTS_PER_PAGE));
+      setHasMore(products.length > PRODUCTS_PER_PAGE);
+    }
+  }, [products]);
+
+  // Load more products when scroll trigger is in view
+  const loadMoreProducts = useCallback(() => {
+    if (isLoading || !hasMore) return;
+
+    setIsLoading(true);
+
+    // Simulate loading delay for better user experience
+    setTimeout(() => {
+      const nextPage = page + 1;
+      const startIndex = page * PRODUCTS_PER_PAGE;
+      const endIndex = startIndex + PRODUCTS_PER_PAGE;
+
+      const newProducts = products.slice(startIndex, endIndex);
+
+      if (newProducts.length > 0) {
+        setDisplayedProducts((prev) => [...prev, ...newProducts]);
+        setPage(nextPage);
+        setHasMore(endIndex < products.length);
+      } else {
+        setHasMore(false);
+      }
+
+      setIsLoading(false);
+    }, 800);
+  }, [page, products, isLoading, hasMore]);
+
+  // Trigger load more when scroll reference is in view
+  useEffect(() => {
+    if (inView) {
+      loadMoreProducts();
+    }
+  }, [inView, loadMoreProducts]);
 
   // Mock data for categories - focused on electronics product catalog
   const categories = [
@@ -20,38 +75,6 @@ const Home = () => {
     { id: 4, name: "Mobile Accessories", path: "/category/mobile-accessories" },
     { id: 5, name: "Laptop Accessories", path: "/category/laptop-accessories" },
     { id: 6, name: "Audio Devices", path: "/category/audio" },
-  ];
-
-  // Mock data for featured products
-  const featuredProducts = [
-    {
-      id: 1,
-      name: "Samsung Galaxy S25 Edge",
-      price: 89999,
-      image: "https://via.placeholder.com/300x300?text=Samsung+S25",
-      category: "Mobiles",
-    },
-    {
-      id: 2,
-      name: "Apple iPhone 15 Pro",
-      price: 119999,
-      image: "https://via.placeholder.com/300x300?text=iPhone+15+Pro",
-      category: "Mobiles",
-    },
-    {
-      id: 3,
-      name: "Dell XPS 13",
-      price: 129999,
-      image: "https://via.placeholder.com/300x300?text=Dell+XPS",
-      category: "Laptops",
-    },
-    {
-      id: 4,
-      name: 'Sony 55" 4K Smart TV',
-      price: 69999,
-      image: "https://via.placeholder.com/300x300?text=Sony+TV",
-      category: "TV",
-    },
   ];
 
   // Mock promotional banners
@@ -80,7 +103,6 @@ const Home = () => {
     >
       {/* Hero Banner */}
       <HeroBanner banner={banners[0]} />
-
       {/* Categories Section */}
       <section
         style={{ backgroundColor: "var(--bg-primary)" }}
@@ -90,7 +112,6 @@ const Home = () => {
           <CategoryList categories={categories} />
         </div>
       </section>
-
       {/* Featured Products Section */}
       <section className="py-12">
         <div className="container mx-auto px-4">
@@ -114,25 +135,115 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Fetched Products Section - Example of rendering fetched products */}
+      {/* Our Products Section with Infinite Scroll */}
       <section className="py-12">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold mb-6">Our Products</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {products.map((product) => (
-              <div key={product.id} className="border p-4 rounded-lg">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-48 object-cover mb-4 rounded"
-                />
-                <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
-                <p className="text-gray-700 mb-2">{product.category}</p>
-                <p className="text-xl font-bold text-primary">
-                  ${product.price / 100}
+          <div className="text-center mb-12">
+            <h2
+              className="text-3xl font-bold mb-3"
+              style={{ color: "var(--text-primary)" }}
+            >
+              Our Products
+            </h2>
+            <div
+              className="h-1 w-24 mx-auto rounded-full"
+              style={{
+                backgroundColor: "var(--brand-primary)",
+              }}
+            ></div>
+            <p
+              className="mt-4 text-lg"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              Explore our complete collection
+            </p>
+          </div>
+
+          {/* Products Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {displayedProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={{
+                  ...product,
+                  id: product.id || product._id,
+                  name:
+                    product.name ||
+                    `${product.brand} ${product.model || ""}`.trim(),
+                  image:
+                    product.images && product.images.length > 0
+                      ? product.images[0]
+                      : product.image ||
+                        "https://via.placeholder.com/300x300?text=No+Image",
+                  discountPrice:
+                    product.discount_price ||
+                    product.offer_price ||
+                    product.price,
+                  price: product.price,
+                  discount:
+                    product.discount ||
+                    (product.price && product.discount_price
+                      ? `${Math.round(
+                          ((product.price -
+                            (product.discount_price || product.offer_price)) /
+                            product.price) *
+                            100
+                        )}%`
+                      : null),
+                  rating: product.rating || 4.0,
+                  reviews: product.reviews || product.reviews_count || 0,
+                  brand: product.brand || "Unknown",
+                  category: product.category || "General",
+                  stock: product.stock || 0,
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Loading indicator and scroll trigger */}
+          <div className="mt-10 text-center" ref={ref}>
+            {isLoading && (
+              <div className="flex flex-col items-center justify-center py-8">
+                <div
+                  className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 mb-3"
+                  style={{ borderColor: "var(--brand-primary)" }}
+                ></div>
+                <p
+                  className="text-sm font-medium mt-3"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  Loading more products...
                 </p>
               </div>
-            ))}
+            )}
+
+            {!isLoading && hasMore && (
+              <div className="flex flex-col items-center justify-center py-4">
+                <div
+                  className="flex items-center justify-center h-10 w-10 rounded-full animate-bounce mb-2"
+                  style={{
+                    backgroundColor: "var(--bg-accent-light)",
+                    color: "var(--brand-primary)",
+                  }}
+                >
+                  <FiArrowDown className="text-lg" />
+                </div>
+                <p style={{ color: "var(--text-secondary)" }}>
+                  Scroll for more products
+                </p>
+              </div>
+            )}
+
+            {!isLoading && !hasMore && products.length > 0 && (
+              <div className="py-8">
+                <p
+                  className="text-sm font-medium"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  You've reached the end of our product catalog
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </section>

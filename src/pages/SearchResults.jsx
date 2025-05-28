@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { ROUTES } from "../utils/constants";
 import Breadcrumb from "../components/Breadcrumb/Breadcrumb";
 import ProductFilter from "../components/ProductList/ProductFilter";
@@ -8,24 +8,20 @@ import ProductGrid from "../components/ProductList/ProductGrid";
 import NoResultsFound from "../components/ProductList/NoResultsFound";
 import { useProductStore } from "../store/useProduct";
 
-const ProductList = () => {
-  let { category } = useParams();
-  category = category
-    ? category.charAt(0).toUpperCase() + category.slice(1).replace(/s$/, "")
-    : null;
+const SearchResults = () => {
+  const [searchParams] = useSearchParams();
+  const query = searchParams.get("query") || "";
   const [showFilters, setShowFilters] = useState(false);
+
   // Filter states
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [priceRange, setPriceRange] = useState({ min: 0, max: 150000 });
   const [sortBy, setSortBy] = useState("popularity");
 
-  const { products, brands, loading, fetchProducts } = useProductStore();
+  const { brands, loading, searchProducts } = useProductStore();
 
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
   // Transform products from store to match the expected format
-  const transformedProducts = (products || []).map((product) => ({
+  const transformedProducts = searchProducts(query).map((product) => ({
     ...product,
     discountPrice: product.discount_price || product.price,
     image:
@@ -46,6 +42,7 @@ const ProductList = () => {
     const value = parseInt(e.target.value);
     setPriceRange({ ...priceRange, [bound]: value });
   };
+
   const applyFilters = () => {
     let filteredProducts = [...transformedProducts];
 
@@ -56,23 +53,14 @@ const ProductList = () => {
       );
     }
 
-    // Apply category filter from URL if present
-    if (category) {
-      // This would use a more sophisticated matching in a real app
-      // (e.g. converting URL-friendly format to display format)
-      const formattedCategory = category.replace("-", " ");
-      filteredProducts = filteredProducts.filter(
-        (product) =>
-          product.category.toLowerCase() === formattedCategory.toLowerCase()
-      );
-    }
-
     // Apply price range filter
     filteredProducts = filteredProducts.filter(
       (product) =>
         product.discountPrice >= priceRange.min &&
         product.discountPrice <= priceRange.max
-    ); // Apply sorting
+    );
+
+    // Apply sorting
     if (sortBy === "price-low") {
       filteredProducts.sort((a, b) => a.discountPrice - b.discountPrice);
     } else if (sortBy === "price-high") {
@@ -92,21 +80,15 @@ const ProductList = () => {
 
   const filteredProducts = applyFilters();
 
-  // Add resetFilters function
   const resetFilters = () => {
     setSelectedBrands([]);
     setPriceRange({ min: 0, max: 150000 });
-    setSortBy("popularity"); // Reset sort order as well
+    setSortBy("popularity");
   };
-
-  // Breadcrumb items
+  // Generate breadcrumb items
   const breadcrumbItems = [
     { label: "Home", link: ROUTES.HOME },
-    {
-      label: category
-        ? category.charAt(0).toUpperCase() + category.slice(1).replace("-", " ")
-        : "Products",
-    },
+    { label: `Search Results: "${query}"` },
   ];
 
   return (
@@ -121,12 +103,12 @@ const ProductList = () => {
             className="text-3xl font-bold"
             style={{ color: "var(--text-primary)" }}
           >
-            {category
-              ? category.charAt(0).toUpperCase() +
-                category.slice(1).replace("-", " ")
-              : "All Products"}
+            Search Results for "{query}"
           </h1>
           <Breadcrumb items={breadcrumbItems} />
+          <p className="text-gray-600 mt-2">
+            {filteredProducts.length} results found
+          </p>
         </div>
 
         <div className="flex flex-col md:flex-row justify-between items-start gap-6">
@@ -148,11 +130,14 @@ const ProductList = () => {
             <ProductSorting sortBy={sortBy} setSortBy={setSortBy} />
 
             {/* Products Grid */}
-            <ProductGrid products={filteredProducts} loading={loading} />
-
-            {/* No Results */}
-            {!loading && filteredProducts.length === 0 && (
-              <NoResultsFound resetFilters={resetFilters} />
+            {loading ? (
+              <div className="flex justify-center items-center py-20">
+                <div className="spinner"></div>
+              </div>
+            ) : filteredProducts.length > 0 ? (
+              <ProductGrid products={filteredProducts} />
+            ) : (
+              <NoResultsFound searchQuery={query} resetFilters={resetFilters} />
             )}
           </div>
         </div>
@@ -161,4 +146,4 @@ const ProductList = () => {
   );
 };
 
-export default ProductList;
+export default SearchResults;
