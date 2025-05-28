@@ -25,12 +25,7 @@ const Header = ({ categories }) => {
   const desktopSuggestionsRef = useRef(null);
   const mobileSuggestionsRef = useRef(null);
   const { isAuthenticated } = useAuthStore();
-  const {
-    items: cartItems,
-    itemCount: cartItemCount,
-    totalAmount,
-    fetchCart,
-  } = useCartStore();
+  const { itemCount: cartItemCount, totalAmount, fetchCart } = useCartStore();
   const { items: wishlistItems, fetchWishlist } = useWishlistStore();
   const { searchProducts } = useProductStore();
   const [location, setLocation] = useState({

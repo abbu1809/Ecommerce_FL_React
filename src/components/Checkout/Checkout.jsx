@@ -98,12 +98,12 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      size="xl"
+      size="2xl"
       closeOnBackdropClick={!isProcessingPayment}
-      className="animate-fadeIn"
+      className="animate-fadeIn w-11/12 max-w-5xl"
     >
       <div
-        className="relative"
+        className="relative w-full"
         style={{
           backgroundColor: "var(--bg-primary)",
           color: "var(--text-primary)",
@@ -159,11 +159,11 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
           </div>
         </div>
 
-        <div className="p-8">
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <div className="p-6 md:p-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
             {/* Left Column - Order Summary & Address */}
             <div
-              className="xl:col-span-2 space-y-8"
+              className="lg:col-span-2 space-y-6 md:space-y-8"
               style={{ animation: "slideInLeft 0.6s ease-out" }}
             >
               {" "}
@@ -222,7 +222,7 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
                     >
                       <div className="flex items-center flex-1">
                         <div
-                          className="relative w-20 h-20 rounded-xl overflow-hidden mr-6 group-hover/item:shadow-lg transition-shadow duration-300"
+                          className="relative w-24 h-24 rounded-xl overflow-hidden mr-6 group-hover/item:shadow-lg transition-shadow duration-300"
                           style={{
                             boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)",
                             border: "2px solid var(--border-primary)",
@@ -372,21 +372,6 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
                       </p>
                     </div>
                   </div>
-                  <Button
-                    onClick={() => navigate("/account?tab=addresses")}
-                    variant="outline"
-                    size="sm"
-                    fullWidth={false}
-                    icon={<FiPlus />}
-                    className="transform hover:scale-105 transition-all duration-300 hover:shadow-md"
-                    style={{
-                      borderColor: "var(--brand-primary)",
-                      color: "var(--brand-primary)",
-                      borderWidth: "2px",
-                    }}
-                  >
-                    Add New
-                  </Button>
                 </div>
 
                 {addressLoading ? (
@@ -565,26 +550,13 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
                       className="mb-8 text-base"
                       style={{ color: "var(--text-secondary)" }}
                     >
-                      Add a delivery address to continue with your order
+                      Add a delivery address from profile section to continue
+                      with your order
                     </p>
-                    <Button
-                      onClick={() => navigate("/account?tab=addresses")}
-                      variant="primary"
-                      icon={<FiPlus />}
-                      fullWidth={false}
-                      className="transform hover:scale-105 transition-all duration-300 hover:shadow-lg"
-                      style={{
-                        backgroundColor: "var(--brand-primary)",
-                        color: "var(--text-on-brand)",
-                      }}
-                    >
-                      Add Address
-                    </Button>
                   </div>
                 )}
               </div>
-            </div>
-
+            </div>{" "}
             {/* Right Column - Payment & Order */}
             <div className="lg:col-span-1">
               <div
@@ -723,7 +695,7 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
                 <Button
                   onClick={handlePlaceOrder}
                   disabled={!selectedAddressId || isProcessingPayment}
-                  className="w-full transition-transform hover:scale-105 duration-300"
+                  className="w-full transition-transform hover:scale-105 duration-300 mb-2"
                   size="lg"
                   style={{
                     backgroundColor:
@@ -744,6 +716,20 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
                     ? "Processing Payment..."
                     : `Place Order`}
                 </Button>
+
+                {/* Continue Shopping Button */}
+                <button
+                  onClick={onClose}
+                  className="w-full py-2 mt-2 text-center font-medium transition-all duration-300 rounded-lg hover:bg-opacity-10"
+                  style={{
+                    color: "var(--brand-primary)",
+                    backgroundColor: "transparent",
+                    border: "1px solid var(--brand-primary)",
+                  }}
+                  disabled={isProcessingPayment}
+                >
+                  Continue Shopping
+                </button>
 
                 {/* Security Notice */}
                 <div

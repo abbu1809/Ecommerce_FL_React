@@ -40,18 +40,6 @@ const AccountSidebar = () => {
       path: "/profile/addresses",
       icon: <FiMapPin className="w-5 h-5" />,
     },
-    {
-      id: "payment",
-      name: "Payment Methods",
-      path: "/profile/payment",
-      icon: <FiCreditCard className="w-5 h-5" />,
-    },
-    {
-      id: "settings",
-      name: "Account Settings",
-      path: "/profile/settings",
-      icon: <FiSettings className="w-5 h-5" />,
-    },
   ];
 
   const handleLogout = (e) => {

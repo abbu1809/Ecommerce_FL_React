@@ -50,7 +50,6 @@ export const useOrderStore = create((set) => ({
         set({ isProcessingPayment: false });
         return null;
       }
-
       const orderData = {
         address_id: addressId,
         payment_method: "Razorpay", // Default payment method
@@ -60,6 +59,7 @@ export const useOrderStore = create((set) => ({
         })),
       };
 
+      // Use POST method for order creation to match API requirements
       const response = await api.post("/users/orders/create/", orderData);
       const newOrder = response.data.order;
 

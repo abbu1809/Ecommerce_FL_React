@@ -1,30 +1,30 @@
 import React from "react";
-import { FiMapPin, FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
+import { FiMapPin, FiPlus, FiEdit2, FiTrash2, FiLoader } from "react-icons/fi";
+import useAddressStore from "../../store/useAddress";
+import { useConfirmModal } from "../../hooks/useConfirmModal";
+import ConfirmModal from "../UI/ConfirmModal";
 
 const AddressList = () => {
-  // Mock data for addresses
-  const [addresses, setAddresses] = React.useState([
-    {
-      id: 1,
-      name: "Home",
-      address: "123 Main Street",
-      city: "Bhopal",
-      state: "Madhya Pradesh",
-      pincode: "462001",
-      phone: "9876543210",
-      isDefault: true,
-    },
-    {
-      id: 2,
-      name: "Office",
-      address: "456 Work Avenue",
-      city: "Bhopal",
-      state: "Madhya Pradesh",
-      pincode: "462003",
-      phone: "9876543211",
-      isDefault: false,
-    },
-  ]);
+  const {
+    addresses,
+    isLoading,
+    error,
+    fetchAddresses,
+    addAddress,
+    updateAddress,
+    deleteAddress,
+    setDefaultAddress,
+    clearError,
+  } = useAddressStore();
+
+  const {
+    isOpen: confirmModalIsOpen,
+    modalConfig,
+    isLoading: confirmLoading,
+    showConfirm,
+    hideConfirm,
+    handleConfirm,
+  } = useConfirmModal();
 
   const [isAddingAddress, setIsAddingAddress] = React.useState(false);
   const [editingAddressId, setEditingAddressId] = React.useState(null);
@@ -38,6 +38,15 @@ const AddressList = () => {
     isDefault: false,
   });
 
+  // Fetch addresses on component mount
+  React.useEffect(() => {
+    fetchAddresses();
+  }, [fetchAddresses]);
+
+  // Clear errors when component unmounts
+  React.useEffect(() => {
+    return () => clearError();
+  }, [clearError]);
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -45,52 +54,75 @@ const AddressList = () => {
       [name]: type === "checkbox" ? checked : value,
     }));
   };
-
   const handleEditAddress = (address) => {
-    setFormData(address);
+    setFormData({
+      name: address.name || address.type,
+      address: address.address || address.street_address,
+      city: address.city,
+      state: address.state,
+      pincode: address.pincode || address.postal_code,
+      phone: address.phone || address.phone_number,
+      isDefault: address.isDefault || address.is_default,
+    });
     setEditingAddressId(address.id);
     setIsAddingAddress(true);
   };
-
-  const handleDeleteAddress = (id) => {
-    setAddresses(addresses.filter((address) => address.id !== id));
+  const handleDeleteAddress = async (id) => {
+    showConfirm({
+      title: "Delete Address",
+      message:
+        "Are you sure you want to delete this address? This action cannot be undone.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      type: "danger",
+      onConfirm: async () => {
+        await deleteAddress(id);
+      },
+    });
   };
 
-  const handleSubmit = (e) => {
+  const handleSetDefault = async (id) => {
+    await setDefaultAddress(id);
+  };
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (editingAddressId) {
-      // Update existing address
-      setAddresses(
-        addresses.map((addr) =>
-          addr.id === editingAddressId
-            ? { ...formData, id: editingAddressId }
-            : addr
-        )
-      );
-    } else {
-      // Add new address
-      const newAddress = {
-        ...formData,
-        id: Date.now(),
+    try {
+      // Transform form data to match API format
+      const apiData = {
+        type: formData.name,
+        street_address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        postal_code: formData.pincode,
+        phone_number: formData.phone,
+        is_default: formData.isDefault,
       };
-      setAddresses([...addresses, newAddress]);
+
+      if (editingAddressId) {
+        // Update existing address
+        await updateAddress(editingAddressId, apiData);
+      } else {
+        // Add new address
+        await addAddress(apiData);
+      }
+
+      // Reset form
+      setFormData({
+        name: "",
+        address: "",
+        city: "",
+        state: "",
+        pincode: "",
+        phone: "",
+        isDefault: false,
+      });
+      setIsAddingAddress(false);
+      setEditingAddressId(null);
+    } catch (error) {
+      console.error("Error saving address:", error);
     }
-
-    // Reset form
-    setFormData({
-      name: "",
-      address: "",
-      city: "",
-      state: "",
-      pincode: "",
-      phone: "",
-      isDefault: false,
-    });
-    setIsAddingAddress(false);
-    setEditingAddressId(null);
   };
-
   return (
     <div
       className="bg-white rounded-lg shadow-md p-6"
@@ -107,17 +139,40 @@ const AddressList = () => {
         {!isAddingAddress && (
           <button
             onClick={() => setIsAddingAddress(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:opacity-90"
+            disabled={isLoading}
+            className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:opacity-90 disabled:opacity-50"
             style={{
               backgroundColor: "var(--brand-primary)",
               color: "var(--text-on-brand)",
             }}
           >
-            <FiPlus className="w-4 h-4" />
+            {isLoading ? (
+              <FiLoader className="w-4 h-4 animate-spin" />
+            ) : (
+              <FiPlus className="w-4 h-4" />
+            )}
             <span>Add New Address</span>
           </button>
         )}
       </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-4">
+          {error}
+        </div>
+      )}
+
+      {isLoading && !isAddingAddress && (
+        <div className="flex justify-center items-center py-8">
+          <FiLoader
+            className="w-6 h-6 animate-spin"
+            style={{ color: "var(--brand-primary)" }}
+          />
+          <span className="ml-2" style={{ color: "var(--text-secondary)" }}>
+            Loading addresses...
+          </span>
+        </div>
+      )}
 
       {isAddingAddress ? (
         <div
@@ -304,16 +359,25 @@ const AddressList = () => {
                   </span>
                 </label>
               </div>
-            </div>
-
+            </div>{" "}
             <div className="mt-6 flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => {
                   setIsAddingAddress(false);
                   setEditingAddressId(null);
+                  setFormData({
+                    name: "",
+                    address: "",
+                    city: "",
+                    state: "",
+                    pincode: "",
+                    phone: "",
+                    isDefault: false,
+                  });
                 }}
-                className="px-4 py-2 rounded-md text-sm font-medium"
+                disabled={isLoading}
+                className="px-4 py-2 rounded-md text-sm font-medium disabled:opacity-50"
                 style={{
                   color: "var(--text-primary)",
                   backgroundColor: "var(--bg-secondary)",
@@ -323,86 +387,160 @@ const AddressList = () => {
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 rounded-md text-sm font-medium"
+                disabled={isLoading}
+                className="px-4 py-2 rounded-md text-sm font-medium disabled:opacity-50 flex items-center gap-2"
                 style={{
                   backgroundColor: "var(--brand-primary)",
                   color: "var(--text-on-brand)",
                 }}
               >
+                {isLoading && <FiLoader className="w-4 h-4 animate-spin" />}
                 {editingAddressId ? "Update Address" : "Save Address"}
               </button>
             </div>
           </form>
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 gap-4">
-          {addresses.map((address) => (
-            <div
-              key={address.id}
-              className={`border rounded-lg p-4 relative ${
-                address.isDefault ? "ring-2" : ""
-              }`}
-              style={{
-                borderColor: "var(--border-primary)",
-                ringColor: address.isDefault
-                  ? "var(--brand-primary)"
-                  : undefined,
-              }}
-            >
-              <div className="flex justify-between mb-2">
-                <h3
-                  className="font-medium"
-                  style={{ color: "var(--text-primary)" }}
-                >
-                  {address.name}
-                </h3>
-                {address.isDefault && (
-                  <span
-                    className="text-xs px-2 py-0.5 rounded-full"
-                    style={{
-                      backgroundColor: "var(--bg-accent-light)",
-                      color: "var(--brand-primary)",
-                    }}
-                  >
-                    Default
-                  </span>
-                )}
-              </div>
-
-              <div className="flex gap-2 mb-2 items-start">
-                <FiMapPin
-                  className="min-w-5 h-5 mt-0.5"
-                  style={{ color: "var(--text-secondary)" }}
-                />
-                <div style={{ color: "var(--text-primary)" }}>
-                  <p>{address.address}</p>
-                  <p>
-                    {address.city}, {address.state} - {address.pincode}
-                  </p>
-                  <p className="mt-1">Phone: {address.phone}</p>
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-2 mt-4">
-                <button
-                  onClick={() => handleEditAddress(address)}
-                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  <FiEdit2 className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => handleDeleteAddress(address.id)}
-                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                  style={{ color: "var(--error-color)" }}
-                >
-                  <FiTrash2 className="w-4 h-4" />
-                </button>
-              </div>
+        <div>
+          {addresses.length === 0 && !isLoading ? (
+            <div className="text-center py-8">
+              <FiMapPin
+                className="w-16 h-16 mx-auto mb-4 opacity-50"
+                style={{ color: "var(--text-secondary)" }}
+              />
+              <p
+                className="text-lg font-medium mb-2"
+                style={{ color: "var(--text-primary)" }}
+              >
+                No addresses found
+              </p>
+              <p
+                className="text-sm mb-4"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                Add your first address to get started with deliveries
+              </p>
+              <button
+                onClick={() => setIsAddingAddress(true)}
+                className="px-4 py-2 rounded-md text-sm font-medium"
+                style={{
+                  backgroundColor: "var(--brand-primary)",
+                  color: "var(--text-on-brand)",
+                }}
+              >
+                Add Address
+              </button>
             </div>
-          ))}
+          ) : (
+            <div className="grid md:grid-cols-2 gap-4">
+              {addresses.map((address) => (
+                <div
+                  key={address.id}
+                  className={`border rounded-lg p-4 relative ${
+                    address.isDefault || address.is_default ? "ring-2" : ""
+                  }`}
+                  style={{
+                    borderColor: "var(--border-primary)",
+                    ringColor:
+                      address.isDefault || address.is_default
+                        ? "var(--brand-primary)"
+                        : undefined,
+                  }}
+                >
+                  <div className="flex justify-between mb-2">
+                    <h3
+                      className="font-medium"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      {address.name || address.type}
+                    </h3>
+                    {(address.isDefault || address.is_default) && (
+                      <span
+                        className="text-xs px-2 py-0.5 rounded-full"
+                        style={{
+                          backgroundColor: "var(--bg-accent-light)",
+                          color: "var(--brand-primary)",
+                        }}
+                      >
+                        Default
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex gap-2 mb-2 items-start">
+                    <FiMapPin
+                      className="min-w-5 h-5 mt-0.5"
+                      style={{ color: "var(--text-secondary)" }}
+                    />
+                    <div style={{ color: "var(--text-primary)" }}>
+                      <p>{address.address || address.street_address}</p>
+                      <p>
+                        {address.city}, {address.state} -{" "}
+                        {address.pincode || address.postal_code}
+                      </p>
+                      <p className="mt-1">
+                        Phone: {address.phone || address.phone_number}
+                      </p>
+                    </div>
+                  </div>{" "}
+                  <div className="flex justify-between items-center mt-4">
+                    {!(address.isDefault || address.is_default) && (
+                      <button
+                        onClick={() => handleSetDefault(address.id)}
+                        disabled={isLoading}
+                        className="text-xs px-2 py-1 rounded border transition-colors disabled:opacity-50"
+                        style={{
+                          borderColor: "var(--brand-primary)",
+                          color: "var(--brand-primary)",
+                        }}
+                      >
+                        Set as Default
+                      </button>
+                    )}
+
+                    <div
+                      className={`flex gap-2 ${
+                        !(address.isDefault || address.is_default)
+                          ? "ml-auto"
+                          : ""
+                      }`}
+                    >
+                      <button
+                        onClick={() => handleEditAddress(address)}
+                        disabled={isLoading}
+                        className="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50"
+                        style={{ color: "var(--text-secondary)" }}
+                      >
+                        <FiEdit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteAddress(address.id)}
+                        disabled={isLoading}
+                        className="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50"
+                        style={{ color: "var(--error-color)" }}
+                      >
+                        <FiTrash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}{" "}
         </div>
       )}
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={confirmModalIsOpen}
+        onClose={hideConfirm}
+        onConfirm={handleConfirm}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        confirmText={modalConfig.confirmText}
+        cancelText={modalConfig.cancelText}
+        type={modalConfig.type}
+        isLoading={confirmLoading}
+      />
     </div>
   );
 };

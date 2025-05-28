@@ -309,6 +309,80 @@ export const useAuthStore = create((set) => ({
     set({ user: updatedUser });
   },
 
+  // Fetch user profile from API
+  fetchUserProfile: async () => {
+    try {
+      set({ isLoading: true, error: null });
+
+      const response = await api.get("/users/profile/");
+      const profileData = response.data;
+
+      const userData = {
+        uid: profileData.user_id || profileData.uid,
+        email: profileData.email,
+        first_name: profileData.first_name,
+        last_name: profileData.last_name,
+        phone: profileData.phone_number || profileData.phone || "",
+        auth_provider: profileData.auth_provider,
+      };
+
+      // Update localStorage with fresh data
+      storeData(USER_KEY, userData);
+
+      set({
+        user: userData,
+        isLoading: false,
+      });
+
+      return userData;
+    } catch (error) {
+      set({
+        error: error.response?.data?.error || "Failed to fetch profile",
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
+
+  // Update user profile via API
+  updateUserProfileAPI: async (profileData) => {
+    try {
+      set({ isLoading: true, error: null });
+
+      const response = await api.post("/users/profile/update/", profileData);
+      const updatedProfile = response.data.user;
+
+      const userData = {
+        uid: updatedProfile.user_id || useAuthStore.getState().user?.uid,
+        email: updatedProfile.email,
+        first_name: updatedProfile.first_name,
+        last_name: updatedProfile.last_name,
+        phone: updatedProfile.phone_number || updatedProfile.phone || "",
+        auth_provider: useAuthStore.getState().user?.auth_provider,
+      };
+
+      // Update localStorage with fresh data
+      storeData(USER_KEY, userData);
+
+      set({
+        user: userData,
+        isLoading: false,
+      });
+
+      return {
+        success: true,
+        message: response.data.message,
+        user: userData,
+      };
+    } catch (error) {
+      set({
+        error: error.response?.data?.error || "Failed to update profile",
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
+
   // Get current authentication token
   getToken: () => {
     try {

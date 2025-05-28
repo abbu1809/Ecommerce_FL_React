@@ -3,6 +3,10 @@ import { useParams, Link } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import { ROUTES } from "../utils/constants";
 import { useProductStore } from "../store/useProduct";
+import { useCartStore } from "../store/useCart";
+import { useWishlistStore } from "../store/useWishlist";
+import { useAuthStore } from "../store/useAuth";
+import { showAddToCartToast, showCartErrorToast } from "../utils/toast";
 import Breadcrumb from "../components/Breadcrumb/Breadcrumb";
 import ProductImageGallery from "../components/Product/ProductImageGallery";
 import ProductInfo from "../components/Product/ProductInfo";
@@ -17,6 +21,9 @@ const Product = () => {
   const [activeTab, setActiveTab] = useState("description");
   const { currentProduct, loading, error, fetchProduct, clearCurrentProduct } =
     useProductStore();
+  const { addItem: addToCartStore } = useCartStore();
+  const { addItem: addToWishlistStore } = useWishlistStore();
+  const { user } = useAuthStore();
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -183,16 +190,49 @@ const Product = () => {
       setQuantity(quantity - 1);
     }
   };
+  const addToCart = async () => {
+    if (!user) {
+      showCartErrorToast("Please log in to add items to cart");
+      return;
+    }
 
-  const addToCart = () => {
-    // Add to cart functionality would be implemented here
-    console.log(`Added ${quantity} of ${normalizedProduct.name} to cart`);
-    // You could dispatch an action to a global store here
+    try {
+      const cartItem = {
+        id: normalizedProduct.id,
+        name: normalizedProduct.name,
+        price: normalizedProduct.price,
+        image: normalizedProduct.images?.[0] || normalizedProduct.image,
+        quantity: quantity,
+      };
+
+      await addToCartStore(cartItem);
+      showAddToCartToast(normalizedProduct.name, quantity);
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      showCartErrorToast("Failed to add item to cart");
+    }
   };
 
-  const addToWishlist = () => {
-    // Add to wishlist functionality would be implemented here
-    console.log(`Added ${normalizedProduct.name} to wishlist`); // You could dispatch an action to a global store here
+  const addToWishlist = async () => {
+    if (!user) {
+      showCartErrorToast("Please log in to add items to wishlist");
+      return;
+    }
+
+    try {
+      const wishlistItem = {
+        id: normalizedProduct.id,
+        name: normalizedProduct.name,
+        price: normalizedProduct.price,
+        image: normalizedProduct.images?.[0] || normalizedProduct.image,
+      };
+
+      await addToWishlistStore(wishlistItem);
+      showAddToCartToast(`${normalizedProduct.name} added to wishlist!`);
+    } catch (error) {
+      console.error("Error adding to wishlist:", error);
+      showCartErrorToast("Failed to add item to wishlist");
+    }
   };
 
   // Breadcrumb items
