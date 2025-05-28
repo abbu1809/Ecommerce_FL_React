@@ -5,6 +5,8 @@ import toast from "react-hot-toast";
 
 // Declare razorpay payment function
 const initiateRazorpayPayment = (razorpayData, onSuccess, onFailure) => {
+  console.log("Initiating Razorpay payment with data:", razorpayData);
+
   // Check if Razorpay is available
   if (!window.Razorpay) {
     console.error("Razorpay SDK is not loaded");
@@ -12,16 +14,29 @@ const initiateRazorpayPayment = (razorpayData, onSuccess, onFailure) => {
     return Promise.reject("Razorpay SDK not loaded");
   }
 
+  // Validate required razorpay data
+  if (
+    !razorpayData.key_id ||
+    !razorpayData.amount ||
+    !razorpayData.razorpay_order_id
+  ) {
+    console.error("Missing required Razorpay data:", razorpayData);
+    toast.error("Invalid payment configuration. Please try again.");
+    return Promise.reject("Invalid razorpay data");
+  }
+
   return new Promise((resolve, reject) => {
     const options = {
       key: razorpayData.key_id,
       amount: razorpayData.amount,
-      currency: razorpayData.currency,
+      currency: razorpayData.currency || "INR",
       order_id: razorpayData.razorpay_order_id,
-      name: "Your E-Commerce Store",
+      name: "Anand Mobiles",
       description: "Purchase of products",
       image: "/logo.jpg",
       handler: function (response) {
+        console.log("Payment successful, response:", response);
+
         // Handle successful payment
         const paymentData = {
           razorpay_payment_id: response.razorpay_payment_id,
@@ -32,8 +47,9 @@ const initiateRazorpayPayment = (razorpayData, onSuccess, onFailure) => {
 
         // Verify payment on backend
         api
-          .post("/users/orders/verify-payment/", paymentData)
+          .post("/users/order/razorpay/verify/", paymentData)
           .then((verifyResponse) => {
+            console.log("Payment verified successfully:", verifyResponse.data);
             if (onSuccess) onSuccess(verifyResponse.data);
             resolve(verifyResponse.data);
           })
@@ -57,18 +73,28 @@ const initiateRazorpayPayment = (razorpayData, onSuccess, onFailure) => {
       },
       modal: {
         ondismiss: function () {
-          console.log("Payment modal dismissed");
+          console.log("Payment modal dismissed by user");
           if (onFailure) onFailure({ message: "Payment cancelled by user" });
           reject({ message: "Payment cancelled by user" });
         },
       },
     };
 
+    console.log("Opening Razorpay modal with options:", options);
+
     try {
       const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", function (response) {
+        console.error("Payment failed:", response.error);
+        if (onFailure) onFailure(response.error);
+        reject(response.error);
+      });
+
       rzp.open();
+      console.log("Razorpay modal opened successfully");
     } catch (error) {
       console.error("Error initiating Razorpay:", error);
+      toast.error("Failed to open payment gateway. Please try again.");
       if (onFailure) onFailure(error);
       reject(error);
     }
@@ -130,14 +156,15 @@ export const useOrderStore = create((set) => ({
       return [];
     }
   },
-
   // Place an order from the cart
   placeOrderFromCart: async (addressId) => {
     try {
       set({ isProcessingPayment: true, error: null });
+      console.log("Starting placeOrderFromCart with addressId:", addressId);
 
       // Get cart items from cart store
       const cartItems = useCartStore.getState().items;
+      console.log("Cart items:", cartItems);
 
       if (!cartItems || cartItems.length === 0) {
         toast.error("Your cart is empty");
@@ -160,17 +187,32 @@ export const useOrderStore = create((set) => ({
         product_ids: cartItems.map((item) => item.id),
       };
 
+      console.log("Order data being sent:", orderData);
+
       // Use POST method for order creation to match API requirements
-      const response = await api.post("/users/orders/create/", orderData);
+      const response = await api.post(
+        "/users/order/razorpay/create/",
+        orderData
+      );
+
+      console.log("API response:", response.data);
 
       // The response now contains Razorpay order details
       const razorpayData = response.data;
 
-      // You would typically initiate Razorpay payment here with the returned data
-      // For example:
-      // await initiateRazorpayPayment(razorpayData);
+      // Validate razorpay response
+      if (
+        !razorpayData.key_id ||
+        !razorpayData.razorpay_order_id ||
+        !razorpayData.amount
+      ) {
+        console.error("Invalid razorpay data received:", razorpayData);
+        toast.error("Invalid payment configuration received from server");
+        set({ isProcessingPayment: false });
+        return null;
+      }
 
-      // For now, we'll just handle the successful order creation
+      // Create the order object
       const newOrder = {
         id: razorpayData.app_order_id,
         razorpay_order_id: razorpayData.razorpay_order_id,
@@ -178,17 +220,48 @@ export const useOrderStore = create((set) => ({
         // Add other order details as needed
       };
 
-      // Clear the cart after successful order creation
-      await useCartStore.getState().clearCart();
-
       // Add the new order to the orders list
       set((state) => ({
         orders: [newOrder, ...state.orders],
         currentOrder: newOrder,
-        isProcessingPayment: false,
       }));
 
-      toast.success("Order created successfully! Proceed with payment.");
+      console.log("Initiating Razorpay payment...");
+
+      // Initiate Razorpay payment
+      await initiateRazorpayPayment(
+        razorpayData,
+        async (paymentData) => {
+          // Payment successful
+          console.log("Payment successful:", paymentData);
+
+          // Clear the cart done in verification already no need
+
+          // Update order status
+          set((state) => ({
+            orders: state.orders.map((order) =>
+              order.id === razorpayData.app_order_id
+                ? { ...order, status: "paid", payment_details: paymentData }
+                : order
+            ),
+            isProcessingPayment: false,
+          }));
+
+          toast.success("Payment successful! Order placed successfully.");
+        },
+        (error) => {
+          // Payment failed or cancelled
+          console.error("Payment error:", error);
+
+          set({ isProcessingPayment: false });
+
+          if (error.message === "Payment cancelled by user") {
+            toast.error("Payment was cancelled");
+          } else {
+            toast.error("Payment failed. Please try again.");
+          }
+        }
+      );
 
       return newOrder;
     } catch (error) {
@@ -204,11 +277,15 @@ export const useOrderStore = create((set) => ({
       return null;
     }
   },
-
   // Place an order for a single product
   placeSingleProductOrder: async (product, quantity, addressId) => {
     try {
       set({ isProcessingPayment: true, error: null });
+      console.log("Starting placeSingleProductOrder with:", {
+        product,
+        quantity,
+        addressId,
+      });
 
       if (!product) {
         toast.error("Product information is missing");
@@ -226,16 +303,31 @@ export const useOrderStore = create((set) => ({
         product_ids: [product.id],
       };
 
+      console.log("Single product order data being sent:", orderData);
+
       const response = await api.post("/users/orders/create/", orderData);
+
+      console.log("Single product API response:", response.data);
 
       // The response now contains Razorpay order details
       const razorpayData = response.data;
 
-      // You would typically initiate Razorpay payment here with the returned data
-      // For example:
-      // await initiateRazorpayPayment(razorpayData);
+      // Validate razorpay response
+      if (
+        !razorpayData.key_id ||
+        !razorpayData.razorpay_order_id ||
+        !razorpayData.amount
+      ) {
+        console.error(
+          "Invalid razorpay data received for single product:",
+          razorpayData
+        );
+        toast.error("Invalid payment configuration received from server");
+        set({ isProcessingPayment: false });
+        return null;
+      }
 
-      // For now, we'll just handle the successful order creation
+      // Create the order object
       const newOrder = {
         id: razorpayData.app_order_id,
         razorpay_order_id: razorpayData.razorpay_order_id,
@@ -247,14 +339,46 @@ export const useOrderStore = create((set) => ({
       set((state) => ({
         orders: [newOrder, ...state.orders],
         currentOrder: newOrder,
-        isProcessingPayment: false,
       }));
 
-      toast.success("Order created successfully! Proceed with payment.");
+      console.log("Initiating Razorpay payment for single product...");
+
+      // Initiate Razorpay payment
+      await initiateRazorpayPayment(
+        razorpayData,
+        async (paymentData) => {
+          // Payment successful
+          console.log("Single product payment successful:", paymentData);
+
+          // Update order status
+          set((state) => ({
+            orders: state.orders.map((order) =>
+              order.id === razorpayData.app_order_id
+                ? { ...order, status: "paid", payment_details: paymentData }
+                : order
+            ),
+            isProcessingPayment: false,
+          }));
+
+          toast.success("Payment successful! Order placed successfully.");
+        },
+        (error) => {
+          // Payment failed or cancelled
+          console.error("Single product payment error:", error);
+
+          set({ isProcessingPayment: false });
+
+          if (error.message === "Payment cancelled by user") {
+            toast.error("Payment was cancelled");
+          } else {
+            toast.error("Payment failed. Please try again.");
+          }
+        }
+      );
 
       return newOrder;
     } catch (error) {
-      console.error("Error placing order:", error);
+      console.error("Error placing single product order:", error);
       set({
         isProcessingPayment: false,
         error:

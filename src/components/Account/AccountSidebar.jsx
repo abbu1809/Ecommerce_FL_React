@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   FiUser,
   FiShoppingBag,
@@ -13,6 +13,7 @@ import { useAuthStore } from "../../store/useAuth";
 
 const AccountSidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { logout } = useAuthStore();
 
   const menuItems = [
@@ -45,6 +46,7 @@ const AccountSidebar = () => {
   const handleLogout = (e) => {
     e.preventDefault();
     logout();
+    navigate("/login"); // Redirect to login page after logout
     // Redirect will be handled by auth state change
   };
 

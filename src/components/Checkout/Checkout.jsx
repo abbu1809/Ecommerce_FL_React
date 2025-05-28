@@ -13,18 +13,16 @@ import {
   FiShield,
   FiZap,
   FiTruck,
-  FiLock,
   FiStar,
-  FiHeart,
   FiGift,
 } from "react-icons/fi";
 import useAddressStore from "../../store/useAddress";
 import { useCartStore } from "../../store/useCart";
 import { useOrderStore } from "../../store/useOrder";
 import { useAuthStore } from "../../store/useAuth";
-import { showToast } from "../../utils/toast";
 import Button from "../UI/Button";
 import Modal from "../UI/Modal";
+import toast from "react-hot-toast";
 
 const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
   const navigate = useNavigate();
@@ -46,9 +44,17 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
   const tax = subtotal * 0.18; // 18% GST
   const shipping = subtotal > 0 ? (subtotal > 50000 ? 0 : 99) : 0; // Free shipping for orders above ₹50,000
   const orderTotal = subtotal + tax + shipping;
-
   useEffect(() => {
     if (isOpen && isAuthenticated) {
+      // Check if Razorpay is loaded
+      if (!window.Razorpay) {
+        console.error("Razorpay SDK not loaded when checkout opened");
+        toast.error(
+          "Payment gateway not available. Please refresh and try again."
+        );
+        return;
+      }
+      console.log("Razorpay SDK is available:", !!window.Razorpay);
       fetchAddresses();
     }
   }, [isOpen, isAuthenticated, fetchAddresses]);
@@ -59,28 +65,67 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
       setSelectedAddressId(defaultAddress?.id || addresses[0]?.id);
     }
   }, [addresses, selectedAddressId]);
-
   const handlePlaceOrder = async () => {
+    console.log("handlePlaceOrder called", {
+      isAuthenticated,
+      selectedAddressId,
+    });
+
     if (!isAuthenticated) {
-      showToast.error("Please login to place order");
+      toast.error("Please login to place order");
       navigate("/login");
       return;
     }
 
     if (!selectedAddressId) {
-      showToast.error("Please select a delivery address");
+      toast.error("Please select a delivery address");
       return;
     }
 
     try {
+      console.log("Attempting to place order...", {
+        isCartOrder,
+        product,
+        quantity,
+        selectedAddressId,
+      });
+
+      let result;
       if (isCartOrder) {
-        await placeOrderFromCart(selectedAddressId);
+        console.log("Placing cart order...");
+        result = await placeOrderFromCart(selectedAddressId);
       } else {
-        await placeSingleProductOrder(product, quantity, selectedAddressId);
+        console.log("Placing single product order...");
+        result = await placeSingleProductOrder(
+          product,
+          quantity,
+          selectedAddressId
+        );
       }
-      onClose();
+
+      console.log("Order placement result:", result);
+
+      // Only close the modal if payment was successful
+      // The payment status will be handled by the useOrder store
+      if (result) {
+        console.log(
+          "Order placed successfully, waiting for payment completion..."
+        );
+        // Payment process initiated successfully
+        // Modal will close after payment completion or be kept open if payment fails
+        setTimeout(() => {
+          // Close modal after a short delay to allow payment completion
+          if (!isProcessingPayment) {
+            console.log("Closing checkout modal after successful payment");
+            onClose();
+          }
+        }, 2000); // Increased timeout to 2 seconds
+      } else {
+        console.log("Order placement failed - no result returned");
+      }
     } catch (error) {
       console.error("Order placement failed:", error);
+      toast.error("Failed to place order. Please try again.");
     }
   };
 
@@ -585,7 +630,6 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
                     Payment
                   </h3>
                 </div>
-
                 {/* Payment Method */}
                 <div className="mb-6">
                   <div
@@ -631,7 +675,6 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
                     </div>
                   </div>
                 </div>
-
                 {/* Order Total Summary */}
                 <div
                   className="p-4 rounded-lg mb-6"
@@ -689,8 +732,7 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
                       </span>
                     </div>
                   </div>
-                </div>
-
+                </div>{" "}
                 {/* Place Order Button */}
                 <Button
                   onClick={handlePlaceOrder}
@@ -715,8 +757,7 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
                   {isProcessingPayment
                     ? "Processing Payment..."
                     : `Place Order`}
-                </Button>
-
+                </Button>{" "}
                 {/* Continue Shopping Button */}
                 <button
                   onClick={onClose}
@@ -730,7 +771,6 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
                 >
                   Continue Shopping
                 </button>
-
                 {/* Security Notice */}
                 <div
                   className="mt-4 p-3 rounded-lg flex items-center"
