@@ -1,0 +1,776 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  FiCreditCard,
+  FiMapPin,
+  FiShoppingBag,
+  FiLoader,
+  FiCheck,
+  FiPlus,
+  FiMapPin as FiLocation,
+  FiPhone,
+  FiUser,
+  FiShield,
+  FiZap,
+  FiTruck,
+  FiLock,
+  FiStar,
+  FiHeart,
+  FiGift,
+} from "react-icons/fi";
+import useAddressStore from "../../store/useAddress";
+import { useCartStore } from "../../store/useCart";
+import { useOrderStore } from "../../store/useOrder";
+import { useAuthStore } from "../../store/useAuth";
+import { showToast } from "../../utils/toast";
+import Button from "../UI/Button";
+import Modal from "../UI/Modal";
+
+const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
+  const { items: cartItems, totalAmount: cartTotal } = useCartStore();
+  const { placeOrderFromCart, placeSingleProductOrder, isProcessingPayment } =
+    useOrderStore();
+  const {
+    addresses,
+    fetchAddresses,
+    isLoading: addressLoading,
+  } = useAddressStore();
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
+
+  // Calculate order details
+  const isCartOrder = !product;
+  const orderItems = isCartOrder ? cartItems : [{ ...product, quantity }];
+  const subtotal = isCartOrder ? cartTotal : product?.price * quantity;
+  const tax = subtotal * 0.18; // 18% GST
+  const shipping = subtotal > 0 ? (subtotal > 50000 ? 0 : 99) : 0; // Free shipping for orders above ₹50,000
+  const orderTotal = subtotal + tax + shipping;
+
+  useEffect(() => {
+    if (isOpen && isAuthenticated) {
+      fetchAddresses();
+    }
+  }, [isOpen, isAuthenticated, fetchAddresses]);
+
+  useEffect(() => {
+    if (addresses.length > 0 && !selectedAddressId) {
+      const defaultAddress = addresses.find((addr) => addr.isDefault);
+      setSelectedAddressId(defaultAddress?.id || addresses[0]?.id);
+    }
+  }, [addresses, selectedAddressId]);
+
+  const handlePlaceOrder = async () => {
+    if (!isAuthenticated) {
+      showToast.error("Please login to place order");
+      navigate("/login");
+      return;
+    }
+
+    if (!selectedAddressId) {
+      showToast.error("Please select a delivery address");
+      return;
+    }
+
+    try {
+      if (isCartOrder) {
+        await placeOrderFromCart(selectedAddressId);
+      } else {
+        await placeSingleProductOrder(product, quantity, selectedAddressId);
+      }
+      onClose();
+    } catch (error) {
+      console.error("Order placement failed:", error);
+    }
+  };
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+    }).format(price);
+  };
+
+  // If not open, don't render anything
+  if (!isOpen) return null;
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="xl"
+      closeOnBackdropClick={!isProcessingPayment}
+      className="animate-fadeIn"
+    >
+      <div
+        className="relative"
+        style={{
+          backgroundColor: "var(--bg-primary)",
+          color: "var(--text-primary)",
+        }}
+      >
+        {/* Enhanced Header with Gradient Background */}
+        <div
+          className="relative px-8 py-8 text-center overflow-hidden"
+          style={{
+            background:
+              "linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary-hover) 100%)",
+            color: "var(--text-on-brand)",
+          }}
+        >
+          {/* Background decorative elements */}
+          <div className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-10 transform translate-x-8 -translate-y-8">
+            <div
+              className="w-full h-full rounded-full"
+              style={{ backgroundColor: "var(--text-on-brand)" }}
+            />
+          </div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full opacity-10 transform -translate-x-4 translate-y-4">
+            <div
+              className="w-full h-full rounded-full"
+              style={{ backgroundColor: "var(--text-on-brand)" }}
+            />
+          </div>
+
+          <div className="relative z-10">
+            <div className="flex items-center justify-center mb-4">
+              <div
+                className="p-4 rounded-full transform hover:scale-105 transition-transform duration-300"
+                style={{
+                  backgroundColor: "rgba(255, 255, 255, 0.2)",
+                  backdropFilter: "blur(10px)",
+                }}
+              >
+                <FiShoppingBag className="text-3xl" />
+              </div>
+            </div>
+            <h2 className="text-3xl font-bold mb-2">Complete Your Order</h2>
+            <p className="text-lg opacity-90">
+              Review your order details and complete the secure checkout
+            </p>
+            {/* Progress indicator */}
+            <div className="flex items-center justify-center mt-6 space-x-2">
+              <div className="w-3 h-3 rounded-full bg-white opacity-100"></div>
+              <div className="w-8 h-1 bg-white opacity-60 rounded-full"></div>
+              <div className="w-3 h-3 rounded-full bg-white opacity-60"></div>
+              <div className="w-8 h-1 bg-white opacity-30 rounded-full"></div>
+              <div className="w-3 h-3 rounded-full bg-white opacity-30"></div>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-8">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            {/* Left Column - Order Summary & Address */}
+            <div
+              className="xl:col-span-2 space-y-8"
+              style={{ animation: "slideInLeft 0.6s ease-out" }}
+            >
+              {" "}
+              {/* Enhanced Order Summary */}
+              <div
+                className="group rounded-2xl p-8 border-2 border-transparent transition-all duration-500 hover:border-opacity-30 hover:shadow-xl transform hover:-translate-y-1"
+                style={{
+                  backgroundColor: "var(--bg-secondary)",
+                  borderColor: "var(--border-primary)",
+                  boxShadow:
+                    "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                  background:
+                    "linear-gradient(145deg, var(--bg-secondary) 0%, var(--bg-primary) 100%)",
+                }}
+              >
+                <div className="flex items-center mb-8">
+                  <div
+                    className="p-3 rounded-xl mr-4 transform group-hover:scale-110 transition-transform duration-300"
+                    style={{
+                      backgroundColor: "var(--bg-accent-light)",
+                      color: "var(--brand-primary)",
+                      boxShadow: "0 4px 14px 0 rgba(0, 118, 255, 0.15)",
+                    }}
+                  >
+                    <FiShoppingBag className="text-xl" />
+                  </div>
+                  <div>
+                    <h3
+                      className="text-xl font-bold mb-1"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      Order Summary
+                    </h3>
+                    <p
+                      className="text-sm"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      {orderItems.length} item{orderItems.length > 1 ? "s" : ""}{" "}
+                      in your order
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  {orderItems.map((item, index) => (
+                    <div
+                      key={item.id}
+                      className={`group/item flex items-center justify-between p-6 rounded-xl transition-all duration-300 hover:shadow-md transform hover:scale-[1.02] ${
+                        index < orderItems.length - 1 ? "border-b-2" : ""
+                      }`}
+                      style={{
+                        backgroundColor: "var(--bg-primary)",
+                        borderColor: "var(--border-primary)",
+                        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
+                      }}
+                    >
+                      <div className="flex items-center flex-1">
+                        <div
+                          className="relative w-20 h-20 rounded-xl overflow-hidden mr-6 group-hover/item:shadow-lg transition-shadow duration-300"
+                          style={{
+                            boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)",
+                            border: "2px solid var(--border-primary)",
+                          }}
+                        >
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="w-full h-full object-cover group-hover/item:scale-105 transition-transform duration-300"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover/item:opacity-100 transition-opacity duration-300" />
+                        </div>
+                        <div className="flex-1">
+                          <h4
+                            className="font-semibold mb-2 text-lg group-hover:item:text-opacity-80 transition-all duration-300"
+                            style={{ color: "var(--text-primary)" }}
+                          >
+                            {item.name}
+                          </h4>
+                          <div className="flex items-center space-x-3">
+                            <span
+                              className="text-sm px-4 py-2 rounded-full font-medium"
+                              style={{
+                                backgroundColor: "var(--bg-accent-light)",
+                                color: "var(--brand-primary)",
+                              }}
+                            >
+                              Qty: {item.quantity}
+                            </span>
+                            <div className="flex items-center">
+                              <FiStar
+                                className="text-yellow-400 mr-1"
+                                size={14}
+                              />
+                              <span
+                                className="text-sm font-medium"
+                                style={{ color: "var(--text-secondary)" }}
+                              >
+                                4.5
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right ml-4">
+                        <p
+                          className="font-bold text-xl mb-1 group-hover:item:scale-105 transition-transform duration-300"
+                          style={{ color: "var(--brand-primary)" }}
+                        >
+                          {formatPrice(item.price * item.quantity)}
+                        </p>
+                        <p
+                          className="text-sm"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          {formatPrice(item.price)} each
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Enhanced Total Section */}
+                  <div
+                    className="p-6 rounded-xl border-2"
+                    style={{
+                      borderColor: "var(--brand-primary)",
+                      backgroundColor: "var(--bg-accent-light)",
+                      background:
+                        "linear-gradient(145deg, var(--bg-accent-light) 0%, rgba(255, 255, 255, 0.8) 100%)",
+                    }}
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <FiGift
+                          className="mr-3 text-2xl"
+                          style={{ color: "var(--brand-primary)" }}
+                        />
+                        <div>
+                          <span
+                            className="text-xl font-bold"
+                            style={{ color: "var(--text-primary)" }}
+                          >
+                            Total Amount
+                          </span>
+                          <p
+                            className="text-sm"
+                            style={{ color: "var(--text-secondary)" }}
+                          >
+                            Including all taxes
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span
+                          className="text-3xl font-bold"
+                          style={{ color: "var(--brand-primary)" }}
+                        >
+                          {formatPrice(orderTotal)}
+                        </span>
+                        <div className="flex items-center justify-end mt-1">
+                          <FiTruck className="mr-1 text-green-500" size={14} />
+                          <span className="text-sm font-medium text-green-500">
+                            FREE Delivery
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>{" "}
+              {/* Enhanced Address Selection */}
+              <div
+                className="group rounded-2xl p-8 border-2 border-transparent transition-all duration-500 hover:border-opacity-30 hover:shadow-xl transform hover:-translate-y-1"
+                style={{
+                  backgroundColor: "var(--bg-secondary)",
+                  borderColor: "var(--border-primary)",
+                  boxShadow:
+                    "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                  background:
+                    "linear-gradient(145deg, var(--bg-secondary) 0%, var(--bg-primary) 100%)",
+                }}
+              >
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center">
+                    <div
+                      className="p-3 rounded-xl mr-4 transform group-hover:scale-110 transition-transform duration-300"
+                      style={{
+                        backgroundColor: "var(--bg-accent-light)",
+                        color: "var(--brand-primary)",
+                        boxShadow: "0 4px 14px 0 rgba(0, 118, 255, 0.15)",
+                      }}
+                    >
+                      <FiMapPin className="text-xl" />
+                    </div>
+                    <div>
+                      <h3
+                        className="text-xl font-bold mb-1"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        Delivery Address
+                      </h3>
+                      <p
+                        className="text-sm"
+                        style={{ color: "var(--text-secondary)" }}
+                      >
+                        Choose where you want your order delivered
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => navigate("/account?tab=addresses")}
+                    variant="outline"
+                    size="sm"
+                    fullWidth={false}
+                    icon={<FiPlus />}
+                    className="transform hover:scale-105 transition-all duration-300 hover:shadow-md"
+                    style={{
+                      borderColor: "var(--brand-primary)",
+                      color: "var(--brand-primary)",
+                      borderWidth: "2px",
+                    }}
+                  >
+                    Add New
+                  </Button>
+                </div>
+
+                {addressLoading ? (
+                  <div
+                    className="flex flex-col items-center justify-center py-16 rounded-xl"
+                    style={{ backgroundColor: "var(--bg-primary)" }}
+                  >
+                    <div
+                      className="p-4 rounded-full mb-4"
+                      style={{
+                        backgroundColor: "var(--bg-accent-light)",
+                        color: "var(--brand-primary)",
+                      }}
+                    >
+                      <FiLoader className="animate-spin" size={32} />
+                    </div>
+                    <p
+                      className="text-lg font-medium"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      Loading addresses...
+                    </p>
+                    <p
+                      className="text-sm mt-1"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      Please wait while we fetch your saved addresses
+                    </p>
+                  </div>
+                ) : addresses.length > 0 ? (
+                  <div className="space-y-4">
+                    {addresses.map((address) => (
+                      <div
+                        key={address.id}
+                        className={`group/addr p-6 rounded-xl cursor-pointer transition-all duration-300 border-2 transform ${
+                          selectedAddressId === address.id
+                            ? "shadow-lg scale-[1.02] border-2"
+                            : "hover:shadow-md hover:scale-[1.01]"
+                        }`}
+                        style={{
+                          backgroundColor:
+                            selectedAddressId === address.id
+                              ? "var(--bg-accent-light)"
+                              : "var(--bg-primary)",
+                          borderColor:
+                            selectedAddressId === address.id
+                              ? "var(--brand-primary)"
+                              : "var(--border-primary)",
+                          boxShadow:
+                            selectedAddressId === address.id
+                              ? "0 10px 25px -5px rgba(245, 158, 11, 0.25)"
+                              : "0 4px 15px rgba(0, 0, 0, 0.05)",
+                        }}
+                        onClick={() => setSelectedAddressId(address.id)}
+                      >
+                        <div className="flex items-start">
+                          <div className="flex items-center mr-6 mt-1">
+                            <div
+                              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
+                                selectedAddressId === address.id
+                                  ? "border-2 scale-110"
+                                  : "group-hover/addr:scale-105"
+                              }`}
+                              style={{
+                                borderColor:
+                                  selectedAddressId === address.id
+                                    ? "var(--brand-primary)"
+                                    : "var(--border-secondary)",
+                                backgroundColor:
+                                  selectedAddressId === address.id
+                                    ? "var(--brand-primary)"
+                                    : "transparent",
+                              }}
+                            >
+                              {selectedAddressId === address.id && (
+                                <FiCheck
+                                  className="text-sm animate-fadeIn"
+                                  style={{ color: "var(--text-on-brand)" }}
+                                />
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center mb-3">
+                              <div className="flex items-center mr-4">
+                                <FiUser
+                                  className="mr-2 text-lg"
+                                  style={{ color: "var(--brand-primary)" }}
+                                />
+                                <span
+                                  className="font-semibold text-lg"
+                                  style={{ color: "var(--text-primary)" }}
+                                >
+                                  {address.name}
+                                </span>
+                              </div>
+                              {address.isDefault && (
+                                <span
+                                  className="px-3 py-1 text-xs font-semibold rounded-full transform group-hover/addr:scale-105 transition-transform duration-300"
+                                  style={{
+                                    backgroundColor: "var(--success-color)",
+                                    color: "white",
+                                  }}
+                                >
+                                  ⭐ Default
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-start mb-3">
+                              <FiLocation
+                                className="mr-3 mt-1 text-lg flex-shrink-0"
+                                style={{ color: "var(--brand-primary)" }}
+                              />
+                              <p
+                                className="text-base leading-relaxed"
+                                style={{ color: "var(--text-secondary)" }}
+                              >
+                                {address.address}, {address.city},{" "}
+                                {address.state} - {address.pincode}
+                              </p>
+                            </div>
+                            <div className="flex items-center">
+                              <FiPhone
+                                className="mr-3 text-lg"
+                                style={{ color: "var(--brand-primary)" }}
+                              />
+                              <p
+                                className="text-base font-medium"
+                                style={{ color: "var(--text-secondary)" }}
+                              >
+                                {address.phone}
+                              </p>
+                            </div>
+                          </div>
+                          {selectedAddressId === address.id && (
+                            <div className="ml-4">
+                              <div
+                                className="p-2 rounded-full animate-fadeIn"
+                                style={{
+                                  backgroundColor: "var(--brand-primary)",
+                                  color: "var(--text-on-brand)",
+                                }}
+                              >
+                                <FiCheck className="text-lg" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div
+                    className="text-center py-16 rounded-xl"
+                    style={{ backgroundColor: "var(--bg-primary)" }}
+                  >
+                    <div
+                      className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center transform hover:scale-105 transition-transform duration-300"
+                      style={{
+                        backgroundColor: "var(--bg-secondary)",
+                        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
+                      }}
+                    >
+                      <FiMapPin
+                        size={40}
+                        style={{ color: "var(--text-secondary)" }}
+                      />
+                    </div>
+                    <p
+                      className="mb-4 text-xl font-bold"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      No addresses found
+                    </p>
+                    <p
+                      className="mb-8 text-base"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      Add a delivery address to continue with your order
+                    </p>
+                    <Button
+                      onClick={() => navigate("/account?tab=addresses")}
+                      variant="primary"
+                      icon={<FiPlus />}
+                      fullWidth={false}
+                      className="transform hover:scale-105 transition-all duration-300 hover:shadow-lg"
+                      style={{
+                        backgroundColor: "var(--brand-primary)",
+                        color: "var(--text-on-brand)",
+                      }}
+                    >
+                      Add Address
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right Column - Payment & Order */}
+            <div className="lg:col-span-1">
+              <div
+                className="rounded-xl p-6 border sticky top-4"
+                style={{
+                  backgroundColor: "var(--bg-secondary)",
+                  borderColor: "var(--border-primary)",
+                  boxShadow: "var(--shadow-medium)",
+                  borderTop: "4px solid var(--brand-primary)",
+                }}
+              >
+                <div className="flex items-center mb-6">
+                  <div
+                    className="p-2 rounded-lg mr-3"
+                    style={{
+                      backgroundColor: "var(--bg-accent-light)",
+                      color: "var(--brand-primary)",
+                    }}
+                  >
+                    <FiCreditCard className="text-lg" />
+                  </div>
+                  <h3
+                    className="text-lg font-semibold"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    Payment
+                  </h3>
+                </div>
+
+                {/* Payment Method */}
+                <div className="mb-6">
+                  <div
+                    className="p-4 rounded-lg border-2"
+                    style={{
+                      backgroundColor: "var(--bg-primary)",
+                      borderColor: "var(--brand-primary)",
+                    }}
+                  >
+                    <div className="flex items-center">
+                      <div
+                        className="w-5 h-5 rounded-full border-2 flex items-center justify-center mr-3"
+                        style={{
+                          borderColor: "var(--brand-primary)",
+                          backgroundColor: "var(--brand-primary)",
+                        }}
+                      >
+                        <FiCheck
+                          className="text-xs"
+                          style={{ color: "var(--text-on-brand)" }}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center mb-1">
+                          <span
+                            className="font-medium"
+                            style={{ color: "var(--text-primary)" }}
+                          >
+                            Razorpay
+                          </span>
+                          <FiShield
+                            className="ml-2 text-sm"
+                            style={{ color: "var(--success-color)" }}
+                          />
+                        </div>
+                        <p
+                          className="text-sm"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          Secure payment with UPI, Cards, Net Banking
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Order Total Summary */}
+                <div
+                  className="p-4 rounded-lg mb-6"
+                  style={{
+                    backgroundColor: "var(--bg-primary)",
+                    border: "1px solid var(--border-primary)",
+                  }}
+                >
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span style={{ color: "var(--text-secondary)" }}>
+                        Subtotal:
+                      </span>
+                      <span style={{ color: "var(--text-primary)" }}>
+                        {formatPrice(subtotal)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span style={{ color: "var(--text-secondary)" }}>
+                        GST (18%):
+                      </span>
+                      <span style={{ color: "var(--text-primary)" }}>
+                        {formatPrice(tax)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span style={{ color: "var(--text-secondary)" }}>
+                        Delivery:
+                      </span>
+                      <span
+                        className="font-medium"
+                        style={{
+                          color:
+                            shipping === 0
+                              ? "var(--success-color)"
+                              : "var(--text-primary)",
+                        }}
+                      >
+                        {shipping > 0 ? formatPrice(shipping) : "FREE"}
+                      </span>
+                    </div>
+                    <hr style={{ borderColor: "var(--border-primary)" }} />
+                    <div className="flex justify-between items-center">
+                      <span
+                        className="font-bold text-lg"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        Total:
+                      </span>
+                      <span
+                        className="font-bold text-xl"
+                        style={{ color: "var(--brand-primary)" }}
+                      >
+                        {formatPrice(orderTotal)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Place Order Button */}
+                <Button
+                  onClick={handlePlaceOrder}
+                  disabled={!selectedAddressId || isProcessingPayment}
+                  className="w-full transition-transform hover:scale-105 duration-300"
+                  size="lg"
+                  style={{
+                    backgroundColor:
+                      !selectedAddressId || isProcessingPayment
+                        ? "var(--text-secondary)"
+                        : "var(--brand-primary)",
+                    color: "var(--text-on-brand)",
+                  }}
+                  icon={
+                    isProcessingPayment ? (
+                      <FiLoader className="animate-spin" />
+                    ) : (
+                      <FiZap />
+                    )
+                  }
+                >
+                  {isProcessingPayment
+                    ? "Processing Payment..."
+                    : `Place Order`}
+                </Button>
+
+                {/* Security Notice */}
+                <div
+                  className="mt-4 p-3 rounded-lg flex items-center"
+                  style={{
+                    backgroundColor: "var(--bg-accent-light)",
+                    border: "1px solid var(--border-primary)",
+                  }}
+                >
+                  <FiShield
+                    className="mr-2 flex-shrink-0"
+                    style={{ color: "var(--success-color)" }}
+                  />
+                  <p
+                    className="text-xs"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    Your payment information is secure and encrypted
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+export default Checkout;

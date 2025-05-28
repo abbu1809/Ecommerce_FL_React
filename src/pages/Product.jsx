@@ -245,6 +245,7 @@ const Product = () => {
                   decrementQuantity={decrementQuantity}
                 />
                 <ProductActions
+                  price={normalizedProduct.price}
                   addToCart={addToCart}
                   addToWishlist={addToWishlist}
                 />

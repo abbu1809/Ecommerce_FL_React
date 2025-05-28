@@ -1,7 +1,7 @@
 import Button from "../../components/UI/Button";
 import { FiCreditCard, FiShoppingBag } from "react-icons/fi";
 
-const CartSummary = ({ subtotal, tax, shipping, total }) => {
+const CartSummary = ({ subtotal, tax, shipping, total, onCheckout }) => {
   return (
     <div className="lg:col-span-1 sticky top-4">
       <div
@@ -98,6 +98,7 @@ const CartSummary = ({ subtotal, tax, shipping, total }) => {
 
         <div className="mt-8">
           <Button
+            onClick={onCheckout}
             className="text-base py-3.5 transition-all duration-300 transform hover:translate-y-[-2px] rounded-lg font-medium"
             style={{
               background: "var(--brand-primary)",

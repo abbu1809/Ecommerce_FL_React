@@ -7,10 +7,16 @@ import {
   FiCreditCard,
   FiShield,
   FiGift,
+  FiInfo,
 } from "react-icons/fi";
 import Button from "../../components/UI/Button";
 
-const ProductActions = ({ addToCart, addToWishlist }) => {
+const ProductActions = ({ addToCart, addToWishlist, price }) => {
+  // Calculate GST and delivery
+  const gst = price * 0.18; // 18% GST
+  const shipping = price > 50000 ? 0 : 99;
+  const totalPrice = price + gst + shipping;
+
   return (
     <div
       className="rounded-lg p-4 space-y-6"
@@ -19,6 +25,49 @@ const ProductActions = ({ addToCart, addToWishlist }) => {
         boxShadow: "var(--shadow-small)",
       }}
     >
+      {/* Price details with GST and Delivery */}
+      <div
+        className="p-4 rounded-lg mb-2"
+        style={{ backgroundColor: "var(--bg-accent-light)" }}
+      >
+        <div className="flex justify-between items-center mb-2">
+          <span style={{ color: "var(--text-secondary)" }}>Price:</span>
+          <span style={{ color: "var(--text-primary)" }}>
+            ₹{price.toLocaleString()}
+          </span>
+        </div>
+        <div className="flex justify-between items-center mb-2">
+          <span style={{ color: "var(--text-secondary)" }}>GST (18%):</span>
+          <span style={{ color: "var(--text-primary)" }}>
+            ₹{gst.toLocaleString()}
+          </span>
+        </div>
+        <div className="flex justify-between items-center mb-2">
+          <span style={{ color: "var(--text-secondary)" }}>Delivery:</span>
+          <span
+            style={
+              shipping === 0
+                ? { color: "var(--success-color)" }
+                : { color: "var(--text-primary)" }
+            }
+          >
+            {shipping > 0 ? `₹${shipping.toLocaleString()}` : "Free"}
+          </span>
+        </div>
+        <hr
+          style={{
+            borderColor: "var(--border-primary)",
+            margin: "8px 0",
+          }}
+        />
+        <div className="flex justify-between items-center font-bold">
+          <span style={{ color: "var(--text-primary)" }}>Total:</span>
+          <span style={{ color: "var(--brand-primary)" }}>
+            ₹{totalPrice.toLocaleString()}
+          </span>
+        </div>
+      </div>
+
       {/* Primary action buttons */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Button
