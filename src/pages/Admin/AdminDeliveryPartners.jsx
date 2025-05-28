@@ -31,7 +31,7 @@ const AdminDeliveryPartners = () => {
   };
   const confirmVerify = async () => {
     if (selectedPartner) {
-      toast.promise(verifyDeliveryPartner(selectedPartner.id), {
+      toast.promise(verifyDeliveryPartner(selectedPartner.partner_id), {
         loading: `Verifying ${selectedPartner.name}...`,
         success: `${selectedPartner.name} has been verified successfully!`,
         error: `Failed to verify ${selectedPartner.name}`,
@@ -193,9 +193,10 @@ const AdminDeliveryPartners = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
+                {" "}
                 {filteredPartners.length > 0 ? (
                   filteredPartners.map((partner) => (
-                    <tr key={partner.id} className="hover:bg-gray-50">
+                    <tr key={partner.partner_id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="font-medium text-gray-900">
                           {partner.name}
@@ -258,33 +259,63 @@ const AdminDeliveryPartners = () => {
                 )}
               </tbody>
             </table>
-          </div>
-
+          </div>{" "}
           {/* Verification Modal */}
           {showModal && selectedPartner && (
-            <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-              <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-                <h3 className="text-lg font-bold mb-4">
-                  Verify Delivery Partner
-                </h3>
-                <p className="mb-4">
-                  Are you sure you want to verify{" "}
-                  <span className="font-semibold">{selectedPartner.name}</span>{" "}
-                  as a delivery partner?
-                </p>
-                <div className="flex justify-end gap-3">
-                  <button
-                    onClick={() => setShowModal(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={confirmVerify}
-                    className="px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-opacity-90"
-                  >
-                    Verify Partner
-                  </button>
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <div
+                className="bg-white rounded-lg shadow-2xl max-w-md w-full mx-4 transform transition-all duration-200 scale-100"
+                style={{
+                  backgroundColor: "var(--bg-primary)",
+                  border: "1px solid var(--border-color)",
+                }}
+              >
+                <div className="p-6">
+                  {/* Icon and Title */}
+                  <div className="flex items-start mb-4">
+                    <div className="flex-shrink-0 mr-4 mt-1">
+                      <FiCheck className="text-green-500" size={24} />
+                    </div>
+                    <div className="flex-1">
+                      <h3
+                        className="text-lg font-semibold mb-2"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        Verify Delivery Partner
+                      </h3>
+                      <p
+                        className="text-sm leading-relaxed"
+                        style={{ color: "var(--text-secondary)" }}
+                      >
+                        Are you sure you want to verify{" "}
+                        <span className="font-semibold">
+                          {selectedPartner.name}
+                        </span>{" "}
+                        as a delivery partner?
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex justify-end space-x-3 mt-6">
+                    <button
+                      onClick={() => setShowModal(false)}
+                      className="px-4 py-2 border rounded-md hover:bg-gray-50 transition-colors"
+                      style={{
+                        borderColor: "var(--border-color)",
+                        color: "var(--text-secondary)",
+                        backgroundColor: "transparent",
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={confirmVerify}
+                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                    >
+                      Verify Partner
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

@@ -82,12 +82,10 @@ export const useDeliveryStore = create(
         // Use the API endpoint for verifying a partner
         const response = await deliveryApi.patch(
           `/delivery/verify/${partnerId}/`
-        );
-
-        // Update the partner in the list
+        ); // Update the partner in the list
         set((state) => {
           const updatedList = state.partners.list.map((partner) =>
-            partner.id === partnerId
+            partner.partner_id === partnerId
               ? { ...partner, is_verified: true }
               : partner
           );

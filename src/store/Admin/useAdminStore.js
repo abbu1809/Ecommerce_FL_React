@@ -582,14 +582,12 @@ export const useAdminStore = create(
       try {
         // API call to verify a delivery partner
         const response = await adminApi.patch(
-          `/delivery/verify/${partnerId}/`,
+          `/partners/verify/${partnerId}/`,
           {}
-        );
-
-        // Update the partner in the list
+        ); // Update the partner in the list
         set((state) => {
           const updatedList = state.deliveryPartners.list.map((partner) =>
-            partner.id === partnerId
+            partner.partner_id === partnerId
               ? { ...partner, is_verified: true }
               : partner
           );

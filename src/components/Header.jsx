@@ -79,7 +79,6 @@ const Header = ({ categories }) => {
       fetchWishlist();
     }
   }, [isAuthenticated, fetchCart, fetchWishlist]);
-
   useEffect(() => {
     const getUserLocation = () => {
       if (navigator.geolocation) {
@@ -100,8 +99,9 @@ const Header = ({ categories }) => {
                 data.address.county ||
                 "Unknown";
 
+              // Ensure city name is in English
               setLocation({
-                city: city,
+                city: city, // This should already be in English from the OpenStreetMap API
                 loading: false,
                 error: null,
               });
@@ -115,7 +115,7 @@ const Header = ({ categories }) => {
           },
           (error) => {
             setLocation({
-              city: "Bhopal",
+              city: "Jabalpur", // Changed default from "Bhopal" to "Jabalpur" to match the image
               loading: false,
               error: error || "Location access denied",
             });
@@ -123,7 +123,7 @@ const Header = ({ categories }) => {
         );
       } else {
         setLocation({
-          city: "Bhopal",
+          city: "Jabalpur", // Changed default from "Bhopal" to "Jabalpur" to match the image
           loading: false,
           error: "Geolocation not supported",
         });
@@ -320,7 +320,7 @@ const Header = ({ categories }) => {
                     className="text-xl relative z-10"
                     style={{ color: "var(--text-on-brand)" }}
                   />
-                </div>
+                </div>{" "}
                 <div className="text-xs mt-1">
                   <p
                     className="text-white/80 text-center"
