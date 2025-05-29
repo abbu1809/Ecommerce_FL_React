@@ -136,7 +136,7 @@ const formatDate = (dateString) => {
 };
 
 const OrderTable = ({ onSelectOrder, statusFilter, searchQuery }) => {
-  const { orders, updateOrderStatus } = useAdminStore();
+  const { orders } = useAdminStore();
   const { list: orderList, loading } = orders;
 
   // Filter orders based on status and search query
@@ -153,10 +153,6 @@ const OrderTable = ({ onSelectOrder, statusFilter, searchQuery }) => {
       return matchesStatus && matchesSearch;
     });
   }, [orderList, statusFilter, searchQuery]);
-
-  const handleUpdateStatus = (orderId, newStatus) => {
-    updateOrderStatus(orderId, newStatus);
-  };
 
   return (
     <div
@@ -327,87 +323,6 @@ const OrderTable = ({ onSelectOrder, statusFilter, searchQuery }) => {
                         >
                           <FiEye size={18} />
                         </button>
-                        <div className="relative group">
-                          <button
-                            className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
-                            style={{ color: "var(--brand-secondary)" }}
-                            title="Update Order Status"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <FiEdit2 size={18} />
-                          </button>
-                          <div
-                            className="absolute right-0 mt-2 w-48 rounded-md shadow-lg hidden group-hover:block z-50"
-                            style={{
-                              backgroundColor: "var(--bg-primary)",
-                              boxShadow: "var(--shadow-large)",
-                              borderRadius: "var(--rounded-md)",
-                            }}
-                          >
-                            <div className="py-1">
-                              {order.status !== "processing" && (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleUpdateStatus(
-                                      order.order_id,
-                                      "processing"
-                                    );
-                                  }}
-                                  className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
-                                  style={{ color: "var(--text-primary)" }}
-                                >
-                                  Mark as Processing
-                                </button>
-                              )}
-                              {order.status !== "shipped" && (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleUpdateStatus(
-                                      order.order_id,
-                                      "shipped"
-                                    );
-                                  }}
-                                  className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
-                                  style={{ color: "var(--text-primary)" }}
-                                >
-                                  Mark as Shipped
-                                </button>
-                              )}
-                              {order.status !== "delivered" && (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleUpdateStatus(
-                                      order.order_id,
-                                      "delivered"
-                                    );
-                                  }}
-                                  className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
-                                  style={{ color: "var(--text-primary)" }}
-                                >
-                                  Mark as Delivered
-                                </button>
-                              )}
-                              {order.status !== "cancelled" && (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleUpdateStatus(
-                                      order.order_id,
-                                      "cancelled"
-                                    );
-                                  }}
-                                  className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
-                                  style={{ color: "var(--error-color)" }}
-                                >
-                                  Cancel Order
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
                       </div>
                     </td>
                   </tr>

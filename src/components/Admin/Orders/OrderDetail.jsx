@@ -72,11 +72,19 @@ const OrderDetail = ({ order }) => {
 
   const handleEditSave = async () => {
     try {
-      await editOrder(order.order_id, editedOrder);
+      // Ensure you are passing all required parameters for editOrder
+      // Assuming order object has user_id and order_id
+      if (!order || !order.user_id || !order.order_id) {
+        toast.error("Order details are incomplete.");
+        return;
+      }
+      await editOrder(order.user_id, order.order_id, editedOrder);
       setIsEditing(false);
       toast.success("Order updated successfully!");
+      // Optionally, refresh the order list or the specific order details
+      // fetchOrders(); // If you want to refresh the entire list
     } catch (error) {
-      toast.error("Failed to update order");
+      toast.error(error.message || "Failed to update order");
     }
   };
 
@@ -85,14 +93,27 @@ const OrderDetail = ({ order }) => {
       toast.error("Please select a delivery partner");
       return;
     }
+    // Ensure order and its necessary IDs are present
+    if (!order || !order.user_id || !order.order_id) {
+      toast.error("Order details are incomplete for assignment.");
+      return;
+    }
 
     try {
-      await assignOrderToDeliveryPartner(order.order_id, selectedPartnerId);
+      // Pass userId, orderId, and partnerId to the store action
+      await assignOrderToDeliveryPartner(
+        order.user_id,
+        order.order_id,
+        selectedPartnerId
+      );
       setShowAssignModal(false);
-      setSelectedPartnerId("");
+      setSelectedPartnerId(""); // Reset selected partner
       toast.success("Delivery partner assigned successfully!");
+      // Optionally, refresh orders to see the update immediately
+      // fetchOrders();
     } catch (error) {
-      toast.error("Failed to assign delivery partner");
+      // The error thrown from the store should be caught here
+      toast.error(error.message || "Failed to assign delivery partner");
     }
   };
 

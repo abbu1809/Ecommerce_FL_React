@@ -259,18 +259,18 @@ export const useAdminStore = create(
         }));
       }
     }, // Edit order details
-    editOrder: async (orderId, orderData) => {
+    editOrder: async (userId, orderId, orderData) => {
       set((state) => ({
         orders: { ...state.orders, loading: true, error: null },
       }));
 
       try {
         const response = await adminApi.put(
-          `/admin/order/edit/${orderId}/`,
+          `/admin/users/${userId}/orders/${orderId}/edit/`,
           orderData
         );
 
-        if (response.data.success || response.status === 200) {
+        if (response.data.message || response.status === 200) {
           set((state) => {
             const updatedList = state.orders.list.map((order) =>
               order.order_id === orderId ? { ...order, ...orderData } : order
@@ -301,14 +301,34 @@ export const useAdminStore = create(
     },
 
     // Assign delivery partner to order
-    assignOrderToDeliveryPartner: async (orderId, partnerId) => {
+    assignOrderToDeliveryPartner: async (userId, orderId, partnerId) => {
+      if (!partnerId) {
+        const errorMsg =
+          "Partner ID is required. Please select a delivery partner.";
+        set((state) => ({
+          orders: {
+            ...state.orders,
+            loading: false, // Ensure loading is false as the operation is aborted
+            error: errorMsg,
+          },
+        }));
+        // It's often better to throw an error or return a specific error object
+        // so the calling component can handle it (e.g., display a toast).
+        // For now, we'll log it and set the error state.
+        console.error(errorMsg);
+        // Optionally, re-throw the error if you want the promise to be rejected
+        throw new Error(errorMsg);
+        // Or return an object indicating failure:
+        // return { success: false, error: errorMsg };
+      }
+
       set((state) => ({
         orders: { ...state.orders, loading: true, error: null },
       }));
 
       try {
         const response = await adminApi.post(
-          `/admin/orders/assign-order/${orderId}/`,
+          `/admin/users/${userId}/orders/${orderId}/assign-partner/`,
           {
             partner_id: partnerId,
           }
@@ -340,19 +360,23 @@ export const useAdminStore = create(
             };
           });
 
-          return response.data;
+          return response.data; // Or return { success: true, data: response.data }
         }
+        // It might be good to handle cases where response.status is not 200 but also not an error
+        // For example, if the API could return other success codes or specific non-error messages.
       } catch (error) {
+        const errorMessage =
+          error.response?.data?.error || "Failed to assign delivery partner";
         set((state) => ({
           orders: {
             ...state.orders,
             loading: false,
-            error:
-              error.response?.data?.error ||
-              "Failed to assign delivery partner",
+            error: errorMessage,
           },
         }));
-        throw error;
+        console.error("Error in assignOrderToDeliveryPartner:", error);
+        throw error; // Re-throw the error so the calling component can catch it
+        // Or return { success: false, error: errorMessage };
       }
     },
 
