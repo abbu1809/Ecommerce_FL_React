@@ -74,10 +74,11 @@ const formatCurrency = (amount, currency = "INR") => {
 const OrderStatusList = ({ orders }) => {
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const { initiatePayment, isProcessingPayment } = useOrderStore();
-
   const handleViewDetails = (e, orderId) => {
     e.preventDefault(); // Prevent Link navigation
     e.stopPropagation();
+    console.log("Opening modal for order:", orderId); // Debug log
+    alert(`Opening modal for order: ${orderId}`); // Temporary alert for testing
     setSelectedOrderId(orderId);
   };
 
@@ -245,14 +246,19 @@ const OrderStatusList = ({ orders }) => {
             </Link>
           </div>
         ))}
-      </div>
-
+      </div>{" "}
       {/* Order Detail Modal */}
       <OrderDetailModal
         isOpen={!!selectedOrderId}
         onClose={closeModal}
         orderId={selectedOrderId}
       />
+      {/* Debug info */}
+      {selectedOrderId && (
+        <div style={{ display: "none" }}>
+          Selected Order ID: {selectedOrderId}
+        </div>
+      )}
     </>
   );
 };

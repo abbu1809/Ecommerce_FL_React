@@ -60,15 +60,22 @@ const AdminOrders = () => {
             Export Orders
           </button>
         </div>
-      </div>
-
+      </div>{" "}
       {/* Order status summary */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
         {Object.entries({
           all: { label: "All Orders", color: "var(--brand-primary)" },
-          pending: { label: "Pending", color: "var(--warning-color)" },
+          pending_payment: {
+            label: "Pending Payment",
+            color: "var(--warning-color)",
+          },
+          payment_successful: {
+            label: "Payment Success",
+            color: "var(--success-color)",
+          },
           processing: { label: "Processing", color: "var(--info-color)" },
-          shipped: { label: "Shipped", color: "var(--brand-secondary)" },
+          assigned: { label: "Assigned", color: "var(--brand-secondary)" },
+          shipped: { label: "Shipped", color: "var(--brand-primary)" },
           delivered: { label: "Delivered", color: "var(--success-color)" },
           cancelled: { label: "Cancelled", color: "var(--error-color)" },
         }).map(([status, { label, color }]) => (
@@ -99,7 +106,6 @@ const AdminOrders = () => {
           </button>
         ))}
       </div>
-
       <div className="mb-6 flex flex-wrap items-center gap-4">
         <div className="flex-1 min-w-[240px]">
           <div className="relative">
@@ -125,7 +131,6 @@ const AdminOrders = () => {
           </div>
         </div>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <OrderTable

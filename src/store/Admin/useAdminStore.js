@@ -13,7 +13,7 @@ const getStatusCounts = (items, statusField = "status") => {
 
 // Admin store
 export const useAdminStore = create(
-  devtools((set) => ({
+  devtools((set, get) => ({
     // Dashboard data
     dashboard: {
       stats: [],
@@ -58,6 +58,63 @@ export const useAdminStore = create(
       list: [],
       loading: false,
       error: null,
+    },
+
+    // Single user and product lookup methods
+    getUserById: async (userId) => {
+      try {
+        const response = await adminApi.get(`/admin/users/${userId}/`);
+        return response.data.user;
+      } catch (error) {
+        console.error(`Failed to fetch user ${userId}:`, error);
+        return null;
+      }
+    },
+
+    getProductById: async (productId) => {
+      try {
+        const response = await adminApi.get(`/admin/products/${productId}/`);
+        return response.data.product;
+      } catch (error) {
+        console.error(`Failed to fetch product ${productId}:`, error);
+        return null;
+      }
+    },
+
+    // Cache for users and products to avoid repeated API calls
+    userCache: new Map(),
+    productCache: new Map(),
+
+    // Get user with caching
+    getCachedUser: async (userId) => {
+      const cached = get().userCache.get(userId);
+      if (cached) return cached;
+
+      const user = await get().getUserById(userId);
+      if (user) {
+        set((state) => {
+          const newCache = new Map(state.userCache);
+          newCache.set(userId, user);
+          return { userCache: newCache };
+        });
+      }
+      return user;
+    },
+
+    // Get product with caching
+    getCachedProduct: async (productId) => {
+      const cached = get().productCache.get(productId);
+      if (cached) return cached;
+
+      const product = await get().getProductById(productId);
+      if (product) {
+        set((state) => {
+          const newCache = new Map(state.productCache);
+          newCache.set(productId, product);
+          return { productCache: newCache };
+        });
+      }
+      return product;
     },
 
     // Dashboard actions
@@ -133,9 +190,7 @@ export const useAdminStore = create(
           },
         }));
       }
-    },
-
-    // Orders actions
+    }, // Orders actions
     fetchOrders: async () => {
       set((state) => ({
         orders: { ...state.orders, loading: true, error: null },
@@ -164,23 +219,21 @@ export const useAdminStore = create(
         }));
       }
     },
-
     updateOrderStatus: async (orderId, status) => {
       set((state) => ({
         orders: { ...state.orders, loading: true, error: null },
       }));
 
       try {
-        // This is a placeholder - you'll need to add the actual API endpoint for updating order status
-        const response = await adminApi.post("/admin/update_order_status", {
-          order_id: orderId,
+        // Use the edit_order endpoint for updating order status
+        const response = await adminApi.put(`/admin/order/edit/${orderId}/`, {
           status: status,
         });
 
-        if (response.data.success) {
+        if (response.data.message || response.status === 200) {
           set((state) => {
             const updatedList = state.orders.list.map((order) =>
-              order.id === orderId ? { ...order, status } : order
+              order.order_id === orderId ? { ...order, status } : order
             );
 
             const statusCounts = getStatusCounts(updatedList);
@@ -204,6 +257,102 @@ export const useAdminStore = create(
               error.response?.data?.error || "Failed to update order status",
           },
         }));
+      }
+    }, // Edit order details
+    editOrder: async (orderId, orderData) => {
+      set((state) => ({
+        orders: { ...state.orders, loading: true, error: null },
+      }));
+
+      try {
+        const response = await adminApi.put(
+          `/admin/order/edit/${orderId}/`,
+          orderData
+        );
+
+        if (response.data.success || response.status === 200) {
+          set((state) => {
+            const updatedList = state.orders.list.map((order) =>
+              order.order_id === orderId ? { ...order, ...orderData } : order
+            );
+
+            return {
+              orders: {
+                list: updatedList,
+                statusCounts: getStatusCounts(updatedList),
+                loading: false,
+                error: null,
+              },
+            };
+          });
+
+          return response.data;
+        }
+      } catch (error) {
+        set((state) => ({
+          orders: {
+            ...state.orders,
+            loading: false,
+            error: error.response?.data?.error || "Failed to edit order",
+          },
+        }));
+        throw error;
+      }
+    },
+
+    // Assign delivery partner to order
+    assignOrderToDeliveryPartner: async (orderId, partnerId) => {
+      set((state) => ({
+        orders: { ...state.orders, loading: true, error: null },
+      }));
+
+      try {
+        const response = await adminApi.post(
+          `/admin/orders/assign-order/${orderId}/`,
+          {
+            partner_id: partnerId,
+          }
+        );
+
+        if (response.data.message || response.status === 200) {
+          // Update the order in the list with the assigned partner info
+          set((state) => {
+            const updatedList = state.orders.list.map((order) =>
+              order.order_id === orderId
+                ? {
+                    ...order,
+                    assigned_partner_id: partnerId,
+                    delivery_status: "assigned",
+                    status: "assigned", // Update main status as well
+                  }
+                : order
+            );
+
+            const statusCounts = getStatusCounts(updatedList);
+
+            return {
+              orders: {
+                list: updatedList,
+                statusCounts,
+                loading: false,
+                error: null,
+              },
+            };
+          });
+
+          return response.data;
+        }
+      } catch (error) {
+        set((state) => ({
+          orders: {
+            ...state.orders,
+            loading: false,
+            error:
+              error.response?.data?.error ||
+              "Failed to assign delivery partner",
+          },
+        }));
+        throw error;
       }
     },
 

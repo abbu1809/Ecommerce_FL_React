@@ -397,7 +397,8 @@ export const useOrderStore = create((set) => ({
       set({ isLoading: true, error: null });
 
       const response = await api.get(`/users/orders/${orderId}/`);
-      const order = response.data.order;
+      const order = response.data.order_details;
+      console.log("Fetched order:", order);
 
       set({
         currentOrder: order,

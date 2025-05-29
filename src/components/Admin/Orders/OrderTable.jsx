@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 import {
   FiEye,
   FiEdit2,
@@ -7,6 +7,8 @@ import {
   FiX,
   FiTruck,
   FiLoader,
+  FiCreditCard,
+  FiUser,
 } from "react-icons/fi";
 import Button from "../../UI/Button";
 import useAdminStore from "../../../store/Admin/useAdminStore";
@@ -14,19 +16,29 @@ import useAdminStore from "../../../store/Admin/useAdminStore";
 // Order status badge component
 const StatusBadge = ({ status }) => {
   const statusConfig = {
-    pending: {
+    pending_payment: {
       bg: "var(--warning-color-light)",
       color: "var(--warning-color)",
-      icon: <FiLoader size={12} className="mr-1" />,
+      icon: <FiCreditCard size={12} className="mr-1" />,
+    },
+    payment_successful: {
+      bg: "var(--success-color-light)",
+      color: "var(--success-color)",
+      icon: <FiCheck size={12} className="mr-1" />,
     },
     processing: {
       bg: "var(--info-color-light)",
       color: "var(--info-color)",
       icon: <FiPackage size={12} className="mr-1" />,
     },
-    shipped: {
+    assigned: {
       bg: "var(--brand-secondary-light)",
       color: "var(--brand-secondary)",
+      icon: <FiUser size={12} className="mr-1" />,
+    },
+    shipped: {
+      bg: "var(--brand-primary-light)",
+      color: "var(--brand-primary)",
       icon: <FiTruck size={12} className="mr-1" />,
     },
     delivered: {
@@ -41,7 +53,7 @@ const StatusBadge = ({ status }) => {
     },
   };
 
-  const config = statusConfig[status] || statusConfig.pending;
+  const config = statusConfig[status] || statusConfig.pending_payment;
 
   return (
     <span
@@ -52,9 +64,75 @@ const StatusBadge = ({ status }) => {
       }}
     >
       {config.icon}
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+      {status.replace("_", " ").charAt(0).toUpperCase() +
+        status.replace("_", " ").slice(1)}
     </span>
   );
+};
+
+// Customer name component that fetches user data
+const CustomerName = ({ userId }) => {
+  const { getCachedUser } = useAdminStore();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userData = await getCachedUser(userId);
+        setUser(userData);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [userId, getCachedUser]);
+
+  if (loading) {
+    return <FiLoader className="animate-spin" size={14} />;
+  }
+
+  const displayName = user
+    ? `${user.first_name || ""} ${user.last_name || ""}`.trim() ||
+      user.email ||
+      user.username
+    : `User-${userId.substring(0, 8)}`;
+
+  return (
+    <>
+      <div
+        className="text-sm font-medium"
+        style={{ color: "var(--text-primary)" }}
+      >
+        {displayName}
+      </div>
+      <div className="text-xs" style={{ color: "var(--text-secondary)" }}>
+        {userId.substring(0, 12)}...
+      </div>
+    </>
+  );
+};
+
+// Helper function to get customer name from user_id (fallback)
+const getCustomerName = (userId) => {
+  return `User-${userId.substring(0, 8)}`;
+};
+
+// Helper function to format date
+const formatDate = (dateString) => {
+  try {
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch {
+    return "Invalid Date";
+  }
 };
 
 const OrderTable = ({ onSelectOrder, statusFilter, searchQuery }) => {
@@ -66,10 +144,12 @@ const OrderTable = ({ onSelectOrder, statusFilter, searchQuery }) => {
     return orderList.filter((order) => {
       const matchesStatus =
         statusFilter === "all" || order.status === statusFilter;
+      const customerName = getCustomerName(order.user_id);
       const matchesSearch =
         !searchQuery ||
-        order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.customer.toLowerCase().includes(searchQuery.toLowerCase());
+        order.order_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        order.user_id.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesStatus && matchesSearch;
     });
   }, [orderList, statusFilter, searchQuery]);
@@ -122,6 +202,12 @@ const OrderTable = ({ onSelectOrder, statusFilter, searchQuery }) => {
                   className="px-6 py-3 text-left text-xs font-medium tracking-wider"
                   style={{ color: "var(--text-secondary)" }}
                 >
+                  Items
+                </th>
+                <th
+                  className="px-6 py-3 text-left text-xs font-medium tracking-wider"
+                  style={{ color: "var(--text-secondary)" }}
+                >
                   Total
                 </th>
                 <th
@@ -129,6 +215,12 @@ const OrderTable = ({ onSelectOrder, statusFilter, searchQuery }) => {
                   style={{ color: "var(--text-secondary)" }}
                 >
                   Status
+                </th>
+                <th
+                  className="px-6 py-3 text-left text-xs font-medium tracking-wider"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  Payment
                 </th>
                 <th
                   className="px-6 py-3 text-right text-xs font-medium tracking-wider"
@@ -145,7 +237,7 @@ const OrderTable = ({ onSelectOrder, statusFilter, searchQuery }) => {
               {filteredOrders.length > 0 ? (
                 filteredOrders.map((order) => (
                   <tr
-                    key={order.id}
+                    key={order.order_id}
                     className="hover:bg-gray-50 transition-colors duration-150 cursor-pointer"
                     onClick={() => onSelectOrder(order)}
                   >
@@ -154,7 +246,7 @@ const OrderTable = ({ onSelectOrder, statusFilter, searchQuery }) => {
                         className="text-sm font-medium"
                         style={{ color: "var(--text-primary)" }}
                       >
-                        {order.id}
+                        {order.order_id.substring(0, 8)}...
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -162,27 +254,65 @@ const OrderTable = ({ onSelectOrder, statusFilter, searchQuery }) => {
                         className="text-sm"
                         style={{ color: "var(--text-primary)" }}
                       >
-                        {order.date}
+                        {formatDate(order.created_at)}
                       </div>
+                    </td>{" "}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <CustomerName userId={order.user_id} />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div
+                        className="text-sm"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        {order.order_items?.length || 0} items
+                      </div>
+                      {order.order_items?.length > 0 && (
+                        <div
+                          className="text-xs"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          {order.order_items[0].name}
+                          {order.order_items.length > 1 &&
+                            ` +${order.order_items.length - 1} more`}
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div
                         className="text-sm font-medium"
                         style={{ color: "var(--text-primary)" }}
                       >
-                        {order.customer}
+                        ₹{order.total_amount?.toLocaleString() || 0}
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
                       <div
-                        className="text-sm font-medium"
-                        style={{ color: "var(--text-primary)" }}
+                        className="text-xs"
+                        style={{ color: "var(--text-secondary)" }}
                       >
-                        ₹{order.total.toLocaleString()}
+                        {order.currency || "INR"}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <StatusBadge status={order.status} />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div
+                        className="text-sm"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        {order.payment_details?.method || "N/A"}
+                      </div>
+                      <div
+                        className="text-xs"
+                        style={{
+                          color:
+                            order.payment_details?.status === "captured"
+                              ? "var(--success-color)"
+                              : "var(--text-secondary)",
+                        }}
+                      >
+                        {order.payment_details?.status || "Pending"}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="flex justify-end space-x-2">
@@ -219,9 +349,12 @@ const OrderTable = ({ onSelectOrder, statusFilter, searchQuery }) => {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleUpdateStatus(order.id, "processing");
+                                    handleUpdateStatus(
+                                      order.order_id,
+                                      "processing"
+                                    );
                                   }}
-                                  className="block w-full text-left px-4 py-2 text-sm"
+                                  className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
                                   style={{ color: "var(--text-primary)" }}
                                 >
                                   Mark as Processing
@@ -231,9 +364,12 @@ const OrderTable = ({ onSelectOrder, statusFilter, searchQuery }) => {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleUpdateStatus(order.id, "shipped");
+                                    handleUpdateStatus(
+                                      order.order_id,
+                                      "shipped"
+                                    );
                                   }}
-                                  className="block w-full text-left px-4 py-2 text-sm"
+                                  className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
                                   style={{ color: "var(--text-primary)" }}
                                 >
                                   Mark as Shipped
@@ -243,9 +379,12 @@ const OrderTable = ({ onSelectOrder, statusFilter, searchQuery }) => {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleUpdateStatus(order.id, "delivered");
+                                    handleUpdateStatus(
+                                      order.order_id,
+                                      "delivered"
+                                    );
                                   }}
-                                  className="block w-full text-left px-4 py-2 text-sm"
+                                  className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
                                   style={{ color: "var(--text-primary)" }}
                                 >
                                   Mark as Delivered
@@ -255,9 +394,12 @@ const OrderTable = ({ onSelectOrder, statusFilter, searchQuery }) => {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleUpdateStatus(order.id, "cancelled");
+                                    handleUpdateStatus(
+                                      order.order_id,
+                                      "cancelled"
+                                    );
                                   }}
-                                  className="block w-full text-left px-4 py-2 text-sm"
+                                  className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
                                   style={{ color: "var(--error-color)" }}
                                 >
                                   Cancel Order
@@ -272,7 +414,7 @@ const OrderTable = ({ onSelectOrder, statusFilter, searchQuery }) => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center">
+                  <td colSpan={8} className="px-6 py-8 text-center">
                     <div style={{ color: "var(--text-secondary)" }}>
                       {searchQuery || statusFilter !== "all"
                         ? "No orders match your filter criteria"
