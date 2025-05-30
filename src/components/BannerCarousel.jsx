@@ -1,44 +1,50 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { useBannerStore } from "../store/Admin/useBannerStore";
 
-// Define the product images with correct paths for Vite
-const productImages = [
+// Define fallback product images with correct paths for Vite
+const fallbackImages = [
   {
     id: 1,
-    image: "mobile1.png",
+    image: "/mobile1.png",
     backgroundColor: "#f8fafc",
   },
   {
     id: 2,
-    image: "laptops.png",
+    image: "/laptops.png",
     backgroundColor: "#f1f5f9",
   },
   {
     id: 3,
-    image: "tv1.png",
+    image: "/tv1.png",
     backgroundColor: "#e2e8f0",
   },
   {
     id: 4,
-    image: "tablets1.png",
+    image: "/tablets1.png",
     backgroundColor: "#f1f5f9",
   },
   {
     id: 5,
-    image: "accessories.png",
+    image: "/accessories.png",
     backgroundColor: "#f8fafc",
-  },
-  {
-    id: 6,
-    image: "blf.png",
-    backgroundColor: "#f1f5f9",
   },
 ];
 
-const BannerCarousel = ({ banners = productImages }) => {
+const BannerCarousel = () => {
+  const { fetchPublicBanners, getCarouselBanners } = useBannerStore();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [[page, direction], setPage] = useState([0, 0]);
+
+  // Get carousel banners from store or use fallback
+  const carouselBanners = getCarouselBanners();
+  const banners = carouselBanners.length > 0 ? carouselBanners : fallbackImages;
+
+  // Fetch banners on mount
+  useEffect(() => {
+    fetchPublicBanners();
+  }, [fetchPublicBanners]);
 
   // Auto-advance the slider
   useEffect(() => {
@@ -122,7 +128,7 @@ const BannerCarousel = ({ banners = productImages }) => {
             {" "}
             {/* High-quality image with subtle zoom effect */}
             <motion.img
-              src={`/${banners[currentIndex].image}`}
+              src={banners[currentIndex].image}
               alt="Product"
               className="w-full h-full object-contain"
               style={{

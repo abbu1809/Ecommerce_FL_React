@@ -4,12 +4,14 @@ import FeaturedProductList from "../components/FeaturedProductList";
 import HeroBanner from "../components/HeroBanner";
 import { useEffect, useState, useCallback } from "react";
 import { useProductStore } from "../store/useProduct";
+import { useBannerStore } from "../store/Admin/useBannerStore";
 import { useInView } from "react-intersection-observer";
 import ProductCard from "../components/ProductList/ProductCard";
 import { FiArrowDown } from "react-icons/fi";
 
 const Home = () => {
   const { products, featuredProducts, fetchProducts } = useProductStore();
+  const { fetchPublicBanners } = useBannerStore();
   const [displayedProducts, setDisplayedProducts] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -24,7 +26,8 @@ const Home = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+    fetchPublicBanners(); // Fetch banners for the page
+  }, [fetchProducts, fetchPublicBanners]);
 
   // Load initial products
   useEffect(() => {
@@ -66,7 +69,6 @@ const Home = () => {
       loadMoreProducts();
     }
   }, [inView, loadMoreProducts]);
-
   // Mock data for categories - focused on electronics product catalog
   const categories = [
     { id: 1, name: "Smartphones", path: "/category/smartphones" },
@@ -77,32 +79,14 @@ const Home = () => {
     { id: 6, name: "Audio Devices", path: "/category/audio" },
   ];
 
-  // Mock promotional banners
-  const banners = [
-    {
-      id: 1,
-      title: "Samsung Galaxy S25 Edge",
-      subtitle: "Beyond slim",
-      cta: "Pre-Order now",
-      image: "https://via.placeholder.com/1200x400?text=Samsung+S25+Banner",
-      backgroundColor: "#1e5799",
-    },
-    {
-      id: 2,
-      title: "Summer Deals",
-      subtitle: "Easy Exchange EMI Offer",
-      cta: "Shop Now",
-      image: "https://via.placeholder.com/1200x400?text=Summer+Deals",
-      backgroundColor: "#ffd700",
-    },
-  ];
   return (
     <div
       style={{ backgroundColor: "var(--bg-secondary)" }}
       className="min-h-screen"
     >
+      {" "}
       {/* Hero Banner */}
-      <HeroBanner banner={banners[0]} />
+      <HeroBanner />
       {/* Categories Section */}
       <section
         style={{ backgroundColor: "var(--bg-primary)" }}
@@ -118,23 +102,22 @@ const Home = () => {
           <FeaturedProductList products={featuredProducts} />
         </div>
       </section>
-
       {/* Promotional Banners */}
       <section
         style={{ backgroundColor: "var(--bg-primary)" }}
         className="py-12"
       >
         <div className="container mx-auto px-4">
+          {" "}
           <h2
             style={{ color: "var(--text-primary)" }}
             className="text-2xl md:text-3xl font-bold mb-6"
           >
             Special Offers
           </h2>
-          <BannerCarousel banners={banners} />
+          <BannerCarousel />
         </div>
       </section>
-
       {/* Our Products Section with Infinite Scroll */}
       <section className="py-12">
         <div className="container mx-auto px-4">

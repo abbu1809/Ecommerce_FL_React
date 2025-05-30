@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Button from "./UI/Button";
+import { useBannerStore } from "../store/Admin/useBannerStore";
 
-// Define the images from public folder
-const bannerImages = [
+// Fallback images from public folder (used if no banners from database)
+const fallbackImages = [
   {
-    path: "/mobile1.png",
+    image: "/mobile1.png",
     title: "Latest Smartphones",
     subtitle: "Discover the newest technology at unbeatable prices",
     tag: "New Arrivals",
@@ -13,7 +14,7 @@ const bannerImages = [
     backgroundColor: "#f8fafc",
   },
   {
-    path: "/laptops.png",
+    image: "/laptops.png",
     title: "Premium Laptops",
     subtitle: "Powerful devices for work and play",
     tag: "Best Sellers",
@@ -21,59 +22,50 @@ const bannerImages = [
     backgroundColor: "#f1f5f9",
   },
   {
-    path: "/tv1.png",
+    image: "/tv1.png",
     title: "Smart TVs",
     subtitle: "Immersive entertainment for your home",
     tag: "Featured",
     cta: "Shop TVs",
     backgroundColor: "#e2e8f0",
   },
-  {
-    path: "/tablets1.png",
-    title: "Tablets & iPads",
-    subtitle: "Perfect companions for productivity and fun",
-    tag: "Popular",
-    cta: "Shop Tablets",
-    backgroundColor: "#f1f5f9",
-  },
-  {
-    path: "/accessories.png",
-    title: "Tech Accessories",
-    subtitle: "Complete your tech setup with the perfect accessories",
-    tag: "Must-Have",
-    cta: "Shop Accessories",
-    backgroundColor: "#f8fafc",
-  },
 ];
 
-const HeroBanner = ({ banner = {} }) => {
+const HeroBanner = () => {
+  const { fetchPublicBanners, getHeroBanners } = useBannerStore();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [[page, direction], setPage] = useState([0, 0]);
-  // Combine passed banner with our default banner images if needed
-  // This ensures compatibility if the component is still receiving banner props
-  const images = banner.image ? [banner, ...bannerImages] : bannerImages;
 
+  // Get hero banners from store or use fallback
+  const heroBanners = getHeroBanners();
+  const images = heroBanners.length > 0 ? heroBanners : fallbackImages;
+
+  // Fetch banners on mount
+  useEffect(() => {
+    fetchPublicBanners();
+  }, [fetchPublicBanners]);
   // Auto-advance the slider
   useEffect(() => {
+    if (images.length === 0) return; // Don't auto-advance if no images
+
     const timer = setTimeout(() => {
-      const newIndex = (currentIndex + 1) % bannerImages.length;
+      const newIndex = (currentIndex + 1) % images.length;
       setPage([newIndex, 1]); // 1 for forward direction
       setCurrentIndex(newIndex);
     }, 5000);
 
     return () => clearTimeout(timer);
-  }, [currentIndex]);
+  }, [currentIndex, images.length]);
 
   // Handle manual navigation
   const handlePrevious = () => {
-    const newIndex =
-      (currentIndex - 1 + bannerImages.length) % bannerImages.length;
+    const newIndex = (currentIndex - 1 + images.length) % images.length;
     setPage([newIndex, -1]); // -1 for backward direction
     setCurrentIndex(newIndex);
   };
 
   const handleNext = () => {
-    const newIndex = (currentIndex + 1) % bannerImages.length;
+    const newIndex = (currentIndex + 1) % images.length;
     setPage([newIndex, 1]); // 1 for forward direction
     setCurrentIndex(newIndex);
   };
@@ -127,7 +119,7 @@ const HeroBanner = ({ banner = {} }) => {
               {" "}
               {/* High-quality image with subtle zoom effect */}
               <img
-                src={images[currentIndex].path || images[currentIndex].image}
+                src={images[currentIndex].image}
                 alt={images[currentIndex].title}
                 className="w-full h-full object-cover object-center"
                 style={{
@@ -210,8 +202,9 @@ const HeroBanner = ({ banner = {} }) => {
                         padding: "0.85rem 2rem",
                       }}
                     >
+                      {" "}
                       <span className="relative z-10 text-base font-semibold flex items-center gap-2">
-                        {bannerImages[currentIndex].cta || "Shop Now"}
+                        {images[currentIndex].cta || "Shop Now"}
                         <svg
                           className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300"
                           fill="none"
@@ -255,7 +248,6 @@ const HeroBanner = ({ banner = {} }) => {
               </div>
             </motion.div>
           </AnimatePresence>
-
           {/* Slider navigation buttons */}
           <div className="absolute inset-y-0 left-0 flex items-center">
             <motion.button
@@ -306,11 +298,10 @@ const HeroBanner = ({ banner = {} }) => {
                 />
               </svg>
             </motion.button>
-          </div>
-
+          </div>{" "}
           {/* Slide indicators */}
           <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
-            {bannerImages.map((_, index) => (
+            {images.map((_, index) => (
               <motion.button
                 key={index}
                 onClick={() => {
@@ -328,7 +319,6 @@ const HeroBanner = ({ banner = {} }) => {
               />
             ))}
           </div>
-
           {/* Keep the decorative elements */}
           <div
             className="absolute top-0 right-0 w-64 h-64 opacity-20 rotate-45 translate-x-20 -translate-y-20 animate-pulse"

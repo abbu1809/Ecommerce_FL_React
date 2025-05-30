@@ -1,116 +1,175 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Button from "../../UI/Button";
-
-// Mock banner data
-const mockBanners = [
-  {
-    id: 1,
-    title: "Summer Sale",
-    description: "Up to 70% off on all summer products",
-    image:
-      "https://via.placeholder.com/800x300/FF9A8B/000000?text=Summer+Sale+Banner",
-    link: "/sale/summer",
-    position: "hero",
-    active: true,
-  },
-  {
-    id: 2,
-    title: "New Arrivals",
-    description: "Check out our newest products",
-    image:
-      "https://via.placeholder.com/800x300/A8E6CF/000000?text=New+Arrivals+Banner",
-    link: "/new-arrivals",
-    position: "home-middle",
-    active: true,
-  },
-  {
-    id: 3,
-    title: "Special Deals",
-    description: "Limited time offers on selected items",
-    image:
-      "https://via.placeholder.com/800x300/DCEDC8/000000?text=Special+Deals+Banner",
-    link: "/special-deals",
-    position: "home-bottom",
-    active: false,
-  },
-];
+import { useBannerStore } from "../../../store/Admin/useBannerStore";
 
 const BannerManager = () => {
-  const [banners, setBanners] = useState(mockBanners);
-  const [editingBanner, setEditingBanner] = useState(null);
-  const [newBanner, setNewBanner] = useState({
+  const {
+    banners,
+    loading,
+    error,
+    fetchBanners,
+    addBanner,
+    editBanner,
+    deleteBanner,
+    toggleBannerActive,
+  } = useBannerStore();
+
+  const [editingBanner, setEditingBanner] = useState(null);  const [newBanner, setNewBanner] = useState({
     title: "",
+    subtitle: "",
     description: "",
     image: "",
     link: "",
     position: "hero",
+    tag: "",
+    cta: "",
+    backgroundColor: "#ffffff",
     active: true,
   });
-  const [showAddForm, setShowAddForm] = useState(false);
+  const [newBannerImageFile, setNewBannerImageFile] = useState(null);
+  const [newBannerImagePreview, setNewBannerImagePreview] = useState(null);
+  const [editBannerImageFile, setEditBannerImageFile] = useState(null);
+  const [editBannerImagePreview, setEditBannerImagePreview] = useState(null);
+  const [showAddForm, setShowAddForm] = useState(false);  useEffect(() => {
+    fetchBanners();
+  }, [fetchBanners]);
 
-  const handleToggleActive = (id) => {
-    setBanners(
-      banners.map((banner) =>
-        banner.id === id ? { ...banner, active: !banner.active } : banner
-      )
-    );
+  // File handling functions
+  const handleNewBannerImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setNewBannerImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => setNewBannerImagePreview(e.target.result);
+      reader.readAsDataURL(file);
+    }
   };
 
-  const handleEditBanner = (banner) => {
-    setEditingBanner(banner);
-    setShowAddForm(false);
+  const handleEditBannerImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setEditBannerImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => setEditBannerImagePreview(e.target.result);
+      reader.readAsDataURL(file);
+    }
   };
 
-  const handleSaveEdit = () => {
-    setBanners(
-      banners.map((banner) =>
-        banner.id === editingBanner.id ? editingBanner : banner
-      )
-    );
-    setEditingBanner(null);
-  };
-
-  const handleAddBanner = () => {
-    const newId = Math.max(...banners.map((b) => b.id)) + 1;
-    setBanners([...banners, { ...newBanner, id: newId }]);
+  const resetNewBannerForm = () => {
     setNewBanner({
       title: "",
+      subtitle: "",
       description: "",
       image: "",
       link: "",
       position: "hero",
+      tag: "",
+      cta: "",
+      backgroundColor: "#ffffff",
       active: true,
     });
+    setNewBannerImageFile(null);
+    setNewBannerImagePreview(null);
+  };
+
+  const resetEditBannerForm = () => {
+    setEditingBanner(null);
+    setEditBannerImageFile(null);
+    setEditBannerImagePreview(null);
+  };
+  const handleToggleActive = async (id) => {
+    await toggleBannerActive(id);
+  };
+  const handleEditBanner = (banner) => {
+    setEditingBanner(banner);
+    setEditBannerImagePreview(banner.image); // Show current image
     setShowAddForm(false);
   };
 
-  const handleDeleteBanner = (id) => {
-    setBanners(banners.filter((banner) => banner.id !== id));
+  const handleSaveEdit = async () => {
+    const formData = new FormData();
+    
+    // Add all banner fields to FormData
+    Object.keys(editingBanner).forEach(key => {
+      if (key !== 'id' && editingBanner[key] !== null && editingBanner[key] !== undefined) {
+        formData.append(key, editingBanner[key]);
+      }
+    });
+    
+    // Add image file if new one is selected
+    if (editBannerImageFile) {
+      formData.append('image_file', editBannerImageFile);
+    }
+    
+    await editBanner(editingBanner.id, formData);
+    resetEditBannerForm();
   };
 
+  const handleAddBanner = async () => {
+    if (!newBannerImageFile) {
+      alert('Please select an image file');
+      return;
+    }
+    
+    const formData = new FormData();
+    
+    // Add all banner fields to FormData
+    Object.keys(newBanner).forEach(key => {
+      if (key !== 'image' && newBanner[key] !== null && newBanner[key] !== undefined) {
+        formData.append(key, newBanner[key]);
+      }
+    });
+    
+    // Add image file
+    formData.append('image_file', newBannerImageFile);
+    
+    await addBanner(formData);
+    resetNewBannerForm();
+    setShowAddForm(false);
+  };
+
+  const handleDeleteBanner = async (id) => {
+    if (window.confirm("Are you sure you want to delete this banner?")) {
+      await deleteBanner(id);
+    }
+  };
   const positionOptions = [
     { value: "hero", label: "Hero Banner (Top)" },
+    { value: "carousel", label: "Banner Carousel" },
     { value: "home-middle", label: "Home Middle Section" },
     { value: "home-bottom", label: "Home Bottom Section" },
     { value: "category-top", label: "Category Page Top" },
     { value: "sidebar", label: "Sidebar" },
   ];
-
   return (
     <div className="space-y-6">
+      {loading && (
+        <div className="text-center py-4">
+          <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+          <span className="ml-2">Loading banners...</span>
+        </div>
+      )}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      )}
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-800">Manage Banners</h2>
-        <Button
+        <h2 className="text-lg font-semibold text-gray-800">Manage Banners</h2>        <Button
           variant="primary"
           onClick={() => {
-            setShowAddForm(!showAddForm);
-            setEditingBanner(null);
+            if (showAddForm) {
+              resetNewBannerForm();
+              setShowAddForm(false);
+            } else {
+              setShowAddForm(true);
+              resetEditBannerForm();
+            }
           }}
         >
           {showAddForm ? "Cancel" : "Add New Banner"}
         </Button>
-      </div>
-
+      </div>{" "}
       {showAddForm && (
         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
           <h3 className="font-medium">Add New Banner</h3>
@@ -130,16 +189,36 @@ const BannerManager = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Image URL
+                Subtitle
               </label>
               <input
                 type="text"
                 className="w-full p-2 border border-gray-300 rounded-md"
-                value={newBanner.image}
+                value={newBanner.subtitle}
                 onChange={(e) =>
-                  setNewBanner({ ...newBanner, image: e.target.value })
+                  setNewBanner({ ...newBanner, subtitle: e.target.value })
                 }
               />
+            </div>            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Image Upload
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                className="w-full p-2 border border-gray-300 rounded-md"
+                onChange={handleNewBannerImageChange}
+                required
+              />
+              {newBannerImagePreview && (
+                <div className="mt-2">
+                  <img
+                    src={newBannerImagePreview}
+                    alt="Preview"
+                    className="h-24 w-48 object-cover rounded border"
+                  />
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -171,6 +250,50 @@ const BannerManager = () => {
                   </option>
                 ))}
               </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Tag
+              </label>
+              <input
+                type="text"
+                className="w-full p-2 border border-gray-300 rounded-md"
+                value={newBanner.tag}
+                onChange={(e) =>
+                  setNewBanner({ ...newBanner, tag: e.target.value })
+                }
+                placeholder="e.g., SALE, NEW, LIMITED"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Call to Action
+              </label>
+              <input
+                type="text"
+                className="w-full p-2 border border-gray-300 rounded-md"
+                value={newBanner.cta}
+                onChange={(e) =>
+                  setNewBanner({ ...newBanner, cta: e.target.value })
+                }
+                placeholder="e.g., Shop Now, Learn More"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Background Color
+              </label>
+              <input
+                type="color"
+                className="w-full p-1 border border-gray-300 rounded-md h-10"
+                value={newBanner.backgroundColor}
+                onChange={(e) =>
+                  setNewBanner({
+                    ...newBanner,
+                    backgroundColor: e.target.value,
+                  })
+                }
+              />
             </div>
             <div className="col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -205,8 +328,7 @@ const BannerManager = () => {
             </Button>
           </div>
         </div>
-      )}
-
+      )}{" "}
       {editingBanner && (
         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
           <h3 className="font-medium">Edit Banner</h3>
@@ -218,7 +340,7 @@ const BannerManager = () => {
               <input
                 type="text"
                 className="w-full p-2 border border-gray-300 rounded-md"
-                value={editingBanner.title}
+                value={editingBanner.title || ""}
                 onChange={(e) =>
                   setEditingBanner({ ...editingBanner, title: e.target.value })
                 }
@@ -226,16 +348,41 @@ const BannerManager = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Image URL
+                Subtitle
               </label>
               <input
                 type="text"
                 className="w-full p-2 border border-gray-300 rounded-md"
-                value={editingBanner.image}
+                value={editingBanner.subtitle || ""}
                 onChange={(e) =>
-                  setEditingBanner({ ...editingBanner, image: e.target.value })
+                  setEditingBanner({
+                    ...editingBanner,
+                    subtitle: e.target.value,
+                  })
                 }
               />
+            </div>            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Image Upload
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                className="w-full p-2 border border-gray-300 rounded-md"
+                onChange={handleEditBannerImageChange}
+              />
+              {editBannerImagePreview && (
+                <div className="mt-2">
+                  <img
+                    src={editBannerImagePreview}
+                    alt="Current/Preview"
+                    className="h-24 w-48 object-cover rounded border"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {editBannerImageFile ? "New image preview" : "Current image"}
+                  </p>
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -244,7 +391,7 @@ const BannerManager = () => {
               <input
                 type="text"
                 className="w-full p-2 border border-gray-300 rounded-md"
-                value={editingBanner.link}
+                value={editingBanner.link || ""}
                 onChange={(e) =>
                   setEditingBanner({ ...editingBanner, link: e.target.value })
                 }
@@ -256,7 +403,7 @@ const BannerManager = () => {
               </label>
               <select
                 className="w-full p-2 border border-gray-300 rounded-md"
-                value={editingBanner.position}
+                value={editingBanner.position || "hero"}
                 onChange={(e) =>
                   setEditingBanner({
                     ...editingBanner,
@@ -271,13 +418,57 @@ const BannerManager = () => {
                 ))}
               </select>
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Tag
+              </label>
+              <input
+                type="text"
+                className="w-full p-2 border border-gray-300 rounded-md"
+                value={editingBanner.tag || ""}
+                onChange={(e) =>
+                  setEditingBanner({ ...editingBanner, tag: e.target.value })
+                }
+                placeholder="e.g., SALE, NEW, LIMITED"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Call to Action
+              </label>
+              <input
+                type="text"
+                className="w-full p-2 border border-gray-300 rounded-md"
+                value={editingBanner.cta || ""}
+                onChange={(e) =>
+                  setEditingBanner({ ...editingBanner, cta: e.target.value })
+                }
+                placeholder="e.g., Shop Now, Learn More"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Background Color
+              </label>
+              <input
+                type="color"
+                className="w-full p-1 border border-gray-300 rounded-md h-10"
+                value={editingBanner.backgroundColor || "#ffffff"}
+                onChange={(e) =>
+                  setEditingBanner({
+                    ...editingBanner,
+                    backgroundColor: e.target.value,
+                  })
+                }
+              />
+            </div>
             <div className="col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Description
               </label>
               <textarea
                 className="w-full p-2 border border-gray-300 rounded-md"
-                value={editingBanner.description}
+                value={editingBanner.description || ""}
                 onChange={(e) =>
                   setEditingBanner({
                     ...editingBanner,
@@ -303,9 +494,8 @@ const BannerManager = () => {
                 <span className="text-sm text-gray-700">Active</span>
               </label>
             </div>
-          </div>
-          <div className="flex justify-end space-x-3">
-            <Button variant="secondary" onClick={() => setEditingBanner(null)}>
+          </div>          <div className="flex justify-end space-x-3">
+            <Button variant="secondary" onClick={resetEditBannerForm}>
               Cancel
             </Button>
             <Button variant="primary" onClick={handleSaveEdit}>
@@ -314,7 +504,6 @@ const BannerManager = () => {
           </div>
         </div>
       )}
-
       <div className="overflow-x-auto">
         <table className="w-full whitespace-nowrap">
           <thead className="bg-gray-100 text-gray-700 text-sm">
@@ -335,18 +524,30 @@ const BannerManager = () => {
                     alt={banner.title}
                     className="h-24 w-48 object-cover rounded"
                   />
-                </td>
+                </td>{" "}
                 <td className="py-3 px-4">
                   <h3 className="font-medium">{banner.title}</h3>
+                  {banner.subtitle && (
+                    <p className="text-sm text-gray-600">{banner.subtitle}</p>
+                  )}
                   <p className="text-sm text-gray-500 line-clamp-2">
                     {banner.description}
                   </p>
-                  <a
-                    href={banner.link}
-                    className="text-xs text-blue-500 hover:underline"
-                  >
-                    {banner.link}
-                  </a>
+                  {banner.link && (
+                    <a
+                      href={banner.link}
+                      className="text-xs text-blue-500 hover:underline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {banner.link}
+                    </a>
+                  )}
+                  {banner.tag && (
+                    <span className="inline-block mt-1 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
+                      {banner.tag}
+                    </span>
+                  )}
                 </td>
                 <td className="py-3 px-4">
                   {positionOptions.find((p) => p.value === banner.position)
@@ -393,7 +594,6 @@ const BannerManager = () => {
           </tbody>
         </table>
       </div>
-
       {banners.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           <p>No banners found. Add your first banner!</p>
