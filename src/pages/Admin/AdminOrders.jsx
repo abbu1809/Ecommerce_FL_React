@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { FiDownload, FiSearch, FiFilter, FiRefreshCw } from "react-icons/fi";
+import {
+  FiDownload,
+  FiSearch,
+  FiFilter,
+  FiRefreshCw,
+  FiX,
+} from "react-icons/fi";
 import OrderTable from "../../components/Admin/Orders/OrderTable";
 import OrderDetail from "../../components/Admin/Orders/OrderDetail";
 import Button from "../../components/UI/Button";
@@ -9,6 +15,7 @@ const AdminOrders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [showOrderDetailModal, setShowOrderDetailModal] = useState(false);
 
   const { orders, fetchOrders } = useAdminStore();
   const { loading, statusCounts } = orders;
@@ -16,6 +23,15 @@ const AdminOrders = () => {
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
+
+  const handleSelectOrder = (order) => {
+    setSelectedOrder(order);
+    setShowOrderDetailModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowOrderDetailModal(false);
+  };
 
   return (
     <div>
@@ -131,32 +147,51 @@ const AdminOrders = () => {
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <OrderTable
-            onSelectOrder={setSelectedOrder}
-            statusFilter={statusFilter}
-            searchQuery={searchQuery}
-          />
-        </div>
-        <div className="lg:col-span-1">
-          {selectedOrder ? (
-            <OrderDetail order={selectedOrder} />
-          ) : (
-            <div
-              className="bg-white p-6 rounded-lg shadow-md h-full flex items-center justify-center"
-              style={{
-                backgroundColor: "var(--bg-primary)",
-                color: "var(--text-secondary)",
-                borderRadius: "var(--rounded-lg)",
-                boxShadow: "var(--shadow-medium)",
-              }}
-            >
-              <p>Select an order to view details</p>
-            </div>
-          )}
-        </div>
+      {/* Order table - now full width */}
+      <div className="w-full">
+        <OrderTable
+          onSelectOrder={handleSelectOrder}
+          statusFilter={statusFilter}
+          searchQuery={searchQuery}
+        />
       </div>
+      {/* Order Detail Modal */}
+      {showOrderDetailModal && selectedOrder && (
+        <div className="fixed inset-0 bg-opacity-90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div
+            className="bg-white w-full max-w-4xl rounded-lg shadow-2xl max-h-[90vh] overflow-auto"
+            style={{
+              backgroundColor: "var(--bg-primary)",
+              borderRadius: "var(--rounded-lg)",
+            }}
+          >
+            <div
+              className="sticky top-0 z-10"
+              style={{ backgroundColor: "var(--bg-primary)" }}
+            >
+              <div
+                className="flex justify-between items-center p-6 border-b"
+                style={{ borderColor: "var(--border-primary)" }}
+              >
+                <h2
+                  className="text-xl font-semibold"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  Order Details
+                </h2>
+                <button
+                  onClick={handleCloseModal}
+                  className="text-gray-500 hover:text-gray-700 transition-colors"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  <FiX size={24} />
+                </button>
+              </div>
+            </div>
+            <OrderDetail order={selectedOrder} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

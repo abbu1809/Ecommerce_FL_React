@@ -1,41 +1,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import axios from "axios";
-import { API_URL, DELIVERY_TOKEN_KEY } from "../../utils/constants";
-
-// Create a delivery partner API instance
-const deliveryApi = axios.create({
-  baseURL: API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-// Add a request interceptor to include the delivery partner token in requests
-deliveryApi.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem(DELIVERY_TOKEN_KEY);
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Add a response interceptor to handle unauthorized access
-deliveryApi.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Handle unauthorized - clear delivery partner auth state
-      localStorage.removeItem(DELIVERY_TOKEN_KEY);
-    }
-    return Promise.reject(error);
-  }
-);
+import { deliveryApi } from "../../services/api";
+import { DELIVERY_TOKEN_KEY } from "../../utils/constants";
 
 export const useDeliveryPartnerStore = create(
   devtools((set) => ({

@@ -12,6 +12,26 @@ const OrderDetailModal = ({ isOpen, onClose, orderId }) => {
   const { getOrderById, isLoading } = useOrderStore();
   const [orderDetails, setOrderDetails] = useState(null);
 
+  // Handle escape key press
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("keydown", handleEscape);
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = "hidden";
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen, onClose]);
+
   useEffect(() => {
     if (isOpen && orderId) {
       console.log("Modal opened for order:", orderId); // Debug log
@@ -34,7 +54,7 @@ const OrderDetailModal = ({ isOpen, onClose, orderId }) => {
 
   const formatCurrency = (amount, currency = "INR") => {
     if (currency === "INR") {
-      return `₹${amount.toLocaleString()}`;
+      return `₹${amount?.toLocaleString()}`;
     }
     return `${amount} ${currency}`;
   };
@@ -66,18 +86,29 @@ const OrderDetailModal = ({ isOpen, onClose, orderId }) => {
     };
     return statusColors[status] || "var(--brand-primary)";
   };
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
-      style={{ zIndex: 9999 }}
+      className="fixed inset-0 flex items-center justify-center z-50 p-4"
+      style={{
+        backgroundColor: "var(--bg-overlay)",
+        backdropFilter: "blur(4px)",
+      }}
+      onClick={handleBackdropClick}
     >
+      {" "}
       <div
-        className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        className="w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-lg shadow-xl transform transition-all"
         style={{
           backgroundColor: "var(--bg-primary)",
           borderRadius: "var(--rounded-lg)",
-          boxShadow: "var(--shadow-large)",
         }}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div
@@ -105,18 +136,17 @@ const OrderDetailModal = ({ isOpen, onClose, orderId }) => {
                 Order #{orderId}
               </p>
             </div>
-          </div>
+          </div>{" "}
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-md hover:bg-gray-100 transition-colors"
             style={{ color: "var(--text-secondary)" }}
           >
             <FiX size={20} />
           </button>
-        </div>
-
+        </div>{" "}
         {/* Content */}
-        <div className="p-6">
+        <div className="overflow-y-auto max-h-[calc(90vh-80px)] p-6">
           {isLoading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>

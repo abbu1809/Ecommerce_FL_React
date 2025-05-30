@@ -26,8 +26,8 @@ const Cart = () => {
 
   // Calculate cart totals
   const subtotal = totalAmount;
-  const tax = subtotal * 0.18; // 18% GST
-  const shipping = subtotal > 0 ? (subtotal > 50000 ? 0 : 99) : 0; // Free shipping for orders above ₹50,000
+  const tax = 0; // 18% GST
+  const shipping = 0; // Free shipping for orders above ₹50,000
   const total = subtotal + tax + shipping;
 
   const handleOpenCheckout = () => {

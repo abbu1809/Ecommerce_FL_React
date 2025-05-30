@@ -187,17 +187,19 @@ export const useProductStore = create((set, get) => ({
         }
       );
 
-      // Update current product if it's the same product being reviewed
-      const { currentProduct } = get();
-      if (currentProduct && currentProduct.id === productId) {
-        set({
-          currentProduct: {
-            ...currentProduct,
-            rating: response.data.updated_rating,
-            reviews_count: response.data.total_reviews,
-          },
-        });
+      // If the review was for the currently loaded product, refresh its data
+      // to include the new review and updated rating/review count.
+      const store = get();
+      // Assuming currentProduct.id is a number (e.g., from API via getProduct which uses parseInt).
+      // Ensure productId is compared as a number.
+      if (
+        store.currentProduct &&
+        store.currentProduct.id === Number(productId)
+      ) {
+        await store.fetchProduct(productId); // This will refresh currentProduct with latest data, including reviews.
       }
+      // The previous direct update to currentProduct's rating and reviews_count is removed,
+      // as fetchProduct(productId) will provide the comprehensive fresh state.
 
       set({ reviewLoading: false });
       return {

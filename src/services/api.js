@@ -3,7 +3,7 @@ import {
   API_URL,
   TOKEN_KEY,
   USER_KEY,
-  ADMIN_TOKEN_KEY,
+  DELIVERY_TOKEN_KEY,
 } from "../utils/constants";
 
 // Create an axios instance with base configuration
@@ -52,7 +52,7 @@ const adminApi = axios.create({
 // Add a request interceptor for admin API to include the admin token
 adminApi.interceptors.request.use(
   (config) => {
-    const adminToken = localStorage.getItem('admin_token');
+    const adminToken = localStorage.getItem("admin_token");
     if (adminToken) {
       config.headers.Authorization = `Bearer ${adminToken}`;
     }
@@ -69,11 +69,45 @@ adminApi.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Handle unauthorized - clear admin auth state
-      localStorage.removeItem('admin_token');
+      localStorage.removeItem("admin_token");
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Create a delivery partner API instance
+const deliveryApi = axios.create({
+  baseURL: API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+// Add a request interceptor to include the delivery partner token in requests
+deliveryApi.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem(DELIVERY_TOKEN_KEY);
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add a response interceptor to handle unauthorized access
+deliveryApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Handle unauthorized - clear delivery partner auth state
+      localStorage.removeItem(DELIVERY_TOKEN_KEY);
     }
     return Promise.reject(error);
   }
 );
 
 export default api;
-export { adminApi };
+export { adminApi, deliveryApi };

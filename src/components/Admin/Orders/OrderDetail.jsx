@@ -1,6 +1,4 @@
 import {
-  FiPrinter,
-  FiMail,
   FiPackage,
   FiCheck,
   FiX,
@@ -33,7 +31,6 @@ const OrderDetail = ({ order }) => {
     deliveryPartners,
     fetchDeliveryPartners,
     getCachedUser,
-    getCachedProduct,
   } = useAdminStore();
 
   useEffect(() => {
@@ -753,15 +750,6 @@ const OrderDetail = ({ order }) => {
           borderColor: "var(--border-primary)",
         }}
       >
-        <div className="flex space-x-3">
-          <Button variant="secondary" size="sm" icon={<FiPrinter size={16} />}>
-            Print Invoice
-          </Button>
-          <Button variant="secondary" size="sm" icon={<FiMail size={16} />}>
-            Contact Customer
-          </Button>
-        </div>
-
         {isEditing && (
           <div className="flex space-x-2">
             <Button

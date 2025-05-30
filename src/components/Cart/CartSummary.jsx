@@ -1,7 +1,7 @@
 import Button from "../../components/UI/Button";
 import { FiCreditCard, FiShoppingBag } from "react-icons/fi";
 
-const CartSummary = ({ subtotal, tax, shipping, total, onCheckout }) => {
+const CartSummary = ({ subtotal, total, onCheckout }) => {
   return (
     <div className="lg:col-span-1 sticky top-4">
       <div
@@ -40,41 +40,6 @@ const CartSummary = ({ subtotal, tax, shipping, total, onCheckout }) => {
               ₹{subtotal.toLocaleString()}
             </span>
           </div>
-
-          <div className="flex justify-between items-center py-1">
-            <span
-              className="text-sm"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              GST (18%)
-            </span>
-            <span
-              className="font-medium"
-              style={{ color: "var(--text-primary)" }}
-            >
-              ₹{tax.toLocaleString()}
-            </span>
-          </div>
-
-          <div className="flex justify-between items-center py-1">
-            <span
-              className="text-sm"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              Shipping
-            </span>
-            <span
-              className="font-medium"
-              style={
-                shipping === 0
-                  ? { color: "var(--success-color)" }
-                  : { color: "var(--text-primary)" }
-              }
-            >
-              {shipping > 0 ? `₹${shipping.toLocaleString()}` : "Free"}
-            </span>
-          </div>
-
           <div
             className="h-px my-3"
             style={{ background: "var(--border-primary)" }}

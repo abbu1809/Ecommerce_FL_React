@@ -225,7 +225,7 @@ const RecentOrders = () => {
                     className="py-4 text-sm font-medium"
                     style={{ color: "var(--text-primary)" }}
                   >
-                    ₹{order.amount.toLocaleString()}
+                    ₹{order.amount?.toLocaleString()}
                   </td>
                   <td className="py-4">
                     <div

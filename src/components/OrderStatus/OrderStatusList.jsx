@@ -66,7 +66,7 @@ const getStatusDisplay = (status) => {
 
 const formatCurrency = (amount, currency = "INR") => {
   if (currency === "INR") {
-    return `₹${amount.toLocaleString()}`;
+    return `₹${amount?.toLocaleString()}`;
   }
   return `${amount} ${currency}`;
 };

@@ -41,8 +41,8 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
   const isCartOrder = !product;
   const orderItems = isCartOrder ? cartItems : [{ ...product, quantity }];
   const subtotal = isCartOrder ? cartTotal : product?.price * quantity;
-  const tax = subtotal * 0.18; // 18% GST
-  const shipping = subtotal > 0 ? (subtotal > 50000 ? 0 : 99) : 0; // Free shipping for orders above ₹50,000
+  const tax = 0;
+  const shipping = 0;
   const orderTotal = subtotal + tax + shipping;
   useEffect(() => {
     if (isOpen && isAuthenticated) {
@@ -690,30 +690,6 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
                       </span>
                       <span style={{ color: "var(--text-primary)" }}>
                         {formatPrice(subtotal)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span style={{ color: "var(--text-secondary)" }}>
-                        GST (18%):
-                      </span>
-                      <span style={{ color: "var(--text-primary)" }}>
-                        {formatPrice(tax)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span style={{ color: "var(--text-secondary)" }}>
-                        Delivery:
-                      </span>
-                      <span
-                        className="font-medium"
-                        style={{
-                          color:
-                            shipping === 0
-                              ? "var(--success-color)"
-                              : "var(--text-primary)",
-                        }}
-                      >
-                        {shipping > 0 ? formatPrice(shipping) : "FREE"}
                       </span>
                     </div>
                     <hr style={{ borderColor: "var(--border-primary)" }} />
