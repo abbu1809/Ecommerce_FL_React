@@ -87,25 +87,23 @@ export const useBannerStore = create(
     editBanner: async (bannerId, bannerData) => {
       set({ loading: true, error: null });
       try {
-        const config = {};
+        const isFormData = bannerData instanceof FormData;
+        let headers = {};
 
-        // If bannerData is FormData (contains file), set multipart headers
-        if (bannerData instanceof FormData) {
-          config.headers = {
-            "Content-Type": "multipart/form-data",
-          };
+        // Set content-type header if data is FormData
+        if (isFormData) {
+          headers = { "Content-Type": "multipart/form-data" };
         }
 
         const response = await adminApi.patch(
           `/admin/banners/edit/${bannerId}/`,
           bannerData,
-          config
+          { headers }
         );
 
         if (response.status === 200) {
-          // Refresh the banner list to get updated data including new image URL
+          // Refresh banner list to get updated data including new image URL
           await get().fetchBanners();
-
           set({ loading: false });
           return response.data;
         }
@@ -193,11 +191,14 @@ export const useBannerStore = create(
     // Get carousel banners
     getCarouselBanners: () => {
       const { banners } = get();
-      return banners.filter(
+      let carouselBanners = banners.filter(
         (banner) =>
-          ["home-middle", "home-bottom"].includes(banner.position) &&
-          banner.active
+          ["home-middle", "home-bottom", "carousel"].includes(
+            banner.position
+          ) && banner.active
       );
+      console.log("Carousel Banners:", carouselBanners);
+      return carouselBanners;
     },
 
     // Clear error

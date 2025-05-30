@@ -1,7 +1,6 @@
 import { useState } from "react";
 import BannerManager from "../../components/Admin/Content/BannerManager";
-import CategoryManager from "../../components/Admin/Content/CategoryManager";
-import PromotionManager from "../../components/Admin/Content/PromotionManager";
+import { bannerPositionOptions } from "../../constants/bannerOptions";
 
 const AdminContent = () => {
   const [activeTab, setActiveTab] = useState("banners");
@@ -24,32 +23,12 @@ const AdminContent = () => {
           >
             Banners
           </button>
-          <button
-            className={`px-6 py-3 font-medium ${
-              activeTab === "categories"
-                ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-            onClick={() => setActiveTab("categories")}
-          >
-            Categories
-          </button>
-          <button
-            className={`px-6 py-3 font-medium ${
-              activeTab === "promotions"
-                ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-            onClick={() => setActiveTab("promotions")}
-          >
-            Promotions & Ads
-          </button>
         </div>
 
         <div className="p-6">
-          {activeTab === "banners" && <BannerManager />}
-          {activeTab === "categories" && <CategoryManager />}
-          {activeTab === "promotions" && <PromotionManager />}
+          {activeTab === "banners" && (
+            <BannerManager positionOptions={bannerPositionOptions} />
+          )}
         </div>
       </div>
     </div>

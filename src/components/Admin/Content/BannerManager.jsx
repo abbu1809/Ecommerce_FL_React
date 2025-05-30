@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import Button from "../../UI/Button";
 import { useBannerStore } from "../../../store/Admin/useBannerStore";
+import ConfirmModal from "../../UI/ConfirmModal";
 
-const BannerManager = () => {
+const BannerManager = ({ positionOptions }) => {
   const {
     banners,
     loading,
@@ -13,8 +14,11 @@ const BannerManager = () => {
     deleteBanner,
     toggleBannerActive,
   } = useBannerStore();
-
-  const [editingBanner, setEditingBanner] = useState(null);  const [newBanner, setNewBanner] = useState({
+  const [editingBanner, setEditingBanner] = useState(null);
+  const [bannerToDelete, setBannerToDelete] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [newBanner, setNewBanner] = useState({
     title: "",
     subtitle: "",
     description: "",
@@ -30,7 +34,8 @@ const BannerManager = () => {
   const [newBannerImagePreview, setNewBannerImagePreview] = useState(null);
   const [editBannerImageFile, setEditBannerImageFile] = useState(null);
   const [editBannerImagePreview, setEditBannerImagePreview] = useState(null);
-  const [showAddForm, setShowAddForm] = useState(false);  useEffect(() => {
+  const [showAddForm, setShowAddForm] = useState(false);
+  useEffect(() => {
     fetchBanners();
   }, [fetchBanners]);
 
@@ -88,59 +93,69 @@ const BannerManager = () => {
 
   const handleSaveEdit = async () => {
     const formData = new FormData();
-    
+
     // Add all banner fields to FormData
-    Object.keys(editingBanner).forEach(key => {
-      if (key !== 'id' && editingBanner[key] !== null && editingBanner[key] !== undefined) {
+    Object.keys(editingBanner).forEach((key) => {
+      if (
+        key !== "id" &&
+        editingBanner[key] !== null &&
+        editingBanner[key] !== undefined
+      ) {
         formData.append(key, editingBanner[key]);
       }
     });
-    
+
     // Add image file if new one is selected
     if (editBannerImageFile) {
-      formData.append('image_file', editBannerImageFile);
+      formData.append("image_file", editBannerImageFile);
     }
-    
+
     await editBanner(editingBanner.id, formData);
     resetEditBannerForm();
   };
 
   const handleAddBanner = async () => {
     if (!newBannerImageFile) {
-      alert('Please select an image file');
+      alert("Please select an image file");
       return;
     }
-    
+
     const formData = new FormData();
-    
+
     // Add all banner fields to FormData
-    Object.keys(newBanner).forEach(key => {
-      if (key !== 'image' && newBanner[key] !== null && newBanner[key] !== undefined) {
+    Object.keys(newBanner).forEach((key) => {
+      if (
+        key !== "image" &&
+        newBanner[key] !== null &&
+        newBanner[key] !== undefined
+      ) {
         formData.append(key, newBanner[key]);
       }
     });
-    
+
     // Add image file
-    formData.append('image_file', newBannerImageFile);
-    
+    formData.append("image_file", newBannerImageFile);
+
     await addBanner(formData);
     resetNewBannerForm();
     setShowAddForm(false);
   };
+  const handleDeleteBanner = (banner) => {
+    setBannerToDelete(banner);
+    setShowDeleteModal(true);
+  };
 
-  const handleDeleteBanner = async (id) => {
-    if (window.confirm("Are you sure you want to delete this banner?")) {
-      await deleteBanner(id);
+  const confirmDelete = async () => {
+    try {
+      setDeleteLoading(true);
+      await deleteBanner(bannerToDelete.id);
+      setShowDeleteModal(false);
+    } catch (error) {
+      console.error("Error deleting banner:", error);
+    } finally {
+      setDeleteLoading(false);
     }
   };
-  const positionOptions = [
-    { value: "hero", label: "Hero Banner (Top)" },
-    { value: "carousel", label: "Banner Carousel" },
-    { value: "home-middle", label: "Home Middle Section" },
-    { value: "home-bottom", label: "Home Bottom Section" },
-    { value: "category-top", label: "Category Page Top" },
-    { value: "sidebar", label: "Sidebar" },
-  ];
   return (
     <div className="space-y-6">
       {loading && (
@@ -155,7 +170,8 @@ const BannerManager = () => {
         </div>
       )}
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-800">Manage Banners</h2>        <Button
+        <h2 className="text-lg font-semibold text-gray-800">Manage Banners</h2>{" "}
+        <Button
           variant="primary"
           onClick={() => {
             if (showAddForm) {
@@ -199,7 +215,8 @@ const BannerManager = () => {
                   setNewBanner({ ...newBanner, subtitle: e.target.value })
                 }
               />
-            </div>            <div>
+            </div>{" "}
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Image Upload
               </label>
@@ -361,7 +378,8 @@ const BannerManager = () => {
                   })
                 }
               />
-            </div>            <div>
+            </div>{" "}
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Image Upload
               </label>
@@ -379,7 +397,9 @@ const BannerManager = () => {
                     className="h-24 w-48 object-cover rounded border"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    {editBannerImageFile ? "New image preview" : "Current image"}
+                    {editBannerImageFile
+                      ? "New image preview"
+                      : "Current image"}
                   </p>
                 </div>
               )}
@@ -494,7 +514,8 @@ const BannerManager = () => {
                 <span className="text-sm text-gray-700">Active</span>
               </label>
             </div>
-          </div>          <div className="flex justify-end space-x-3">
+          </div>{" "}
+          <div className="flex justify-end space-x-3">
             <Button variant="secondary" onClick={resetEditBannerForm}>
               Cancel
             </Button>
@@ -579,11 +600,11 @@ const BannerManager = () => {
                       onClick={() => handleToggleActive(banner.id)}
                     >
                       {banner.active ? "Deactivate" : "Activate"}
-                    </Button>
+                    </Button>{" "}
                     <Button
                       variant="danger"
                       size="sm"
-                      onClick={() => handleDeleteBanner(banner.id)}
+                      onClick={() => handleDeleteBanner(banner)}
                     >
                       Delete
                     </Button>
@@ -593,12 +614,28 @@ const BannerManager = () => {
             ))}
           </tbody>
         </table>
-      </div>
+      </div>{" "}
       {banners.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           <p>No banners found. Add your first banner!</p>
         </div>
       )}
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={confirmDelete}
+        title="Delete Banner"
+        message={
+          bannerToDelete
+            ? `Are you sure you want to delete the banner "${bannerToDelete.title}"? This action cannot be undone.`
+            : "Are you sure you want to delete this banner?"
+        }
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        isLoading={deleteLoading}
+      />
     </div>
   );
 };

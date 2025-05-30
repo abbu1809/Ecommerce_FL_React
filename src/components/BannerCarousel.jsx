@@ -93,11 +93,11 @@ const BannerCarousel = () => {
   };
   return (
     <div
-      className="relative overflow-hidden rounded-xl"
+      className="relative overflow-hidden rounded-xl w-full"
       style={{
         boxShadow: "var(--shadow-large)",
         borderRadius: "var(--rounded-xl)",
-        height: "400px",
+        height: "500px",
       }}
     >
       {/* Progress bar - automatic animation */}
@@ -110,11 +110,11 @@ const BannerCarousel = () => {
             transition: "width 5s linear",
           }}
         ></div>
-      </div>
-
+      </div>{" "}
       {/* Slider with Framer Motion */}
       <div className="relative w-full h-full overflow-hidden">
         <AnimatePresence initial={false} custom={direction}>
+          {" "}
           <motion.div
             key={page}
             custom={direction}
@@ -123,14 +123,14 @@ const BannerCarousel = () => {
             animate="center"
             exit="exit"
             transition={slideTransition}
-            className="absolute inset-0"
+            className="absolute inset-0 w-full"
           >
             {" "}
-            {/* High-quality image with subtle zoom effect */}
+            {/* High-quality image with subtle zoom effect */}{" "}
             <motion.img
               src={banners[currentIndex].image}
               alt="Product"
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover"
               style={{
                 backgroundColor:
                   banners[currentIndex].backgroundColor || "#f1f5f9",
@@ -186,7 +186,6 @@ const BannerCarousel = () => {
           </motion.div>
         </AnimatePresence>
       </div>
-
       {/* Navigation buttons */}
       <motion.button
         initial={{ opacity: 0.6 }}
@@ -204,7 +203,6 @@ const BannerCarousel = () => {
       >
         <FiChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
       </motion.button>
-
       <motion.button
         initial={{ opacity: 0.6 }}
         whileHover={{ opacity: 1, scale: 1.1 }}
@@ -221,7 +219,6 @@ const BannerCarousel = () => {
       >
         <FiChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
       </motion.button>
-
       {/* Slide indicators */}
       <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex space-x-2 z-20">
         {banners.map((_, index) => (
