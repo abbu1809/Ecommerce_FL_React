@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { FiSearch, FiFilter, FiDownload, FiCalendar } from "react-icons/fi";
 import { DeliveryLayout, DeliveryHistoryItem } from "../../components/Delivery";
 import { toast } from "../../utils/toast";
-import { useDeliveryPartnerStore } from "../../store/Delivery";
+import useDeliveryPartnerStore from "../../store/Delivery/useDeliveryPartnerStore";
 
 const DeliveryHistory = () => {
   const location = useLocation();
@@ -14,7 +14,7 @@ const DeliveryHistory = () => {
   const [dateFilter, setDateFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [successMessage, setSuccessMessage] = useState("");
-  
+
   // Access the store
   const { fetchDeliveryHistory } = useDeliveryPartnerStore();
 
@@ -54,14 +54,22 @@ const DeliveryHistory = () => {
     const results = deliveries.filter((delivery) => {
       // Search filter
       const matchesSearch =
-        (delivery.order_id || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (delivery.customer_name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (delivery.address?.street_address || "").toLowerCase().includes(searchTerm.toLowerCase());
+        (delivery.order_id || "")
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        (delivery.customer_name || "")
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        (delivery.address?.street_address || "")
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
 
       // Date filter
       let matchesDate = true;
       const today = new Date();
-      const deliveryDate = delivery.delivered_at ? new Date(delivery.delivered_at) : null;
+      const deliveryDate = delivery.delivered_at
+        ? new Date(delivery.delivered_at)
+        : null;
 
       if (dateFilter === "today") {
         matchesDate =
@@ -82,7 +90,8 @@ const DeliveryHistory = () => {
       // Status filter
       const matchesStatus =
         statusFilter === "all" ||
-        (delivery.delivery_status || "").toLowerCase() === statusFilter.toLowerCase();
+        (delivery.delivery_status || "").toLowerCase() ===
+          statusFilter.toLowerCase();
 
       return matchesSearch && matchesDate && matchesStatus;
     });
@@ -222,7 +231,10 @@ const DeliveryHistory = () => {
         ) : filteredDeliveries.length > 0 ? (
           <div className="space-y-4">
             {filteredDeliveries.map((delivery) => (
-              <DeliveryHistoryItem key={delivery.order_id} delivery={delivery} />
+              <DeliveryHistoryItem
+                key={delivery.order_id}
+                delivery={delivery}
+              />
             ))}
           </div>
         ) : (

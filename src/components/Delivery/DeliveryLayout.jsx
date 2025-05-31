@@ -11,10 +11,21 @@ import {
   FiChevronRight,
 } from "react-icons/fi";
 import DeliverySidebar from "./DeliverySidebar";
+import useDeliveryPartnerStore from "../../store/Delivery/useDeliveryPartnerStore"; // Updated import
 
 const DeliveryLayout = ({ children, hideMenu }) => {
   // We might use location later for active route highlighting
   const [collapsed, setCollapsed] = React.useState(false);
+  const { logoutPartner } = useDeliveryPartnerStore(); // Updated to use logoutPartner
+
+  const handleLogout = async () => {
+    // Implement your logout logic here
+    // e.g., call an API, clear local storage, redirect, etc.
+    await logoutPartner(); // Updated to call logoutPartner
+    // You might want to redirect to the login page or home page after logout
+    // navigate('/login'); // Example using react-router-dom navigate
+    console.log("User logged out");
+  };
 
   return (
     <div className="flex h-screen bg-bg-secondary overflow-hidden">
@@ -72,26 +83,16 @@ const DeliveryLayout = ({ children, hideMenu }) => {
           {/* Navigation */}
           <DeliverySidebar collapsed={collapsed} />
 
-          {/* Back to Site Link */}
+          {/* Logout Button */}
           <div className="mt-auto p-4">
-            <Link
-              to="/"
-              className={`flex items-center py-3 px-4 rounded-md transition-all duration-200 hover:bg-gray-700 hover:bg-opacity-30`}
+            <button
+              onClick={handleLogout}
+              className={`flex items-center w-full py-3 px-4 rounded-md transition-all duration-200 hover:bg-gray-700 hover:bg-opacity-30 text-left`}
+              style={{ color: "var(--text-on-dark-bg)" }}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 mr-3"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              {!collapsed && <span className="ml-3">Back to Site</span>}
-            </Link>
+              <FiLogOut className="h-5 w-5 mr-3" />
+              {!collapsed && <span className="ml-3">Logout</span>}
+            </button>
           </div>
         </aside>
       )}
