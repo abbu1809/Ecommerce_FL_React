@@ -19,6 +19,7 @@ import {
   showAddToWishlistToast,
   showCartErrorToast,
   showWishlistErrorToast,
+  toast,
 } from "../../utils/toast";
 
 const ProductActionsIntegrated = ({ product, quantity = 1 }) => {
@@ -93,7 +94,7 @@ const ProductActionsIntegrated = ({ product, quantity = 1 }) => {
     } else {
       // Fallback for browsers that don't support Web Share API
       navigator.clipboard.writeText(window.location.href);
-      alert("Link copied to clipboard!");
+      toast.info("Link copied to clipboard!");
     }
   };
 

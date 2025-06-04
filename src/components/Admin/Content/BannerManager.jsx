@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Button from "../../UI/Button";
 import { useBannerStore } from "../../../store/Admin/useBannerStore";
 import ConfirmModal from "../../UI/ConfirmModal";
+import toast from "react-hot-toast";
 
 const BannerManager = ({ positionOptions }) => {
   const {
@@ -116,7 +117,7 @@ const BannerManager = ({ positionOptions }) => {
 
   const handleAddBanner = async () => {
     if (!newBannerImageFile) {
-      alert("Please select an image file");
+      toast.info("Please select an image file");
       return;
     }
 

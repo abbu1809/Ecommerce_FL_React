@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import {
   FiPackage,
   FiMapPin,
@@ -26,7 +25,7 @@ const statusIcons = {
   Failed: <FiPackage />,
 };
 
-const DeliveryCard = ({ delivery }) => {
+const DeliveryCard = ({ delivery, onAccept }) => {
   return (
     <div
       className="flex flex-col md:flex-row justify-between p-4 group hover:bg-gray-50 rounded-lg transition-all duration-200 animate-fadeIn transform hover:translate-y-[-2px] border border-transparent hover:border-gray-100 mb-4"
@@ -147,16 +146,15 @@ const DeliveryCard = ({ delivery }) => {
           }}
         >
           {delivery.status}
-        </div>
-
-        <Link
-          to={`/delivery/status-update/${delivery.id}`}
-          className="flex items-center mt-4 font-medium text-sm"
+        </div>{" "}
+        <button
+          onClick={() => onAccept(delivery.id)}
+          className="flex items-center mt-4 font-medium text-sm hover:underline transition-colors"
           style={{ color: "var(--brand-primary)" }}
         >
           Update Status
           <FiChevronRight className="ml-1" />
-        </Link>
+        </button>
       </div>
     </div>
   );

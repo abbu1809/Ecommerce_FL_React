@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { FiX, FiUpload, FiPlus, FiTrash2 } from "react-icons/fi";
+import { FiX, FiUpload, FiPlus, FiTrash2, FiCamera } from "react-icons/fi";
+import useAdminProducts from "../../../store/Admin/useAdminProducts";
+import { toast } from "../../../utils/toast";
 
 const EditProductModal = ({ product, onClose, onSave }) => {
   const [step, setStep] = useState(1);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const { uploadProductImage } = useAdminProducts();
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -159,6 +164,32 @@ const EditProductModal = ({ product, onClose, onSave }) => {
       ...formData,
       variant: newVariant,
     });
+  };
+  // Handle image upload
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+
+    try {
+      const result = await uploadProductImage(file);
+
+      if (result.success) {
+        setFormData((prev) => ({
+          ...prev,
+          images: [...prev.images, result.imageUrl].slice(0, 5),
+        }));
+        toast.info("Image uploaded successfully.");
+      } else {
+        toast.error("Failed to upload image: " + result.message);
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast.error("Failed to upload image: " + error.message);
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handleSubmit = (e) => {
@@ -696,26 +727,39 @@ const EditProductModal = ({ product, onClose, onSave }) => {
                         <FiX size={12} />
                       </button>
                     </div>
-                  ))}
-
+                  ))}{" "}
                   {formData.images.length < 5 && (
                     <div
-                      className="aspect-square border rounded-md flex items-center justify-center"
+                      className="aspect-square border rounded-md flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors relative"
                       style={{
                         borderColor: "var(--border-primary)",
                         borderStyle: "dashed",
                       }}
+                      onClick={() =>
+                        document.getElementById("image-upload-edit").click()
+                      }
                     >
+                      <input
+                        type="file"
+                        id="image-upload-edit"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
                       <div className="flex flex-col items-center">
-                        <FiUpload
-                          size={20}
-                          style={{ color: "var(--text-secondary)" }}
-                        />
+                        {uploadingImage ? (
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                        ) : (
+                          <FiCamera
+                            size={20}
+                            style={{ color: "var(--text-secondary)" }}
+                          />
+                        )}
                         <span
                           className="text-xs mt-1"
                           style={{ color: "var(--text-secondary)" }}
                         >
-                          Add Image
+                          {uploadingImage ? "Uploading..." : "Add Image"}
                         </span>
                       </div>
                     </div>

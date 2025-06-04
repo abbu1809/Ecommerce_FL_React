@@ -8,19 +8,15 @@ import {
   FiX,
   FiFlag,
 } from "react-icons/fi";
-import useReviewStore from "../../../store/useReviewStore";
+import useAdminReviews from "../../../store/Admin/useAdminReviews";
 import { useConfirmModal } from "../../../hooks/useConfirmModal";
 import ConfirmModal from "../../UI/ConfirmModal";
+import ReviewDetailModal from "./ReviewDetailModal";
 import { toast } from "../../../utils/toast";
 
-const ReviewTable = () => {
-  const {
-    reviews,
-    updateReviewStatus,
-    deleteReview,
-    toggleFlaggedStatus,
-    fetchReviews,
-  } = useReviewStore();
+const ReviewTable = ({ activeTab = "all" }) => {
+  const { reviews, updateReviewStatus, deleteReview, fetchReviews } =
+    useAdminReviews();
 
   const {
     isOpen: confirmModalIsOpen,
@@ -31,21 +27,47 @@ const ReviewTable = () => {
     handleConfirm,
   } = useConfirmModal();
 
+  // State for review detail modal
+  const [selectedReview, setSelectedReview] = useState(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  // Open review detail modal
+  const openDetailModal = (review) => {
+    setSelectedReview(review);
+    setIsDetailModalOpen(true);
+  };
+
+  // Close review detail modal
+  const closeDetailModal = () => {
+    setIsDetailModalOpen(false);
+    setSelectedReview(null);
+  };
+
   useEffect(() => {
     // Fetch reviews if we don't have any yet
-    if (reviews.length === 0) {
+    if (reviews.list.length === 0) {
       fetchReviews();
     }
-  }, [reviews.length, fetchReviews]);
+
+    // Set the status filter based on the activeTab
+    if (activeTab === "pending") {
+      setStatusFilter("pending");
+    } else if (activeTab === "flagged") {
+      setFlaggedFilter(true);
+      setStatusFilter("all");
+    } else {
+      setFlaggedFilter(false);
+      setStatusFilter("all");
+    }
+  }, [reviews.list.length, fetchReviews, activeTab]);
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState("all"); // all, approved, pending, rejected
   const [flaggedFilter, setFlaggedFilter] = useState(false);
   const [verifiedFilter, setVerifiedFilter] = useState(false);
   const [ratingFilter, setRatingFilter] = useState(0); // 0 means all ratings
-
   // Handle delete review
-  const handleDeleteReview = (id) => {
+  const handleDeleteReview = (productId, reviewId) => {
     showConfirm({
       title: "Delete Review",
       message:
@@ -55,36 +77,27 @@ const ReviewTable = () => {
       type: "danger",
       onConfirm: async () => {
         try {
-          await deleteReview(id);
-          toast.success("Review deleted successfully");
+          const result = await deleteReview(productId, reviewId);
+          if (result.success) {
+            toast.success(result.message || "Review deleted successfully");
+          } else {
+            toast.error(result.error || "Failed to delete review");
+          }
         } catch (error) {
           console.error("Error deleting review:", error);
           toast.error("Failed to delete review");
         }
       },
     });
-  };
+  }; // Handle status change is now handled by the ReviewDetailModal// Handle flagged state change
 
-  // Handle status change
-  const handleUpdateStatus = (id, status) => {
-    updateReviewStatus(id, status);
-  };
-
-  // Handle flagged state change
-  const toggleFlagged = (id) => {
-    toggleFlaggedStatus(id);
-  };
-
-  // Apply filters
-  const filteredReviews = reviews.filter((review) => {
+  const filteredReviews = reviews.list.filter((review) => {
     // Status filter
-    if (statusFilter !== "all" && review.status !== statusFilter) return false;
-
-    // Flagged filter
-    if (flaggedFilter && !review.flagged) return false;
+    if (statusFilter !== "all" && review.status !== statusFilter) return false; // Flagged filter
+    if (flaggedFilter && review.reported_count <= 0) return false;
 
     // Verified filter
-    if (verifiedFilter && !review.verified) return false;
+    if (verifiedFilter && !review.is_verified) return false;
 
     // Rating filter
     if (ratingFilter !== 0 && review.rating !== ratingFilter) return false;
@@ -302,14 +315,16 @@ const ReviewTable = () => {
             className="divide-y"
             style={{ borderColor: "var(--border-primary)" }}
           >
+            {" "}
             {filteredReviews.map((review) => (
               <tr
                 key={review.id}
                 className="hover:bg-gray-50 transition-colors duration-150"
                 style={{
-                  backgroundColor: review.flagged
-                    ? "rgba(239, 68, 68, 0.05)"
-                    : "transparent",
+                  backgroundColor:
+                    review.reported_count > 0
+                      ? "rgba(239, 68, 68, 0.05)"
+                      : "transparent",
                 }}
               >
                 {/* Product */}
@@ -320,8 +335,8 @@ const ReviewTable = () => {
                       style={{ borderColor: "var(--border-primary)" }}
                     >
                       <img
-                        src={review.productImage}
-                        alt={review.productName}
+                        src={review.productImage || "/public/logo.jpg"}
+                        alt={review.product_name}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -330,26 +345,25 @@ const ReviewTable = () => {
                         className="text-sm font-medium"
                         style={{ color: "var(--text-primary)" }}
                       >
-                        {review.productName}
+                        {review.product_name}
                       </div>
                       <div
                         className="text-xs"
                         style={{ color: "var(--text-secondary)" }}
                       >
-                        Product ID: {review.productId}
+                        Product ID: {review.product_id}
                       </div>
                     </div>
                   </div>
                 </td>
-
                 {/* User */}
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div
                     className="text-sm font-medium"
                     style={{ color: "var(--text-primary)" }}
                   >
-                    {review.user}
-                    {review.verified && (
+                    {review.email?.split("@")[0] || "Unknown User"}
+                    {review.is_verified && (
                       <span
                         className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium"
                         style={{
@@ -366,22 +380,20 @@ const ReviewTable = () => {
                     className="text-xs"
                     style={{ color: "var(--text-secondary)" }}
                   >
-                    {review.userEmail}
+                    {review.email}
                   </div>
                 </td>
-
                 {/* Rating */}
                 <td className="px-6 py-4 whitespace-nowrap">
                   {renderRating(review.rating)}
-                </td>
-
+                </td>{" "}
                 {/* Review */}
                 <td className="px-6 py-4">
                   <div
                     className="text-sm font-medium mb-1"
                     style={{ color: "var(--text-primary)" }}
                   >
-                    {review.title}
+                    {review.title || "No Title"}
                   </div>
                   <div
                     className="text-xs line-clamp-2"
@@ -397,24 +409,22 @@ const ReviewTable = () => {
                       className="font-medium"
                       style={{ color: "var(--brand-primary)" }}
                     >
-                      {review.helpful}
+                      {review.helpful_users?.length || 0}
                     </span>{" "}
                     found helpful
                   </div>
                 </td>
-
                 {/* Status */}
                 <td className="px-6 py-4 whitespace-nowrap">
                   {renderStatusBadge(review.status)}
-                </td>
-
+                </td>{" "}
                 {/* Date */}
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div
                     className="text-sm"
                     style={{ color: "var(--text-primary)" }}
                   >
-                    {new Date(review.date).toLocaleDateString("en-IN", {
+                    {new Date(review.created_at).toLocaleDateString("en-IN", {
                       day: "numeric",
                       month: "short",
                       year: "numeric",
@@ -424,14 +434,13 @@ const ReviewTable = () => {
                     className="text-xs"
                     style={{ color: "var(--text-secondary)" }}
                   >
-                    {new Date(review.date).toLocaleTimeString("en-IN", {
+                    {new Date(review.created_at).toLocaleTimeString("en-IN", {
                       hour: "2-digit",
                       minute: "2-digit",
                       hour12: true,
                     })}
                   </div>
                 </td>
-
                 {/* Actions */}
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex justify-end space-x-2">
@@ -439,40 +448,91 @@ const ReviewTable = () => {
                       className="p-1 rounded-full hover:bg-gray-100 transition-colors duration-200"
                       style={{ color: "var(--text-secondary)" }}
                       title="View Review"
+                      onClick={() => openDetailModal(review)}
                     >
                       <FiEye size={16} />
-                    </button>
-
-                    <button
-                      className="p-1 rounded-full hover:bg-gray-100 transition-colors duration-200"
-                      style={{
-                        color: review.flagged
-                          ? "var(--error-color)"
-                          : "var(--text-secondary)",
-                      }}
-                      title={review.flagged ? "Remove Flag" : "Flag Review"}
-                      onClick={() => toggleFlagged(review.id)}
-                    >
-                      <FiFlag size={16} />
-                    </button>
-
+                    </button>{" "}
                     {review.status === "pending" && (
                       <>
+                        {" "}
                         <button
-                          onClick={() =>
-                            updateReviewStatus(review.id, "approved")
-                          }
+                          onClick={() => {
+                            showConfirm({
+                              title: "Approve Review",
+                              message:
+                                "Are you sure you want to approve this review?",
+                              confirmText: "Approve",
+                              cancelText: "Cancel",
+                              type: "success",
+                              onConfirm: async () => {
+                                try {
+                                  const result = await updateReviewStatus(
+                                    review.product_id,
+                                    review.id,
+                                    "approved"
+                                  );
+                                  if (result.success) {
+                                    toast.success(
+                                      result.message ||
+                                        "Review approved successfully"
+                                    );
+                                  } else {
+                                    toast.error(
+                                      result.error || "Failed to approve review"
+                                    );
+                                  }
+                                } catch (error) {
+                                  console.error(
+                                    "Error approving review:",
+                                    error
+                                  );
+                                  toast.error("Failed to approve review");
+                                }
+                              },
+                            });
+                          }}
                           className="p-1 rounded-full hover:bg-gray-100 transition-colors duration-200"
                           style={{ color: "var(--success-color)" }}
                           title="Approve Review"
                         >
                           <FiCheck size={16} />
                         </button>
-
                         <button
-                          onClick={() =>
-                            updateReviewStatus(review.id, "rejected")
-                          }
+                          onClick={() => {
+                            showConfirm({
+                              title: "Reject Review",
+                              message:
+                                "Are you sure you want to reject this review?",
+                              confirmText: "Reject",
+                              cancelText: "Cancel",
+                              type: "warning",
+                              onConfirm: async () => {
+                                try {
+                                  const result = await updateReviewStatus(
+                                    review.product_id,
+                                    review.id,
+                                    "rejected"
+                                  );
+                                  if (result.success) {
+                                    toast.success(
+                                      result.message ||
+                                        "Review rejected successfully"
+                                    );
+                                  } else {
+                                    toast.error(
+                                      result.error || "Failed to reject review"
+                                    );
+                                  }
+                                } catch (error) {
+                                  console.error(
+                                    "Error rejecting review:",
+                                    error
+                                  );
+                                  toast.error("Failed to reject review");
+                                }
+                              },
+                            });
+                          }}
                           className="p-1 rounded-full hover:bg-gray-100 transition-colors duration-200"
                           style={{ color: "var(--error-color)" }}
                           title="Reject Review"
@@ -481,12 +541,13 @@ const ReviewTable = () => {
                         </button>
                       </>
                     )}
-
                     <button
                       className="p-1 rounded-full hover:bg-gray-100 transition-colors duration-200"
                       style={{ color: "var(--error-color)" }}
                       title="Delete Review"
-                      onClick={() => handleDeleteReview(review.id)}
+                      onClick={() =>
+                        handleDeleteReview(review.product_id, review.id)
+                      }
                     >
                       <FiTrash2 size={16} />
                     </button>
@@ -494,7 +555,6 @@ const ReviewTable = () => {
                 </td>
               </tr>
             ))}
-
             {filteredReviews.length === 0 && (
               <tr>
                 <td
@@ -515,8 +575,9 @@ const ReviewTable = () => {
           className="px-6 py-3 flex items-center justify-between border-t"
           style={{ borderColor: "var(--border-primary)" }}
         >
+          {" "}
           <div className="text-sm" style={{ color: "var(--text-secondary)" }}>
-            Showing {filteredReviews.length} of {reviews.length} reviews
+            Showing {filteredReviews.length} of {reviews.list.length} reviews
           </div>
           <div className="flex space-x-1">
             {[1, 2, 3].map((page) => (
@@ -550,6 +611,13 @@ const ReviewTable = () => {
         cancelText={modalConfig.cancelText}
         type={modalConfig.type}
         isLoading={confirmLoading}
+      />
+
+      {/* Review Detail Modal */}
+      <ReviewDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={closeDetailModal}
+        review={selectedReview}
       />
     </div>
   );

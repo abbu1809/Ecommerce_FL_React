@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { FiSearch, FiFilter, FiAlertCircle } from "react-icons/fi";
-import { DeliveryLayout } from "../../components/Delivery";
+import { DeliveryLayout, DeliveryStatusModal } from "../../components/Delivery";
 import { DeliveryCard } from "../../components/Delivery";
+import useDeliveryPartnerStore from "../../store/Delivery/useDeliveryPartnerStore";
+import { toast } from "../../utils/toast";
 
 const DeliveryAssignmentList = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -9,87 +11,94 @@ const DeliveryAssignmentList = () => {
   const [filteredAssignments, setFilteredAssignments] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("all");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDelivery, setSelectedDelivery] = useState(null);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+
+  // Get fetchAssignedDeliveries and updateDeliveryStatus functions from the store
+  const { fetchAssignedDeliveries, updateDeliveryStatus } =
+    useDeliveryPartnerStore();
 
   useEffect(() => {
-    // Simulate API call to fetch assignments
+    // Fetch assigned deliveries from API
     const fetchAssignments = async () => {
       setIsLoading(true);
       try {
-        // Mock data - in a real app, this would be fetched from an API
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const deliveries = await fetchAssignedDeliveries();
 
-        const mockAssignments = [
-          {
-            id: "DEL-1001",
-            orderId: "ORD-5732",
-            customer: {
-              name: "John Smith",
-              phone: "202-555-0140",
-              address: "123 Main St, Apt 4B, New York, NY 10001",
-            },
-            items: [
-              { name: "Wireless Headphones", quantity: 1 },
-              { name: "Smartphone Case", quantity: 1 },
-            ],
-            status: "pending",
-            priority: "normal",
-            distance: "3.2 km",
-            estimatedTime: "25 min",
-            paymentType: "Paid Online",
-            createdAt: "2023-10-22T14:30:00Z",
+        // Transform the API response to match our component's data structure
+        const formattedDeliveries = deliveries.map((delivery) => ({
+          id: delivery.order_id,
+          orderId: delivery.order_id,
+          customer: {
+            name: delivery.customer_name || "Customer",
+            phone: delivery.customer_phone || "N/A",
+            address: formatAddress(delivery.delivery_address),
           },
-          {
-            id: "DEL-1002",
-            orderId: "ORD-5733",
-            customer: {
-              name: "Emily Johnson",
-              phone: "202-555-0187",
-              address: "456 Park Ave, Suite 7, New York, NY 10022",
-            },
-            items: [
-              { name: "Bluetooth Speaker", quantity: 1 },
-              { name: "USB Cable Pack", quantity: 2 },
-            ],
-            status: "pending",
-            priority: "high",
-            distance: "1.5 km",
-            estimatedTime: "15 min",
-            paymentType: "Cash on Delivery",
-            createdAt: "2023-10-22T14:45:00Z",
-          },
-          {
-            id: "DEL-1003",
-            orderId: "ORD-5736",
-            customer: {
-              name: "Michael Wilson",
-              phone: "202-555-0192",
-              address: "789 Broadway, Floor 3, New York, NY 10003",
-            },
-            items: [
-              { name: "Gaming Mouse", quantity: 1 },
-              { name: "Mechanical Keyboard", quantity: 1 },
-              { name: "Mousepad XL", quantity: 1 },
-            ],
-            status: "pending",
-            priority: "normal",
-            distance: "4.7 km",
-            estimatedTime: "35 min",
-            paymentType: "Paid Online",
-            createdAt: "2023-10-22T15:30:00Z",
-          },
-        ];
+          items: delivery.items || [],
+          status: delivery.delivery_status || "pending",
+          priority: getPriority(delivery),
+          distance: "N/A", // Calculate if needed
+          estimatedTime: formatEstimatedDelivery(delivery.estimated_delivery),
+          paymentType: "N/A", // Add if available in API
+          createdAt: delivery.created_at,
+          total_amount: delivery.total_amount,
+          currency: delivery.currency || "INR",
+        }));
 
-        setAssignments(mockAssignments);
-        setFilteredAssignments(mockAssignments);
+        setAssignments(formattedDeliveries);
+        setFilteredAssignments(formattedDeliveries);
       } catch (error) {
-        console.error("Error fetching assignments:", error);
+        console.error("Error fetching assigned deliveries:", error);
+        toast.error("Failed to load delivery assignments");
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchAssignments();
-  }, []);
+  }, [fetchAssignedDeliveries]);
+
+  // Helper functions for data formatting
+  const formatAddress = (addressObj) => {
+    if (!addressObj) return "N/A";
+
+    const { street_address, city, state, postal_code } = addressObj;
+    return [street_address, city, state, postal_code]
+      .filter(Boolean)
+      .join(", ");
+  };
+
+  const getPriority = (delivery) => {
+    // Determine priority based on delivery data - can be customized
+    if (!delivery) return "normal";
+
+    // Logic to determine priority - for example, based on estimated delivery time
+    const estimatedDate = delivery.estimated_delivery
+      ? new Date(delivery.estimated_delivery)
+      : null;
+    const now = new Date();
+
+    if (estimatedDate && estimatedDate - now < 24 * 60 * 60 * 1000) {
+      return "high"; // High priority if delivery is due within 24 hours
+    }
+    return "normal";
+  };
+
+  const formatEstimatedDelivery = (dateString) => {
+    if (!dateString) return "N/A";
+    try {
+      const date = new Date(dateString);
+      return (
+        date.toLocaleDateString() +
+        " " +
+        date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      );
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return dateString;
+    }
+  };
 
   useEffect(() => {
     // Filter and search assignments
@@ -114,18 +123,56 @@ const DeliveryAssignmentList = () => {
 
     setFilteredAssignments(results);
   }, [searchTerm, filter, assignments]);
-
-  const handleAcceptDelivery = (deliveryId) => {
-    setAssignments((prev) =>
-      prev.map((assignment) =>
-        assignment.id === deliveryId
-          ? { ...assignment, status: "accepted" }
-          : assignment
-      )
+  const handleAcceptDelivery = async (orderId) => {
+    // Find the delivery to show in modal
+    const delivery = assignments.find(
+      (assignment) => assignment.id === orderId
     );
+    if (delivery) {
+      setSelectedDelivery(delivery);
+      setIsModalOpen(true);
+    }
+  };
+  const handleStatusUpdate = async (orderId, status, additionalData) => {
+    setIsUpdatingStatus(true);
+    try {
+      // Update status using the store function
+      await updateDeliveryStatus(orderId, status, additionalData);
 
-    // Normally there would be an API call here to update the status
-    console.log(`Accepted delivery: ${deliveryId}`);
+      // Update local state
+      setAssignments((prev) =>
+        prev.map((assignment) =>
+          assignment.id === orderId
+            ? { ...assignment, status: status }
+            : assignment
+        )
+      );
+
+      // Update filtered assignments as well
+      setFilteredAssignments((prev) =>
+        prev.map((assignment) =>
+          assignment.id === orderId
+            ? { ...assignment, status: status }
+            : assignment
+        )
+      );
+
+      toast.success("Delivery status updated successfully");
+
+      // Close modal
+      setIsModalOpen(false);
+      setSelectedDelivery(null);
+    } catch (error) {
+      console.error("Error updating delivery status:", error);
+      toast.error("Failed to update delivery status");
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedDelivery(null);
   };
 
   return (
@@ -232,6 +279,15 @@ const DeliveryAssignmentList = () => {
           </div>
         )}
       </div>
+
+      {/* Status Update Modal */}
+      <DeliveryStatusModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        delivery={selectedDelivery}
+        onStatusUpdate={handleStatusUpdate}
+        isSubmitting={isUpdatingStatus}
+      />
     </DeliveryLayout>
   );
 };

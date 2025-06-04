@@ -78,7 +78,7 @@ const OrderStatusList = ({ orders }) => {
     e.preventDefault(); // Prevent Link navigation
     e.stopPropagation();
     console.log("Opening modal for order:", orderId); // Debug log
-    alert(`Opening modal for order: ${orderId}`); // Temporary alert for testing
+    toast.info(`Opening modal for order: ${orderId}`); // Temporary alert for testing
     setSelectedOrderId(orderId);
   };
 

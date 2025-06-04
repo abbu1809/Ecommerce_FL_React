@@ -6,8 +6,10 @@ import {
   FiClock,
   FiCheckCircle,
   FiX,
+  FiTruck,
 } from "react-icons/fi";
 
+// Status colors for different delivery statuses
 const statusColors = {
   Pending: "var(--warning-color)",
   "Out for Delivery": "var(--brand-secondary)",
@@ -15,14 +17,49 @@ const statusColors = {
   Failed: "var(--error-color)",
 };
 
+// Status icons for different delivery statuses
 const statusIcons = {
   Pending: <FiPackage size={16} />,
-  "Out for Delivery": <FiClock size={16} />,
+  "Out for Delivery": <FiTruck size={16} />,
   Delivered: <FiCheckCircle size={16} />,
   Failed: <FiX size={16} />,
 };
 
 const DeliveryHistoryItem = ({ delivery }) => {
+  // Safely handle date displays with fallbacks
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "N/A";
+    try {
+      return new Date(dateStr).toLocaleDateString();
+    } catch (err) {
+      console.error("Invalid date format:", dateStr, err);
+      return "N/A";
+    }
+  };
+
+  const formatTime = (dateStr) => {
+    if (!dateStr) return "";
+    try {
+      return new Date(dateStr).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch (err) {
+      console.error("Invalid date format:", dateStr, err);
+      return "";
+    }
+  };
+
+  // Get the appropriate status color and icon, defaulting if not found
+  const statusColor = statusColors[delivery.status] || "var(--warning-color)";
+  const statusIcon = statusIcons[delivery.status] || <FiPackage size={16} />;
+
+  // Safely handle amount display
+  const amount =
+    typeof delivery.amount === "number"
+      ? delivery.amount.toFixed(2)
+      : parseFloat(delivery.amount || 0).toFixed(2);
+
   return (
     <div
       className="border rounded-lg overflow-hidden mb-4 transition-all duration-200 hover:shadow-md"
@@ -47,11 +84,11 @@ const DeliveryHistoryItem = ({ delivery }) => {
             <span
               className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
               style={{
-                backgroundColor: `${statusColors[delivery.status]}20`,
-                color: statusColors[delivery.status],
+                backgroundColor: `${statusColor}20`,
+                color: statusColor,
               }}
             >
-              {statusIcons[delivery.status]}
+              {statusIcon}
               <span className="ml-1">{delivery.status}</span>
             </span>
           </div>
@@ -59,12 +96,11 @@ const DeliveryHistoryItem = ({ delivery }) => {
             className="text-xs mt-1"
             style={{ color: "var(--text-secondary)" }}
           >
-            Completed on {new Date(delivery.completedDate).toLocaleDateString()}{" "}
-            at{" "}
-            {new Date(delivery.completedDate).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+            {delivery.completedDate
+              ? `Completed on ${formatDate(
+                  delivery.completedDate
+                )} at ${formatTime(delivery.completedDate)}`
+              : "In progress"}
           </div>
         </div>
         <div className="text-right">
@@ -83,10 +119,10 @@ const DeliveryHistoryItem = ({ delivery }) => {
                   : "var(--text-primary)",
             }}
           >
-            ₹{delivery.amount.toFixed(2)}
+            ₹{amount}
           </div>
           <div className="text-xs" style={{ color: "var(--brand-primary)" }}>
-            {delivery.paymentMethod}
+            {delivery.paymentMethod || "Online"}
           </div>
         </div>
       </div>
@@ -106,7 +142,7 @@ const DeliveryHistoryItem = ({ delivery }) => {
               Delivery Address
             </div>
             <div className="text-sm" style={{ color: "var(--text-primary)" }}>
-              {delivery.address}
+              {delivery.address || "No address provided"}
             </div>
           </div>
         </div>
@@ -124,8 +160,7 @@ const DeliveryHistoryItem = ({ delivery }) => {
               Expected vs Actual Delivery
             </div>
             <div className="text-sm" style={{ color: "var(--text-primary)" }}>
-              Expected:{" "}
-              {new Date(delivery.expectedDelivery).toLocaleDateString()}
+              Expected: {formatDate(delivery.expectedDelivery)}
               <br />
               {delivery.status === "Delivered" ? (
                 <span
@@ -137,8 +172,7 @@ const DeliveryHistoryItem = ({ delivery }) => {
                         : "var(--warning-color)",
                   }}
                 >
-                  Actual:{" "}
-                  {new Date(delivery.completedDate).toLocaleDateString()}
+                  Actual: {formatDate(delivery.completedDate)}
                 </span>
               ) : (
                 <span style={{ color: "var(--error-color)" }}>

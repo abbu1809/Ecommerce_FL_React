@@ -28,15 +28,18 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
   const { items: cartItems, totalAmount: cartTotal } = useCartStore();
-  const { placeOrderFromCart, placeSingleProductOrder, isProcessingPayment } =
-    useOrderStore();
+  const {
+    placeOrderFromCart,
+    placeSingleProductOrder,
+    isProcessingPayment,
+    paymentSuccessful,
+  } = useOrderStore();
   const {
     addresses,
     fetchAddresses,
     isLoading: addressLoading,
   } = useAddressStore();
   const [selectedAddressId, setSelectedAddressId] = useState(null);
-
   // Calculate order details
   const isCartOrder = !product;
   const orderItems = isCartOrder ? cartItems : [{ ...product, quantity }];
@@ -44,6 +47,7 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
   const tax = 0;
   const shipping = 0;
   const orderTotal = subtotal + tax + shipping;
+
   useEffect(() => {
     if (isOpen && isAuthenticated) {
       // Check if Razorpay is loaded
@@ -65,6 +69,17 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
       setSelectedAddressId(defaultAddress?.id || addresses[0]?.id);
     }
   }, [addresses, selectedAddressId]);
+
+  // Close checkout modal when payment is successful
+  useEffect(() => {
+    if (paymentSuccessful && isOpen) {
+      console.log("Payment successful, closing checkout modal");
+      // Add a small delay before closing to allow state updates
+      setTimeout(() => {
+        onClose();
+      }, 1000);
+    }
+  }, [paymentSuccessful, isOpen, onClose]);
   const handlePlaceOrder = async () => {
     console.log("handlePlaceOrder called", {
       isAuthenticated,
@@ -113,13 +128,6 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
         );
         // Payment process initiated successfully
         // Modal will close after payment completion or be kept open if payment fails
-        setTimeout(() => {
-          // Close modal after a short delay to allow payment completion
-          if (!isProcessingPayment) {
-            console.log("Closing checkout modal after successful payment");
-            onClose();
-          }
-        }, 2000); // Increased timeout to 2 seconds
       } else {
         console.log("Order placement failed - no result returned");
       }

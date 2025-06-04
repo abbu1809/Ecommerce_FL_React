@@ -7,6 +7,7 @@ import CartSummary from "../components/Cart/CartSummary";
 import Checkout from "../components/Checkout/Checkout";
 import { useCartStore } from "../store/useCart";
 import { useAuthStore } from "../store/useAuth";
+import { useOrderStore } from "../store/useOrder";
 
 const Cart = () => {
   const {
@@ -17,12 +18,24 @@ const Cart = () => {
     removeItem,
   } = useCartStore();
   const { isAuthenticated } = useAuthStore();
+  const { paymentSuccessful } = useOrderStore();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
-
   useEffect(() => {
     // Load cart data when component mounts or auth state changes
     fetchCart();
   }, [fetchCart, isAuthenticated]);
+
+  // Listen for successful payment and refetch cart
+  useEffect(() => {
+    if (paymentSuccessful) {
+      console.log("Payment successful, refetching cart data");
+      // Add a short delay to ensure backend has processed the order
+      setTimeout(() => {
+        fetchCart();
+        console.log("Cart data refetched after successful payment");
+      }, 500);
+    }
+  }, [paymentSuccessful, fetchCart]);
 
   // Calculate cart totals
   const subtotal = totalAmount;
@@ -33,9 +46,11 @@ const Cart = () => {
   const handleOpenCheckout = () => {
     setCheckoutOpen(true);
   };
-
   const handleCloseCheckout = () => {
     setCheckoutOpen(false);
+    // Refetch cart data after checkout closes
+    // This ensures the cart is up to date whether payment was successful or canceled
+    fetchCart();
   };
 
   // Breadcrumb items

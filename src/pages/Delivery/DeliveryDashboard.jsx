@@ -1,4 +1,4 @@
-import  { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import {
   FiTruck,
@@ -13,6 +13,8 @@ import {
   FiStar,
 } from "react-icons/fi";
 import { DeliveryLayout } from "../../components/Delivery";
+import useDeliveryPartnerStore from "../../store/Delivery/useDeliveryPartnerStore";
+import { toast } from "../../utils/toast";
 
 const DeliveryDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -20,110 +22,175 @@ const DeliveryDashboard = () => {
     todayDeliveries: 0,
     pendingDeliveries: 0,
     completedDeliveries: 0,
-    rating: 0,
+    rating: 4.8, // Static for now
   });
   const [recentDeliveries, setRecentDeliveries] = useState([]);
   const [upcomingDeliveries, setUpcomingDeliveries] = useState([]);
 
+  // Get store methods
+  const { fetchAssignedDeliveries, fetchDeliveryHistory } =
+    useDeliveryPartnerStore();
+
+  // Helper functions for formatting
+  const formatAddress = useCallback((addressObj) => {
+    if (!addressObj) return "N/A";
+
+    const { street_address, city, state, postal_code } = addressObj;
+    return [street_address, city, state, postal_code]
+      .filter(Boolean)
+      .join(", ");
+  }, []);
+
+  const formatDate = useCallback((dateString) => {
+    if (!dateString) return "N/A";
+
+    const date = new Date(dateString);
+    const now = new Date();
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    // If today
+    if (date.setHours(0, 0, 0, 0) === now.setHours(0, 0, 0, 0)) {
+      return `Today, ${date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`;
+    }
+
+    // If yesterday
+    if (date.setHours(0, 0, 0, 0) === yesterday.setHours(0, 0, 0, 0)) {
+      return `Yesterday, ${date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`;
+    }
+
+    // Otherwise show date and time
+    return `${date.toLocaleDateString()}, ${date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    })}`;
+  }, []);
+
+  const getPriorityFromDelivery = useCallback((delivery) => {
+    // Determine priority based on delivery timing
+    if (!delivery || !delivery.estimated_delivery) return "normal";
+
+    const estimatedDate = new Date(delivery.estimated_delivery);
+    const now = new Date();
+
+    // If delivery due within 24 hours
+    if (estimatedDate - now < 24 * 60 * 60 * 1000) {
+      return "high";
+    }
+
+    return "normal";
+  }, []);
+
+  const capitalizeFirstLetter = useCallback((string) => {
+    if (!string) return "";
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }, []);
+
+  // Process delivery data for dashboard
+  const processDeliveryData = useCallback(
+    (assignedDeliveries = [], historyDeliveries = []) => {
+      // Filter and format upcoming deliveries from assigned
+      const formattedUpcoming = assignedDeliveries
+        .slice(0, 3) // Just take top 3 for dashboard
+        .map((delivery) => ({
+          id: delivery.order_id,
+          orderId: delivery.order_id,
+          customer: delivery.customer_name || "Customer",
+          address: formatAddress(delivery.delivery_address),
+          scheduledTime: formatDate(delivery.estimated_delivery),
+          priority: getPriorityFromDelivery(delivery),
+        }));
+
+      setUpcomingDeliveries(formattedUpcoming);
+
+      // Filter and format recent completed deliveries
+      const formattedRecent = historyDeliveries
+        .slice(0, 3) // Just take top 3 for dashboard
+        .map((delivery) => ({
+          id: delivery.order_id,
+          orderId: delivery.order_id,
+          customer: delivery.customer_name || "Customer",
+          address: formatAddress(delivery.delivery_address),
+          status: capitalizeFirstLetter(delivery.delivery_status || ""),
+          time: formatDate(
+            delivery.delivered_at || delivery.updated_at || delivery.created_at
+          ),
+          reason: delivery.notes || null,
+        }));
+
+      setRecentDeliveries(formattedRecent);
+
+      // Calculate and set stats
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const todayDeliveries = historyDeliveries.filter((delivery) => {
+        const deliveryDate = new Date(
+          delivery.delivered_at || delivery.updated_at
+        );
+        return deliveryDate >= today;
+      }).length;
+
+      setStats({
+        todayDeliveries,
+        pendingDeliveries: assignedDeliveries.length,
+        completedDeliveries: historyDeliveries.length,
+        rating: 4.8, // Static for now, could come from API in the future
+      });
+    },
+    [formatAddress, formatDate, getPriorityFromDelivery, capitalizeFirstLetter]
+  );
+
   useEffect(() => {
-    // Fetch dashboard data
+    // Fetch dashboard data from API
     const fetchDashboardData = async () => {
       setIsLoading(true);
       try {
-        // In a real app, these would be API calls
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // Fetch assigned deliveries for upcoming/pending
+        const assignedDeliveries = await fetchAssignedDeliveries();
 
-        // Mock statistics data
-        setStats({
-          todayDeliveries: 3,
-          pendingDeliveries: 5,
-          completedDeliveries: 42,
-          rating: 4.8,
-        });
+        // Fetch delivery history for completed
+        const historyDeliveries = await fetchDeliveryHistory();
 
-        // Mock recent deliveries
-        setRecentDeliveries([
-          {
-            id: "DEL-1005",
-            orderId: "ORD-5740",
-            customer: "Rahul Sharma",
-            address: "123 Main St, Bhopal, MP 462001",
-            status: "Delivered",
-            time: "Today, 13:45",
-          },
-          {
-            id: "DEL-1004",
-            orderId: "ORD-5738",
-            customer: "Priya Patel",
-            address: "456 Park Ave, Bhopal, MP 462003",
-            status: "Delivered",
-            time: "Today, 11:20",
-          },
-          {
-            id: "DEL-1003",
-            orderId: "ORD-5736",
-            customer: "Amit Kumar",
-            address: "789 Lake View, Bhopal, MP 462020",
-            status: "Failed",
-            time: "Yesterday, 16:30",
-            reason: "Customer not available",
-          },
-        ]);
-
-        // Mock upcoming deliveries
-        setUpcomingDeliveries([
-          {
-            id: "DEL-1008",
-            orderId: "ORD-5745",
-            customer: "Vikram Singh",
-            address: "56 Market Complex, Bhopal, MP 462011",
-            scheduledTime: "Today, 15:30",
-            priority: "high",
-          },
-          {
-            id: "DEL-1007",
-            orderId: "ORD-5744",
-            customer: "Meera Joshi",
-            address: "72 Garden View, Bhopal, MP 462023",
-            scheduledTime: "Today, 16:15",
-            priority: "normal",
-          },
-          {
-            id: "DEL-1006",
-            orderId: "ORD-5742",
-            customer: "Ajay Verma",
-            address: "14 College Road, Bhopal, MP 462026",
-            scheduledTime: "Tomorrow, 10:00",
-            priority: "normal",
-          },
-        ]);
-
-        setIsLoading(false);
+        // Process and format the delivery data for the dashboard
+        processDeliveryData(assignedDeliveries, historyDeliveries);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
+        toast.error("Failed to load dashboard data");
+      } finally {
         setIsLoading(false);
       }
     };
 
     fetchDashboardData();
-  }, []);
+  }, [fetchAssignedDeliveries, fetchDeliveryHistory, processDeliveryData]);
 
   // Function to get color based on status
-  const getStatusColor = (status) => {
+  const getStatusColor = useCallback((status) => {
     switch (status) {
       case "Delivered":
         return "var(--success-color)";
+      case "Failed_attempt":
+      case "Failed_final":
       case "Failed":
         return "var(--error-color)";
+      case "Assigned":
+      case "Out_for_delivery":
       case "Pending":
         return "var(--warning-color)";
       default:
         return "var(--brand-primary)";
     }
-  };
+  }, []);
 
   // Function to get priority color and label
-  const getPriorityInfo = (priority) => {
+  const getPriorityInfo = useCallback((priority) => {
     switch (priority) {
       case "high":
         return {
@@ -146,7 +213,7 @@ const DeliveryDashboard = () => {
           label: "Normal",
         };
     }
-  };
+  }, []);
 
   // Stat card component
   const StatCard = ({ icon, value, label, color, bgColor }) => (
@@ -209,7 +276,7 @@ const DeliveryDashboard = () => {
                 className="font-medium"
                 style={{ color: "var(--text-primary)" }}
               >
-                Order #{delivery.orderId.split("-")[1]}
+                Order #{delivery.orderId}
               </p>
               <span
                 className="mx-2 text-xs px-2 py-0.5 rounded-full"
@@ -285,7 +352,7 @@ const DeliveryDashboard = () => {
                   className="font-medium"
                   style={{ color: "var(--text-primary)" }}
                 >
-                  Order #{delivery.orderId.split("-")[1]}
+                  Order #{delivery.orderId}
                 </p>
                 <span
                   className="mx-2 text-xs px-2 py-0.5 rounded-full"
@@ -340,151 +407,6 @@ const DeliveryDashboard = () => {
     );
   };
 
-  // Performance metrics component
-  const PerformanceMetrics = () => (
-    <div
-      className="rounded-lg p-6"
-      style={{
-        backgroundColor: "var(--bg-primary)",
-        boxShadow: "var(--shadow-sm)",
-      }}
-    >
-      <div className="flex items-center justify-between mb-4">
-        <h2
-          className="text-lg font-medium"
-          style={{ color: "var(--text-primary)" }}
-        >
-          Performance Metrics
-        </h2>
-        <Link
-          to="/delivery/history"
-          className="text-xs font-medium flex items-center"
-          style={{ color: "var(--brand-primary)" }}
-        >
-          View History
-          <FiChevronRight size={14} className="ml-0.5" />
-        </Link>
-      </div>
-
-      <div className="space-y-4">
-        <div>
-          <div className="flex items-center justify-between">
-            <p
-              className="text-sm font-medium"
-              style={{ color: "var(--text-primary)" }}
-            >
-              On-time Delivery Rate
-            </p>
-            <p
-              className="text-sm font-bold"
-              style={{ color: "var(--text-primary)" }}
-            >
-              95%
-            </p>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-            <div
-              className="h-2 rounded-full"
-              style={{ width: "95%", backgroundColor: "var(--success-color)" }}
-            ></div>
-          </div>
-        </div>
-
-        <div>
-          <div className="flex items-center justify-between">
-            <p
-              className="text-sm font-medium"
-              style={{ color: "var(--text-primary)" }}
-            >
-              Successful Delivery Rate
-            </p>
-            <p
-              className="text-sm font-bold"
-              style={{ color: "var(--text-primary)" }}
-            >
-              98%
-            </p>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-            <div
-              className="h-2 rounded-full"
-              style={{ width: "98%", backgroundColor: "var(--success-color)" }}
-            ></div>
-          </div>
-        </div>
-
-        <div>
-          <div className="flex items-center justify-between">
-            <p
-              className="text-sm font-medium"
-              style={{ color: "var(--text-primary)" }}
-            >
-              Average Delivery Time
-            </p>
-            <p
-              className="text-sm font-bold"
-              style={{ color: "var(--text-primary)" }}
-            >
-              25 mins
-            </p>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-            <div
-              className="h-2 rounded-full"
-              style={{ width: "85%", backgroundColor: "var(--brand-primary)" }}
-            ></div>
-          </div>
-        </div>
-
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <p
-              className="text-sm font-medium"
-              style={{ color: "var(--text-primary)" }}
-            >
-              Customer Rating
-            </p>
-            <div className="flex items-center">
-              <p
-                className="text-sm font-bold mr-1"
-                style={{ color: "var(--text-primary)" }}
-              >
-                {stats.rating}
-              </p>
-              <div className="flex">
-                {[...Array(5)].map((_, i) => (
-                  <FiStar
-                    key={i}
-                    size={12}
-                    className="mr-0.5"
-                    style={{
-                      color:
-                        i < Math.floor(stats.rating)
-                          ? "var(--warning-color)"
-                          : "var(--text-secondary)",
-                      fill:
-                        i < Math.floor(stats.rating)
-                          ? "var(--warning-color)"
-                          : "none",
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-            <div
-              className="h-2 rounded-full"
-              style={{
-                width: `${(stats.rating / 5) * 100}%`,
-                backgroundColor: "var(--warning-color)",
-              }}
-            ></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <DeliveryLayout>
@@ -555,13 +477,6 @@ const DeliveryDashboard = () => {
                 label="Completed Deliveries"
                 color="var(--success-color)"
                 bgColor="var(--success-color)20"
-              />
-              <StatCard
-                icon={<FiStar size={24} />}
-                value={stats.rating}
-                label="Customer Rating"
-                color="var(--warning-color)"
-                bgColor="var(--warning-color)20"
               />
             </div>
 
@@ -660,8 +575,6 @@ const DeliveryDashboard = () => {
 
               {/* Right Column - Performance */}
               <div className="space-y-6">
-                <PerformanceMetrics />
-
                 {/* Quick Actions */}
                 <div
                   className="rounded-lg p-6"
@@ -678,9 +591,10 @@ const DeliveryDashboard = () => {
                   </h2>
 
                   <div className="space-y-3">
+                    {" "}
                     <Link
                       to="/delivery/assignments"
-                      className="block p-3 rounded-lg transition-all duration-200 hover:shadow-sm flex justify-between items-center"
+                      className="p-3 rounded-lg transition-all duration-200 hover:shadow-sm flex justify-between items-center"
                       style={{ backgroundColor: "var(--bg-secondary)" }}
                     >
                       <div className="flex items-center">
@@ -698,11 +612,10 @@ const DeliveryDashboard = () => {
                         </span>
                       </div>
                       <FiChevronRight />
-                    </Link>
-
+                    </Link>{" "}
                     <Link
                       to="/delivery/history"
-                      className="block p-3 rounded-lg transition-all duration-200 hover:shadow-sm flex justify-between items-center"
+                      className="p-3 rounded-lg transition-all duration-200 hover:shadow-sm flex justify-between items-center"
                       style={{ backgroundColor: "var(--bg-secondary)" }}
                     >
                       <div className="flex items-center">
@@ -720,11 +633,10 @@ const DeliveryDashboard = () => {
                         </span>
                       </div>
                       <FiChevronRight />
-                    </Link>
-
+                    </Link>{" "}
                     <Link
                       to="/delivery/status-update"
-                      className="block p-3 rounded-lg transition-all duration-200 hover:shadow-sm flex justify-between items-center"
+                      className="p-3 rounded-lg transition-all duration-200 hover:shadow-sm flex justify-between items-center"
                       style={{ backgroundColor: "var(--bg-secondary)" }}
                     >
                       <div className="flex items-center">

@@ -1,6 +1,7 @@
 // Test component to verify admin orders API integration
 import { useState } from "react";
 import useAdminStore from "../store/Admin/useAdminStore";
+import toast from "react-hot-toast";
 
 const AdminOrdersTest = () => {
   const [testResults, setTestResults] = useState({});
@@ -99,7 +100,7 @@ const AdminOrdersTest = () => {
 
   const testUpdateOrderStatus = async () => {
     if (orders.list.length === 0) {
-      alert("No orders available to test with");
+      toast.info("No orders available to test with");
       return;
     }
 
@@ -110,14 +111,14 @@ const AdminOrdersTest = () => {
 
     try {
       await updateOrderStatus(orderId, testStatus);
-      alert(
+      toast.success(
         `Successfully updated order ${orderId.substring(
           0,
           8
         )} status to ${testStatus}`
       );
     } catch (error) {
-      alert(`Failed to update order status: ${error.message}`);
+      toast.error(`Failed to update order status: ${error.message}`);
     }
   };
 

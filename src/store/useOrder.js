@@ -106,6 +106,7 @@ export const useOrderStore = create((set) => ({
   currentOrder: null,
   isLoading: false,
   isProcessingPayment: false,
+  paymentSuccessful: false,
   error: null,
 
   // Initialize Razorpay payment
@@ -120,8 +121,14 @@ export const useOrderStore = create((set) => ({
               ? { ...order, status: "paid", payment_details: data }
               : order
           ),
+          paymentSuccessful: true,
         }));
         toast.success("Payment successful!");
+
+        // Reset payment success flag after a short delay
+        setTimeout(() => {
+          set({ paymentSuccessful: false });
+        }, 1000);
       },
       (error) => {
         toast.error("Payment failed. Please try again.");
@@ -226,9 +233,7 @@ export const useOrderStore = create((set) => ({
         currentOrder: newOrder,
       }));
 
-      console.log("Initiating Razorpay payment...");
-
-      // Initiate Razorpay payment
+      console.log("Initiating Razorpay payment..."); // Initiate Razorpay payment
       await initiateRazorpayPayment(
         razorpayData,
         async (paymentData) => {
@@ -245,7 +250,13 @@ export const useOrderStore = create((set) => ({
                 : order
             ),
             isProcessingPayment: false,
+            paymentSuccessful: true,
           }));
+
+          // Reset payment success flag after a short delay
+          setTimeout(() => {
+            set({ paymentSuccessful: false });
+          }, 1000);
 
           toast.success("Payment successful! Order placed successfully.");
         },
@@ -358,7 +369,13 @@ export const useOrderStore = create((set) => ({
                 : order
             ),
             isProcessingPayment: false,
+            paymentSuccessful: true,
           }));
+
+          // Reset payment success flag after a short delay
+          setTimeout(() => {
+            set({ paymentSuccessful: false });
+          }, 1000);
 
           toast.success("Payment successful! Order placed successfully.");
         },

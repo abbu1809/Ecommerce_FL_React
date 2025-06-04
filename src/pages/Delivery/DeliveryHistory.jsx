@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { FiSearch, FiFilter, FiDownload, FiCalendar } from "react-icons/fi";
 import { DeliveryLayout, DeliveryHistoryItem } from "../../components/Delivery";
@@ -18,6 +18,16 @@ const DeliveryHistory = () => {
   // Access the store
   const { fetchDeliveryHistory } = useDeliveryPartnerStore();
 
+  // Helper function to format address
+  const formatAddress = useCallback((addressObj) => {
+    if (!addressObj) return "N/A";
+
+    const { street_address, city, state, postal_code } = addressObj;
+    return [street_address, city, state, postal_code]
+      .filter(Boolean)
+      .join(", ");
+  }, []);
+
   useEffect(() => {
     // Handle success message from navigation state
     if (location.state?.successMessage) {
@@ -36,8 +46,26 @@ const DeliveryHistory = () => {
       setIsLoading(true);
       try {
         const history = await fetchDeliveryHistory();
-        setDeliveries(history || []);
-        setFilteredDeliveries(history || []);
+
+        // Transform API data to match DeliveryHistoryItem component structure
+        const transformedHistory = history.map((delivery) => ({
+          id: delivery.order_id,
+          orderId: delivery.order_id,
+          customer: delivery.customer_name || "Customer",
+          address: formatAddress(delivery.delivery_address),
+          status: transformStatus(delivery.delivery_status || ""),
+          completedDate:
+            delivery.delivered_at || delivery.updated_at || delivery.created_at,
+          expectedDelivery:
+            delivery.estimated_delivery || new Date().toISOString(),
+          amount: parseFloat(delivery.total_amount || "0"),
+          paymentMethod: delivery.payment_method || "Online",
+          notes: delivery.notes || "",
+          items: delivery.items || [],
+        }));
+
+        setDeliveries(transformedHistory);
+        setFilteredDeliveries(transformedHistory);
       } catch (error) {
         console.error("Error fetching delivery history:", error);
         toast.error("Failed to load delivery history");
@@ -47,28 +75,43 @@ const DeliveryHistory = () => {
     };
 
     getDeliveryHistory();
-  }, [fetchDeliveryHistory]);
+  }, [fetchDeliveryHistory, formatAddress]);
+
+  // Helper function to transform status from API format to display format
+  const transformStatus = (status) => {
+    const statusMap = {
+      delivered: "Delivered",
+      out_for_delivery: "Out for Delivery",
+      failed_final: "Failed",
+      failed_attempt: "Failed",
+      pending: "Pending",
+      assigned: "Pending",
+      cancelled: "Failed",
+    };
+
+    return statusMap[status.toLowerCase()] || "Pending";
+  };
 
   useEffect(() => {
     // Filter and search deliveries
     const results = deliveries.filter((delivery) => {
       // Search filter
       const matchesSearch =
-        (delivery.order_id || "")
+        (delivery.orderId || "")
           .toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
-        (delivery.customer_name || "")
+        (delivery.customer || "")
           .toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
-        (delivery.address?.street_address || "")
+        (delivery.address || "")
           .toLowerCase()
           .includes(searchTerm.toLowerCase());
 
       // Date filter
       let matchesDate = true;
       const today = new Date();
-      const deliveryDate = delivery.delivered_at
-        ? new Date(delivery.delivered_at)
+      const deliveryDate = delivery.completedDate
+        ? new Date(delivery.completedDate)
         : null;
 
       if (dateFilter === "today") {
@@ -90,8 +133,7 @@ const DeliveryHistory = () => {
       // Status filter
       const matchesStatus =
         statusFilter === "all" ||
-        (delivery.delivery_status || "").toLowerCase() ===
-          statusFilter.toLowerCase();
+        (delivery.status || "").toLowerCase() === statusFilter.toLowerCase();
 
       return matchesSearch && matchesDate && matchesStatus;
     });
@@ -105,6 +147,48 @@ const DeliveryHistory = () => {
       toast.error("No data to export");
       return;
     }
+
+    // Create CSV content
+    const headers = [
+      "Order ID",
+      "Customer",
+      "Address",
+      "Status",
+      "Completed Date",
+      "Expected Delivery",
+      "Amount",
+      "Payment Method",
+      "Notes",
+    ];
+
+    const csvRows = [
+      headers.join(","),
+      ...filteredDeliveries.map((delivery) =>
+        [
+          `"${delivery.orderId}"`,
+          `"${delivery.customer}"`,
+          `"${delivery.address}"`,
+          `"${delivery.status}"`,
+          `"${new Date(delivery.completedDate).toLocaleDateString()}"`,
+          `"${new Date(delivery.expectedDelivery).toLocaleDateString()}"`,
+          delivery.amount,
+          `"${delivery.paymentMethod}"`,
+          `"${delivery.notes}"`,
+        ].join(",")
+      ),
+    ];
+
+    const csvContent = "data:text/csv;charset=utf-8," + csvRows.join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute(
+      "download",
+      `delivery_history_${new Date().toISOString().split("T")[0]}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 
     toast.success("Delivery history exported successfully");
   };

@@ -1,18 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   FiPackage,
-  FiCheck,
-  FiAlertTriangle,
-  FiCamera,
-  FiImage,
   FiArrowLeft,
   FiSearch,
+  FiAlertCircle,
 } from "react-icons/fi";
-import { DeliveryLayout } from "../../components/Delivery";
-import { StatusUpdateForm } from "../../components/Delivery";
+import { DeliveryLayout, DeliveryStatusModal } from "../../components/Delivery";
 import Button from "../../components/UI/Button";
 import Input from "../../components/UI/Input";
+import useDeliveryPartnerStore from "../../store/Delivery/useDeliveryPartnerStore";
+import { toast } from "../../utils/toast";
 
 const DeliveryStatusUpdate = () => {
   const { id } = useParams();
@@ -20,91 +18,119 @@ const DeliveryStatusUpdate = () => {
   const [isLoading, setIsLoading] = useState(id ? true : false);
   const [delivery, setDelivery] = useState(null);
   const [error, setError] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [deliveries, setDeliveries] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDelivery, setSelectedDelivery] = useState(null);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
-  // Mock deliveries for the status update page when no specific ID is provided
-  const mockDeliveries = [
-    {
-      id: "DEL-12345",
-      orderId: "ORD-7890",
-      customerName: "Sarah Johnson",
-      customerAddress: "123 Main St, Apt 4B, Springfield",
-      customerPhone: "555-123-4567",
-      status: "out_for_delivery",
-      items: [
-        { name: "Smartphone XYZ", quantity: 1 },
-        { name: "Phone Case", quantity: 1 },
-      ],
-      expectedDelivery: "2023-06-20T15:00:00Z",
-      assignedOn: "2023-06-20T09:30:00Z",
+  // Get store methods
+  const { fetchAssignedDeliveries, updateDeliveryStatus, assignedDeliveries } =
+    useDeliveryPartnerStore();
+
+  // Helper function to format address wrapped in useCallback
+  const formatAddress = useCallback((addressObj) => {
+    if (!addressObj) return "N/A";
+
+    const { street_address, city, state, postal_code } = addressObj;
+    return [street_address, city, state, postal_code]
+      .filter(Boolean)
+      .join(", ");
+  }, []);
+
+  console.log("assigned", assignedDeliveries);
+  // Fetch all assigned deliveries
+  const fetchAssignedDeliveriesData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      await fetchAssignedDeliveries();
+
+      // Transform the API response to match our component's data structure
+      const formattedDeliveries = assignedDeliveries?.map((delivery) => ({
+        id: delivery.order_id,
+        orderId: delivery.order_id,
+        customerName: delivery.customer_name || "Customer",
+        customerAddress: formatAddress(delivery.delivery_address),
+        customerPhone: delivery.customer_phone || "N/A",
+        status: delivery.delivery_status || delivery.status || "assigned",
+        items: delivery.items || [],
+        expectedDelivery: delivery.estimated_delivery,
+        assignedOn: delivery.assigned_at,
+        paymentType: delivery.payment_method || "Online Payment",
+        paymentAmount: `${delivery.currency || "INR"} ${
+          delivery.total_amount || 0
+        }`,
+      }));
+
+      setDeliveries(formattedDeliveries);
+    } catch (error) {
+      console.error("Error fetching assigned deliveries:", error);
+      toast.error("Failed to load deliveries");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchAssignedDeliveries, formatAddress, assignedDeliveries]);
+
+  // Fetch delivery details by ID
+  const fetchDeliveryById = useCallback(
+    async (deliveryId) => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        // Fetch all assigned deliveries
+        const assignedDeliveries = await fetchAssignedDeliveries();
+
+        // Find the delivery with the matching ID
+        const foundDelivery = assignedDeliveries.find(
+          (d) => d.order_id === deliveryId
+        );
+        if (foundDelivery) {
+          // Transform the delivery data to match our component structure
+          setDelivery({
+            id: foundDelivery.order_id,
+            orderId: foundDelivery.order_id,
+            status:
+              foundDelivery.delivery_status ||
+              foundDelivery.status ||
+              "assigned",
+            customer: {
+              name: foundDelivery.customer_name || "Customer",
+              phone: foundDelivery.customer_phone || "N/A",
+              address: formatAddress(foundDelivery.delivery_address),
+            },
+            items: foundDelivery.items || [],
+            paymentType: foundDelivery.payment_method || "Online Payment",
+            paymentAmount: `${foundDelivery.currency || "INR"} ${
+              foundDelivery.total_amount || "0"
+            }`,
+            deliveryInstructions: foundDelivery.delivery_instructions || "",
+            estimatedDelivery: foundDelivery.estimated_delivery,
+            assignedOn: foundDelivery.assigned_at,
+            assignedPartnerName: foundDelivery.assigned_partner_name,
+          });
+        } else {
+          throw new Error("Delivery not found");
+        }
+      } catch (error) {
+        setError("Failed to load delivery information. Please try again.");
+        console.error("Error fetching delivery:", error);
+      } finally {
+        setIsLoading(false);
+      }
     },
-    {
-      id: "DEL-12346",
-      orderId: "ORD-7891",
-      customerName: "Michael Brown",
-      customerAddress: "456 Oak Ave, Suite 7, Rivertown",
-      customerPhone: "555-234-5678",
-      status: "assigned",
-      items: [
-        { name: "Laptop Pro", quantity: 1 },
-        { name: "Wireless Mouse", quantity: 1 },
-        { name: "Laptop Stand", quantity: 1 },
-      ],
-      expectedDelivery: "2023-06-20T17:30:00Z",
-      assignedOn: "2023-06-20T10:15:00Z",
-    },
-    {
-      id: "DEL-12347",
-      orderId: "ORD-7892",
-      customerName: "Emily Wilson",
-      customerAddress: "789 Pine Rd, Lakeside",
-      customerPhone: "555-345-6789",
-      status: "out_for_delivery",
-      items: [
-        { name: "Wireless Headphones", quantity: 1 },
-        { name: "Bluetooth Speaker", quantity: 1 },
-      ],
-      expectedDelivery: "2023-06-20T16:45:00Z",
-      assignedOn: "2023-06-20T11:00:00Z",
-    },
-  ];
+    [fetchAssignedDeliveries, formatAddress]
+  );
 
   // Load delivery data based on ID parameter
   useEffect(() => {
     if (id) {
       fetchDeliveryById(id);
     } else {
-      // If no ID provided, show the list of deliveries
-      setDeliveries(mockDeliveries);
+      // If no ID provided, fetch all assigned deliveries
+      fetchAssignedDeliveriesData();
     }
-  }, [id]);
-
-  // Fetch delivery details by ID
-  const fetchDeliveryById = async (deliveryId) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Find the delivery in mock data
-      const foundDelivery = mockDeliveries.find((d) => d.id === deliveryId);
-
-      if (foundDelivery) {
-        setDelivery(foundDelivery);
-      } else {
-        throw new Error("Delivery not found");
-      }
-    } catch (error) {
-      setError("Failed to load delivery information. Please try again.");
-      console.error("Error fetching delivery:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [id, fetchDeliveryById, fetchAssignedDeliveriesData]);
 
   // Handle search for deliveries
   const handleSearch = (e) => {
@@ -112,11 +138,11 @@ const DeliveryStatusUpdate = () => {
     setSearchQuery(query);
 
     if (!query.trim()) {
-      setDeliveries(mockDeliveries);
+      fetchAssignedDeliveriesData();
       return;
     }
 
-    const filtered = mockDeliveries.filter(
+    const filtered = deliveries.filter(
       (delivery) =>
         delivery.id.toLowerCase().includes(query) ||
         delivery.orderId.toLowerCase().includes(query) ||
@@ -126,33 +152,49 @@ const DeliveryStatusUpdate = () => {
 
     setDeliveries(filtered);
   };
-
   // Handle selecting a delivery from the list
   const handleSelectDelivery = (deliveryId) => {
-    navigate(`/delivery/update/${deliveryId}`);
+    const delivery = deliveries.find((d) => d.id === deliveryId);
+    if (delivery) {
+      setSelectedDelivery(delivery);
+      setIsModalOpen(true);
+    }
+  };
+  // Handle status update
+  const handleStatusUpdate = async (orderId, status, additionalData) => {
+    setIsUpdatingStatus(true);
+    try {
+      await updateDeliveryStatus(orderId, status, additionalData);
+
+      // Update local delivery state if we're viewing a specific delivery
+      if (delivery && delivery.id === orderId) {
+        setDelivery((prev) => ({ ...prev, status }));
+      }
+
+      // Update local deliveries state
+      setDeliveries((prev) =>
+        prev.map((d) => (d.id === orderId ? { ...d, status } : d))
+      );
+
+      toast.success("Delivery status updated successfully");
+      setIsModalOpen(false);
+      setSelectedDelivery(null);
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast.error("Failed to update delivery status");
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+  // Handle opening modal for specific delivery
+  const handleOpenModal = () => {
+    setSelectedDelivery(delivery);
+    setIsModalOpen(true);
   };
 
-  // Handle status update submission
-  const handleStatusUpdate = async (statusData) => {
-    setSubmitting(true);
-
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Navigate back to assignments after successful update
-      navigate("/delivery/assignments", {
-        state: {
-          message: "Status updated successfully!",
-          type: "success",
-        },
-      });
-    } catch (error) {
-      setError("Failed to update status. Please try again.");
-      console.error("Error updating status:", error);
-    } finally {
-      setSubmitting(false);
-    }
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedDelivery(null);
   };
 
   // If no ID is provided, show the list of deliveries for status update
@@ -177,7 +219,14 @@ const DeliveryStatusUpdate = () => {
             />
           </div>
 
-          {deliveries.length === 0 ? (
+          {isLoading ? (
+            <div className="flex justify-center items-center py-20">
+              <div
+                className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2"
+                style={{ borderColor: "var(--brand-primary)" }}
+              ></div>
+            </div>
+          ) : deliveries?.length === 0 ? (
             <div
               className="p-6 text-center rounded-lg"
               style={{
@@ -193,7 +242,7 @@ const DeliveryStatusUpdate = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {deliveries.map((delivery) => (
+              {deliveries?.map((delivery) => (
                 <div
                   key={delivery.id}
                   className="p-4 rounded-lg cursor-pointer transition-all hover:shadow-md"
@@ -221,24 +270,43 @@ const DeliveryStatusUpdate = () => {
                             backgroundColor:
                               delivery.status === "delivered"
                                 ? "var(--success-color)20"
-                                : delivery.status === "failed"
+                                : delivery.status === "failed_attempt" ||
+                                  delivery.status === "failed_final"
                                 ? "var(--error-color)20"
+                                : delivery.status === "shipped" ||
+                                  delivery.status === "payment_successful" ||
+                                  delivery.status === "assigned"
+                                ? "var(--brand-primary)20"
                                 : "var(--warning-color)20",
                             color:
                               delivery.status === "delivered"
                                 ? "var(--success-color)"
-                                : delivery.status === "failed"
+                                : delivery.status === "failed_attempt" ||
+                                  delivery.status === "failed_final"
                                 ? "var(--error-color)"
+                                : delivery.status === "shipped" ||
+                                  delivery.status === "payment_successful" ||
+                                  delivery.status === "assigned"
+                                ? "var(--brand-primary)"
                                 : "var(--warning-color)",
                           }}
                         >
-                          {delivery.status === "assigned"
+                          {" "}
+                          {delivery.status === "assigned" ||
+                          delivery.status === "shipped" ||
+                          delivery.status === "payment_successful"
                             ? "Assigned"
                             : delivery.status === "out_for_delivery"
                             ? "Out For Delivery"
                             : delivery.status === "delivered"
                             ? "Delivered"
-                            : "Failed"}
+                            : delivery.status === "failed_attempt"
+                            ? "Failed Attempt"
+                            : delivery.status === "failed_final"
+                            ? "Failed"
+                            : delivery.status === "returning_to_warehouse"
+                            ? "Returning"
+                            : delivery.status}
                         </span>
                       </div>
                     </div>
@@ -258,9 +326,31 @@ const DeliveryStatusUpdate = () => {
                     </div>
                   </div>
                 </div>
-              ))}
+              ))}{" "}
             </div>
           )}
+        </div>
+
+        {/* Status Update Modal */}
+        <DeliveryStatusModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          delivery={selectedDelivery}
+          onStatusUpdate={handleStatusUpdate}
+          isSubmitting={isUpdatingStatus}
+        />
+      </DeliveryLayout>
+    );
+  }
+
+  if (isLoading || !delivery) {
+    return (
+      <DeliveryLayout>
+        <div className="flex justify-center items-center py-20">
+          <div
+            className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2"
+            style={{ borderColor: "var(--brand-primary)" }}
+          ></div>
         </div>
       </DeliveryLayout>
     );
@@ -318,38 +408,52 @@ const DeliveryStatusUpdate = () => {
                   {delivery.orderId}
                 </span>
               </div>
-            </div>
-
+            </div>{" "}
             <div
               className="mt-4 md:mt-0 px-3 py-1 rounded-full text-xs font-semibold"
               style={{
                 backgroundColor:
                   delivery.status === "delivered"
                     ? "var(--success-color)20"
-                    : delivery.status === "failed"
+                    : delivery.status === "failed_attempt" ||
+                      delivery.status === "failed_final"
                     ? "var(--error-color)20"
                     : "var(--brand-primary)20",
                 color:
                   delivery.status === "delivered"
                     ? "var(--success-color)"
-                    : delivery.status === "failed"
+                    : delivery.status === "failed_attempt" ||
+                      delivery.status === "failed_final"
                     ? "var(--error-color)"
                     : "var(--brand-primary)",
               }}
             >
-              {delivery.status === "accepted" && "Accepted"}
-              {delivery.status === "picked_up" && "Picked Up"}
-              {delivery.status === "in_transit" && "In Transit"}
-              {delivery.status === "arriving" && "Arriving"}
+              {(delivery.status === "assigned" ||
+                delivery.status === "shipped" ||
+                delivery.status === "payment_successful") &&
+                "Assigned"}
+              {delivery.status === "out_for_delivery" && "Out For Delivery"}
               {delivery.status === "delivered" && "Delivered"}
-              {delivery.status === "failed" && "Failed"}
+              {delivery.status === "failed_attempt" && "Failed Attempt"}
+              {delivery.status === "failed_final" && "Failed"}
+              {delivery.status === "returning_to_warehouse" && "Returning"}
             </div>
           </div>
         </div>
-
+        {error && (
+          <div
+            className="p-4 mb-6 rounded-lg"
+            style={{
+              backgroundColor: "var(--error-color)10",
+              borderLeft: "4px solid var(--error-color)",
+            }}
+          >
+            <p style={{ color: "var(--error-color)" }}>{error}</p>
+          </div>
+        )}{" "}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            {/* Delivery Status Update Form */}
+            {/* Delivery Status Update Section */}
             <div
               className="rounded-lg p-6 mb-6"
               style={{ backgroundColor: "var(--bg-secondary)" }}
@@ -361,96 +465,22 @@ const DeliveryStatusUpdate = () => {
                 <FiPackage className="mr-2" /> Update Status
               </h2>
 
-              <StatusUpdateForm
-                currentStatus={delivery.status}
-                onSubmit={handleStatusUpdate}
-                isSubmitting={submitting}
-                collectPayment={delivery.paymentType === "Cash on Delivery"}
-                paymentAmount={delivery.paymentAmount}
-              />
-            </div>
-
-            {/* Delivery Photo Section - only show if the status is about to be updated to "delivered" */}
-            {delivery.status === "arriving" && (
-              <div
-                className="rounded-lg p-6"
-                style={{ backgroundColor: "var(--bg-secondary)" }}
+              <p
+                className="text-sm mb-4"
+                style={{ color: "var(--text-secondary)" }}
               >
-                <h2
-                  className="text-lg font-semibold mb-4 flex items-center"
-                  style={{ color: "var(--text-primary)" }}
-                >
-                  <FiCamera className="mr-2" /> Delivery Photo
-                </h2>
+                Click the button below to update the delivery status for this
+                order.
+              </p>
 
-                <p
-                  className="text-sm mb-4"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  Take a photo of where you left the package as proof of
-                  delivery
-                </p>
-
-                {photoPreview ? (
-                  <div className="mb-4">
-                    <div className="relative inline-block">
-                      <img
-                        src={photoPreview}
-                        alt="Delivery proof"
-                        className="rounded-md max-h-60 max-w-full"
-                      />
-                      <button
-                        onClick={removePhoto}
-                        className="absolute top-2 right-2 rounded-full p-1"
-                        style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-                      >
-                        <FiX size={16} style={{ color: "white" }} />
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="mb-4">
-                    <label
-                      className="flex flex-col items-center justify-center w-full h-40 rounded-md cursor-pointer border-2 border-dashed"
-                      style={{
-                        borderColor: "var(--border-primary)",
-                        backgroundColor: "var(--bg-primary)",
-                      }}
-                    >
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <FiImage
-                          size={36}
-                          style={{ color: "var(--text-secondary)" }}
-                          className="mb-3"
-                        />
-                        <p
-                          className="mb-2 text-sm"
-                          style={{ color: "var(--text-primary)" }}
-                        >
-                          <span className="font-semibold">
-                            Click to take a photo
-                          </span>{" "}
-                          or drag and drop
-                        </p>
-                        <p
-                          className="text-xs"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
-                          JPG, PNG or GIF (MAX. 5MB)
-                        </p>
-                      </div>
-                      <input
-                        type="file"
-                        className="hidden"
-                        accept="image/*"
-                        capture="environment"
-                        onChange={handlePhotoCapture}
-                      />
-                    </label>
-                  </div>
-                )}
-              </div>
-            )}
+              <Button
+                variant="primary"
+                onClick={handleOpenModal}
+                className="transition-transform hover:scale-105"
+              >
+                Update Delivery Status
+              </Button>
+            </div>
           </div>
 
           {/* Delivery Details Panel */}
@@ -465,7 +495,6 @@ const DeliveryStatusUpdate = () => {
               >
                 Delivery Details
               </h2>
-
               <div className="space-y-4">
                 <div>
                   <h3
@@ -502,19 +531,23 @@ const DeliveryStatusUpdate = () => {
                     className="text-sm font-medium mb-2"
                     style={{ color: "var(--text-secondary)" }}
                   >
-                    Items ({delivery.items.length})
+                    Items ({delivery.items ? delivery.items.length : 0})
                   </h3>
                   <ul className="space-y-2">
-                    {delivery.items.map((item, index) => (
-                      <li key={index} className="flex justify-between text-sm">
-                        <span style={{ color: "var(--text-primary)" }}>
-                          {item.name} x{item.quantity}
-                        </span>
-                        <span style={{ color: "var(--text-secondary)" }}>
-                          {item.price}
-                        </span>
-                      </li>
-                    ))}
+                    {delivery.items &&
+                      delivery.items.map((item, index) => (
+                        <li
+                          key={index}
+                          className="flex justify-between text-sm"
+                        >
+                          <span style={{ color: "var(--text-primary)" }}>
+                            {item.name} x{item.quantity}
+                          </span>
+                          <span style={{ color: "var(--text-secondary)" }}>
+                            {item.price}
+                          </span>
+                        </li>
+                      ))}
                   </ul>
                 </div>
 
@@ -574,33 +607,20 @@ const DeliveryStatusUpdate = () => {
                     </p>
                   </div>
                 )}
-              </div>
+              </div>{" "}
             </div>
           </div>
         </div>
+        {/* Status Update Modal */}
+        <DeliveryStatusModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          delivery={selectedDelivery}
+          onStatusUpdate={handleStatusUpdate}
+          isSubmitting={isUpdatingStatus}
+        />
       </div>
     </DeliveryLayout>
-  );
-};
-
-// This component is missing in the code but is used in the UI
-const FiX = ({ size, style }) => {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={style}
-    >
-      <line x1="18" y1="6" x2="6" y2="18"></line>
-      <line x1="6" y1="6" x2="18" y2="18"></line>
-    </svg>
   );
 };
 

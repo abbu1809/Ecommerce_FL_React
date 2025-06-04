@@ -160,7 +160,7 @@ export const useAdminProducts = create((set, get) => ({
 
     try {
       const response = await adminApi.patch(
-        `admin/products/edit/${productId}/`,
+        `/admin/products/edit/${productId}/`,
         productData
       );
       if (response.status === 200) {
@@ -181,10 +181,21 @@ export const useAdminProducts = create((set, get) => ({
             error: null,
           },
         }));
+        set((state) => ({
+          products: {
+            ...state.products,
+            list: updateProduct(state.products.list),
+            filteredList: state.products.filteredList
+              ? updateProduct(state.products.filteredList)
+              : null,
+            loading: false,
+            error: null,
+          },
+        }));
         return {
           success: true,
           message: response.data.message || "Product updated successfully",
-          product_id: response.data.product_id,
+          product_id: response.data.product_id || productId,
         };
       }
     } catch (error) {
@@ -337,7 +348,6 @@ export const useAdminProducts = create((set, get) => ({
       },
     }));
   },
-
   // Reset filters to show all products
   resetFilters: () => {
     set((state) => ({
@@ -346,6 +356,45 @@ export const useAdminProducts = create((set, get) => ({
         filteredList: null,
       },
     }));
+  },
+
+  // Upload product image
+  uploadProductImage: async (imageFile) => {
+    try {
+      const formData = new FormData();
+      formData.append("image", imageFile);
+
+      const response = await adminApi.post(
+        "/admin/products/upload-image/",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        return {
+          success: true,
+          imageUrl: response.data.image_url,
+          message: response.data.message || "Image uploaded successfully",
+        };
+      } else {
+        return {
+          success: false,
+          message: response.data.error || "Failed to upload image",
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.error ||
+          error.message ||
+          "Failed to upload image",
+      };
+    }
   },
 }));
 

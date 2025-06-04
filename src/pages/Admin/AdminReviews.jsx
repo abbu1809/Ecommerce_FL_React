@@ -7,36 +7,38 @@ import {
   FiFilter,
 } from "react-icons/fi";
 import ReviewTable from "../../components/Admin/Reviews/ReviewTable";
-import useReviewStore from "../../store/useReviewStore";
+import useAdminReviews from "../../store/Admin/useAdminReviews";
 
 const AdminReviews = () => {
   const [activeTab, setActiveTab] = useState("all"); // all, pending, flagged
   const { reviews, pendingReviews, flaggedReviews, fetchReviews } =
-    useReviewStore();
-
+    useAdminReviews();
   useEffect(() => {
     // Fetch reviews if we don't have any yet
-    if (reviews.length === 0) {
+    if (reviews.list.length === 0) {
       fetchReviews();
     }
-  }, [reviews.length, fetchReviews]);
-
-  // Calculate review statistics
-  const approvedReviews = reviews.filter(
+  }, [reviews.list.length, fetchReviews]); // Calculate review statistics
+  const approvedReviews = reviews.list.filter(
     (review) => review.status === "approved"
   );
-  const rejectedReviews = reviews.filter(
+  const rejectedReviews = reviews.list.filter(
     (review) => review.status === "rejected"
   );
-  const verifiedPurchaseReviews = reviews.filter((review) => review.verified);
-
-  const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+  const verifiedPurchaseReviews = reviews.list.filter(
+    (review) => review.is_verified === true
+  );
+  const totalRating = reviews.list.reduce(
+    (sum, review) => sum + review.rating,
+    0
+  );
   const averageRating =
-    reviews.length > 0 ? (totalRating / reviews.length).toFixed(1) : 0;
-
+    reviews.list.length > 0
+      ? (totalRating / reviews.list.length).toFixed(1)
+      : 0;
   // Review statistics data
   const reviewStats = {
-    total: reviews.length,
+    total: reviews.list.length,
     pending: pendingReviews.length,
     approved: approvedReviews.length,
     rejected: rejectedReviews.length,
@@ -87,7 +89,6 @@ const AdminReviews = () => {
           content
         </p>
       </div>
-
       {/* Stats cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {statsCards.map((card, index) => (
@@ -126,7 +127,6 @@ const AdminReviews = () => {
           </div>
         ))}
       </div>
-
       {/* Additional stats */}
       <div
         className="mb-8 p-5 rounded-lg flex flex-wrap gap-6 justify-between"
@@ -240,7 +240,6 @@ const AdminReviews = () => {
           </div>
         </div>
       </div>
-
       {/* Tab navigation */}
       <div
         className="mb-6 border-b"
@@ -324,10 +323,9 @@ const AdminReviews = () => {
             </span>
           </button>
         </div>
-      </div>
-
+      </div>{" "}
       {/* Review table */}
-      <ReviewTable />
+      <ReviewTable activeTab={activeTab} />
     </div>
   );
 };

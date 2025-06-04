@@ -90,12 +90,17 @@ export const useDeliveryPartnerStore = create(
         const response = await deliveryApi.get(
           "/partners/deliveries/assigned/"
         );
+
+        // Updated to handle assigned_orders instead of assigned_deliveries
+        const assignedDeliveries = response.data.assigned_orders || [];
+
         set({
-          assignedDeliveries: response.data.assigned_deliveries,
+          assignedDeliveries: assignedDeliveries,
           loading: false,
           error: null,
         });
-        return response.data.assigned_deliveries;
+
+        return assignedDeliveries;
       } catch (error) {
         set({
           loading: false,
