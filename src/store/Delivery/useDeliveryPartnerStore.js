@@ -131,13 +131,18 @@ export const useDeliveryPartnerStore = create(
         throw error;
       }
     },
-
-    updateDeliveryStatus: async (orderId, status) => {
+    updateDeliveryStatus: async (orderId, status, additionalData = {}) => {
       set({ loading: true, error: null });
       try {
+        // Combine status with additional data like notes, estimated_delivery, etc.
+        const updateData = {
+          status,
+          ...additionalData,
+        };
+
         const response = await deliveryApi.patch(
           `/partners/deliveries/update_status/${orderId}/`,
-          { status }
+          updateData
         );
 
         // Update the local state by fetching fresh data

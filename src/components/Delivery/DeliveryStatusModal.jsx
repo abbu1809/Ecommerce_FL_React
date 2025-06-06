@@ -214,7 +214,6 @@ const DeliveryStatusModal = ({
                     >
                       <FiPackage className="mr-2" /> Update Status
                     </h4>
-
                     {/* Status Selection */}
                     <div className="mb-4">
                       <label
@@ -267,7 +266,6 @@ const DeliveryStatusModal = ({
                         ))}
                       </div>
                     </div>
-
                     {/* OTP field shown only for delivered status */}
                     {selectedStatus?.requiresOtp && (
                       <div className="mb-4">
@@ -296,10 +294,57 @@ const DeliveryStatusModal = ({
                           style={{ color: "var(--text-secondary)" }}
                         >
                           Please collect the OTP from the customer upon delivery
-                        </p>
+                        </p>{" "}
                       </div>
-                    )}
-
+                    )}{" "}
+                    {/* Estimated Delivery Date field */}
+                    <div className="mb-4">
+                      {" "}
+                      <label
+                        htmlFor="estimatedDelivery"
+                        className="text-sm font-medium mb-2 flex justify-between items-center"
+                      >
+                        <span style={{ color: "var(--text-primary)" }}>
+                          Estimated Delivery Date & Time
+                        </span>
+                        {newStatus === "out_for_delivery" && (
+                          <span
+                            className="text-xs font-semibold px-2 py-1 rounded-full"
+                            style={{
+                              backgroundColor: "var(--warning-color)15",
+                              color: "var(--warning-color)",
+                            }}
+                          >
+                            Recommended
+                          </span>
+                        )}
+                      </label>
+                      <input
+                        type="datetime-local"
+                        id="estimatedDelivery"
+                        value={estimatedDelivery}
+                        onChange={(e) => setEstimatedDelivery(e.target.value)}
+                        className={`w-full p-3 border rounded-md text-sm ${
+                          newStatus === "out_for_delivery" ? "border-2" : ""
+                        }`}
+                        style={{
+                          backgroundColor: "var(--bg-primary)",
+                          borderColor:
+                            newStatus === "out_for_delivery"
+                              ? "var(--brand-primary)"
+                              : "var(--border-primary)",
+                          color: "var(--text-primary)",
+                        }}
+                      />
+                      <p
+                        className="mt-1 text-xs"
+                        style={{ color: "var(--text-secondary)" }}
+                      >
+                        {newStatus === "out_for_delivery"
+                          ? "Please provide an estimated delivery time when going out for delivery"
+                          : "Update the estimated delivery date and time for this order"}
+                      </p>
+                    </div>
                     {/* Notes field */}
                     <div className="mb-4">
                       <label
@@ -327,7 +372,6 @@ const DeliveryStatusModal = ({
                         rows={3}
                       />
                     </div>
-
                     {/* Error message */}
                     {error && (
                       <div

@@ -19,6 +19,7 @@ const EditProductModal = ({ product, onClose, onSave }) => {
     stock: "",
     images: [],
     specifications: {},
+    attributes: {},
     features: [],
     variant: {
       colors: [],
@@ -51,7 +52,6 @@ const EditProductModal = ({ product, onClose, onSave }) => {
         typeof product.stock === "number"
           ? product.stock
           : parseInt(product.stock || 0, 10);
-
       setFormData({
         name: product.name || "",
         description: product.description || "",
@@ -63,6 +63,7 @@ const EditProductModal = ({ product, onClose, onSave }) => {
         stock: stock,
         images: product.images || [],
         specifications: formattedSpecs,
+        attributes: product.attributes || {},
         features: featuresArray,
         variant: product.variant || { colors: [], storage: [] },
         featured: product.featured || false,
@@ -99,7 +100,6 @@ const EditProductModal = ({ product, onClose, onSave }) => {
       },
     });
   };
-
   // Remove specification
   const removeSpecification = (keyToRemove) => {
     const newSpecs = { ...formData.specifications };
@@ -107,6 +107,38 @@ const EditProductModal = ({ product, onClose, onSave }) => {
     setFormData({
       ...formData,
       specifications: newSpecs,
+    });
+  };
+
+  // Handle attribute change
+  const handleAttributeChange = (key, value) => {
+    setFormData({
+      ...formData,
+      attributes: {
+        ...formData.attributes,
+        [key]: value,
+      },
+    });
+  };
+
+  // Add new attribute
+  const addAttribute = () => {
+    setFormData({
+      ...formData,
+      attributes: {
+        ...formData.attributes,
+        "": "",
+      },
+    });
+  };
+
+  // Remove attribute
+  const removeAttribute = (keyToRemove) => {
+    const newAttributes = { ...formData.attributes };
+    delete newAttributes[keyToRemove];
+    setFormData({
+      ...formData,
+      attributes: newAttributes,
     });
   };
 
@@ -546,7 +578,6 @@ const EditProductModal = ({ product, onClose, onSave }) => {
                     <FiPlus size={14} className="mr-1" /> Add Specification
                   </button>
                 </div>
-
                 {Object.entries(formData.specifications).map(
                   ([key, value], index) => (
                     <div key={index} className="flex items-center mb-2 gap-2">
@@ -588,6 +619,78 @@ const EditProductModal = ({ product, onClose, onSave }) => {
                       <button
                         type="button"
                         onClick={() => removeSpecification(key)}
+                        className="p-1.5 rounded-md"
+                        style={{ color: "var(--error-color)" }}
+                      >
+                        <FiTrash2 size={16} />
+                      </button>
+                    </div>
+                  )
+                )}{" "}
+              </div>
+
+              {/* Attributes */}
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <h3
+                    className="text-sm font-medium"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    Attributes
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={addAttribute}
+                    className="text-xs flex items-center"
+                    style={{ color: "var(--brand-primary)" }}
+                  >
+                    <FiPlus size={14} className="mr-1" /> Add Attribute
+                  </button>
+                </div>
+
+                {Object.entries(formData.attributes).map(
+                  ([key, value], index) => (
+                    <div key={index} className="flex items-center mb-2 gap-2">
+                      <input
+                        type="text"
+                        value={key}
+                        onChange={(e) => {
+                          const newAttrs = { ...formData.attributes };
+                          const oldValue = newAttrs[key];
+                          delete newAttrs[key];
+                          setFormData({
+                            ...formData,
+                            attributes: {
+                              ...newAttrs,
+                              [e.target.value]: oldValue,
+                            },
+                          });
+                        }}
+                        className="flex-grow p-2 border rounded-md text-sm"
+                        style={{
+                          backgroundColor: "var(--bg-primary)",
+                          color: "var(--text-primary)",
+                          borderColor: "var(--border-primary)",
+                        }}
+                        placeholder="Attribute name"
+                      />
+                      <input
+                        type="text"
+                        value={value}
+                        onChange={(e) =>
+                          handleAttributeChange(key, e.target.value)
+                        }
+                        className="flex-grow p-2 border rounded-md text-sm"
+                        style={{
+                          backgroundColor: "var(--bg-primary)",
+                          color: "var(--text-primary)",
+                          borderColor: "var(--border-primary)",
+                        }}
+                        placeholder="Attribute value"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeAttribute(key)}
                         className="p-1.5 rounded-md"
                         style={{ color: "var(--error-color)" }}
                       >

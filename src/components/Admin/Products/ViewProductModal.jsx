@@ -179,7 +179,6 @@ const ViewProductModal = ({ product, onClose, onEdit }) => {
                   </div>
                 </div>
               </div>
-
               <div>
                 <h3
                   className="text-lg font-medium mb-2"
@@ -194,7 +193,6 @@ const ViewProductModal = ({ product, onClose, onEdit }) => {
                   {product.description}
                 </p>
               </div>
-
               {/* Features */}
               {product.features && product.features.length > 0 && (
                 <div>
@@ -213,8 +211,7 @@ const ViewProductModal = ({ product, onClose, onEdit }) => {
                     ))}
                   </ul>
                 </div>
-              )}
-
+              )}{" "}
               {/* Specifications */}
               {product.specifications &&
                 Object.keys(product.specifications).length > 0 && (
@@ -244,7 +241,35 @@ const ViewProductModal = ({ product, onClose, onEdit }) => {
                     </div>
                   </div>
                 )}
-
+              {/* Attributes */}
+              {product.attributes &&
+                Object.keys(product.attributes).length > 0 && (
+                  <div>
+                    <h3
+                      className="text-lg font-medium mb-2"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      Attributes
+                    </h3>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                      {Object.entries(product.attributes).map(
+                        ([key, value]) => (
+                          <div key={key} className="flex justify-between">
+                            <span
+                              className="font-medium capitalize"
+                              style={{ color: "var(--text-primary)" }}
+                            >
+                              {key.replace(/([A-Z])/g, " $1").trim()}:
+                            </span>
+                            <span style={{ color: "var(--text-secondary)" }}>
+                              {value}
+                            </span>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
               {/* Variants */}
               {product.variant && (
                 <div className="space-y-4">

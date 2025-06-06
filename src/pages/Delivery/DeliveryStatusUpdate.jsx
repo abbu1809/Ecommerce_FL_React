@@ -496,6 +496,7 @@ const DeliveryStatusUpdate = () => {
                 Delivery Details
               </h2>
               <div className="space-y-4">
+                {" "}
                 <div>
                   <h3
                     className="text-sm font-medium mb-2"
@@ -522,7 +523,32 @@ const DeliveryStatusUpdate = () => {
                     {delivery.customer.address}
                   </p>
                 </div>
-
+                {delivery.estimatedDelivery && (
+                  <div
+                    className="pt-4 border-t"
+                    style={{ borderColor: "var(--border-primary)" }}
+                  >
+                    <h3
+                      className="text-sm font-medium mb-2"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      Estimated Delivery
+                    </h3>
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: "var(--brand-primary)" }}
+                    >
+                      {new Date(
+                        delivery.estimatedDelivery
+                      ).toLocaleDateString()}{" "}
+                      at{" "}
+                      {new Date(delivery.estimatedDelivery).toLocaleTimeString(
+                        [],
+                        { hour: "2-digit", minute: "2-digit" }
+                      )}
+                    </p>
+                  </div>
+                )}
                 <div
                   className="pt-4 border-t"
                   style={{ borderColor: "var(--border-primary)" }}
@@ -550,7 +576,6 @@ const DeliveryStatusUpdate = () => {
                       ))}
                   </ul>
                 </div>
-
                 <div
                   className="pt-4 border-t"
                   style={{ borderColor: "var(--border-primary)" }}
@@ -587,7 +612,6 @@ const DeliveryStatusUpdate = () => {
                     </span>
                   </div>
                 </div>
-
                 {delivery.deliveryInstructions && (
                   <div
                     className="pt-4 border-t"
