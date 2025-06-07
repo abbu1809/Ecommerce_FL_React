@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FiX, FiUpload, FiPlus, FiTrash2, FiCamera } from "react-icons/fi";
 import useAdminProducts from "../../../store/Admin/useAdminProducts";
 import { toast } from "../../../utils/toast";
@@ -29,7 +29,7 @@ const AddProductForm = ({ onClose, onSave }) => {
     reviews: 0,
   });
 
-  // ...existing code...  // Handle image upload
+  // Handle image upload
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -106,14 +106,57 @@ const AddProductForm = ({ onClose, onSave }) => {
     });
   };
 
+  // Handle attribute key update (when the user changes the name of an attribute key)
+  const handleAttributeKeyUpdate = (oldKey, newKey, currentValue) => {
+    setFormData((prevFormData) => {
+      if (oldKey === newKey) {
+        // Key hasn't actually changed, no update needed.
+        return prevFormData;
+      }
+
+      const currentAttributes = { ...prevFormData.attributes };
+
+      // Check if the new key already exists and is different from the old key.
+      // This prevents overwriting another attribute.
+      if (Object.prototype.hasOwnProperty.call(currentAttributes, newKey)) {
+        toast.error(
+          `Attribute key "${newKey}" already exists. Please use a unique key.`
+        );
+        return prevFormData;
+      }
+
+      // Delete the old attribute key and add the new one with the existing value.
+      delete currentAttributes[oldKey];
+      currentAttributes[newKey] = currentValue;
+
+      return {
+        ...prevFormData,
+        attributes: currentAttributes,
+      };
+    });
+  };
+
   // Add new attribute
   const addAttribute = () => {
-    setFormData({
-      ...formData,
-      attributes: {
-        ...formData.attributes,
-        "": "",
-      },
+    setFormData((prevFormData) => {
+      const currentAttributes = prevFormData.attributes;
+      let baseName = "";
+      let newKey = baseName;
+      let counter = 0;
+
+      // Generate a unique key (e.g., NewKey, NewKey1, NewKey2, ...)
+      while (Object.prototype.hasOwnProperty.call(currentAttributes, newKey)) {
+        counter++;
+        newKey = `${baseName}${counter}`;
+      }
+
+      return {
+        ...prevFormData,
+        attributes: {
+          ...currentAttributes,
+          [newKey]: "", // Add new attribute with a unique placeholder key
+        },
+      };
     });
   };
 
@@ -619,57 +662,36 @@ const AddProductForm = ({ onClose, onSave }) => {
                   </button>
                 </div>
 
-                {Object.entries(formData.attributes).map(
-                  ([key, value], index) => (
-                    <div key={index} className="flex items-center mb-2 gap-2">
-                      <input
-                        type="text"
-                        value={key}
-                        onChange={(e) => {
-                          const newAttrs = { ...formData.attributes };
-                          const oldValue = newAttrs[key];
-                          delete newAttrs[key];
-                          setFormData({
-                            ...formData,
-                            attributes: {
-                              ...newAttrs,
-                              [e.target.value]: oldValue,
-                            },
-                          });
-                        }}
-                        className="flex-grow p-2 border rounded-md text-sm"
-                        style={{
-                          backgroundColor: "var(--bg-primary)",
-                          color: "var(--text-primary)",
-                          borderColor: "var(--border-primary)",
-                        }}
-                        placeholder="Attribute name"
-                      />
-                      <input
-                        type="text"
-                        value={value}
-                        onChange={(e) =>
-                          handleAttributeChange(key, e.target.value)
-                        }
-                        className="flex-grow p-2 border rounded-md text-sm"
-                        style={{
-                          backgroundColor: "var(--bg-primary)",
-                          color: "var(--text-primary)",
-                          borderColor: "var(--border-primary)",
-                        }}
-                        placeholder="Attribute value"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeAttribute(key)}
-                        className="p-1.5 rounded-md"
-                        style={{ color: "var(--error-color)" }}
-                      >
-                        <FiTrash2 size={16} />
-                      </button>
-                    </div>
-                  )
-                )}
+                <div className="space-y-4">
+                  <h4
+                    className="text-md font-semibold"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    Attributes
+                  </h4>
+                  {Object.entries(formData.attributes).map(([key, value]) => (
+                    <EditableAttributeRow
+                      key={key} // React key is still the attribute name from formData
+                      initialKey={key}
+                      initialValue={value}
+                      onKeyCommit={handleAttributeKeyUpdate}
+                      onValueChange={handleAttributeChange}
+                      onDelete={removeAttribute}
+                      styleProps={{
+                        backgroundColor: "var(--bg-primary)",
+                        color: "var(--text-primary)",
+                        borderColor: "var(--border-primary)",
+                      }}
+                    />
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addAttribute}
+                    className="flex items-center gap-1 text-sm text-blue-500 hover:text-blue-700"
+                  >
+                    <FiPlus /> Add Attribute
+                  </button>
+                </div>
               </div>
 
               {/* Variants: Colors */}
@@ -904,6 +926,78 @@ const AddProductForm = ({ onClose, onSave }) => {
           )}
         </form>
       </div>
+    </div>
+  );
+};
+
+// Component for rendering and managing an individual attribute row
+const EditableAttributeRow = ({
+  initialKey,
+  initialValue,
+  onKeyCommit,
+  onValueChange,
+  onDelete,
+  styleProps,
+}) => {
+  const [draftKey, setDraftKey] = useState(initialKey);
+  const [draftValue, setDraftValue] = useState(initialValue);
+
+  useEffect(() => {
+    setDraftKey(initialKey);
+  }, [initialKey]);
+
+  useEffect(() => {
+    setDraftValue(initialValue);
+  }, [initialValue]);
+
+  const handleKeyInputChange = (e) => {
+    setDraftKey(e.target.value);
+  };
+
+  const handleKeyCommitOnBlur = () => {
+    if (draftKey !== initialKey) {
+      onKeyCommit(initialKey, draftKey, draftValue);
+    }
+  };
+
+  const handleValueInputChange = (e) => {
+    setDraftValue(e.target.value); // Only update local draft state
+  };
+
+  const handleValueCommitOnBlur = () => {
+    // Commit the drafted value to the parent state if it has changed
+    if (draftValue !== initialValue) {
+      onValueChange(initialKey, draftValue); // Use initialKey as the key for this value
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <input
+        type="text"
+        value={draftKey}
+        onChange={handleKeyInputChange}
+        onBlur={handleKeyCommitOnBlur}
+        placeholder="Attribute Name"
+        className="w-1/2 p-2 border rounded-md text-sm"
+        style={styleProps}
+      />
+      <input
+        type="text"
+        value={draftValue}
+        onChange={handleValueInputChange} // Changed to only update local state
+        onBlur={handleValueCommitOnBlur} // Added: commits to parent on blur
+        placeholder="Attribute Value"
+        className="w-1/2 p-2 border rounded-md text-sm"
+        style={styleProps}
+      />
+      <button
+        type="button"
+        onClick={() => onDelete(initialKey)}
+        className="p-2 text-red-500 hover:text-red-700"
+      >
+        <FiTrash2 />
+      </button>
     </div>
   );
 };
