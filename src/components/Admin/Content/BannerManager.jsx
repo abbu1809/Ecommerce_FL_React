@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import Button from "../../UI/Button";
+import Button from "../../ui/Button";
 import { useBannerStore } from "../../../store/Admin/useBannerStore";
-import ConfirmModal from "../../UI/ConfirmModal";
+import ConfirmModal from "../../ui/ConfirmModal";
 import toast from "react-hot-toast";
 
 const BannerManager = ({ positionOptions }) => {

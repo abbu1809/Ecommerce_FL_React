@@ -8,7 +8,7 @@ import {
   FiCheckCircle,
   FiAlertCircle,
 } from "react-icons/fi";
-import Button from "../UI/Button";
+import Button from "../ui/Button";
 
 const DeliveryStatusModal = ({
   isOpen,

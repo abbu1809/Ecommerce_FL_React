@@ -9,7 +9,7 @@ import {
 } from "react-icons/fi";
 import UserTable from "../../components/Admin/Users/UserTable";
 import UserDetail from "../../components/Admin/Users/UserDetail";
-import Button from "../../components/UI/Button";
+import Button from "../../components/ui/Button";
 import useAdminStore from "../../store/Admin/useAdminStore";
 
 const AdminUsers = () => {

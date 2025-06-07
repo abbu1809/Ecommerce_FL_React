@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FiX, FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
 import { useConfirmModal } from "../../../hooks/useConfirmModal";
-import ConfirmModal from "../../UI/ConfirmModal";
+import ConfirmModal from "../../ui/ConfirmModal";
 import { toast } from "../../../utils/toast";
 
 const ProductCategoryManager = ({ onClose }) => {

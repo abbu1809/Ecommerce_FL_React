@@ -8,7 +8,7 @@ import {
 } from "react-icons/fi";
 import OrderTable from "../../components/Admin/Orders/OrderTable";
 import OrderDetail from "../../components/Admin/Orders/OrderDetail";
-import Button from "../../components/UI/Button";
+import Button from "../../components/ui/Button";
 import useAdminStore from "../../store/Admin/useAdminStore";
 
 const AdminOrders = () => {

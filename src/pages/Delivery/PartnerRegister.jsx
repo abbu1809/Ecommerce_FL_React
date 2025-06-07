@@ -8,9 +8,9 @@ import {
   FiTruck,
   FiAlertCircle,
 } from "react-icons/fi";
-import Button from "../../components/UI/Button";
-import Input from "../../components/UI/Input";
-import FormWrapper from "../../components/UI/FormWrapper";
+import Button from "../../components/ui/Button";
+import Input from "../../components/ui/Input";
+import FormWrapper from "../../components/ui/FormWrapper";
 import { useDeliveryPartnerStore } from "../../store/Delivery/useDeliveryPartnerStore";
 
 const PartnerRegister = () => {

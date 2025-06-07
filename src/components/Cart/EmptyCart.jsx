@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { FiShoppingBag, FiArrowRight } from "react-icons/fi";
-import Button from "../../components/UI/Button";
+import Button from "../../components/ui/Button";
 import { ROUTES } from "../../utils/constants";
 
 const EmptyCart = () => {

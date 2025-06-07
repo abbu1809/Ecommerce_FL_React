@@ -10,7 +10,7 @@ import {
   FiCalendar,
 } from "react-icons/fi";
 import { ROUTES } from "../utils/constants";
-import Logo from "./UI/Logo";
+import Logo from "./ui/Logo";
 import { useAuthStore } from "../store/useAuth";
 import { useCartStore } from "../store/useCart";
 import { useWishlistStore } from "../store/useWishlist";

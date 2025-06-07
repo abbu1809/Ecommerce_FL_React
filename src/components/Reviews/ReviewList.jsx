@@ -8,7 +8,7 @@ import {
 } from "react-icons/fi";
 import ReviewRatings from "./ReviewRatings";
 import { toast } from "../../utils/toast";
-import ConfirmModal from "../UI/ConfirmModal";
+import ConfirmModal from "../ui/ConfirmModal";
 import { useConfirmModal } from "../../hooks/useConfirmModal";
 
 const ReviewList = ({

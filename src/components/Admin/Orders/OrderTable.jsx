@@ -10,7 +10,7 @@ import {
   FiCreditCard,
   FiUser,
 } from "react-icons/fi";
-import Button from "../../UI/Button";
+import Button from "../../ui/Button";
 import useAdminStore from "../../../store/Admin/useAdminStore";
 
 // Order status badge component

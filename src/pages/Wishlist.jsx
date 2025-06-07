@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FiShoppingCart, FiTrash2, FiHeart } from "react-icons/fi";
-import Button from "../components/UI/Button";
+import Button from "../components/ui/Button";
 import { ROUTES } from "../utils/constants";
 import { useWishlistStore } from "../store/useWishlist";
 import { useCartStore } from "../store/useCart";

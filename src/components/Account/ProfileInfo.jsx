@@ -2,7 +2,7 @@ import React from "react";
 import { FiLoader } from "react-icons/fi";
 import { useAuthStore } from "../../store/useAuth";
 import { useConfirmModal } from "../../hooks/useConfirmModal";
-import ConfirmModal from "../UI/ConfirmModal";
+import ConfirmModal from "../ui/ConfirmModal";
 import toast from "react-hot-toast";
 
 const ProfileInfo = () => {

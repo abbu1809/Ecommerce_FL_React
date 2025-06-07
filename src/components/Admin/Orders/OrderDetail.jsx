@@ -13,7 +13,7 @@ import {
   FiShoppingBag,
 } from "react-icons/fi";
 import { useState, useEffect } from "react";
-import Button from "../../UI/Button";
+import Button from "../../ui/Button";
 import useAdminStore from "../../../store/Admin/useAdminStore";
 import { toast } from "react-hot-toast";
 

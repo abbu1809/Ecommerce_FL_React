@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { FiHeart, FiShoppingCart } from "react-icons/fi";
 import { FaStar, FaRegStar, FaStarHalfAlt } from "react-icons/fa";
 import { toast } from "react-hot-toast";
-import Button from "../../components/UI/Button";
+import Button from "../../components/ui/Button";
 import { useCartStore } from "../../store/useCart";
 import { useWishlistStore } from "../../store/useWishlist";
 

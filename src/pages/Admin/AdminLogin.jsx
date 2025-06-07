@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import FormWrapper from "../../components/UI/FormWrapper";
-import Input from "../../components/UI/Input";
-import Button from "../../components/UI/Button";
+import FormWrapper from "../../components/ui/FormWrapper";
+import Input from "../../components/ui/Input";
+import Button from "../../components/ui/Button";
 import { useAdminAuthStore } from "../../store/Admin/useAdminAuth"; // Updated to use admin-specific auth store
 
 const AdminLogin = () => {

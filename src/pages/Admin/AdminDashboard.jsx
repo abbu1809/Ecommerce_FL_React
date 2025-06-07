@@ -10,7 +10,7 @@ import DashboardStats from "../../components/Admin/Dashboard/DashboardStats";
 import RecentOrders from "../../components/Admin/Dashboard/RecentOrders";
 import SalesChart from "../../components/Admin/Dashboard/SalesChart";
 import TopProducts from "../../components/Admin/Dashboard/TopProducts";
-import Button from "../../components/UI/Button";
+import Button from "../../components/ui/Button";
 import useAdminStore from "../../store/Admin/useAdminStore";
 
 const AdminDashboard = () => {

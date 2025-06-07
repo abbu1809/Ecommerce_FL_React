@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import FormWrapper from "../components/UI/FormWrapper";
+import FormWrapper from "../components/ui/FormWrapper";
 
-import Input from "../components/UI/Input";
+import Input from "../components/ui/Input";
 
-import Button from "../components/UI/Button";
+import Button from "../components/ui/Button";
 
 import { useAuthStore } from "../store/useAuth";
 import { FiUser, FiMail, FiPhone, FiLock, FiAlertCircle } from "react-icons/fi";

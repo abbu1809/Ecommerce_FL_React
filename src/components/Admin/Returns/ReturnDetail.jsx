@@ -1,4 +1,4 @@
-import Button from "../../UI/Button";
+import Button from "../../ui/Button";
 
 const ReturnDetail = ({ return: returnData }) => {
   if (!returnData) return null;

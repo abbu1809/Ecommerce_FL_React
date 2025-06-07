@@ -6,8 +6,8 @@ import {
   FiUserCheck,
   FiUserX,
 } from "react-icons/fi";
-import FormWrapper from "../../components/UI/FormWrapper";
-import Button from "../../components/UI/Button";
+import FormWrapper from "../../components/ui/FormWrapper";
+import Button from "../../components/ui/Button";
 
 const AdminVerify = () => {
   const navigate = useNavigate();

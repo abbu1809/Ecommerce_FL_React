@@ -1,6 +1,6 @@
 import React from "react";
 import { FiStar, FiMessageSquare, FiInfo } from "react-icons/fi";
-import Button from "../../components/UI/Button";
+import Button from "../../components/ui/Button";
 import ProductReviews from "./ProductReviews";
 
 const ProductTabs = ({ product, activeTab, setActiveTab }) => {

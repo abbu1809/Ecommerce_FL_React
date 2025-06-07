@@ -10,7 +10,7 @@ import {
 } from "react-icons/fi";
 import useAdminReviews from "../../../store/Admin/useAdminReviews";
 import { useConfirmModal } from "../../../hooks/useConfirmModal";
-import ConfirmModal from "../../UI/ConfirmModal";
+import ConfirmModal from "../../ui/ConfirmModal";
 import ReviewDetailModal from "./ReviewDetailModal";
 import { toast } from "../../../utils/toast";
 

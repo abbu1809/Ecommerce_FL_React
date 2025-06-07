@@ -1,4 +1,4 @@
-import Button from "../../components/UI/Button";
+import Button from "../../components/ui/Button";
 import { FiCreditCard, FiShoppingBag } from "react-icons/fi";
 
 const CartSummary = ({ subtotal, total, onCheckout }) => {

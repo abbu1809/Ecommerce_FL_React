@@ -20,8 +20,8 @@ import useAddressStore from "../../store/useAddress";
 import { useCartStore } from "../../store/useCart";
 import { useOrderStore } from "../../store/useOrder";
 import { useAuthStore } from "../../store/useAuth";
-import Button from "../UI/Button";
-import Modal from "../UI/Modal";
+import Button from "../ui/Button";
+import Modal from "../ui/Modal";
 import toast from "react-hot-toast";
 
 const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {

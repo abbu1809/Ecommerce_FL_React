@@ -1,6 +1,6 @@
 import React from "react";
 import { FiStar, FiCheck, FiX, FiFlag, FiTrash2 } from "react-icons/fi";
-import Modal from "../../UI/Modal";
+import Modal from "../../ui/Modal";
 import useAdminReviews from "../../../store/Admin/useAdminReviews";
 import { toast } from "../../../utils/toast";
 

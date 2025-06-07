@@ -6,7 +6,7 @@ import {
   FiX,
   FiAlertCircle,
 } from "react-icons/fi";
-import Button from "../UI/Button";
+import Button from "../ui/Button";
 
 const StatusUpdateForm = ({ delivery, onStatusUpdate }) => {
   const [newStatus, setNewStatus] = useState(delivery.status);

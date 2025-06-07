@@ -8,7 +8,7 @@ import {
   FiShield,
   FiGift,
 } from "react-icons/fi";
-import Button from "../UI/Button";
+import Button from "../ui/Button";
 import { useCartStore } from "../../store/useCart";
 import { useWishlistStore } from "../../store/useWishlist";
 import { useAuthStore } from "../../store/useAuth";

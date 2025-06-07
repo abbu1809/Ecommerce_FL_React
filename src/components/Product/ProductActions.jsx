@@ -9,7 +9,7 @@ import {
   FiGift,
   FiInfo,
 } from "react-icons/fi";
-import Button from "../../components/UI/Button";
+import Button from "../../components/ui/Button";
 
 const ProductActions = ({ addToCart, addToWishlist, price }) => {
   // Calculate GST and delivery

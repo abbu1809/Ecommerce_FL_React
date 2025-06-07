@@ -2,7 +2,7 @@ import React from "react";
 import { FiMapPin, FiPlus, FiEdit2, FiTrash2, FiLoader } from "react-icons/fi";
 import useAddressStore from "../../store/useAddress";
 import { useConfirmModal } from "../../hooks/useConfirmModal";
-import ConfirmModal from "../UI/ConfirmModal";
+import ConfirmModal from "../ui/ConfirmModal";
 
 const AddressList = () => {
   const {

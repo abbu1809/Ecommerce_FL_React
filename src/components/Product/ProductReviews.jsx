@@ -5,7 +5,7 @@ import useReviewStore from "../../store/useReviewStore";
 import { useAuthStore } from "../../store/useAuth";
 import { useProductStore } from "../../store/useProduct";
 import { toast } from "../../utils/toast";
-import ConfirmModal from "../UI/ConfirmModal";
+import ConfirmModal from "../ui/ConfirmModal";
 import { useConfirmModal } from "../../hooks/useConfirmModal";
 
 const ProductReviews = ({ productId, product }) => {

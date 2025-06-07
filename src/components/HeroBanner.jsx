@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Button from "./UI/Button";
+import Button from "./ui/Button";
 import { useBannerStore } from "../store/Admin/useBannerStore";
 
 // Fallback images from public folder (used if no banners from database)

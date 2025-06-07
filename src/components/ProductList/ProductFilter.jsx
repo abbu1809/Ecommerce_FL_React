@@ -1,6 +1,6 @@
 import React from "react";
 import { FiFilter, FiXCircle, FiSliders } from "react-icons/fi";
-import Button from "../../components/UI/Button";
+import Button from "../../components/ui/Button";
 
 const ProductFilter = ({
   showFilters,

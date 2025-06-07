@@ -7,8 +7,8 @@ import {
   FiAlertCircle,
 } from "react-icons/fi";
 import { DeliveryLayout, DeliveryStatusModal } from "../../components/Delivery";
-import Button from "../../components/UI/Button";
-import Input from "../../components/UI/Input";
+import Button from "../../components/ui/Button";
+import Input from "../../components/ui/Input";
 import useDeliveryPartnerStore from "../../store/Delivery/useDeliveryPartnerStore";
 import { toast } from "../../utils/toast";
 

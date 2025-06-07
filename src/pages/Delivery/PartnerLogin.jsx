@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import FormWrapper from "../../components/UI/FormWrapper";
-import Input from "../../components/UI/Input";
-import Button from "../../components/UI/Button";
+import FormWrapper from "../../components/ui/FormWrapper";
+import Input from "../../components/ui/Input";
+import Button from "../../components/ui/Button";
 import { FiTruck, FiMail, FiLock, FiAlertCircle } from "react-icons/fi";
 import { useDeliveryPartnerStore } from "../../store/Delivery/useDeliveryPartnerStore";
 import toast from "react-hot-toast";

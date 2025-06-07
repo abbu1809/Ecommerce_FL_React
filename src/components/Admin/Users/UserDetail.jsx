@@ -6,7 +6,7 @@ import {
   FiLogIn,
   FiEdit,
 } from "react-icons/fi";
-import Button from "../../UI/Button";
+import Button from "../../ui/Button";
 import useAdminStore from "../../../store/Admin/useAdminStore";
 
 const UserDetail = ({ user }) => {
