@@ -19,7 +19,7 @@ export const useProductStore = create((set, get) => ({
     set({ loading: true });
 
     try {
-      const response = await api.get(`${API_URL}/products/products`);
+      const response = await api.get(`${API_URL}/products/products/`);
 
       // Extract unique categories and brands
       const categories = Array.from(
@@ -297,7 +297,7 @@ export const useProductStore = create((set, get) => ({
     set({ loading: true });
 
     try {
-      const response = await api.get(`${API_URL}/products/products`);
+      const response = await api.get(`${API_URL}/products/products/`);
 
       // Get featured products - first those marked as featured, then high-rated ones
       const featuredProducts = response.data.products
