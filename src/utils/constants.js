@@ -1,5 +1,5 @@
 // API Constants
-export const API_URL = "http://69.62.72.199/api"; // Replace with your actual API URL
+export const API_URL = "http://69.62.72.199/api/api"; // Replace with your actual API URL
 
 // API Constants
 // export const API_URL = "http://127.0.0.1:8000/api"; // Replace with your actual API URL
