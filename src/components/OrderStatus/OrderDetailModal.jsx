@@ -5,6 +5,7 @@ import {
   FiClock,
   FiMapPin,
   FiCreditCard,
+  FiDownload,
 } from "react-icons/fi";
 import useOrderStore from "../../store/useOrder";
 
@@ -247,8 +248,66 @@ const OrderDetailModal = ({ isOpen, onClose, orderId }) => {
                       {orderDetails.item_count} item(s)
                     </p>
                   </div>
-                </div>
+                </div>{" "}
               </div>
+
+              {/* Invoice Download Section */}
+              {orderDetails.invoice && orderDetails.invoice.invoice_pdf_url && (
+                <div>
+                  <h3
+                    className="text-lg font-semibold mb-3"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    Invoice
+                  </h3>
+                  <div
+                    className="p-4 rounded-lg"
+                    style={{ backgroundColor: "var(--bg-secondary)" }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <FiDownload
+                          className="mr-2"
+                          style={{ color: "var(--brand-primary)" }}
+                        />
+                        <div>
+                          <p
+                            className="font-medium"
+                            style={{ color: "var(--text-primary)" }}
+                          >
+                            Invoice #{orderDetails.invoice.invoice_id}
+                          </p>
+                          <p
+                            className="text-sm"
+                            style={{ color: "var(--text-secondary)" }}
+                          >
+                            Download your order invoice
+                          </p>
+                        </div>
+                      </div>{" "}
+                      <a
+                        href={orderDetails.invoice.invoice_pdf_url}
+                        download={`Invoice_${orderDetails.invoice.invoice_id}.pdf`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 rounded-md text-white font-medium transition-colors duration-200 hover:opacity-90 flex items-center"
+                        style={{
+                          backgroundColor: "var(--brand-primary)",
+                        }}
+                        onClick={() => {
+                          // Add a small delay to ensure the download starts
+                          setTimeout(() => {
+                            console.log("Invoice download initiated");
+                          }, 100);
+                        }}
+                      >
+                        <FiDownload className="mr-2" size={16} />
+                        Download Invoice
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Products */}
               {orderDetails.items && orderDetails.items.length > 0 && (

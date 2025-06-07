@@ -30,6 +30,7 @@ import {
   FiHeart,
   FiThumbsUp,
   FiX,
+  FiDownload,
 } from "react-icons/fi";
 import OrderTrackingTimeline from "../components/OrderTracking/OrderTrackingTimeline";
 import useOrderStore from "../store/useOrder";
@@ -160,7 +161,6 @@ const OrderTrackingDetail = () => {
       if (!address) return null;
       return `${address.street_address}, ${address.city}, ${address.state} - ${address.postal_code}`;
     };
-
     return {
       id: orderData.razorpay_order_id || orderId,
       order_id: orderData.razorpay_order_id || orderId,
@@ -178,6 +178,7 @@ const OrderTrackingDetail = () => {
       paymentDetails: orderData.payment_details,
       createdAt: orderData.created_at,
       createdAtFormatted: orderData.created_at_formatted,
+      invoice: orderData.invoice, // Add invoice information
     };
   };
 
@@ -656,11 +657,84 @@ const OrderTrackingDetail = () => {
                         +{displayOrder.orderItems.length - 3} more items
                       </div>
                     )}
-                  </div>
+                  </div>{" "}
                 </div>
               </div>
             )}
           </div>
+          {/* Invoice Download Section */}
+          {displayOrder.invoice && displayOrder.invoice.invoice_pdf_url && (
+            <div
+              className="bg-white rounded-xl shadow-md p-6 mb-6 animate-fadeIn"
+              style={{
+                backgroundColor: "var(--bg-primary)",
+                borderRadius: "var(--rounded-lg)",
+                boxShadow: "var(--shadow-medium)",
+                animationDelay: "100ms",
+              }}
+            >
+              <div
+                className="p-6 rounded-xl border"
+                style={{
+                  borderColor: "var(--border-primary)",
+                  background:
+                    "linear-gradient(135deg, var(--bg-primary) 0%, rgba(16, 185, 129, 0.02) 100%)",
+                }}
+              >
+                <div className="flex items-center mb-4">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center mr-3"
+                    style={{
+                      backgroundColor: "var(--success-color)15",
+                      color: "var(--success-color)",
+                    }}
+                  >
+                    <FiDownload size={18} />
+                  </div>
+                  <h3
+                    className="font-semibold text-lg"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    Invoice Available
+                  </h3>
+                </div>
+                <div className="ml-13 flex items-center justify-between">
+                  <div>
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      Invoice #{displayOrder.invoice.invoice_id}
+                    </p>
+                    <p
+                      className="text-xs mt-1"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      Download your order invoice for records
+                    </p>
+                  </div>
+                  <a
+                    href={displayOrder.invoice.invoice_pdf_url}
+                    download={`Invoice_${displayOrder.invoice.invoice_id}.pdf`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-md transform hover:scale-105"
+                    style={{
+                      backgroundColor: "var(--success-color)",
+                      color: "white",
+                      textDecoration: "none",
+                    }}
+                    onClick={() => {
+                      console.log("Invoice download initiated");
+                    }}
+                  >
+                    <FiDownload className="mr-2" size={16} />
+                    Download PDF
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
           {/* Timeline section */}
           <div
             className="bg-white rounded-xl shadow-md p-6 animate-fadeIn"

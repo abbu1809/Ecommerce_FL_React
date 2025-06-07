@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import api from "../services/api";
 import { useAuthStore } from "./useAuth";
+import toast from "react-hot-toast";
 
 export const useCartStore = create(
   persist(
@@ -94,6 +95,7 @@ export const useCartStore = create(
 
           // Update cart totals
           updateTotals();
+          toast.success("Item added to cart");
           return true;
         } catch (error) {
           set({

@@ -5,47 +5,16 @@ export const showToast = (message, type = "info") => {
   toast.className = `toast toast-${type}`;
   toast.textContent = message;
 
-  // Add styles
-  Object.assign(toast.style, {
-    position: "fixed",
-    top: "20px",
-    right: "20px",
-    padding: "12px 24px",
-    borderRadius: "8px",
-    zIndex: "9999",
-    fontSize: "14px",
-    fontWeight: "500",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-    transition: "all 0.3s ease",
-    transform: "translateX(100%)",
-    opacity: "0",
-  });
-
-  // Set colors based on type
-  const colors = {
-    success: { bg: "#10b981", text: "#ffffff" },
-    error: { bg: "#ef4444", text: "#ffffff" },
-    warning: { bg: "#f59e0b", text: "#ffffff" },
-    info: { bg: "#3b82f6", text: "#ffffff" },
-  };
-
-  const color = colors[type] || colors.info;
-  toast.style.backgroundColor = color.bg;
-  toast.style.color = color.text;
-
   // Add to DOM
   document.body.appendChild(toast);
-
   // Animate in
   setTimeout(() => {
-    toast.style.transform = "translateX(0)";
-    toast.style.opacity = "1";
+    toast.classList.add("toast-show");
   }, 100);
 
   // Remove after delay
   setTimeout(() => {
-    toast.style.transform = "translateX(100%)";
-    toast.style.opacity = "0";
+    toast.classList.add("toast-hide");
     setTimeout(() => {
       if (toast.parentNode) {
         toast.parentNode.removeChild(toast);

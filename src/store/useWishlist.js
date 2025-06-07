@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import api from "../services/api";
 import { useAuthStore } from "./useAuth";
+import toast from "react-hot-toast";
 
 export const useWishlistStore = create(
   persist(
@@ -76,7 +77,7 @@ export const useWishlistStore = create(
             items: [...items, product],
             isLoading: false,
           });
-
+          toast.success("Item added to wishlist");
           return true;
         } catch (error) {
           set({

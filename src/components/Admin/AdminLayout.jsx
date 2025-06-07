@@ -44,11 +44,11 @@ const AdminLayout = () => {
       path: "/admin/users",
       icon: <FiUsers size={20} />,
     },
-    {
-      name: "Returns",
-      path: "/admin/returns",
-      icon: <FiCornerDownLeft size={20} />,
-    },
+    // {
+    //   name: "Returns",
+    //   path: "/admin/returns",
+    //   icon: <FiCornerDownLeft size={20} />,
+    // },
     {
       name: "Content",
       path: "/admin/content",
