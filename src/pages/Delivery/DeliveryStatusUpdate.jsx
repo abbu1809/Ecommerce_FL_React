@@ -44,32 +44,34 @@ const DeliveryStatusUpdate = () => {
     setIsLoading(true);
     try {
       await fetchAssignedDeliveries();
-
-      // Transform the API response to match our component's data structure
-      const formattedDeliveries = assignedDeliveries?.map((delivery) => ({
-        id: delivery.order_id,
-        orderId: delivery.order_id,
-        customerName: delivery.customer_name || "Customer",
-        customerAddress: formatAddress(delivery.delivery_address),
-        customerPhone: delivery.customer_phone || "N/A",
-        status: delivery.delivery_status || delivery.status || "assigned",
-        items: delivery.items || [],
-        expectedDelivery: delivery.estimated_delivery,
-        assignedOn: delivery.assigned_at,
-        paymentType: delivery.payment_method || "Online Payment",
-        paymentAmount: `${delivery.currency || "INR"} ${
-          delivery.total_amount || 0
-        }`,
-      }));
-
-      setDeliveries(formattedDeliveries);
     } catch (error) {
       console.error("Error fetching assigned deliveries:", error);
       toast.error("Failed to load deliveries");
     } finally {
       setIsLoading(false);
     }
-  }, [fetchAssignedDeliveries, formatAddress, assignedDeliveries]);
+  }, [fetchAssignedDeliveries]);
+
+  useEffect(() => {
+    // Transform the API response to match our component's data structure
+    const formattedDeliveries = assignedDeliveries?.map((delivery) => ({
+      id: delivery.order_id,
+      orderId: delivery.order_id,
+      customerName: delivery.customer_name || "Customer",
+      customerAddress: formatAddress(delivery.delivery_address),
+      customerPhone: delivery.customer_phone || "N/A",
+      status: delivery.delivery_status || delivery.status || "assigned",
+      items: delivery.items || [],
+      expectedDelivery: delivery.estimated_delivery,
+      assignedOn: delivery.assigned_at,
+      paymentType: delivery.payment_method || "Online Payment",
+      paymentAmount: `${delivery.currency || "INR"} ${
+        delivery.total_amount || 0
+      }`,
+    }));
+
+    setDeliveries(formattedDeliveries);
+  }, [assignedDeliveries, formatAddress]);
 
   // Fetch delivery details by ID
   const fetchDeliveryById = useCallback(

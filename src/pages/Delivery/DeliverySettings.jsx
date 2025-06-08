@@ -93,7 +93,7 @@ const DeliverySettings = () => {
       }, 3000);
     } catch (error) {
       setErrors({
-        form: "Failed to save changes. Please try again.",
+        form: error.message || "Failed to save changes. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -308,87 +308,6 @@ const DeliverySettings = () => {
                   icon={<FiSave />}
                 >
                   Update Password
-                </Button>
-              </div>
-            </form>
-          </FormWrapper>
-
-          {/* Notification Settings */}
-          <FormWrapper>
-            <h2
-              className="text-xl font-semibold mb-4"
-              style={{ color: "var(--text-primary)" }}
-            >
-              Notification Preferences
-            </h2>
-            <form
-              onSubmit={(e) => handleSubmit(e, "notifications")}
-              className="space-y-4"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="notifyAssignments"
-                    name="notifyAssignments"
-                    checked={formData.notifyAssignments}
-                    onChange={handleChange}
-                    className="mr-3 h-4 w-4"
-                    style={{ accentColor: "var(--brand-primary)" }}
-                  />
-                  <label
-                    htmlFor="notifyAssignments"
-                    style={{ color: "var(--text-primary)" }}
-                  >
-                    New delivery assignments
-                  </label>
-                </div>
-
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="notifyStatus"
-                    name="notifyStatus"
-                    checked={formData.notifyStatus}
-                    onChange={handleChange}
-                    className="mr-3 h-4 w-4"
-                    style={{ accentColor: "var(--brand-primary)" }}
-                  />
-                  <label
-                    htmlFor="notifyStatus"
-                    style={{ color: "var(--text-primary)" }}
-                  >
-                    Delivery status updates
-                  </label>
-                </div>
-
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="notifyReviews"
-                    name="notifyReviews"
-                    checked={formData.notifyReviews}
-                    onChange={handleChange}
-                    className="mr-3 h-4 w-4"
-                    style={{ accentColor: "var(--brand-primary)" }}
-                  />
-                  <label
-                    htmlFor="notifyReviews"
-                    style={{ color: "var(--text-primary)" }}
-                  >
-                    Customer reviews and ratings
-                  </label>
-                </div>
-              </div>
-
-              <div className="mt-4">
-                <Button
-                  type="submit"
-                  variant="primary"
-                  isLoading={isLoading}
-                  icon={<FiSave />}
-                >
-                  Save Preferences
                 </Button>
               </div>
             </form>

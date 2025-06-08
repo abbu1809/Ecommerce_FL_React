@@ -1,4 +1,3 @@
-import React from "react";
 import OrderTrackingTimeline from "../components/OrderTracking/OrderTrackingTimeline";
 import { Link } from "react-router-dom";
 import { FiArrowLeft, FiPackage, FiCalendar, FiInfo } from "react-icons/fi";

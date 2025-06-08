@@ -7,6 +7,9 @@ import {
   FiTruck,
   FiCheckCircle,
   FiAlertCircle,
+  FiCalendar,
+  FiInfo,
+  FiEdit,
 } from "react-icons/fi";
 import Button from "../ui/Button";
 
@@ -18,45 +21,56 @@ const DeliveryStatusModal = ({
   isSubmitting = false,
 }) => {
   const [photoPreview, setPhotoPreview] = useState(null);
-  const [newStatus, setNewStatus] = useState(delivery?.status || "assigned");
+  const [newStatus, setNewStatus] = useState(delivery?.status || "processing");
   const [otp, setOtp] = useState("");
   const [notes, setNotes] = useState("");
   const [estimatedDelivery, setEstimatedDelivery] = useState("");
   const [error, setError] = useState("");
-
+  const [carrier, setCarrier] = useState("");
+  const [trackingNumber, setTrackingNumber] = useState("");
+  const [otherStatusText, setOtherStatusText] = useState("");
   // Initialize form when delivery changes
   useEffect(() => {
     if (delivery) {
-      setNewStatus(delivery.status || "assigned");
+      setNewStatus(delivery.status || "processing");
       setEstimatedDelivery(
-        delivery.estimated_delivery
-          ? new Date(delivery.estimated_delivery).toISOString().slice(0, 16)
+        delivery.expectedDelivery
+          ? new Date(delivery.expectedDelivery).toISOString().slice(0, 16)
           : ""
       );
+      setCarrier(delivery.carrier || "");
+      setTrackingNumber(delivery.tracking_number || "");
       setOtp("");
       setNotes("");
       setError("");
       setPhotoPreview(null);
+      setOtherStatusText("");
     }
   }, [delivery]);
-
   if (!isOpen || !delivery) return null;
-
-  // Comprehensive status options for delivery partner
+  // Comprehensive status options for delivery partner aligned with OrderTrackingDetail
   const statusOptions = [
     {
-      value: "assigned",
-      label: "Assigned",
-      icon: <FiPackage />,
-      color: "var(--brand-primary)",
-      description: "Order assigned to delivery partner",
-    },
-    {
-      value: "picked_up",
-      label: "Picked Up",
+      value: "processing",
+      label: "Processing",
       icon: <FiPackage />,
       color: "var(--info-color)",
-      description: "Package collected from warehouse",
+      description: "Order is being processed",
+    },
+    {
+      value: "packed",
+      label: "Packed",
+      icon: <FiPackage />,
+      color: "var(--info-color)",
+      description: "Package is packed and ready for shipping",
+    },
+    {
+      value: "shipped",
+      label: "Shipped",
+      icon: <FiTruck />,
+      color: "var(--info-color)",
+      description: "Package has been shipped",
+      requiresTrackingInfo: true,
     },
     {
       value: "out_for_delivery",
@@ -64,6 +78,7 @@ const DeliveryStatusModal = ({
       icon: <FiTruck />,
       color: "var(--brand-primary)",
       description: "Package is out for delivery",
+      requiresTrackingInfo: true,
     },
     {
       value: "delivered",
@@ -89,6 +104,15 @@ const DeliveryStatusModal = ({
       requiresNotes: true,
       description: "Package being returned to warehouse",
     },
+    {
+      value: "other",
+      label: "Other Status",
+      icon: <FiEdit />,
+      color: "var(--info-color)",
+      requiresNotes: true,
+      description: "Specify a custom status for this delivery",
+      isCustom: true,
+    },
   ];
 
   // Find selected status option
@@ -110,7 +134,6 @@ const DeliveryStatusModal = ({
   const removePhoto = () => {
     setPhotoPreview(null);
   };
-
   // Handle status update submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -126,8 +149,31 @@ const DeliveryStatusModal = ({
       setError("Please provide a reason for delivery failure");
       return;
     }
+
     try {
-      await onStatusUpdate(delivery.id, newStatus, {
+      // If custom status is selected, use the otherStatusText as status
+      const statusToSubmit = newStatus === "other" ? "other" : newStatus;
+
+      // Only attempt to update if we have a valid status
+      if (newStatus === "other" && !otherStatusText) {
+        setError("Please specify a custom status");
+        return;
+      }
+
+      // Check for carrier and tracking number requirements
+      if (selectedStatus?.requiresTrackingInfo) {
+        if (!carrier) {
+          setError("Please provide a carrier name for shipped packages");
+          return;
+        }
+        if (!trackingNumber) {
+          setError("Please provide a tracking number for shipped packages");
+          return;
+        }
+      }
+
+      // Prepare update payload
+      const updatePayload = {
         photo: photoPreview,
         otp,
         notes,
@@ -135,12 +181,27 @@ const DeliveryStatusModal = ({
           ? new Date(estimatedDelivery).toISOString()
           : null,
         updatedAt: new Date().toISOString(),
-      });
+        carrier,
+        tracking_number: trackingNumber,
+      };
+
+      // If status is "other", include the custom text in notes
+      if (newStatus === "other") {
+        updatePayload.notes = `Custom status: ${otherStatusText}${
+          notes ? ` - ${notes}` : ""
+        }`;
+      }
+
+      await onStatusUpdate(delivery.id, statusToSubmit, updatePayload);
+
       // Reset form
       setPhotoPreview(null);
       setOtp("");
       setNotes("");
       setEstimatedDelivery("");
+      setCarrier("");
+      setTrackingNumber("");
+      setOtherStatusText("");
       setError("");
     } catch (error) {
       console.error("Error updating status:", error);
@@ -213,7 +274,7 @@ const DeliveryStatusModal = ({
                       style={{ color: "var(--text-primary)" }}
                     >
                       <FiPackage className="mr-2" /> Update Status
-                    </h4>
+                    </h4>{" "}
                     {/* Status Selection */}
                     <div className="mb-4">
                       <label
@@ -242,7 +303,9 @@ const DeliveryStatusModal = ({
                                   ? option.color
                                   : "var(--border-primary)",
                             }}
-                            onClick={() => setNewStatus(option.value)}
+                            onClick={() => {
+                              setNewStatus(option.value);
+                            }}
                           >
                             <span
                               className="w-6 h-6 rounded-full flex items-center justify-center mr-2"
@@ -264,8 +327,47 @@ const DeliveryStatusModal = ({
                             </span>
                           </button>
                         ))}
-                      </div>
+                      </div>{" "}
                     </div>
+                    {/* Custom Status Field (when "Other" is selected) */}
+                    {newStatus === "other" && (
+                      <div className="mb-4">
+                        <label
+                          htmlFor="customStatus"
+                          className="block text-sm font-medium mb-2"
+                          style={{ color: "var(--text-primary)" }}
+                        >
+                          Specify Custom Status
+                        </label>
+                        <div className="relative">
+                          <div
+                            className="absolute left-3 top-1/2 transform -translate-y-1/2"
+                            style={{ color: "var(--brand-primary)" }}
+                          >
+                            <FiEdit size={16} />
+                          </div>
+                          <input
+                            type="text"
+                            id="customStatus"
+                            value={otherStatusText}
+                            onChange={(e) => setOtherStatusText(e.target.value)}
+                            placeholder="Enter custom delivery status"
+                            className="w-full pl-10 p-3 rounded-md text-sm border-2"
+                            style={{
+                              backgroundColor: "var(--bg-primary)",
+                              borderColor: "var(--brand-primary)",
+                              color: "var(--text-primary)",
+                            }}
+                          />
+                        </div>
+                        <p
+                          className="mt-1 text-xs"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          Please specify a descriptive status for this delivery
+                        </p>
+                      </div>
+                    )}
                     {/* OTP field shown only for delivered status */}
                     {selectedStatus?.requiresOtp && (
                       <div className="mb-4">
@@ -297,9 +399,92 @@ const DeliveryStatusModal = ({
                         </p>{" "}
                       </div>
                     )}{" "}
+                    {/* Carrier field */}
+                    {(newStatus === "shipped" ||
+                      newStatus === "out_for_delivery") && (
+                      <div className="mb-4">
+                        <label
+                          htmlFor="carrier"
+                          className="text-sm font-medium mb-2 flex justify-between items-center"
+                        >
+                          <span style={{ color: "var(--text-primary)" }}>
+                            Shipping Carrier
+                          </span>
+                          <span
+                            className="text-xs font-semibold px-2 py-1 rounded-full"
+                            style={{
+                              backgroundColor: "var(--info-color)15",
+                              color: "var(--info-color)",
+                            }}
+                          >
+                            Required
+                          </span>
+                        </label>
+                        <input
+                          type="text"
+                          id="carrier"
+                          value={carrier}
+                          onChange={(e) => setCarrier(e.target.value)}
+                          className="w-full p-3 border rounded-md text-sm"
+                          style={{
+                            backgroundColor: "var(--bg-primary)",
+                            borderColor: "var(--border-primary)",
+                            color: "var(--text-primary)",
+                          }}
+                          placeholder="Enter shipping carrier name (e.g., FedEx, UPS)"
+                        />
+                        <p
+                          className="mt-1 text-xs"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          The carrier responsible for delivering this package
+                        </p>
+                      </div>
+                    )}
+                    {/* Tracking Number field */}
+                    {(newStatus === "shipped" ||
+                      newStatus === "out_for_delivery") && (
+                      <div className="mb-4">
+                        <label
+                          htmlFor="trackingNumber"
+                          className="text-sm font-medium mb-2 flex justify-between items-center"
+                        >
+                          <span style={{ color: "var(--text-primary)" }}>
+                            Tracking Number
+                          </span>
+                          <span
+                            className="text-xs font-semibold px-2 py-1 rounded-full"
+                            style={{
+                              backgroundColor: "var(--info-color)15",
+                              color: "var(--info-color)",
+                            }}
+                          >
+                            Required
+                          </span>
+                        </label>
+                        <input
+                          type="text"
+                          id="trackingNumber"
+                          value={trackingNumber}
+                          onChange={(e) => setTrackingNumber(e.target.value)}
+                          className="w-full p-3 border rounded-md text-sm"
+                          style={{
+                            backgroundColor: "var(--bg-primary)",
+                            borderColor: "var(--border-primary)",
+                            color: "var(--text-primary)",
+                          }}
+                          placeholder="Enter tracking number"
+                        />
+                        <p
+                          className="mt-1 text-xs"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          Tracking number provided by the shipping carrier
+                        </p>
+                      </div>
+                    )}
                     {/* Estimated Delivery Date field */}
                     <div className="mb-4">
-                      {" "}
                       <label
                         htmlFor="estimatedDelivery"
                         className="text-sm font-medium mb-2 flex justify-between items-center"
@@ -319,23 +504,58 @@ const DeliveryStatusModal = ({
                           </span>
                         )}
                       </label>
-                      <input
-                        type="datetime-local"
-                        id="estimatedDelivery"
-                        value={estimatedDelivery}
-                        onChange={(e) => setEstimatedDelivery(e.target.value)}
-                        className={`w-full p-3 border rounded-md text-sm ${
-                          newStatus === "out_for_delivery" ? "border-2" : ""
-                        }`}
-                        style={{
-                          backgroundColor: "var(--bg-primary)",
-                          borderColor:
-                            newStatus === "out_for_delivery"
-                              ? "var(--brand-primary)"
-                              : "var(--border-primary)",
-                          color: "var(--text-primary)",
-                        }}
-                      />
+                      <div className="relative">
+                        <div
+                          className="absolute left-3 top-1/2 transform -translate-y-1/2"
+                          style={{ color: "var(--brand-primary)" }}
+                        >
+                          <FiCalendar size={16} />
+                        </div>
+                        <input
+                          type="datetime-local"
+                          id="estimatedDelivery"
+                          value={estimatedDelivery}
+                          onChange={(e) => setEstimatedDelivery(e.target.value)}
+                          className={`w-full pl-10 p-3 border rounded-md text-sm ${
+                            newStatus === "out_for_delivery" ? "border-2" : ""
+                          }`}
+                          style={{
+                            backgroundColor: "var(--bg-primary)",
+                            borderColor:
+                              newStatus === "out_for_delivery"
+                                ? "var(--brand-primary)"
+                                : "var(--border-primary)",
+                            color: "var(--text-primary)",
+                          }}
+                        />
+                      </div>
+                      {estimatedDelivery && (
+                        <div
+                          className="mt-2 py-2 px-3 rounded-md"
+                          style={{
+                            backgroundColor: "var(--bg-secondary)",
+                            border: "1px solid var(--border-primary)",
+                          }}
+                        >
+                          <span
+                            className="text-xs font-medium"
+                            style={{ color: "var(--text-secondary)" }}
+                          >
+                            Current Estimate:
+                          </span>
+                          <span
+                            className="ml-2 text-sm font-semibold"
+                            style={{ color: "var(--brand-primary)" }}
+                          >
+                            {new Date(estimatedDelivery).toLocaleDateString() +
+                              " at " +
+                              new Date(estimatedDelivery).toLocaleTimeString(
+                                [],
+                                { hour: "2-digit", minute: "2-digit" }
+                              )}
+                          </span>
+                        </div>
+                      )}{" "}
                       <p
                         className="mt-1 text-xs"
                         style={{ color: "var(--text-secondary)" }}
@@ -519,7 +739,6 @@ const DeliveryStatusModal = ({
                             : delivery.status}
                         </span>
                       </div>
-
                       {/* Customer Information */}
                       <div>
                         <h5
@@ -547,7 +766,6 @@ const DeliveryStatusModal = ({
                           {delivery.customer?.address}
                         </p>
                       </div>
-
                       {/* Items */}
                       <div>
                         <h5
@@ -578,8 +796,39 @@ const DeliveryStatusModal = ({
                               ))}
                           </ul>
                         </div>
+                      </div>{" "}
+                      {/* Estimated Delivery */}
+                      <div>
+                        <h5
+                          className="text-xs font-medium mb-1"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          Estimated Delivery
+                        </h5>
+                        <p
+                          className="text-sm font-medium"
+                          style={{ color: "var(--text-primary)" }}
+                        >
+                          {delivery.expectedDelivery
+                            ? new Date(
+                                delivery.expectedDelivery
+                              ).toLocaleDateString()
+                            : "Not specified"}
+                        </p>
+                        <p
+                          className="text-xs"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          {delivery.expectedDelivery
+                            ? new Date(
+                                delivery.expectedDelivery
+                              ).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })
+                            : ""}
+                        </p>
                       </div>
-
                       {/* Payment Information */}
                       <div>
                         <h5

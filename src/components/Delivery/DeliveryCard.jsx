@@ -11,18 +11,20 @@ import {
 
 // Status colors similar to order status
 const statusColors = {
-  Pending: "var(--warning-color)",
-  "Out for Delivery": "var(--brand-secondary)",
-  Delivered: "var(--success-color)",
-  Failed: "var(--error-color)",
+  pending: "var(--warning-color)",
+  out_for_delivery: "var(--brand-secondary)",
+  delivered: "var(--success-color)",
+  failed: "var(--error-color)",
+  payment_successful: "var(--brand-primary)",
 };
 
 // Status icons similar to order status
 const statusIcons = {
-  Pending: <FiPackage />,
-  "Out for Delivery": <FiTruck />,
-  Delivered: <FiPackage />,
-  Failed: <FiPackage />,
+  pending: <FiPackage />,
+  out_for_delivery: <FiTruck />,
+  delivered: <FiPackage />,
+  failed: <FiPackage />,
+  payment_successful: <FiPackage />,
 };
 
 const DeliveryCard = ({ delivery, onAccept }) => {
@@ -55,9 +57,18 @@ const DeliveryCard = ({ delivery, onAccept }) => {
             style={{ color: "var(--text-primary)" }}
           >
             Order #{delivery.orderId}
+            <span
+              className="ml-2 text-sm font-normal"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              {delivery.total_amount
+                ? `${delivery.currency} ${delivery.total_amount.toFixed(2)}`
+                : ""}
+            </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 mt-3">
+            {" "}
             <div className="flex items-start">
               <FiMapPin
                 className="mt-1 mr-2 flex-shrink-0"
@@ -71,11 +82,10 @@ const DeliveryCard = ({ delivery, onAccept }) => {
                   Delivery Address
                 </p>
                 <p className="text-sm" style={{ color: "var(--text-primary)" }}>
-                  {delivery.address}
+                  {delivery.address || "Address not available"}
                 </p>
               </div>
             </div>
-
             <div className="flex items-start">
               <FiPhone
                 className="mt-1 mr-2 flex-shrink-0"
@@ -89,11 +99,10 @@ const DeliveryCard = ({ delivery, onAccept }) => {
                   Customer Contact
                 </p>
                 <p className="text-sm" style={{ color: "var(--text-primary)" }}>
-                  {delivery.customerPhone}
+                  {delivery.customerPhone || "N/A"}
                 </p>
               </div>
             </div>
-
             <div className="flex items-start">
               <FiCalendar
                 className="mt-1 mr-2 flex-shrink-0"
@@ -107,11 +116,12 @@ const DeliveryCard = ({ delivery, onAccept }) => {
                   Expected Delivery
                 </p>
                 <p className="text-sm" style={{ color: "var(--text-primary)" }}>
-                  {new Date(delivery.expectedDelivery).toLocaleDateString()}
+                  {delivery.expectedDelivery
+                    ? new Date(delivery.expectedDelivery).toLocaleDateString()
+                    : "Not specified"}
                 </p>
               </div>
             </div>
-
             <div className="flex items-start">
               <FiClock
                 className="mt-1 mr-2 flex-shrink-0"
@@ -125,11 +135,16 @@ const DeliveryCard = ({ delivery, onAccept }) => {
                   Assigned On
                 </p>
                 <p className="text-sm" style={{ color: "var(--text-primary)" }}>
-                  {new Date(delivery.assignedDate).toLocaleDateString()}{" "}
-                  {new Date(delivery.assignedDate).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {delivery.assignedDate
+                    ? `${new Date(
+                        delivery.assignedDate
+                      ).toLocaleDateString()} ${new Date(
+                        delivery.assignedDate
+                      ).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}`
+                    : "Not assigned yet"}
                 </p>
               </div>
             </div>
@@ -138,14 +153,27 @@ const DeliveryCard = ({ delivery, onAccept }) => {
       </div>
 
       <div className="flex md:flex-col justify-between items-end mt-4 md:mt-0 md:ml-4">
+        {" "}
         <div
           className="px-3 py-1 rounded-full text-xs font-medium"
           style={{
-            backgroundColor: `${statusColors[delivery.status]}20`,
-            color: statusColors[delivery.status],
+            backgroundColor: `${
+              statusColors[delivery.status] || "var(--warning-color)"
+            }20`,
+            color: statusColors[delivery.status] || "var(--warning-color)",
           }}
         >
-          {delivery.status}
+          {delivery.status === "payment_successful"
+            ? "Payment Successful"
+            : delivery.status === "pending"
+            ? "Pending"
+            : delivery.status === "out_for_delivery"
+            ? "Out for Delivery"
+            : delivery.status === "delivered"
+            ? "Delivered"
+            : delivery.status === "failed"
+            ? "Failed"
+            : delivery.status || "Pending"}
         </div>{" "}
         <button
           onClick={() => onAccept(delivery.id)}
