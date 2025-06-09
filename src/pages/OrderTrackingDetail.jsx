@@ -61,12 +61,18 @@ const OrderTrackingDetail = () => {
     if (!orderData) return null; // Enhanced: Get appropriate description for each status
     const getStatusDescription = (status, isCompleted) => {
       const descriptions = {
-        Ordered: isCompleted
-          ? "Order confirmed and being processed"
-          : "Order will be confirmed",
+        "Pending Payment": isCompleted
+          ? "Awaiting payment confirmation"
+          : "Payment will be processed",
+        "Payment Successful": isCompleted
+          ? "Payment received successfully"
+          : "Payment confirmation pending",
+        Assigned: isCompleted
+          ? "Order assigned to delivery partner"
+          : "Order will be assigned to partner",
         Processing: isCompleted
-          ? "Payment processed successfully, preparing your order"
-          : "Order processing pending",
+          ? "Order is being processed"
+          : "Order processing will begin",
         Packed: isCompleted
           ? "Items packed and ready for dispatch"
           : "Items will be packed soon",
@@ -79,24 +85,36 @@ const OrderTrackingDetail = () => {
         Delivered: isCompleted
           ? "Order successfully delivered"
           : "Order will be delivered soon",
+        "Failed Delivery Attempt": isCompleted
+          ? "Delivery attempt was unsuccessful"
+          : "Delivery will be retried",
+        "Returning to Warehouse": isCompleted
+          ? "Package is being returned to warehouse"
+          : "Package may need to be returned",
+        Cancelled: isCompleted
+          ? "Order has been cancelled"
+          : "Order cancellation pending",
       };
       return (
         descriptions[status] ||
         `${status} - ${isCompleted ? "completed" : "pending"}`
       );
-    };
-
-    // Map status to display-friendly format
+    }; // Map status to display-friendly format
     const getDisplayStatus = (status) => {
+      console.log("Mapping status:", status); // Debug log
       const statusMap = {
-        pending_payment: "Ordered",
-        payment_successful: "Processing", // Enhanced: Shows "Processing" for successful payments
+        pending_payment: "Pending Payment",
+        payment_successful: "Payment Successful",
+        assigned: "Assigned",
         processing: "Processing",
         packed: "Packed",
         shipped: "Shipped",
         out_for_delivery: "Out for Delivery",
         delivered: "Delivered",
         cancelled: "Cancelled",
+        failed_attempt: "Failed Delivery Attempt",
+        returning_to_warehouse: "Returning to Warehouse",
+        other: "Other Status",
       };
       return statusMap[status] || status;
     }; // Transform tracking status history to timeline format
@@ -107,12 +125,12 @@ const OrderTrackingDetail = () => {
         description:
           history.description ||
           `Status updated to ${getDisplayStatus(history.status)}`,
-      })) || [];
-
-    // Enhanced timeline with better status progression and descriptions
+      })) || []; // Enhanced timeline with better status progression and descriptions
     const allStatuses = [
-      "Ordered",
-      "Processing", // Enhanced: Using Processing for consistent flow
+      "Pending Payment",
+      "Payment Successful",
+      "Assigned",
+      "Processing",
       "Packed",
       "Shipped",
       "Out for Delivery",
@@ -122,7 +140,7 @@ const OrderTrackingDetail = () => {
 
     // Add missing statuses up to the current status and beyond
     const currentStatusIndex = allStatuses.indexOf(
-      getDisplayStatus(orderData.status)
+      getDisplayStatus(orderData.delivery_status || orderData.status)
     );
 
     allStatuses.forEach((status, index) => {
@@ -145,8 +163,10 @@ const OrderTrackingDetail = () => {
       }
     }); // Sort timeline by expected order
     const statusOrder = [
-      "Ordered",
-      "Processing", // Updated to match new status flow
+      "Pending Payment",
+      "Payment Successful",
+      "Assigned",
+      "Processing",
       "Packed",
       "Shipped",
       "Out for Delivery",
@@ -154,21 +174,37 @@ const OrderTrackingDetail = () => {
     ];
     timeline.sort(
       (a, b) => statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status)
-    );
-
-    // Format shipping address properly
+    ); // Format shipping address properly
     const formatShippingAddress = (address) => {
       if (!address) return null;
       return `${address.street_address}, ${address.city}, ${address.state} - ${address.postal_code}`;
     };
+
+    // Format phone number display
+    const formatPhoneNumber = (phone) => {
+      if (!phone) return null;
+      return phone.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
+    };
+
     return {
-      id: orderData.razorpay_order_id || orderId,
-      order_id: orderData.razorpay_order_id || orderId,
-      status: getDisplayStatus(orderData.status),
+      id: orderData.invoice_id || orderData.razorpay_order_id || orderId,
+      order_id: orderData.invoice_id || orderData.razorpay_order_id || orderId,
+      status: getDisplayStatus(orderData.delivery_status || orderData.status),
+      delivery_status: getDisplayStatus(orderData.delivery_status),
+      overall_status: getDisplayStatus(orderData.status),
       timeline: timeline,
       estimatedDelivery: orderData.estimated_delivery,
-      estimatedDeliveryFormatted: orderData.estimated_delivery_formatted,
+      estimatedDeliveryFormatted: orderData.estimated_delivery
+        ? new Date(orderData.estimated_delivery).toLocaleDateString("en-IN", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })
+        : null,
       shippingAddress: formatShippingAddress(orderData.address),
+      phoneNumber: formatPhoneNumber(orderData.address?.phone_number),
+      addressType: orderData.address?.type,
       carrier: orderData.tracking_info?.carrier || "Pending",
       trackingNumber: orderData.tracking_info?.tracking_number,
       trackingUrl: orderData.tracking_info?.tracking_url,
@@ -178,7 +214,11 @@ const OrderTrackingDetail = () => {
       paymentDetails: orderData.payment_details,
       createdAt: orderData.created_at,
       createdAtFormatted: orderData.created_at_formatted,
-      invoice: orderData.invoice, // Add invoice information
+      invoice: orderData.invoice,
+      assigned_partner_name: orderData.assigned_partner_name,
+      assigned_at: orderData.assigned_at,
+      last_updated_by_admin_at: orderData.last_updated_by_admin_at,
+      last_updated_by_partner_at: orderData.last_updated_by_partner_at,
     };
   };
 
@@ -214,31 +254,39 @@ const OrderTrackingDetail = () => {
       ) || 0;
     return Math.min(((currentStepIndex + 1) / totalSteps) * 100, 100);
   };
-
   // Enhanced: Get status icon based on status
   const getStatusIcon = (status) => {
     const statusIcons = {
-      Ordered: <FiShoppingBag />,
+      "Pending Payment": <FiClock />,
+      "Payment Successful": <FiCheckCircle />,
+      Assigned: <FiUser />,
       Processing: <FiActivity />,
       Packed: <FiBox />,
       Shipped: <FiTruck />,
       "Out for Delivery": <FiTarget />,
       Delivered: <FiCheckCircle />,
       Cancelled: <FiX />,
+      "Failed Delivery Attempt": <FiRefreshCw />,
+      "Returning to Warehouse": <FiArrowLeft />,
+      "Other Status": <FiInfo />,
     };
     return statusIcons[status] || <FiPackage />;
   };
-
   // Enhanced: Get status color based on status
   const getStatusColor = (status) => {
     const statusColors = {
-      Ordered: "var(--brand-primary)",
-      Processing: "var(--info-color)",
+      "Pending Payment": "var(--warning-color)",
+      "Payment Successful": "var(--success-color)",
+      Assigned: "var(--info-color)",
+      Processing: "var(--brand-primary)",
       Packed: "var(--brand-secondary)",
-      Shipped: "var(--warning-color)",
-      "Out for Delivery": "var(--error-color)",
+      Shipped: "var(--info-color)",
+      "Out for Delivery": "var(--warning-color)",
       Delivered: "var(--success-color)",
-      Cancelled: "var(--text-secondary)",
+      Cancelled: "var(--error-color)",
+      "Failed Delivery Attempt": "var(--error-color)",
+      "Returning to Warehouse": "var(--warning-color)",
+      "Other Status": "var(--text-secondary)",
     };
     return statusColors[status] || "var(--brand-primary)";
   };
@@ -375,9 +423,8 @@ const OrderTrackingDetail = () => {
                         style={{ color: "var(--text-primary)" }}
                       >
                         Order #{displayOrder.id || displayOrder.order_id}
-                      </h1>
+                      </h1>{" "}
                       <div className="flex items-center space-x-3">
-                        {" "}
                         <div
                           className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold shadow-sm"
                           style={{
@@ -393,6 +440,27 @@ const OrderTrackingDetail = () => {
                           {getStatusIcon(displayOrder.status)}
                           <span className="ml-2">{displayOrder.status}</span>
                         </div>
+                        {displayOrder.delivery_status &&
+                          displayOrder.delivery_status !==
+                            displayOrder.overall_status && (
+                            <div
+                              className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium"
+                              style={{
+                                backgroundColor: `${getStatusColor(
+                                  displayOrder.delivery_status
+                                )}10`,
+                                color: getStatusColor(
+                                  displayOrder.delivery_status
+                                ),
+                                border: `1px solid ${getStatusColor(
+                                  displayOrder.delivery_status
+                                )}20`,
+                              }}
+                            >
+                              <FiTruck className="mr-1" size={12} />
+                              Delivery: {displayOrder.delivery_status}
+                            </div>
+                          )}
                         {displayOrder.totalAmount && (
                           <div
                             className="inline-flex items-center px-3 py-1 rounded-lg text-sm font-medium"
@@ -464,7 +532,7 @@ const OrderTrackingDetail = () => {
               </div>
             </div>{" "}
             {/* Enhanced shipping info cards */}
-            <div className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="p-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Enhanced Shipping address card */}
               <div
                 className="p-6 rounded-xl border shadow-sm hover:shadow-md transition-all duration-200"
@@ -491,20 +559,33 @@ const OrderTrackingDetail = () => {
                     Delivery Address
                   </h3>
                 </div>
-                <div className="ml-13">
+                <div className="ml-13 space-y-2">
                   <p
                     className="text-sm leading-relaxed"
                     style={{ color: "var(--text-secondary)" }}
                   >
                     {displayOrder.shippingAddress || "Address not available"}
                   </p>
-                  <div
-                    className="flex items-center mt-3 text-xs"
-                    style={{ color: "var(--text-tertiary)" }}
-                  >
-                    <FiNavigation className="mr-1" size={12} />
-                    <span>Primary delivery location</span>
-                  </div>
+                  {displayOrder.phoneNumber && (
+                    <div className="flex items-center text-sm">
+                      <FiPhone className="mr-2" size={14} />
+                      <span style={{ color: "var(--text-secondary)" }}>
+                        {displayOrder.phoneNumber}
+                      </span>
+                    </div>
+                  )}
+                  {displayOrder.addressType && (
+                    <div
+                      className="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
+                      style={{
+                        backgroundColor: "var(--success-color)15",
+                        color: "var(--success-color)",
+                      }}
+                    >
+                      <FiNavigation className="mr-1" size={10} />
+                      {displayOrder.addressType}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -531,7 +612,7 @@ const OrderTrackingDetail = () => {
                     className="font-semibold text-lg"
                     style={{ color: "var(--text-primary)" }}
                   >
-                    Shipping Details
+                    Delivery Partner
                   </h3>
                 </div>
                 <div className="ml-13 space-y-3">
@@ -540,65 +621,125 @@ const OrderTrackingDetail = () => {
                       className="text-sm font-medium"
                       style={{ color: "var(--text-secondary)" }}
                     >
-                      Carrier:
+                      Partner:
                     </span>
                     <span
                       className="text-sm font-semibold"
                       style={{ color: "var(--text-primary)" }}
                     >
-                      {displayOrder.carrier || "TBD"}
+                      {displayOrder.assigned_partner_name || "Not Assigned"}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span
-                      className="text-sm font-medium"
-                      style={{ color: "var(--text-secondary)" }}
-                    >
-                      Tracking ID:
-                    </span>
-                    <div className="flex items-center">
-                      {displayOrder.trackingNumber ? (
-                        displayOrder.trackingUrl ? (
-                          <a
-                            href={displayOrder.trackingUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center font-mono bg-gray-100 px-3 py-1.5 rounded-lg text-xs hover:bg-gray-200 transition-colors shadow-sm"
-                            style={{ color: "var(--brand-primary)" }}
-                          >
-                            {displayOrder.trackingNumber}
-                            <FiExternalLink className="ml-1" size={12} />
-                          </a>
-                        ) : (
-                          <span
-                            className="font-mono bg-gray-100 px-3 py-1.5 rounded-lg text-xs"
-                            style={{ color: "var(--text-primary)" }}
-                          >
-                            {displayOrder.trackingNumber}
-                          </span>
-                        )
-                      ) : (
-                        <span
-                          className="font-mono bg-gray-100 px-3 py-1.5 rounded-lg text-xs"
-                          style={{ color: "var(--text-tertiary)" }}
-                        >
-                          Pending
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  {displayOrder.carrier && (
-                    <div
-                      className="flex items-center text-xs pt-2"
-                      style={{ color: "var(--text-tertiary)" }}
-                    >
-                      <FiInfo className="mr-1" size={12} />
-                      <span>Professional courier service</span>
+                  {displayOrder.trackingNumber && (
+                    <div className="flex items-center justify-between">
+                      <span
+                        className="text-sm font-medium"
+                        style={{ color: "var(--text-secondary)" }}
+                      >
+                        Tracking:
+                      </span>
+                      <span
+                        className="text-sm font-mono"
+                        style={{ color: "var(--brand-primary)" }}
+                      >
+                        {displayOrder.trackingNumber}
+                      </span>
                     </div>
                   )}
                 </div>
+                {displayOrder.assigned_at && (
+                  <div
+                    className="flex items-center text-xs pt-2"
+                    style={{ color: "var(--text-tertiary)" }}
+                  >
+                    <FiClock className="mr-1" size={12} />
+                    <span>
+                      Assigned on{" "}
+                      {new Date(displayOrder.assigned_at).toLocaleDateString(
+                        "en-IN"
+                      )}
+                    </span>
+                  </div>
+                )}
               </div>
-            </div>
+
+              {/* Payment Details Card */}
+              {displayOrder.paymentDetails && (
+                <div
+                  className="p-6 rounded-xl border shadow-sm hover:shadow-md transition-all duration-200"
+                  style={{
+                    borderColor: "var(--border-primary)",
+                    background:
+                      "linear-gradient(135deg, var(--bg-primary) 0%, rgba(16, 185, 129, 0.02) 100%)",
+                  }}
+                >
+                  <div className="flex items-center mb-4">
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center mr-3"
+                      style={{
+                        backgroundColor: "var(--success-color)15",
+                        color: "var(--success-color)",
+                      }}
+                    >
+                      <FiCreditCard size={18} />
+                    </div>
+                    <h3
+                      className="font-semibold text-lg"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      Payment Details
+                    </h3>
+                  </div>
+                  <div className="ml-13 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span
+                        className="text-sm font-medium"
+                        style={{ color: "var(--text-secondary)" }}
+                      >
+                        Method:
+                      </span>
+                      <span
+                        className="text-sm font-semibold capitalize"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        {displayOrder.paymentDetails.method || "N/A"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span
+                        className="text-sm font-medium"
+                        style={{ color: "var(--text-secondary)" }}
+                      >
+                        Status:
+                      </span>
+                      <span
+                        className="text-sm font-semibold capitalize"
+                        style={{
+                          color:
+                            displayOrder.paymentDetails.status === "captured"
+                              ? "var(--success-color)"
+                              : "var(--warning-color)",
+                        }}
+                      >
+                        {displayOrder.paymentDetails.status || "N/A"}
+                      </span>
+                    </div>
+                    {displayOrder.paymentDetails.captured_at_formatted && (
+                      <div
+                        className="flex items-center text-xs pt-2"
+                        style={{ color: "var(--text-tertiary)" }}
+                      >
+                        <FiCheckCircle className="mr-1" size={12} />
+                        <span>
+                          Paid on{" "}
+                          {displayOrder.paymentDetails.captured_at_formatted}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>{" "}
             {/* Order Items Preview (if available) */}
             {displayOrder.orderItems && displayOrder.orderItems.length > 0 && (
               <div className="px-8 pb-6">
@@ -626,42 +767,95 @@ const OrderTrackingDetail = () => {
                     >
                       Order Items ({displayOrder.orderItems.length})
                     </h3>
+                    <div
+                      className="ml-auto text-lg font-bold"
+                      style={{ color: "var(--brand-primary)" }}
+                    >
+                      ₹{displayOrder.totalAmount}
+                    </div>
                   </div>
-                  <div className="ml-13 space-y-2">
-                    {displayOrder.orderItems.slice(0, 3).map((item, index) => (
+                  <div className="ml-13 space-y-4">
+                    {displayOrder.orderItems.map((item, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between py-2"
+                        className="flex items-center justify-between p-4 rounded-lg border"
+                        style={{
+                          backgroundColor: "var(--bg-secondary)",
+                          borderColor: "var(--border-secondary)",
+                        }}
                       >
-                        <span
-                          className="text-sm"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
-                          {item.product_name ||
-                            item.name ||
-                            `Item ${index + 1}`}
-                        </span>
-                        <span
-                          className="text-sm font-medium"
-                          style={{ color: "var(--text-primary)" }}
-                        >
-                          Qty: {item.quantity || 1}
-                        </span>
+                        <div className="flex items-center space-x-4">
+                          {item.image_url ? (
+                            <img
+                              src={item.image_url}
+                              alt={item.name}
+                              className="w-12 h-12 object-cover rounded-lg"
+                            />
+                          ) : (
+                            <div
+                              className="w-12 h-12 rounded-lg flex items-center justify-center"
+                              style={{
+                                backgroundColor: "var(--brand-primary)15",
+                                color: "var(--brand-primary)",
+                              }}
+                            >
+                              <FiPackage size={20} />
+                            </div>
+                          )}
+                          <div>
+                            <h4
+                              className="font-medium text-sm"
+                              style={{ color: "var(--text-primary)" }}
+                            >
+                              {item.name || `Item ${index + 1}`}
+                            </h4>
+                            {item.brand && (
+                              <p
+                                className="text-xs"
+                                style={{ color: "var(--text-secondary)" }}
+                              >
+                                Brand: {item.brand}
+                              </p>
+                            )}
+                            {item.model && (
+                              <p
+                                className="text-xs"
+                                style={{ color: "var(--text-secondary)" }}
+                              >
+                                Model: {item.model}
+                              </p>
+                            )}
+                            {item.color && (
+                              <p
+                                className="text-xs"
+                                style={{ color: "var(--text-secondary)" }}
+                              >
+                                Color: {item.color}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div
+                            className="text-sm font-medium"
+                            style={{ color: "var(--text-primary)" }}
+                          >
+                            Qty: {item.quantity || 1}
+                          </div>
+                          <div
+                            className="text-lg font-bold"
+                            style={{ color: "var(--brand-primary)" }}
+                          >
+                            ₹{item.price_at_purchase || item.total_item_price}
+                          </div>
+                        </div>
                       </div>
                     ))}
-                    {displayOrder.orderItems.length > 3 && (
-                      <div
-                        className="text-xs pt-2"
-                        style={{ color: "var(--text-tertiary)" }}
-                      >
-                        +{displayOrder.orderItems.length - 3} more items
-                      </div>
-                    )}
-                  </div>{" "}
+                  </div>
                 </div>
               </div>
             )}
-          </div>
+          </div>{" "}
           {/* Invoice Download Section */}
           {displayOrder.invoice && displayOrder.invoice.invoice_pdf_url && (
             <div
@@ -735,6 +929,165 @@ const OrderTrackingDetail = () => {
               </div>
             </div>
           )}
+          {/* Tracking URL Section */}
+          {displayOrder.trackingUrl && (
+            <div
+              className="bg-white rounded-xl shadow-md p-6 mb-6 animate-fadeIn"
+              style={{
+                backgroundColor: "var(--bg-primary)",
+                borderRadius: "var(--rounded-lg)",
+                boxShadow: "var(--shadow-medium)",
+                animationDelay: "150ms",
+              }}
+            >
+              <div
+                className="p-6 rounded-xl border"
+                style={{
+                  borderColor: "var(--border-primary)",
+                  background:
+                    "linear-gradient(135deg, var(--bg-primary) 0%, rgba(59, 130, 246, 0.02) 100%)",
+                }}
+              >
+                <div className="flex items-center mb-4">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center mr-3"
+                    style={{
+                      backgroundColor: "var(--brand-primary)15",
+                      color: "var(--brand-primary)",
+                    }}
+                  >
+                    <FiExternalLink size={18} />
+                  </div>
+                  <h3
+                    className="font-semibold text-lg"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    External Tracking
+                  </h3>
+                </div>
+                <div className="ml-13 flex items-center justify-between">
+                  <div>
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      Track with carrier
+                    </p>
+                    <p
+                      className="text-xs mt-1"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      Get real-time updates from delivery partner
+                    </p>
+                  </div>
+                  <a
+                    href={displayOrder.trackingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-md transform hover:scale-105"
+                    style={{
+                      backgroundColor: "var(--brand-primary)",
+                      color: "white",
+                      textDecoration: "none",
+                    }}
+                  >
+                    <FiExternalLink className="mr-2" size={16} />
+                    Track Now
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Recent Updates Section */}
+          {displayOrder.last_updated_by_partner_at ||
+          displayOrder.last_updated_by_admin_at ? (
+            <div
+              className="bg-white rounded-xl shadow-md p-6 mb-6 animate-fadeIn"
+              style={{
+                backgroundColor: "var(--bg-primary)",
+                borderRadius: "var(--rounded-lg)",
+                boxShadow: "var(--shadow-medium)",
+                animationDelay: "180ms",
+              }}
+            >
+              <div
+                className="p-6 rounded-xl border"
+                style={{
+                  borderColor: "var(--border-primary)",
+                  background:
+                    "linear-gradient(135deg, var(--bg-primary) 0%, rgba(245, 158, 11, 0.02) 100%)",
+                }}
+              >
+                <div className="flex items-center mb-4">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center mr-3"
+                    style={{
+                      backgroundColor: "var(--warning-color)15",
+                      color: "var(--warning-color)",
+                    }}
+                  >
+                    <FiActivity size={18} />
+                  </div>
+                  <h3
+                    className="font-semibold text-lg"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    Recent Updates
+                  </h3>
+                </div>
+                <div className="ml-13 space-y-3">
+                  {displayOrder.last_updated_by_partner_at && (
+                    <div className="flex items-center justify-between">
+                      <span
+                        className="text-sm font-medium"
+                        style={{ color: "var(--text-secondary)" }}
+                      >
+                        Last partner update:
+                      </span>
+                      <span
+                        className="text-sm"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        {new Date(
+                          displayOrder.last_updated_by_partner_at
+                        ).toLocaleDateString("en-IN", {
+                          weekday: "short",
+                          day: "numeric",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
+                  )}
+                  {displayOrder.last_updated_by_admin_at && (
+                    <div className="flex items-center justify-between">
+                      <span
+                        className="text-sm font-medium"
+                        style={{ color: "var(--text-secondary)" }}
+                      >
+                        Last admin update:
+                      </span>
+                      <span
+                        className="text-sm"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        {new Date(
+                          displayOrder.last_updated_by_admin_at
+                        ).toLocaleDateString("en-IN", {
+                          weekday: "short",
+                          day: "numeric",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : null}
           {/* Timeline section */}
           <div
             className="bg-white rounded-xl shadow-md p-6 animate-fadeIn"

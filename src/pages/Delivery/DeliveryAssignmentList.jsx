@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { FiSearch, FiFilter, FiAlertCircle } from "react-icons/fi";
 import { DeliveryLayout, DeliveryStatusModal } from "../../components/Delivery";
 import { DeliveryCard } from "../../components/Delivery";
@@ -16,38 +16,25 @@ const DeliveryAssignmentList = () => {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   // Get fetchAssignedDeliveries and updateDeliveryStatus functions from the store
-  const { fetchAssignedDeliveries, updateDeliveryStatus } =
+  const { fetchAssignedDeliveries, updateDeliveryStatus, assignedDeliveries } =
     useDeliveryPartnerStore();
+
+  // Helper functions for data formatting - wrapped in useCallback to prevent recreation on each render
+  const formatAddress = useCallback((addressObj) => {
+    if (!addressObj) return "N/A";
+
+    const { street_address, city, state, postal_code } = addressObj;
+    return [street_address, city, state, postal_code]
+      .filter(Boolean)
+      .join(", ");
+  }, []);
 
   useEffect(() => {
     // Fetch assigned deliveries from API
     const fetchAssignments = async () => {
       setIsLoading(true);
       try {
-        const deliveries = await fetchAssignedDeliveries();
-
-        // Transform the API response to match our component's data structure
-        const formattedDeliveries = deliveries.map((delivery) => ({
-          id: delivery.order_id,
-          orderId: delivery.order_id,
-          customer: {
-            name: delivery.customer_name || "Customer",
-            phone: delivery.customer_phone || "N/A",
-            address: formatAddress(delivery.delivery_address),
-          },
-          items: delivery.items || [],
-          status: delivery.delivery_status || "pending",
-          priority: getPriority(delivery),
-          distance: "N/A", // Calculate if needed
-          estimatedTime: formatEstimatedDelivery(delivery.estimated_delivery),
-          paymentType: "N/A", // Add if available in API
-          createdAt: delivery.created_at,
-          total_amount: delivery.total_amount,
-          currency: delivery.currency || "INR",
-        }));
-
-        setAssignments(formattedDeliveries);
-        setFilteredAssignments(formattedDeliveries);
+        await fetchAssignedDeliveries();
       } catch (error) {
         console.error("Error fetching assigned deliveries:", error);
         toast.error("Failed to load delivery assignments");
@@ -59,15 +46,36 @@ const DeliveryAssignmentList = () => {
     fetchAssignments();
   }, [fetchAssignedDeliveries]);
 
-  // Helper functions for data formatting
-  const formatAddress = (addressObj) => {
-    if (!addressObj) return "N/A";
+  useEffect(() => {
+    // Transform the API response to match our component's data structure
+    const formattedDeliveries = assignedDeliveries?.map(
+      (delivery) => ({
+        id: delivery.order_id,
+        orderId: delivery.order_id,
+        customer: {
+          name: delivery.customer_name || "Customer",
+          phone: delivery.customer_phone || "N/A",
+        },
+        address: formatAddress(delivery.delivery_address),
+        customerPhone: delivery.customer_phone || "N/A",
+        items: delivery.items || [],
+        status: delivery.delivery_status || "pending",
+        priority: getPriority(delivery),
+        distance: "N/A", // Calculate if needed
+        expectedDelivery: delivery.estimated_delivery,
+        assignedDate: delivery.assigned_at,
+        paymentType: "N/A", // Add if available in API
+        createdAt: delivery.created_at,
+        total_amount: delivery.total_amount,
+        currency: delivery.currency || "INR",
+      })
+    );
 
-    const { street_address, city, state, postal_code } = addressObj;
-    return [street_address, city, state, postal_code]
-      .filter(Boolean)
-      .join(", ");
-  };
+    setAssignments(formattedDeliveries);
+    setFilteredAssignments(formattedDeliveries);
+
+  console.log("DeliveryAssignmentList rendered",assignments ,filteredAssignments);
+  }, [assignedDeliveries, formatAddress]);
 
   const getPriority = (delivery) => {
     // Determine priority based on delivery data - can be customized
@@ -85,24 +93,9 @@ const DeliveryAssignmentList = () => {
     return "normal";
   };
 
-  const formatEstimatedDelivery = (dateString) => {
-    if (!dateString) return "N/A";
-    try {
-      const date = new Date(dateString);
-      return (
-        date.toLocaleDateString() +
-        " " +
-        date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-      );
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return dateString;
-    }
-  };
-
   useEffect(() => {
     // Filter and search assignments
-    const results = assignments.filter((assignment) => {
+    const results = assignments?.filter((assignment) => {
       const matchesSearch =
         assignment.orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
         assignment.customer.name
@@ -242,9 +235,9 @@ const DeliveryAssignmentList = () => {
               style={{ borderColor: "var(--brand-primary)" }}
             ></div>
           </div>
-        ) : filteredAssignments.length > 0 ? (
+        ) : filteredAssignments?.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {filteredAssignments.map((assignment) => (
+            {filteredAssignments?.map((assignment) => (
               <DeliveryCard
                 key={assignment.id}
                 delivery={assignment}
