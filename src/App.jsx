@@ -48,6 +48,7 @@ import {
   AdminContent,
   AdminDeliveryPartners,
 } from "./pages/Admin";
+import AdminSellPhone from "./pages/Admin/AdminSellPhone";
 
 // Layout component that will be used across all pages
 const Layout = () => {
@@ -284,6 +285,16 @@ const App = () => {
             element={
               isAdminAuthenticated ? (
                 <AdminContent />
+              ) : (
+                <Navigate to="/admin/login" />
+              )
+            }
+          />
+          <Route
+            path="/admin/sell-phones"
+            element={
+              isAdminAuthenticated ? (
+                <AdminSellPhone />
               ) : (
                 <Navigate to="/admin/login" />
               )
