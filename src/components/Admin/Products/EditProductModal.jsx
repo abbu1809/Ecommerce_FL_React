@@ -17,6 +17,7 @@ const EditProductModal = ({ product, onClose, onSave }) => {
     discount: "",
     stock: "",
     images: [],
+    videos: [], // Added videos array to store video URLs
     specifications: {},
     attributes: {},
     features: [],
@@ -134,6 +135,7 @@ const EditProductModal = ({ product, onClose, onSave }) => {
         discount: product.discount || "",
         stock: stock,
         images: product.images || [],
+        videos: product.videos || [], // Initialize videos from product data or empty array
         specifications: formattedSpecs,
         attributes: product.attributes || {},
         features: featuresArray,
@@ -379,6 +381,32 @@ const EditProductModal = ({ product, onClose, onSave }) => {
     } finally {
       setUploadingImage(false);
     }
+  };
+
+  // Handle adding a video URL
+  const handleAddVideoUrl = () => {
+    setFormData({
+      ...formData,
+      videos: [...formData.videos, ""],
+    });
+  };
+
+  // Handle updating a video URL
+  const handleVideoUrlChange = (index, value) => {
+    const newVideos = [...formData.videos];
+    newVideos[index] = value;
+    setFormData({
+      ...formData,
+      videos: newVideos,
+    });
+  };
+
+  // Handle removing a video URL
+  const handleRemoveVideoUrl = (index) => {
+    setFormData({
+      ...formData,
+      videos: formData.videos.filter((_, i) => i !== index),
+    });
   };
 
   const handleSubmit = (e) => {
@@ -1186,6 +1214,51 @@ const EditProductModal = ({ product, onClose, onSave }) => {
                   >
                     Featured product (show on homepage)
                   </label>
+                </div>
+              </div>
+
+              {/* Videos */}
+              <div className="mt-4">
+                <h3
+                  className="text-sm font-medium mb-2"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  Product Videos
+                </h3>
+                <div className="space-y-2 mb-3">
+                  {formData.videos.map((videoUrl, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <input
+                        type="url"
+                        value={videoUrl}
+                        onChange={(e) =>
+                          handleVideoUrlChange(index, e.target.value)
+                        }
+                        placeholder="Enter video URL"
+                        className="flex-grow p-2 border rounded-md text-sm"
+                        style={{
+                          backgroundColor: "var(--bg-primary)",
+                          color: "var(--text-primary)",
+                          borderColor: "var(--border-primary)",
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveVideoUrl(index)}
+                        className="p-2 text-red-500 hover:text-red-700"
+                      >
+                        <FiTrash2 />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={handleAddVideoUrl}
+                    className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+                  >
+                    <FiPlus size={16} />
+                    <span>Add Video URL</span>
+                  </button>
                 </div>
               </div>
 
