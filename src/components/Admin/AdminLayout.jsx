@@ -13,6 +13,7 @@ import {
   FiChevronRight,
   FiArrowLeft,
   FiTruck,
+  FiSmartphone,
 } from "react-icons/fi";
 
 const AdminLayout = () => {
@@ -53,6 +54,11 @@ const AdminLayout = () => {
       name: "Content",
       path: "/admin/content",
       icon: <FiFileText size={20} />,
+    },
+    {
+      name: "Sell Phones",
+      path: "/admin/sell-phones",
+      icon: <FiSmartphone size={20} />,
     },
     {
       name: "Reviews",
