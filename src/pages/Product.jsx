@@ -19,6 +19,7 @@ const Product = () => {
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
+  const [selectedVariant, setSelectedVariant] = useState(null);
   const { currentProduct, loading, error, fetchProduct, clearCurrentProduct } =
     useProductStore();
   const { addItem: addToCartStore } = useCartStore();
@@ -40,7 +41,16 @@ const Product = () => {
     return () => {
       clearCurrentProduct();
     };
-  }, [id, fetchProduct, clearCurrentProduct]); // Debug log for product data
+  }, [id, fetchProduct, clearCurrentProduct]);
+
+  // Initialize selected variant when product loads
+  useEffect(() => {
+    if (currentProduct?.valid_options?.length > 0) {
+      setSelectedVariant(currentProduct.valid_options[0]);
+    }
+  }, [currentProduct]);
+
+  // Debug log for product data
   useEffect(() => {
     if (currentProduct) {
       console.log("Raw product data from API:", currentProduct);
@@ -104,7 +114,6 @@ const Product = () => {
       </div>
     );
   }
-
   const product = currentProduct;
 
   // Normalize product data from Firebase
@@ -116,8 +125,10 @@ const Product = () => {
       product.title ||
       product.product_name ||
       "Unknown Product",
-    price: product.price || product.original_price || 0,
+    price:
+      selectedVariant?.price || product.price || product.original_price || 0,
     discountPrice:
+      selectedVariant?.discounted_price ||
       product.discount_price ||
       product.discountPrice ||
       product.discounted_price ||
@@ -132,27 +143,34 @@ const Product = () => {
           ) + "%"
         : null),
     rating: product.rating || product.average_rating || 0,
-    reviews: Array.isArray(product.reviews)
-      ? product.reviews.length
-      : product.reviews || product.review_count || 0,
+    reviews:
+      product.total_reviews ||
+      (Array.isArray(product.reviews)
+        ? product.reviews.length
+        : product.reviews || product.review_count || 0),
     reviewsData: Array.isArray(product.reviews)
       ? product.reviews.map((review) => ({
           id: review.id,
           rating: review.rating,
           comment: review.comment,
-          user: review.email ? review.email.split("@")[0] : "Anonymous", // Extract username from email
+          user: review.email ? review.email.split("@")[0] : "Anonymous",
           userEmail: review.email,
           date: review.created_at,
-          verified: true, // Assume verified since they come from API
-          helpful: review.helpful_count || 0, // Use helpful_count from API
-          helpful_count: review.helpful_count || 0, // Keep both for compatibility
-          is_marked_helpful: review.is_marked_helpful || false, // Track if current user marked as helpful
-          title: `${review.rating} star review`, // Generate a title based on rating
-          reported_count: review.reported_count || 0, // Include reported count
-          helpful_users: review.helpful_users || [], // Include helpful users array
+          verified: true,
+          helpful: review.helpful_count || 0,
+          helpful_count: review.helpful_count || 0,
+          is_marked_helpful: review.is_marked_helpful || false,
+          title: `${review.rating} star review`,
+          reported_count: review.reported_count || 0,
+          helpful_users: review.helpful_users || [],
         }))
       : [],
-    stock: product.stock || product.quantity || product.inventory || 1,
+    stock:
+      selectedVariant?.stock ||
+      product.stock ||
+      product.quantity ||
+      product.inventory ||
+      1,
     images: product.images ||
       product.image_urls ||
       product.photos || ["https://via.placeholder.com/600x600?text=No+Image"],
@@ -169,26 +187,35 @@ const Product = () => {
     colors: product.variant?.colors || [],
     ramOptions: product.variant?.ram || [],
     storageOptions: product.variant?.storage || [],
+    validOptions: product.valid_options || [],
+    selectedColor: selectedVariant?.colors || null,
   }; // Debug normalized product
   console.log("Normalized product data:", normalizedProduct);
-
+  console.log("Selected variant:", selectedVariant);
   const handleQuantityChange = (e) => {
     const value = parseInt(e.target.value);
-    if (value > 0 && value <= normalizedProduct.stock) {
+    const maxStock = selectedVariant?.stock || normalizedProduct.stock;
+    if (value > 0 && value <= maxStock) {
       setQuantity(value);
     }
   };
 
   const incrementQuantity = () => {
-    if (quantity < normalizedProduct.stock) {
+    const maxStock = selectedVariant?.stock || normalizedProduct.stock;
+    if (quantity < maxStock) {
       setQuantity(quantity + 1);
     }
   };
-
   const decrementQuantity = () => {
     if (quantity > 1) {
       setQuantity(quantity - 1);
     }
+  };
+  const handleVariantChange = (option) => {
+    console.log("Variant changed to:", option);
+    setSelectedVariant(option);
+    // Reset quantity to 1 when variant changes
+    setQuantity(1);
   };
   const addToCart = async () => {
     if (!user) {
@@ -200,9 +227,15 @@ const Product = () => {
       const cartItem = {
         id: normalizedProduct.id,
         name: normalizedProduct.name,
-        price: normalizedProduct.price,
+        price: normalizedProduct.discountPrice || normalizedProduct.price,
         image: normalizedProduct.images?.[0] || normalizedProduct.image,
         quantity: quantity,
+        variant: selectedVariant
+          ? {
+              color: selectedVariant.colors,
+              price: selectedVariant.discounted_price || selectedVariant.price,
+            }
+          : null,
       };
 
       await addToCartStore(cartItem);
@@ -212,7 +245,6 @@ const Product = () => {
       showCartErrorToast("Failed to add item to cart");
     }
   };
-
   const addToWishlist = async () => {
     if (!user) {
       showCartErrorToast("Please log in to add items to wishlist");
@@ -223,8 +255,14 @@ const Product = () => {
       const wishlistItem = {
         id: normalizedProduct.id,
         name: normalizedProduct.name,
-        price: normalizedProduct.price,
+        price: normalizedProduct.discountPrice || normalizedProduct.price,
         image: normalizedProduct.images?.[0] || normalizedProduct.image,
+        variant: selectedVariant
+          ? {
+              color: selectedVariant.colors,
+              price: selectedVariant.discounted_price || selectedVariant.price,
+            }
+          : null,
       };
 
       await addToWishlistStore(wishlistItem);
@@ -269,11 +307,76 @@ const Product = () => {
                 setActiveImage={setActiveImage}
               />
             </div>
-
-            {/* Product Details - Right Column on Desktop */}
+            {/* Product Details - Right Column on Desktop */}{" "}
             <div className="lg:col-span-3 flex flex-col">
-              <ProductInfo product={normalizedProduct} />
-
+              <ProductInfo
+                product={normalizedProduct}
+                selectedVariant={selectedVariant}
+              />{" "}
+              {/* Variant Selector */}
+              {normalizedProduct.validOptions?.length > 0 ? (
+                <div className="border-t border-gray-200 py-4">
+                  <h3 className="text-lg font-semibold mb-3">
+                    Available Options
+                  </h3>
+                  <div className="space-y-2">
+                    {normalizedProduct.validOptions.map((option, index) => (
+                      <div
+                        key={index}
+                        className={`p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
+                          selectedVariant?.colors === option.colors
+                            ? "border-orange-500 bg-orange-50"
+                            : "border-gray-200 hover:border-gray-300"
+                        }`}
+                        onClick={() => handleVariantChange(option)}
+                      >
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center space-x-3">
+                            <div
+                              className="w-6 h-6 rounded-full border-2 border-gray-300"
+                              style={{
+                                backgroundColor: option.colors.toLowerCase(),
+                              }}
+                            ></div>
+                            <span className="font-medium">{option.colors}</span>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-semibold text-orange-600">
+                              ₹{option.discounted_price?.toLocaleString()}
+                            </div>
+                            {option.price !== option.discounted_price && (
+                              <div className="text-sm text-gray-500 line-through">
+                                ₹{option.price?.toLocaleString()}
+                              </div>
+                            )}
+                            <div className="text-xs text-gray-600">
+                              Stock: {option.stock}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                normalizedProduct.colors?.length > 0 && (
+                  <div className="border-t border-gray-200 py-4">
+                    <h3 className="text-lg font-semibold mb-3">
+                      Available Colors
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {normalizedProduct.colors.map((color, index) => (
+                        <span
+                          key={index}
+                          className="px-3 py-1 text-sm font-medium rounded-full border border-gray-200 bg-gray-50"
+                        >
+                          {color}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )
+              )}
               <div className="border-t border-gray-200 py-4">
                 {" "}
                 <ProductQuantitySelector
@@ -283,9 +386,11 @@ const Product = () => {
                   handleQuantityChange={handleQuantityChange}
                   incrementQuantity={incrementQuantity}
                   decrementQuantity={decrementQuantity}
-                />
+                />{" "}
                 <ProductActions
-                  price={normalizedProduct.price}
+                  price={
+                    normalizedProduct.discountPrice || normalizedProduct.price
+                  }
                   addToCart={addToCart}
                   addToWishlist={addToWishlist}
                 />

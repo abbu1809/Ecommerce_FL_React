@@ -16,6 +16,49 @@ const StockTable = ({ categoryFilter, stockFilter, searchQuery }) => {
   const { products, fetchProducts } = useAdminProducts();
   const { getFilteredInventory, updateProductStock, generateSKU } =
     useAdminInventory();
+  // Helper function to get display price from product
+  const getProductDisplayPrice = (product) => {
+    if (!product) return 0;
+
+    // If product has valid_options, use the first option's price
+    if (product.valid_options && product.valid_options.length > 0) {
+      const firstOption = product.valid_options[0];
+      const price = firstOption.discounted_price || firstOption.price;
+      return typeof price === "number" ? price : 0;
+    }
+    // Fallback to top-level price fields
+    const price = product.discount_price || product.price;
+    return typeof price === "number" ? price : 0;
+  };
+
+  // Helper function to get original price from product
+  const getProductOriginalPrice = (product) => {
+    if (!product) return 0;
+
+    // If product has valid_options, use the first option's original price
+    if (product.valid_options && product.valid_options.length > 0) {
+      const firstOption = product.valid_options[0];
+      const price = firstOption.price;
+      return typeof price === "number" ? price : 0;
+    }
+    // Fallback to top-level price
+    const price = product.price;
+    return typeof price === "number" ? price : 0;
+  }; // Helper function to get total stock from product
+  const getProductTotalStock = (product) => {
+    if (!product) return 0;
+
+    // If product has valid_options, sum up all stock
+    if (product.valid_options && product.valid_options.length > 0) {
+      return product.valid_options.reduce((total, option) => {
+        const stock = typeof option.stock === "number" ? option.stock : 0;
+        return total + stock;
+      }, 0);
+    }
+    // Fallback to top-level stock
+    const stock = product.stock;
+    return typeof stock === "number" ? stock : 0;
+  };
 
   // Fetch products on component mount
   useEffect(() => {
@@ -156,173 +199,179 @@ const StockTable = ({ categoryFilter, stockFilter, searchQuery }) => {
           className="divide-y"
           style={{ borderColor: "var(--border-primary)" }}
         >
-          {filteredProducts.map((product) => {
-            const stockStatus = getStockStatusStyles(product.stock, 5);
-            const productSKU = generateSKU(product);
-            const productImage =
-              product.images && product.images.length > 0
-                ? product.images[0]
-                : "https://via.placeholder.com/50";
+          {" "}
+          {filteredProducts
+            .filter((product) => product && product.id) // Filter out null/undefined products
+            .map((product) => {
+              const stockStatus = getStockStatusStyles(
+                getProductTotalStock(product),
+                5
+              );
+              const productSKU = generateSKU(product);
+              const productImage =
+                product.images && product.images.length > 0
+                  ? product.images[0]
+                  : "https://via.placeholder.com/50";
 
-            return (
-              <tr
-                key={product.id}
-                className="hover:bg-gray-50 transition-colors duration-150"
-              >
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div
-                      className="flex-shrink-0 w-10 h-10 rounded overflow-hidden bg-gray-100 border"
-                      style={{ borderColor: "var(--border-primary)" }}
-                    >
-                      <img
-                        src={productImage}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.src = "https://via.placeholder.com/50";
-                        }}
-                      />
-                    </div>
-                    <div className="ml-4">
+              return (
+                <tr
+                  key={product.id}
+                  className="hover:bg-gray-50 transition-colors duration-150"
+                >
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
                       <div
-                        className="text-sm font-medium"
-                        style={{ color: "var(--text-primary)" }}
+                        className="flex-shrink-0 w-10 h-10 rounded overflow-hidden bg-gray-100 border"
+                        style={{ borderColor: "var(--border-primary)" }}
                       >
-                        {product.name}
-                      </div>
-                      <div
-                        className="text-xs"
-                        style={{ color: "var(--text-secondary)" }}
-                      >
-                        {product.brand}
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div
-                    className="text-sm"
-                    style={{ color: "var(--text-secondary)" }}
-                  >
-                    {productSKU}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">
-                  {editingId === product.id ? (
-                    <div className="flex items-center justify-center">
-                      <input
-                        type="number"
-                        min="0"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        className="w-16 text-center p-1 border rounded-md text-sm"
-                        style={{
-                          borderColor: "var(--border-primary)",
-                          borderRadius: "var(--rounded-sm)",
-                        }}
-                        autoFocus
-                        onKeyPress={(e) => {
-                          if (e.key === "Enter") {
-                            saveEdit(product.id);
-                          } else if (e.key === "Escape") {
-                            cancelEdit();
-                          }
-                        }}
-                      />
-                      <button
-                        onClick={() => saveEdit(product.id)}
-                        className="ml-2 p-1 rounded-md"
-                        style={{
-                          backgroundColor: "var(--success-color)",
-                          color: "white",
-                        }}
-                      >
-                        <FiSave size={16} />
-                      </button>
-                      <button
-                        onClick={cancelEdit}
-                        className="ml-1 p-1 rounded-md"
-                        style={{
-                          backgroundColor: "var(--error-color)",
-                          color: "white",
-                        }}
-                      >
-                        <FiX size={16} />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center">
-                      <div
-                        className="text-sm font-medium mr-2"
-                        style={{
-                          color:
-                            product.stock === 0
-                              ? "var(--error-color)"
-                              : product.stock <= 5
-                              ? "var(--warning-color)"
-                              : "var(--text-primary)",
-                        }}
-                      >
-                        {product.stock}
-                      </div>
-                      <button
-                        onClick={() => startEditing(product.id, product.stock)}
-                        className="p-1 rounded-md hover:bg-gray-100"
-                        title="Edit stock level"
-                      >
-                        <FiEdit2
-                          size={14}
-                          style={{ color: "var(--brand-primary)" }}
+                        <img
+                          src={productImage}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.src = "https://via.placeholder.com/50";
+                          }}
                         />
-                      </button>
+                      </div>
+                      <div className="ml-4">
+                        <div
+                          className="text-sm font-medium"
+                          style={{ color: "var(--text-primary)" }}
+                        >
+                          {product.name}
+                        </div>
+                        <div
+                          className="text-xs"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          {product.brand}
+                        </div>
+                      </div>
                     </div>
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex justify-center">
-                    <span
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                      style={{
-                        backgroundColor: stockStatus.bgColor,
-                        color: stockStatus.textColor,
-                      }}
-                    >
-                      <span className="mr-1">{stockStatus.icon}</span>
-                      {stockStatus.text}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div
-                    className="text-sm font-medium"
-                    style={{ color: "var(--text-primary)" }}
-                  >
-                    ₹
-                    {product.price
-                      ? parseFloat(product.price).toLocaleString()
-                      : "N/A"}
-                  </div>
-                  {product.discount_price && (
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <div
-                      className="text-xs line-through"
+                      className="text-sm"
                       style={{ color: "var(--text-secondary)" }}
                     >
-                      ₹{parseFloat(product.discount_price).toLocaleString()}
+                      {productSKU}
                     </div>
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div
-                    className="text-sm"
-                    style={{ color: "var(--text-secondary)" }}
-                  >
-                    {product.category}
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    {editingId === product.id ? (
+                      <div className="flex items-center justify-center">
+                        <input
+                          type="number"
+                          min="0"
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          className="w-16 text-center p-1 border rounded-md text-sm"
+                          style={{
+                            borderColor: "var(--border-primary)",
+                            borderRadius: "var(--rounded-sm)",
+                          }}
+                          autoFocus
+                          onKeyPress={(e) => {
+                            if (e.key === "Enter") {
+                              saveEdit(product.id);
+                            } else if (e.key === "Escape") {
+                              cancelEdit();
+                            }
+                          }}
+                        />
+                        <button
+                          onClick={() => saveEdit(product.id)}
+                          className="ml-2 p-1 rounded-md"
+                          style={{
+                            backgroundColor: "var(--success-color)",
+                            color: "white",
+                          }}
+                        >
+                          <FiSave size={16} />
+                        </button>
+                        <button
+                          onClick={cancelEdit}
+                          className="ml-1 p-1 rounded-md"
+                          style={{
+                            backgroundColor: "var(--error-color)",
+                            color: "white",
+                          }}
+                        >
+                          <FiX size={16} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center">
+                        <div
+                          className="text-sm font-medium mr-2"
+                          style={{
+                            color:
+                              product.stock === 0
+                                ? "var(--error-color)"
+                                : product.stock <= 5
+                                ? "var(--warning-color)"
+                                : "var(--text-primary)",
+                          }}
+                        >
+                          {product.stock}
+                        </div>
+                        <button
+                          onClick={() =>
+                            startEditing(product.id, product.stock)
+                          }
+                          className="p-1 rounded-md hover:bg-gray-100"
+                          title="Edit stock level"
+                        >
+                          <FiEdit2
+                            size={14}
+                            style={{ color: "var(--brand-primary)" }}
+                          />
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex justify-center">
+                      <span
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                        style={{
+                          backgroundColor: stockStatus.bgColor,
+                          color: stockStatus.textColor,
+                        }}
+                      >
+                        <span className="mr-1">{stockStatus.icon}</span>
+                        {stockStatus.text}
+                      </span>
+                    </div>
+                  </td>{" "}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div
+                      className="text-sm font-medium"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      ₹{getProductDisplayPrice(product).toLocaleString()}
+                    </div>
+                    {getProductOriginalPrice(product) !==
+                      getProductDisplayPrice(product) && (
+                      <div
+                        className="text-xs line-through"
+                        style={{ color: "var(--text-secondary)" }}
+                      >
+                        ₹{getProductOriginalPrice(product).toLocaleString()}
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div
+                      className="text-sm"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      {product.category}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
         </tbody>
       </table>
 

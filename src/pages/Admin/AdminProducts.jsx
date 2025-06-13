@@ -64,10 +64,9 @@ const AdminProducts = () => {
         "name",
         "brand",
         "category",
-        "price",
-        "stock",
         "description",
       ];
+      
       const missingFields = requiredFields.filter(
         (field) => !updatedProduct[field]
       );

@@ -15,6 +15,35 @@ const ProductTable = ({ onViewProduct, onEditProduct }) => {
 
   // Use filteredList when it's been set (even if empty), otherwise fall back to the main list
   const displayedProducts = filteredList !== null ? filteredList : productList;
+  // Helper function to get display price from product
+  const getProductDisplayPrice = (product) => {
+    if (!product) return 0;
+
+    // If product has valid_options, use the first option's price
+    if (product.valid_options && product.valid_options.length > 0) {
+      const firstOption = product.valid_options[0];
+      const price = firstOption.discounted_price || firstOption.price;
+      return typeof price === "number" ? price : 0;
+    }
+    // Fallback to top-level price fields
+    const price = product.discount_price || product.price;
+    return typeof price === "number" ? price : 0;
+  };
+  // Helper function to get total stock from product
+  const getProductTotalStock = (product) => {
+    if (!product) return 0;
+
+    // If product has valid_options, sum up all stock
+    if (product.valid_options && product.valid_options.length > 0) {
+      return product.valid_options.reduce((total, option) => {
+        const stock = typeof option.stock === "number" ? option.stock : 0;
+        return total + stock;
+      }, 0);
+    }
+    // Fallback to top-level stock
+    const stock = product.stock;
+    return typeof stock === "number" ? stock : 0;
+  };
 
   // States for confirmation modals
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -128,143 +157,148 @@ const ProductTable = ({ onViewProduct, onEditProduct }) => {
               </td>
             </tr>
           ) : (
-            displayedProducts.map((product) => (
-              <tr
-                key={product.id}
-                className="hover:bg-gray-50 transition-colors duration-150"
-              >
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
+            displayedProducts
+              .filter((product) => product && product.id) // Filter out null/undefined products
+              .map((product) => (
+                <tr
+                  key={product.id}
+                  className="hover:bg-gray-50 transition-colors duration-150"
+                >
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div
+                        className="flex-shrink-0 w-10 h-10 rounded overflow-hidden bg-gray-100 border"
+                        style={{ borderColor: "var(--border-primary)" }}
+                      >
+                        <img
+                          src={
+                            product.images && product.images.length > 0
+                              ? product.images[0]
+                              : "https://via.placeholder.com/50"
+                          }
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="ml-4">
+                        <div
+                          className="text-sm font-medium"
+                          style={{ color: "var(--text-primary)" }}
+                        >
+                          {product.name}
+                        </div>
+                        <div
+                          className="text-xs"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          ID: {product.id}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <div
-                      className="flex-shrink-0 w-10 h-10 rounded overflow-hidden bg-gray-100 border"
-                      style={{ borderColor: "var(--border-primary)" }}
+                      className="text-sm"
+                      style={{ color: "var(--text-primary)" }}
                     >
-                      <img
-                        src={
-                          product.images && product.images.length > 0
-                            ? product.images[0]
-                            : "https://via.placeholder.com/50"
-                        }
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
+                      {product.category}
                     </div>
-                    <div className="ml-4">
-                      <div
-                        className="text-sm font-medium"
-                        style={{ color: "var(--text-primary)" }}
-                      >
-                        {product.name}
-                      </div>
-                      <div
-                        className="text-xs"
+                  </td>{" "}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div
+                      className="text-sm font-medium"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      ₹{getProductDisplayPrice(product).toLocaleString()}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div
+                      className="text-sm"
+                      style={{
+                        color:
+                          getProductTotalStock(product) === 0
+                            ? "var(--error-color)"
+                            : getProductTotalStock(product) < 10
+                            ? "var(--warning-color)"
+                            : "var(--text-primary)",
+                      }}
+                    >
+                      {getProductTotalStock(product)}{" "}
+                      {getProductTotalStock(product) === 1 ? "unit" : "units"}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <button
+                      onClick={() => openFeaturedModal(product)}
+                      className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors duration-200`}
+                      style={{
+                        backgroundColor: product.featured
+                          ? "var(--brand-primary)"
+                          : "var(--bg-secondary)",
+                        border: "1px solid",
+                        borderColor: product.featured
+                          ? "var(--brand-primary)"
+                          : "var(--border-secondary)",
+                        color: product.featured
+                          ? "var(--text-on-brand)"
+                          : "var(--text-secondary)",
+                      }}
+                    >
+                      {product.featured ? <FiCheck size={12} /> : null}
+                    </button>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {" "}
+                    <span
+                      className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                      style={{
+                        backgroundColor:
+                          getProductTotalStock(product) > 0
+                            ? "rgba(16, 185, 129, 0.1)"
+                            : "rgba(239, 68, 68, 0.1)",
+                        color:
+                          getProductTotalStock(product) > 0
+                            ? "var(--success-color)"
+                            : "var(--error-color)",
+                      }}
+                    >
+                      {getProductTotalStock(product) > 0
+                        ? "Active"
+                        : "Out of Stock"}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    {" "}
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        onClick={() => onViewProduct(product)}
+                        className="p-1 rounded-full hover:bg-gray-100 transition-colors duration-200"
                         style={{ color: "var(--text-secondary)" }}
+                        title="View Product"
                       >
-                        ID: {product.id}
-                      </div>
+                        <FiEye size={16} />
+                      </button>
+                      <button
+                        onClick={() => onEditProduct(product)}
+                        className="p-1 rounded-full hover:bg-gray-100 transition-colors duration-200"
+                        style={{ color: "var(--brand-primary)" }}
+                        title="Edit Product"
+                      >
+                        <FiEdit2 size={16} />
+                      </button>
+                      <button
+                        onClick={() => openDeleteModal(product)}
+                        className="p-1 rounded-full hover:bg-gray-100 transition-colors duration-200"
+                        style={{ color: "var(--error-color)" }}
+                        title="Delete Product"
+                      >
+                        <FiTrash2 size={16} />
+                      </button>
                     </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div
-                    className="text-sm"
-                    style={{ color: "var(--text-primary)" }}
-                  >
-                    {product.category}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div
-                    className="text-sm font-medium"
-                    style={{ color: "var(--text-primary)" }}
-                  >
-                    ₹
-                    {(product.discount_price || product.price).toLocaleString()}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div
-                    className="text-sm"
-                    style={{
-                      color:
-                        product.stock === 0
-                          ? "var(--error-color)"
-                          : product.stock < 10
-                          ? "var(--warning-color)"
-                          : "var(--text-primary)",
-                    }}
-                  >
-                    {product.stock} {product.stock === 1 ? "unit" : "units"}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">
-                  <button
-                    onClick={() => openFeaturedModal(product)}
-                    className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors duration-200`}
-                    style={{
-                      backgroundColor: product.featured
-                        ? "var(--brand-primary)"
-                        : "var(--bg-secondary)",
-                      border: "1px solid",
-                      borderColor: product.featured
-                        ? "var(--brand-primary)"
-                        : "var(--border-secondary)",
-                      color: product.featured
-                        ? "var(--text-on-brand)"
-                        : "var(--text-secondary)",
-                    }}
-                  >
-                    {product.featured ? <FiCheck size={12} /> : null}
-                  </button>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                    style={{
-                      backgroundColor:
-                        product.stock > 0
-                          ? "rgba(16, 185, 129, 0.1)"
-                          : "rgba(239, 68, 68, 0.1)",
-                      color:
-                        product.stock > 0
-                          ? "var(--success-color)"
-                          : "var(--error-color)",
-                    }}
-                  >
-                    {product.stock > 0 ? "Active" : "Out of Stock"}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  {" "}
-                  <div className="flex justify-end space-x-2">
-                    <button
-                      onClick={() => onViewProduct(product)}
-                      className="p-1 rounded-full hover:bg-gray-100 transition-colors duration-200"
-                      style={{ color: "var(--text-secondary)" }}
-                      title="View Product"
-                    >
-                      <FiEye size={16} />
-                    </button>
-                    <button
-                      onClick={() => onEditProduct(product)}
-                      className="p-1 rounded-full hover:bg-gray-100 transition-colors duration-200"
-                      style={{ color: "var(--brand-primary)" }}
-                      title="Edit Product"
-                    >
-                      <FiEdit2 size={16} />
-                    </button>
-                    <button
-                      onClick={() => openDeleteModal(product)}
-                      className="p-1 rounded-full hover:bg-gray-100 transition-colors duration-200"
-                      style={{ color: "var(--error-color)" }}
-                      title="Delete Product"
-                    >
-                      <FiTrash2 size={16} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))
+                  </td>
+                </tr>
+              ))
           )}
         </tbody>
       </table>

@@ -7,7 +7,6 @@ const EditProductModal = ({ product, onClose, onSave }) => {
   const [step, setStep] = useState(1);
   const [uploadingImage, setUploadingImage] = useState(false);
   const { uploadProductImage } = useAdminProducts();
-
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -25,6 +24,7 @@ const EditProductModal = ({ product, onClose, onSave }) => {
       colors: [],
       storage: [],
     },
+    valid_options: [],
     featured: false,
   });
 
@@ -138,6 +138,7 @@ const EditProductModal = ({ product, onClose, onSave }) => {
         attributes: product.attributes || {},
         features: featuresArray,
         variant: product.variant || { colors: [], storage: [] },
+        valid_options: product.valid_options || [],
         featured: product.featured || false,
       });
     }
@@ -302,7 +303,6 @@ const EditProductModal = ({ product, onClose, onSave }) => {
       variant: newVariant,
     });
   };
-
   const removeVariantOption = (type, index) => {
     const newVariant = { ...formData.variant };
     newVariant[type] = newVariant[type].filter((_, i) => i !== index);
@@ -310,6 +310,48 @@ const EditProductModal = ({ product, onClose, onSave }) => {
     setFormData({
       ...formData,
       variant: newVariant,
+    });
+  };
+
+  // Valid Options handlers
+  const addValidOption = () => {
+    const newOption = {
+      colors: "",
+      storage: "",
+      ram: "",
+      size: "",
+      price: 0,
+      discounted_price: 0,
+      stock: 0,
+    };
+    setFormData({
+      ...formData,
+      valid_options: [...formData.valid_options, newOption],
+    });
+  };
+
+  const removeValidOption = (index) => {
+    const newValidOptions = formData.valid_options.filter(
+      (_, i) => i !== index
+    );
+    setFormData({
+      ...formData,
+      valid_options: newValidOptions,
+    });
+  };
+
+  const handleValidOptionChange = (index, field, value) => {
+    const newValidOptions = [...formData.valid_options];
+    newValidOptions[index] = {
+      ...newValidOptions[index],
+      [field]:
+        field === "price" || field === "discounted_price" || field === "stock"
+          ? parseFloat(value) || 0
+          : value,
+    };
+    setFormData({
+      ...formData,
+      valid_options: newValidOptions,
     });
   };
   // Handle image upload
@@ -795,7 +837,172 @@ const EditProductModal = ({ product, onClose, onSave }) => {
                 </div>
               </div>
 
-              {/* Variants: Colors */}
+              {/* Valid Options Section */}
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <h3
+                    className="text-sm font-medium"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    Valid Options (Variants with Price & Stock)
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={addValidOption}
+                    className="text-xs flex items-center"
+                    style={{ color: "var(--brand-primary)" }}
+                  >
+                    <FiPlus size={14} className="mr-1" /> Add Option
+                  </button>
+                </div>
+
+                {formData.valid_options.map((option, index) => (
+                  <div
+                    key={index}
+                    className="p-3 border rounded-md mb-3"
+                    style={{ borderColor: "var(--border-primary)" }}
+                  >
+                    <div className="grid grid-cols-2 gap-3 mb-3">
+                      <input
+                        type="text"
+                        value={option.colors || ""}
+                        onChange={(e) =>
+                          handleValidOptionChange(
+                            index,
+                            "colors",
+                            e.target.value
+                          )
+                        }
+                        className="p-2 border rounded-md text-sm"
+                        style={{
+                          backgroundColor: "var(--bg-primary)",
+                          color: "var(--text-primary)",
+                          borderColor: "var(--border-primary)",
+                        }}
+                        placeholder="Color"
+                      />
+                      <input
+                        type="text"
+                        value={option.storage || ""}
+                        onChange={(e) =>
+                          handleValidOptionChange(
+                            index,
+                            "storage",
+                            e.target.value
+                          )
+                        }
+                        className="p-2 border rounded-md text-sm"
+                        style={{
+                          backgroundColor: "var(--bg-primary)",
+                          color: "var(--text-primary)",
+                          borderColor: "var(--border-primary)",
+                        }}
+                        placeholder="Storage"
+                      />
+                      <input
+                        type="text"
+                        value={option.ram || ""}
+                        onChange={(e) =>
+                          handleValidOptionChange(index, "ram", e.target.value)
+                        }
+                        className="p-2 border rounded-md text-sm"
+                        style={{
+                          backgroundColor: "var(--bg-primary)",
+                          color: "var(--text-primary)",
+                          borderColor: "var(--border-primary)",
+                        }}
+                        placeholder="RAM"
+                      />
+                      <input
+                        type="text"
+                        value={option.size || ""}
+                        onChange={(e) =>
+                          handleValidOptionChange(index, "size", e.target.value)
+                        }
+                        className="p-2 border rounded-md text-sm"
+                        style={{
+                          backgroundColor: "var(--bg-primary)",
+                          color: "var(--text-primary)",
+                          borderColor: "var(--border-primary)",
+                        }}
+                        placeholder="Size/Resolution"
+                      />
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      <input
+                        type="number"
+                        value={option.price || ""}
+                        onChange={(e) =>
+                          handleValidOptionChange(
+                            index,
+                            "price",
+                            e.target.value
+                          )
+                        }
+                        className="p-2 border rounded-md text-sm"
+                        style={{
+                          backgroundColor: "var(--bg-primary)",
+                          color: "var(--text-primary)",
+                          borderColor: "var(--border-primary)",
+                        }}
+                        placeholder="Price"
+                        min="0"
+                        step="0.01"
+                      />
+                      <input
+                        type="number"
+                        value={option.discounted_price || ""}
+                        onChange={(e) =>
+                          handleValidOptionChange(
+                            index,
+                            "discounted_price",
+                            e.target.value
+                          )
+                        }
+                        className="p-2 border rounded-md text-sm"
+                        style={{
+                          backgroundColor: "var(--bg-primary)",
+                          color: "var(--text-primary)",
+                          borderColor: "var(--border-primary)",
+                        }}
+                        placeholder="Discounted Price"
+                        min="0"
+                        step="0.01"
+                      />
+                      <input
+                        type="number"
+                        value={option.stock || ""}
+                        onChange={(e) =>
+                          handleValidOptionChange(
+                            index,
+                            "stock",
+                            e.target.value
+                          )
+                        }
+                        className="p-2 border rounded-md text-sm"
+                        style={{
+                          backgroundColor: "var(--bg-primary)",
+                          color: "var(--text-primary)",
+                          borderColor: "var(--border-primary)",
+                        }}
+                        placeholder="Stock"
+                        min="0"
+                        step="1"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeValidOption(index)}
+                      className="mt-2 p-1.5 rounded-md"
+                      style={{ color: "var(--error-color)" }}
+                    >
+                      <FiTrash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Legacy Variants: Colors (for backward compatibility) */}
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <h3

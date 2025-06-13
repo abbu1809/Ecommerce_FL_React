@@ -1,9 +1,15 @@
 import React from "react";
 import { FiStar, FiCheck, FiAward, FiTruck, FiShield } from "react-icons/fi";
 
-const ProductInfo = ({ product }) => {
+const ProductInfo = ({ product, selectedVariant }) => {
   // Ensure reviews property exists
   const reviews = product.reviews || 0;
+
+  // Get current price based on selected variant or default
+  const currentPrice =
+    selectedVariant?.discounted_price || product.discountPrice;
+  const originalPrice = selectedVariant?.price || product.price;
+  const currentStock = selectedVariant?.stock || product.stock;
 
   return (
     <div className="space-y-6">
@@ -17,7 +23,6 @@ const ProductInfo = ({ product }) => {
       >
         {product.brand}
       </div>
-
       {/* Product title */}
       <h1
         className="text-3xl font-bold"
@@ -25,7 +30,6 @@ const ProductInfo = ({ product }) => {
       >
         {product.name}
       </h1>
-
       {/* Ratings */}
       <div className="flex items-center space-x-2">
         <div
@@ -52,8 +56,7 @@ const ProductInfo = ({ product }) => {
         >
           {product.rating} ({reviews} ratings)
         </span>
-      </div>
-
+      </div>{" "}
       {/* Price section with modern styling */}
       <div
         className="p-4 rounded-lg"
@@ -64,15 +67,15 @@ const ProductInfo = ({ product }) => {
             className="text-3xl font-bold"
             style={{ color: "var(--text-primary)" }}
           >
-            ₹{product.discountPrice.toLocaleString()}
+            ₹{currentPrice.toLocaleString()}
           </span>
-          {product.discount && (
+          {product.discount && currentPrice !== originalPrice && (
             <>
               <span
                 className="text-lg line-through"
                 style={{ color: "var(--text-secondary)" }}
               >
-                ₹{product.price.toLocaleString()}
+                ₹{originalPrice.toLocaleString()}
               </span>
               <span
                 className="px-2 py-1 text-xs font-bold rounded-md"
@@ -99,11 +102,25 @@ const ProductInfo = ({ product }) => {
             className="text-sm ml-2"
             style={{ color: "var(--text-secondary)" }}
           >
-            ({product.stock} available)
+            ({currentStock} available)
           </span>
-        </div>{" "}
-      </div>
+        </div>
 
+        {/* Selected variant info */}
+        {selectedVariant && (
+          <div
+            className="mt-3 p-2 rounded-md"
+            style={{ backgroundColor: "var(--bg-accent-light)" }}
+          >
+            <span
+              className="text-sm font-medium"
+              style={{ color: "var(--brand-primary)" }}
+            >
+              Selected: {selectedVariant.colors}
+            </span>
+          </div>
+        )}
+      </div>
       {/* Product Variants */}
       {(product.colors?.length > 0 ||
         product.ramOptions?.length > 0 ||
@@ -191,7 +208,6 @@ const ProductInfo = ({ product }) => {
           )}
         </div>
       )}
-
       {/* Additional info badges */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div

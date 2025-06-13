@@ -269,9 +269,161 @@ const ViewProductModal = ({ product, onClose, onEdit }) => {
                       )}
                     </div>
                   </div>
-                )}
-              {/* Variants */}
-              {product.variant && (
+                )}{" "}
+              {/* Valid Options / Variants */}
+              {product.valid_options && product.valid_options.length > 0 && (
+                <div>
+                  <h3
+                    className="text-lg font-medium mb-3"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    Available Options
+                  </h3>
+                  <div className="space-y-3">
+                    {product.valid_options.map((option, index) => (
+                      <div
+                        key={index}
+                        className="p-4 rounded-lg border"
+                        style={{
+                          backgroundColor: "var(--bg-secondary)",
+                          borderColor: "var(--border-primary)",
+                        }}
+                      >
+                        <div className="grid grid-cols-2 gap-4 mb-3">
+                          {option.colors && (
+                            <div>
+                              <span
+                                className="text-xs font-medium block mb-1"
+                                style={{ color: "var(--text-secondary)" }}
+                              >
+                                Color:
+                              </span>
+                              <p
+                                className="text-sm font-medium"
+                                style={{ color: "var(--text-primary)" }}
+                              >
+                                {option.colors}
+                              </p>
+                            </div>
+                          )}
+                          {option.storage && (
+                            <div>
+                              <span
+                                className="text-xs font-medium block mb-1"
+                                style={{ color: "var(--text-secondary)" }}
+                              >
+                                Storage:
+                              </span>
+                              <p
+                                className="text-sm font-medium"
+                                style={{ color: "var(--text-primary)" }}
+                              >
+                                {option.storage}
+                              </p>
+                            </div>
+                          )}
+                          {option.ram && (
+                            <div>
+                              <span
+                                className="text-xs font-medium block mb-1"
+                                style={{ color: "var(--text-secondary)" }}
+                              >
+                                RAM:
+                              </span>
+                              <p
+                                className="text-sm font-medium"
+                                style={{ color: "var(--text-primary)" }}
+                              >
+                                {option.ram}
+                              </p>
+                            </div>
+                          )}
+                          {option.size && (
+                            <div>
+                              <span
+                                className="text-xs font-medium block mb-1"
+                                style={{ color: "var(--text-secondary)" }}
+                              >
+                                Size:
+                              </span>
+                              <p
+                                className="text-sm font-medium"
+                                style={{ color: "var(--text-primary)" }}
+                              >
+                                {option.size}
+                              </p>
+                            </div>
+                          )}
+                          {option.resolution && (
+                            <div>
+                              <span
+                                className="text-xs font-medium block mb-1"
+                                style={{ color: "var(--text-secondary)" }}
+                              >
+                                Resolution:
+                              </span>
+                              <p
+                                className="text-sm font-medium"
+                                style={{ color: "var(--text-primary)" }}
+                              >
+                                {option.resolution}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-3 gap-4 pt-3 border-t">
+                          <div>
+                            <span
+                              className="text-xs font-medium block mb-1"
+                              style={{ color: "var(--text-secondary)" }}
+                            >
+                              Price:
+                            </span>
+                            <p
+                              className="text-sm font-medium"
+                              style={{ color: "var(--text-primary)" }}
+                            >
+                              ₹{option.price?.toLocaleString()}
+                            </p>
+                          </div>
+                          <div>
+                            <span
+                              className="text-xs font-medium block mb-1"
+                              style={{ color: "var(--text-secondary)" }}
+                            >
+                              Discounted Price:
+                            </span>
+                            <p className="text-sm font-medium text-green-600">
+                              ₹{option.discounted_price?.toLocaleString()}
+                            </p>
+                          </div>
+                          <div>
+                            <span
+                              className="text-xs font-medium block mb-1"
+                              style={{ color: "var(--text-secondary)" }}
+                            >
+                              Stock:
+                            </span>
+                            <p
+                              className="text-sm font-medium"
+                              style={{
+                                color:
+                                  option.stock > 0
+                                    ? "var(--success-color)"
+                                    : "var(--error-color)",
+                              }}
+                            >
+                              {option.stock} units
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {/* Legacy Variants (fallback) */}
+              {!product.valid_options && product.variant && (
                 <div className="space-y-4">
                   {product.variant.colors &&
                     product.variant.colors.length > 0 && (
