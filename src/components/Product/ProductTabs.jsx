@@ -7,6 +7,9 @@ const ProductTabs = ({ product, activeTab, setActiveTab }) => {
   // Ensure reviews property exists
   const reviews = product.reviews || 0;
 
+  // Get attribute keys for dynamic tabs
+  const attributeKeys = Object.keys(product.attributes || {});
+
   return (
     <div
       className="mt-10 rounded-lg overflow-hidden"
@@ -37,6 +40,19 @@ const ProductTabs = ({ product, activeTab, setActiveTab }) => {
           label="Specifications"
         />
 
+        {/* Dynamic attribute tabs */}
+        {attributeKeys.map((attributeKey) => (
+          <TabButton
+            key={attributeKey}
+            id={`attribute-${attributeKey}`}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            label={attributeKey
+              .replace(/([A-Z])/g, " $1")
+              .replace(/^./, (str) => str.toUpperCase())}
+          />
+        ))}
+
         <TabButton
           id="reviews"
           activeTab={activeTab}
@@ -44,14 +60,13 @@ const ProductTabs = ({ product, activeTab, setActiveTab }) => {
           icon={<FiMessageSquare />}
           label={`Reviews (${reviews})`}
         />
-      </div>
-
+      </div>{" "}
       {/* Tab content with animated transitions */}
-      <div className="p-6 bg-white">
+      <div className="p-6 bg-white min-h-[400px] max-h-[600px] overflow-y-auto custom-scrollbar">
         {activeTab === "description" && (
           <div className="animate-fadeIn">
             <p
-              className="mb-6 leading-relaxed"
+              className="mb-6 leading-relaxed text-base"
               style={{ color: "var(--text-secondary)" }}
             >
               {product.description}
@@ -68,7 +83,7 @@ const ProductTabs = ({ product, activeTab, setActiveTab }) => {
               {(product.features || []).map((feature, index) => (
                 <li key={index} className="flex items-start">
                   <span
-                    className="inline-flex items-center justify-center h-5 w-5 rounded-full mr-2 mt-0.5"
+                    className="inline-flex items-center justify-center h-6 w-6 rounded-full mr-3 mt-0.5 text-sm font-medium"
                     style={{
                       backgroundColor: "var(--brand-primary)",
                       color: "var(--text-on-brand)",
@@ -76,7 +91,10 @@ const ProductTabs = ({ product, activeTab, setActiveTab }) => {
                   >
                     {index + 1}
                   </span>
-                  <span style={{ color: "var(--text-secondary)" }}>
+                  <span
+                    className="text-base leading-relaxed"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
                     {feature}
                   </span>
                 </li>
@@ -86,7 +104,7 @@ const ProductTabs = ({ product, activeTab, setActiveTab }) => {
               {(!product.features || product.features.length === 0) && (
                 <li className="flex items-start">
                   <span
-                    className="inline-flex items-center justify-center h-5 w-5 rounded-full mr-2 mt-0.5"
+                    className="inline-flex items-center justify-center h-6 w-6 rounded-full mr-3 mt-0.5 text-sm font-medium"
                     style={{
                       backgroundColor: "var(--brand-primary)",
                       color: "var(--text-on-brand)",
@@ -94,7 +112,10 @@ const ProductTabs = ({ product, activeTab, setActiveTab }) => {
                   >
                     1
                   </span>
-                  <span style={{ color: "var(--text-secondary)" }}>
+                  <span
+                    className="text-base"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
                     High-quality materials and construction
                   </span>
                 </li>
@@ -102,24 +123,37 @@ const ProductTabs = ({ product, activeTab, setActiveTab }) => {
             </ul>
           </div>
         )}
+
         {activeTab === "specifications" && (
           <div className="animate-fadeIn">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-10">
+            <h3
+              className="font-semibold text-xl mb-6"
+              style={{ color: "var(--text-primary)" }}
+            >
+              Technical Specifications
+            </h3>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {Object.entries(product.specifications || {}).map(
                 ([key, value]) => (
                   <div key={key} className="group">
                     <div
-                      className="flex flex-col pb-4 border-b-2 transition-colors duration-300 group-hover:border-orange-500"
-                      style={{ borderColor: "var(--border-primary)" }}
+                      className="flex flex-col p-4 rounded-lg border-2 transition-all duration-300 group-hover:border-orange-500 group-hover:shadow-md"
+                      style={{
+                        borderColor: "var(--border-primary)",
+                        backgroundColor: "var(--bg-secondary)",
+                      }}
                     >
                       <span
-                        className="text-sm mb-1"
-                        style={{ color: "var(--text-secondary)" }}
+                        className="text-sm font-medium mb-2 uppercase tracking-wide"
+                        style={{ color: "var(--brand-primary)" }}
                       >
-                        {key}
+                        {key
+                          .replace(/([A-Z])/g, " $1")
+                          .replace(/^./, (str) => str.toUpperCase())}
                       </span>
                       <span
-                        className="font-medium"
+                        className="font-semibold text-base"
                         style={{ color: "var(--text-primary)" }}
                       >
                         {value}
@@ -133,18 +167,60 @@ const ProductTabs = ({ product, activeTab, setActiveTab }) => {
               {(!product.specifications ||
                 Object.keys(product.specifications).length === 0) && (
                 <div
-                  className="p-4 rounded-lg"
+                  className="col-span-full p-6 rounded-lg text-center"
                   style={{
                     backgroundColor: "var(--bg-secondary)",
                     color: "var(--text-secondary)",
                   }}
                 >
-                  Product specifications not available
+                  <FiInfo className="mx-auto mb-2 text-2xl" />
+                  <p>Product specifications not available</p>
                 </div>
               )}
             </div>
           </div>
-        )}{" "}
+        )}
+
+        {/* Dynamic attribute content */}
+        {attributeKeys.map(
+          (attributeKey) =>
+            activeTab === `attribute-${attributeKey}` && (
+              <div key={attributeKey} className="animate-fadeIn">
+                <h3
+                  className="font-semibold text-xl mb-6"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  {attributeKey
+                    .replace(/([A-Z])/g, " $1")
+                    .replace(/^./, (str) => str.toUpperCase())}
+                </h3>
+
+                <div
+                  className="p-6 rounded-lg border-2"
+                  style={{
+                    borderColor: "var(--border-primary)",
+                    backgroundColor: "var(--bg-accent-light)",
+                  }}
+                >
+                  <div className="text-center">
+                    <span
+                      className="text-sm font-medium uppercase tracking-wide block mb-3"
+                      style={{ color: "var(--brand-primary)" }}
+                    >
+                      {attributeKey}
+                    </span>
+                    <span
+                      className="text-2xl font-bold break-words"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      {product.attributes[attributeKey]}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )
+        )}
+
         {activeTab === "reviews" && (
           <div className="animate-fadeIn">
             <ProductReviews productId={product.id} product={product} />

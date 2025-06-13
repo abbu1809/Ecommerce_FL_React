@@ -3,6 +3,7 @@ import { FiSearch, FiDownload, FiFilter } from "react-icons/fi";
 import StockTable from "../../components/Admin/Inventory/StockTable";
 import BulkUpdateForm from "../../components/Admin/Inventory/BulkUpdateForm";
 import LowStockNotification from "../../components/Admin/Inventory/LowStockNotification";
+import Pagination from "../../components/common/Pagination";
 import useAdminProducts from "../../store/Admin/useAdminProducts";
 import useAdminInventory from "../../store/Admin/useAdminInventory";
 
@@ -10,6 +11,10 @@ const AdminInventory = () => {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [stockFilter, setStockFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   const { products, fetchProducts } = useAdminProducts();
   const { getLowStockProducts, getInventoryStats } = useAdminInventory();
@@ -20,10 +25,48 @@ const AdminInventory = () => {
       fetchProducts();
     }
   }, [fetchProducts, products.list.length]);
-
   // Get low stock products and inventory stats
   const lowStockProducts = getLowStockProducts();
   const inventoryStats = getInventoryStats();
+
+  // Filter products based on search and filters
+  const filteredProducts = products.list.filter((product) => {
+    const matchesSearch =
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.brand.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesCategory =
+      categoryFilter === "all" || product.category === categoryFilter;
+
+    let matchesStock = true;
+    if (stockFilter === "in-stock") {
+      matchesStock = product.stock > 10;
+    } else if (stockFilter === "low-stock") {
+      matchesStock = product.stock <= 10 && product.stock > 0;
+    } else if (stockFilter === "out-of-stock") {
+      matchesStock = product.stock === 0;
+    }
+
+    return matchesSearch && matchesCategory && matchesStock;
+  });
+
+  // Pagination calculations
+  const totalItems = filteredProducts.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [categoryFilter, stockFilter, searchQuery]);
 
   // Export to CSV function
   const exportToCSV = () => {
@@ -100,7 +143,6 @@ const AdminInventory = () => {
           </button>{" "}
         </div>
       </div>
-
       {/* Inventory Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <div
@@ -194,13 +236,11 @@ const AdminInventory = () => {
           </div>
         </div>
       </div>
-
       {lowStockProducts.length > 0 && (
         <div className="mb-6">
           <LowStockNotification products={lowStockProducts} />
         </div>
       )}
-
       <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="md:col-span-2">
           <div className="relative">
@@ -272,13 +312,23 @@ const AdminInventory = () => {
             </select>
           </div>
         </div>
-      </div>
-
+      </div>{" "}
       <StockTable
+        products={paginatedProducts}
         categoryFilter={categoryFilter}
         stockFilter={stockFilter}
         searchQuery={searchQuery}
       />
+      {/* Pagination */}
+      {totalItems > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          totalItems={totalItems}
+          itemsPerPage={ITEMS_PER_PAGE}
+        />
+      )}
     </div>
   );
 };

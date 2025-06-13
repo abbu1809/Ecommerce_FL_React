@@ -4,12 +4,22 @@ import { FiStar, FiCheck, FiAward, FiTruck, FiShield } from "react-icons/fi";
 const ProductInfo = ({ product, selectedVariant }) => {
   // Ensure reviews property exists
   const reviews = product.reviews || 0;
-
   // Get current price based on selected variant or default
   const currentPrice =
-    selectedVariant?.discounted_price || product.discountPrice;
-  const originalPrice = selectedVariant?.price || product.price;
-  const currentStock = selectedVariant?.stock || product.stock;
+    selectedVariant?.discounted_price ||
+    selectedVariant?.price ||
+    product.discountPrice ||
+    product.price ||
+    0;
+  const originalPrice = selectedVariant?.price || product.price || 0;
+  const currentStock = selectedVariant?.stock || product.stock || 0;
+
+  // Calculate discount percentage for current variant
+  const hasDiscount =
+    currentPrice && originalPrice && currentPrice < originalPrice;
+  const discountPercentage = hasDiscount
+    ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
+    : 0;
 
   return (
     <div className="space-y-6">
@@ -69,7 +79,7 @@ const ProductInfo = ({ product, selectedVariant }) => {
           >
             ₹{currentPrice.toLocaleString()}
           </span>
-          {product.discount && currentPrice !== originalPrice && (
+          {hasDiscount && (
             <>
               <span
                 className="text-lg line-through"
@@ -84,7 +94,7 @@ const ProductInfo = ({ product, selectedVariant }) => {
                   color: "white",
                 }}
               >
-                {product.discount} off
+                {discountPercentage}% off
               </span>
             </>
           )}
@@ -92,11 +102,16 @@ const ProductInfo = ({ product, selectedVariant }) => {
         {/* Availability badge */}
         <div className="flex items-center mt-3">
           <div
-            className="flex items-center"
-            style={{ color: "var(--success-color)" }}
+            className={`flex items-center ${
+              currentStock > 0 ? "text-green-600" : "text-red-600"
+            }`}
           >
             <FiCheck className="mr-1" />
-            <span className="font-medium">In Stock</span>
+            <span className="font-medium">
+              {currentStock > 0
+                ? `In Stock (${currentStock} available)`
+                : "Out of Stock"}
+            </span>
           </div>
           <span
             className="text-sm ml-2"

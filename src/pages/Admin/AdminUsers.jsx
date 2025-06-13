@@ -10,19 +10,58 @@ import {
 import UserTable from "../../components/Admin/Users/UserTable";
 import UserDetail from "../../components/Admin/Users/UserDetail";
 import Button from "../../components/ui/Button";
+import Pagination from "../../components/common/Pagination";
 import useAdminStore from "../../store/Admin/useAdminStore";
 
 const AdminUsers = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [view, setView] = useState("all"); // all, customers, banned
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
   const { users, fetchUsers } = useAdminStore();
   const { list: userList, loading } = users;
-
   // Fetch users on component mount
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
+
+  // Filter users based on view and search query
+  const filteredUsers = userList.filter((user) => {
+    const matchesSearch =
+      user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    let matchesView = true;
+    if (view === "customers") {
+      matchesView = user.role === "customer" || !user.role;
+    } else if (view === "banned") {
+      matchesView = user.status === "banned";
+    }
+
+    return matchesSearch && matchesView;
+  });
+
+  // Pagination calculations
+  const totalItems = filteredUsers.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [view, searchQuery]);
   // Quick stats for different user types
   const stats = [
     {
@@ -162,14 +201,28 @@ const AdminUsers = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-      </div>
+      </div>{" "}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <UserTable
+            users={paginatedUsers}
             onSelectUser={setSelectedUser}
             filterView={view}
             searchQuery={searchQuery}
           />
+
+          {/* Pagination */}
+          {totalItems > 0 && (
+            <div className="mt-6">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+                totalItems={totalItems}
+                itemsPerPage={ITEMS_PER_PAGE}
+              />
+            </div>
+          )}
         </div>
         <div className="lg:col-span-1">
           {selectedUser ? (

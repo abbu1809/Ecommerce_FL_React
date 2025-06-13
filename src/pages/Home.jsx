@@ -2,73 +2,32 @@ import BannerCarousel from "../components/BannerCarousel";
 import CategoryList from "../components/CategoryList";
 import FeaturedProductList from "../components/FeaturedProductList";
 import HeroBanner from "../components/HeroBanner";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useProductStore } from "../store/useProduct";
 import { useBannerStore } from "../store/Admin/useBannerStore";
-import { useInView } from "react-intersection-observer";
 import ProductCard from "../components/ProductList/ProductCard";
-import { FiArrowDown } from "react-icons/fi";
+import Pagination from "../components/common/Pagination";
 
 const Home = () => {
   const { products, featuredProducts, fetchProducts } = useProductStore();
   const { fetchPublicBanners } = useBannerStore();
-  const [displayedProducts, setDisplayedProducts] = useState([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-  const PRODUCTS_PER_PAGE = 8;
-
-  // Reference for infinite scroll trigger
-  const { ref, inView } = useInView({
-    threshold: 0.1,
-    triggerOnce: false,
-  });
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const PRODUCTS_PER_PAGE = 10;
   useEffect(() => {
     fetchProducts();
     fetchPublicBanners(); // Fetch banners for the page
   }, [fetchProducts, fetchPublicBanners]);
 
-  // Load initial products
-  useEffect(() => {
-    if (products && products.length > 0) {
-      setDisplayedProducts(products.slice(0, PRODUCTS_PER_PAGE));
-      setHasMore(products.length > PRODUCTS_PER_PAGE);
-    }
-  }, [products]);
-
-  // Load more products when scroll trigger is in view
-  const loadMoreProducts = useCallback(() => {
-    if (isLoading || !hasMore) return;
-
-    setIsLoading(true);
-
-    // Simulate loading delay for better user experience
-    setTimeout(() => {
-      const nextPage = page + 1;
-      const startIndex = page * PRODUCTS_PER_PAGE;
-      const endIndex = startIndex + PRODUCTS_PER_PAGE;
-
-      const newProducts = products.slice(startIndex, endIndex);
-
-      if (newProducts.length > 0) {
-        setDisplayedProducts((prev) => [...prev, ...newProducts]);
-        setPage(nextPage);
-        setHasMore(endIndex < products.length);
-      } else {
-        setHasMore(false);
-      }
-
-      setIsLoading(false);
-    }, 800);
-  }, [page, products, isLoading, hasMore]);
-
-  // Trigger load more when scroll reference is in view
-  useEffect(() => {
-    if (inView) {
-      loadMoreProducts();
-    }
-  }, [inView, loadMoreProducts]); // We don't need mock data anymore as CategoryList will fetch from backend
+  // Pagination calculations
+  const totalProducts = products?.length || 0;
+  const totalPages = Math.ceil(totalProducts / PRODUCTS_PER_PAGE);
+  const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+  const endIndex = startIndex + PRODUCTS_PER_PAGE;
+  const paginatedProducts = products?.slice(startIndex, endIndex) || [];
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  }; // We don't need mock data anymore as CategoryList will fetch from backend
   // Keeping as fallback in case backend is not available
   const categories = [];
 
@@ -111,7 +70,7 @@ const Home = () => {
           <BannerCarousel />
         </div>
       </section>
-      {/* Our Products Section with Infinite Scroll */}
+      {/* Our Products Section with Pagination */}
       <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -133,11 +92,10 @@ const Home = () => {
             >
               Explore our complete collection
             </p>
-          </div>
-
+          </div>{" "}
           {/* Products Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {displayedProducts.map((product) => (
+            {paginatedProducts.map((product) => (
               <ProductCard
                 key={product.id}
                 product={{
@@ -173,54 +131,18 @@ const Home = () => {
                   stock: product.stock || 0,
                 }}
               />
-            ))}
+            ))}{" "}
           </div>
-
-          {/* Loading indicator and scroll trigger */}
-          <div className="mt-10 text-center" ref={ref}>
-            {isLoading && (
-              <div className="flex flex-col items-center justify-center py-8">
-                <div
-                  className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 mb-3"
-                  style={{ borderColor: "var(--brand-primary)" }}
-                ></div>
-                <p
-                  className="text-sm font-medium mt-3"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  Loading more products...
-                </p>
-              </div>
-            )}
-
-            {!isLoading && hasMore && (
-              <div className="flex flex-col items-center justify-center py-4">
-                <div
-                  className="flex items-center justify-center h-10 w-10 rounded-full animate-bounce mb-2"
-                  style={{
-                    backgroundColor: "var(--bg-accent-light)",
-                    color: "var(--brand-primary)",
-                  }}
-                >
-                  <FiArrowDown className="text-lg" />
-                </div>
-                <p style={{ color: "var(--text-secondary)" }}>
-                  Scroll for more products
-                </p>
-              </div>
-            )}
-
-            {!isLoading && !hasMore && products.length > 0 && (
-              <div className="py-8">
-                <p
-                  className="text-sm font-medium"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  You've reached the end of our product catalog
-                </p>
-              </div>
-            )}
-          </div>
+          {/* Pagination */}
+          {totalProducts > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              totalItems={totalProducts}
+              itemsPerPage={PRODUCTS_PER_PAGE}
+            />
+          )}
         </div>
       </section>
     </div>

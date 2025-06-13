@@ -5,6 +5,7 @@ import AddProductForm from "../../components/Admin/Products/AddProductForm";
 import ProductCategoryManager from "../../components/Admin/Products/ProductCategoryManager";
 import ViewProductModal from "../../components/Admin/Products/ViewProductModal";
 import EditProductModal from "../../components/Admin/Products/EditProductModal";
+import Pagination from "../../components/common/Pagination";
 import useAdminProducts from "../../store/Admin/useAdminProducts";
 
 const AdminProducts = () => {
@@ -13,13 +14,22 @@ const AdminProducts = () => {
   const [filterCategory, setFilterCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState("newest");
-
   // State for product detail and edit modals
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showViewProduct, setShowViewProduct] = useState(false);
   const [showEditProduct, setShowEditProduct] = useState(false);
-  const { updateProduct, addProduct, filterAndSortProducts, fetchProducts } =
-    useAdminProducts();
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const PRODUCTS_PER_PAGE = 10;
+
+  const {
+    updateProduct,
+    addProduct,
+    filterAndSortProducts,
+    fetchProducts,
+    filteredProducts,
+  } = useAdminProducts();
 
   // Fetch products on component mount
   useEffect(() => {
@@ -35,13 +45,30 @@ const AdminProducts = () => {
   const handleSortChange = (e) => {
     setSortOption(e.target.value);
   };
-
   // Handle clear filters
   const handleClearFilters = () => {
     setFilterCategory("all");
     setSearchQuery("");
     setSortOption("newest");
+    setCurrentPage(1); // Reset to first page when clearing filters
   };
+
+  // Pagination calculations
+  const totalProducts = filteredProducts?.length || 0;
+  const totalPages = Math.ceil(totalProducts / PRODUCTS_PER_PAGE);
+  const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+  const endIndex = startIndex + PRODUCTS_PER_PAGE;
+  const paginatedProducts = filteredProducts?.slice(startIndex, endIndex) || [];
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterCategory, searchQuery, sortOption]);
 
   // Handle view product details
   const handleViewProduct = (product) => {
@@ -60,13 +87,8 @@ const AdminProducts = () => {
       const productId = selectedProduct.id;
 
       // Ensure we're not sending undefined or empty values for required fields
-      const requiredFields = [
-        "name",
-        "brand",
-        "category",
-        "description",
-      ];
-      
+      const requiredFields = ["name", "brand", "category", "description"];
+
       const missingFields = requiredFields.filter(
         (field) => !updatedProduct[field]
       );
@@ -158,7 +180,6 @@ const AdminProducts = () => {
           </button>
         </div>
       </div>
-
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div className="flex-1 min-w-[240px]">
           <div className="relative">
@@ -233,13 +254,22 @@ const AdminProducts = () => {
             Clear Filters
           </button>
         </div>
-      </div>
-
+      </div>{" "}
       <ProductTable
+        products={paginatedProducts}
         onViewProduct={handleViewProduct}
         onEditProduct={handleEditProduct}
       />
-
+      {/* Pagination */}
+      {totalProducts > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          totalItems={totalProducts}
+          itemsPerPage={PRODUCTS_PER_PAGE}
+        />
+      )}
       {/* Modal forms rendered conditionally */}
       {showAddProduct && (
         <AddProductForm
@@ -247,11 +277,9 @@ const AdminProducts = () => {
           onSave={handleAddProduct}
         />
       )}
-
       {showCategoryManager && (
         <ProductCategoryManager onClose={() => setShowCategoryManager(false)} />
       )}
-
       {/* View Product Modal */}
       {showViewProduct && selectedProduct && (
         <ViewProductModal
@@ -260,7 +288,6 @@ const AdminProducts = () => {
           onEdit={handleEditProduct}
         />
       )}
-
       {/* Edit Product Modal */}
       {showEditProduct && selectedProduct && (
         <EditProductModal

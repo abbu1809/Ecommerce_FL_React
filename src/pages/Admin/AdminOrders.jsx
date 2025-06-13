@@ -9,6 +9,7 @@ import {
 import OrderTable from "../../components/Admin/Orders/OrderTable";
 import OrderDetail from "../../components/Admin/Orders/OrderDetail";
 import Button from "../../components/ui/Button";
+import Pagination from "../../components/common/Pagination";
 import useAdminStore from "../../store/Admin/useAdminStore";
 
 const AdminOrders = () => {
@@ -17,12 +18,46 @@ const AdminOrders = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [showOrderDetailModal, setShowOrderDetailModal] = useState(false);
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
   const { orders, fetchOrders } = useAdminStore();
   const { loading, statusCounts } = orders;
 
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
+
+  // Filter orders based on status and search query
+  const filteredOrders = orders.list.filter((order) => {
+    const matchesSearch =
+      order.id?.toString().includes(searchQuery) ||
+      order.customer_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.customer_email?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === "all" || order.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+
+  // Pagination calculations
+  const totalItems = filteredOrders.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedOrders = filteredOrders.slice(startIndex, endIndex);
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, searchQuery]);
 
   const handleSelectOrder = (order) => {
     setSelectedOrder(order);
@@ -147,13 +182,26 @@ const AdminOrders = () => {
           </div>
         </div>
       </div>
-      {/* Order table - now full width */}
+      {/* Order table - now full width */}{" "}
       <div className="w-full">
         <OrderTable
           onSelectOrder={handleSelectOrder}
           statusFilter={statusFilter}
           searchQuery={searchQuery}
+          orders={paginatedOrders}
         />
+
+        {/* Pagination */}
+        {totalItems > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            totalItems={totalItems}
+            itemsPerPage={ITEMS_PER_PAGE}
+            showItemCount={true}
+          />
+        )}
       </div>
       {/* Order Detail Modal */}
       {showOrderDetailModal && selectedOrder && (

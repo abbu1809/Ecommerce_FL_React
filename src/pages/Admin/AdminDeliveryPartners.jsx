@@ -10,6 +10,7 @@ import {
   FiRefreshCw,
   FiUser,
 } from "react-icons/fi";
+import Pagination from "../../components/common/Pagination";
 
 const AdminDeliveryPartners = () => {
   const { deliveryPartners, fetchDeliveryPartners, verifyDeliveryPartner } =
@@ -18,6 +19,10 @@ const AdminDeliveryPartners = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [showModal, setShowModal] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState(null);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
   useEffect(() => {
     fetchDeliveryPartners().catch((error) => {
       toast.error("Failed to load delivery partners");
@@ -52,9 +57,26 @@ const AdminDeliveryPartners = () => {
       return matchesSearch && partner.is_verified;
     if (filterStatus === "unverified")
       return matchesSearch && !partner.is_verified;
-
     return matchesSearch;
   });
+
+  // Pagination calculations
+  const totalItems = filteredPartners.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedPartners = filteredPartners.slice(startIndex, endIndex);
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterStatus]);
 
   return (
     <div className="animate-fadeIn">
@@ -195,7 +217,7 @@ const AdminDeliveryPartners = () => {
               <tbody className="divide-y divide-gray-200">
                 {" "}
                 {filteredPartners.length > 0 ? (
-                  filteredPartners.map((partner) => (
+                  paginatedPartners.map((partner) => (
                     <tr key={partner.partner_id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="font-medium text-gray-900">
@@ -256,10 +278,23 @@ const AdminDeliveryPartners = () => {
                       No delivery partners found.
                     </td>
                   </tr>
-                )}
+                )}{" "}
               </tbody>
             </table>
-          </div>{" "}
+          </div>
+
+          {/* Pagination */}
+          {totalItems > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              totalItems={totalItems}
+              itemsPerPage={ITEMS_PER_PAGE}
+              showItemCount={true}
+            />
+          )}
+
           {/* Verification Modal */}
           {showModal && selectedPartner && (
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import { ROUTES } from "../utils/constants";
@@ -13,6 +13,7 @@ import ProductInfo from "../components/Product/ProductInfo";
 import ProductQuantitySelector from "../components/Product/ProductQuantitySelector";
 import ProductActions from "../components/Product/ProductActions";
 import ProductTabs from "../components/Product/ProductTabs";
+import ProductVariantSelector from "../components/Product/ProductVariantSelector";
 
 const Product = () => {
   const { id } = useParams();
@@ -25,6 +26,14 @@ const Product = () => {
   const { addItem: addToCartStore } = useCartStore();
   const { addItem: addToWishlistStore } = useWishlistStore();
   const { user } = useAuthStore();
+
+  // Define handleVariantChange early to avoid conditional hooks
+  const handleVariantChange = useCallback((option) => {
+    console.log("Variant changed to:", option);
+    setSelectedVariant(option);
+    // Reset quantity to 1 when variant changes
+    setQuantity(1);
+  }, []);
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -114,9 +123,7 @@ const Product = () => {
       </div>
     );
   }
-  const product = currentProduct;
-
-  // Normalize product data from Firebase
+  const product = currentProduct; // Normalize product data from Firebase
   const normalizedProduct = {
     ...product,
     // Handle different possible field names
@@ -133,11 +140,22 @@ const Product = () => {
       product.discountPrice ||
       product.discounted_price ||
       product.sale_price ||
+      selectedVariant?.price ||
       product.price ||
       0,
     discount:
       product.discount ||
-      (product.price && product.discount_price
+      (selectedVariant?.price &&
+      selectedVariant?.discounted_price &&
+      selectedVariant.discounted_price < selectedVariant.price
+        ? Math.round(
+            ((selectedVariant.price - selectedVariant.discounted_price) /
+              selectedVariant.price) *
+              100
+          ) + "%"
+        : product.price &&
+          product.discount_price &&
+          product.discount_price < product.price
         ? Math.round(
             ((product.price - product.discount_price) / product.price) * 100
           ) + "%"
@@ -174,8 +192,10 @@ const Product = () => {
     images: product.images ||
       product.image_urls ||
       product.photos || ["https://via.placeholder.com/600x600?text=No+Image"],
+    videos: product.videos || [],
     features: product.features || product.key_features || [],
     specifications: product.specifications || product.specs || {},
+    attributes: product.attributes || {},
     description:
       product.description ||
       product.product_description ||
@@ -211,12 +231,7 @@ const Product = () => {
       setQuantity(quantity - 1);
     }
   };
-  const handleVariantChange = (option) => {
-    console.log("Variant changed to:", option);
-    setSelectedVariant(option);
-    // Reset quantity to 1 when variant changes
-    setQuantity(1);
-  };
+
   const addToCart = async () => {
     if (!user) {
       showCartErrorToast("Please log in to add items to cart");
@@ -227,12 +242,18 @@ const Product = () => {
       const cartItem = {
         id: normalizedProduct.id,
         name: normalizedProduct.name,
-        price: normalizedProduct.discountPrice || normalizedProduct.price,
+        price:
+          selectedVariant?.discounted_price ||
+          selectedVariant?.price ||
+          normalizedProduct.discountPrice ||
+          normalizedProduct.price,
         image: normalizedProduct.images?.[0] || normalizedProduct.image,
         quantity: quantity,
         variant: selectedVariant
           ? {
               color: selectedVariant.colors,
+              storage: selectedVariant.storage,
+              ram: selectedVariant.ram,
               price: selectedVariant.discounted_price || selectedVariant.price,
             }
           : null,
@@ -255,11 +276,17 @@ const Product = () => {
       const wishlistItem = {
         id: normalizedProduct.id,
         name: normalizedProduct.name,
-        price: normalizedProduct.discountPrice || normalizedProduct.price,
+        price:
+          selectedVariant?.discounted_price ||
+          selectedVariant?.price ||
+          normalizedProduct.discountPrice ||
+          normalizedProduct.price,
         image: normalizedProduct.images?.[0] || normalizedProduct.image,
         variant: selectedVariant
           ? {
               color: selectedVariant.colors,
+              storage: selectedVariant.storage,
+              ram: selectedVariant.ram,
               price: selectedVariant.discounted_price || selectedVariant.price,
             }
           : null,
@@ -298,106 +325,54 @@ const Product = () => {
 
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 p-6">
-            {/* Product Images - Left Column on Desktop */}
+            {/* Product Images - Left Column on Desktop */}{" "}
             <div className="lg:col-span-2">
-              {" "}
               <ProductImageGallery
                 images={normalizedProduct.images}
+                videos={normalizedProduct.videos}
                 activeImage={activeImage}
                 setActiveImage={setActiveImage}
               />
-            </div>
-            {/* Product Details - Right Column on Desktop */}{" "}
+            </div>{" "}
+            {/* Product Details - Right Column on Desktop */}
             <div className="lg:col-span-3 flex flex-col">
               <ProductInfo
                 product={normalizedProduct}
                 selectedVariant={selectedVariant}
-              />{" "}
+              />
               {/* Variant Selector */}
-              {normalizedProduct.validOptions?.length > 0 ? (
+              {normalizedProduct.validOptions?.length > 0 && (
                 <div className="border-t border-gray-200 py-4">
-                  <h3 className="text-lg font-semibold mb-3">
-                    Available Options
-                  </h3>
-                  <div className="space-y-2">
-                    {normalizedProduct.validOptions.map((option, index) => (
-                      <div
-                        key={index}
-                        className={`p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
-                          selectedVariant?.colors === option.colors
-                            ? "border-orange-500 bg-orange-50"
-                            : "border-gray-200 hover:border-gray-300"
-                        }`}
-                        onClick={() => handleVariantChange(option)}
-                      >
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center space-x-3">
-                            <div
-                              className="w-6 h-6 rounded-full border-2 border-gray-300"
-                              style={{
-                                backgroundColor: option.colors.toLowerCase(),
-                              }}
-                            ></div>
-                            <span className="font-medium">{option.colors}</span>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-semibold text-orange-600">
-                              ₹{option.discounted_price?.toLocaleString()}
-                            </div>
-                            {option.price !== option.discounted_price && (
-                              <div className="text-sm text-gray-500 line-through">
-                                ₹{option.price?.toLocaleString()}
-                              </div>
-                            )}
-                            <div className="text-xs text-gray-600">
-                              Stock: {option.stock}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <ProductVariantSelector
+                    validOptions={normalizedProduct.validOptions}
+                    selectedVariant={selectedVariant}
+                    onVariantChange={handleVariantChange}
+                  />
                 </div>
-              ) : (
-                normalizedProduct.colors?.length > 0 && (
-                  <div className="border-t border-gray-200 py-4">
-                    <h3 className="text-lg font-semibold mb-3">
-                      Available Colors
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {normalizedProduct.colors.map((color, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1 text-sm font-medium rounded-full border border-gray-200 bg-gray-50"
-                        >
-                          {color}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )
-              )}
+              )}{" "}
               <div className="border-t border-gray-200 py-4">
-                {" "}
                 <ProductQuantitySelector
                   quantity={quantity}
                   setQuantity={setQuantity}
-                  stock={normalizedProduct.stock}
+                  stock={selectedVariant?.stock || normalizedProduct.stock}
                   handleQuantityChange={handleQuantityChange}
                   incrementQuantity={incrementQuantity}
                   decrementQuantity={decrementQuantity}
-                />{" "}
+                />
                 <ProductActions
                   price={
-                    normalizedProduct.discountPrice || normalizedProduct.price
+                    selectedVariant?.discounted_price ||
+                    selectedVariant?.price ||
+                    normalizedProduct.discountPrice ||
+                    normalizedProduct.price
                   }
                   addToCart={addToCart}
                   addToWishlist={addToWishlist}
                 />
               </div>
             </div>
-          </div>
-          {/* Product Details Tabs */}{" "}
+          </div>{" "}
+          {/* Product Details Tabs */}
           <ProductTabs
             product={normalizedProduct}
             activeTab={activeTab}

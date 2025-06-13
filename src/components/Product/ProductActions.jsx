@@ -12,10 +12,9 @@ import {
 import Button from "../../components/ui/Button";
 
 const ProductActions = ({ addToCart, addToWishlist, price }) => {
-  // Calculate GST and delivery
-  const gst = price * 0.18; // 18% GST
+  // Calculate delivery
   const shipping = price > 50000 ? 0 : 99;
-  const totalPrice = price + gst + shipping;
+  const totalPrice = price + shipping;
 
   return (
     <div
@@ -30,16 +29,11 @@ const ProductActions = ({ addToCart, addToWishlist, price }) => {
         className="p-4 rounded-lg mb-2"
         style={{ backgroundColor: "var(--bg-accent-light)" }}
       >
+        {" "}
         <div className="flex justify-between items-center mb-2">
           <span style={{ color: "var(--text-secondary)" }}>Price:</span>
           <span style={{ color: "var(--text-primary)" }}>
             ₹{price.toLocaleString()}
-          </span>
-        </div>
-        <div className="flex justify-between items-center mb-2">
-          <span style={{ color: "var(--text-secondary)" }}>GST (18%):</span>
-          <span style={{ color: "var(--text-primary)" }}>
-            ₹{gst.toLocaleString()}
           </span>
         </div>
         <div className="flex justify-between items-center mb-2">
@@ -164,29 +158,6 @@ const ProductActions = ({ addToCart, addToWishlist, price }) => {
               </p>
               <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
                 3, 6, 9 & 12 months available
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center p-2.5 rounded-md hover:bg-white transition-colors duration-300">
-            <div
-              className="h-8 w-8 flex items-center justify-center rounded-full mr-3"
-              style={{
-                backgroundColor: "var(--bg-accent-light)",
-                color: "var(--brand-primary)",
-              }}
-            >
-              <FiGift />
-            </div>
-            <div>
-              <p
-                className="font-medium text-sm"
-                style={{ color: "var(--text-primary)" }}
-              >
-                Gift Wrapping
-              </p>
-              <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                Available at additional cost
               </p>
             </div>
           </div>

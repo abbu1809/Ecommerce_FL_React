@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { FiArrowLeft, FiBox, FiPackage, FiRefreshCw } from "react-icons/fi";
-import OrderStatusList from "../components/OrderStatus/OrderStatusList";
+import OrderStatusListWithReviews from "../components/OrderStatus/OrderStatusListWithReviews";
 import useOrderStore from "../store/useOrder";
 import { useEffect } from "react";
 
@@ -128,7 +128,7 @@ const OrderStatusPage = () => {
                   </button>
                 </div>
               ) : orders.length > 0 ? (
-                <OrderStatusList orders={orders} />
+                <OrderStatusListWithReviews orders={orders} />
               ) : (
                 <div
                   className="text-center py-12"

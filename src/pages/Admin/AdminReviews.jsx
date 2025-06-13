@@ -7,10 +7,16 @@ import {
   FiFilter,
 } from "react-icons/fi";
 import ReviewTable from "../../components/Admin/Reviews/ReviewTable";
+import Pagination from "../../components/common/Pagination";
 import useAdminReviews from "../../store/Admin/useAdminReviews";
 
 const AdminReviews = () => {
   const [activeTab, setActiveTab] = useState("all"); // all, pending, flagged
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
   const { reviews, pendingReviews, flaggedReviews, fetchReviews } =
     useAdminReviews();
   useEffect(() => {
@@ -46,6 +52,38 @@ const AdminReviews = () => {
     averageRating: parseFloat(averageRating),
     verifiedPurchases: verifiedPurchaseReviews.length,
   };
+
+  // Get current reviews based on active tab
+  const getCurrentReviews = () => {
+    switch (activeTab) {
+      case "pending":
+        return pendingReviews;
+      case "flagged":
+        return flaggedReviews;
+      default:
+        return reviews.list;
+    }
+  };
+
+  const currentReviews = getCurrentReviews();
+
+  // Pagination calculations
+  const totalItems = currentReviews.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedReviews = currentReviews.slice(startIndex, endIndex);
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Reset to first page when tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
 
   // Statistics cards
   const statsCards = [
@@ -261,7 +299,6 @@ const AdminReviews = () => {
           >
             All Reviews
           </button>
-
           <button
             onClick={() => setActiveTab("pending")}
             className={`py-3 px-1 text-sm font-medium border-b-2 transition-colors ${
@@ -292,7 +329,6 @@ const AdminReviews = () => {
               {reviewStats.pending}
             </span>
           </button>
-
           <button
             onClick={() => setActiveTab("flagged")}
             className={`py-3 px-1 text-sm font-medium border-b-2 transition-colors ${
@@ -321,11 +357,24 @@ const AdminReviews = () => {
             >
               {reviewStats.flagged}
             </span>
-          </button>
+          </button>{" "}
         </div>
-      </div>{" "}
+      </div>
+
       {/* Review table */}
-      <ReviewTable activeTab={activeTab} />
+      <ReviewTable activeTab={activeTab} reviews={paginatedReviews} />
+
+      {/* Pagination */}
+      {totalItems > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          totalItems={totalItems}
+          itemsPerPage={ITEMS_PER_PAGE}
+          showItemCount={true}
+        />
+      )}
     </div>
   );
 };

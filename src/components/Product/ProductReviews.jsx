@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import ReviewList from "../../components/Reviews/ReviewList";
-import ReviewForm from "./ReviewForm";
+// Removed ReviewForm import as reviews are now written from order history
 import useReviewStore from "../../store/useReviewStore";
 import { useAuthStore } from "../../store/useAuth";
 import { useProductStore } from "../../store/useProduct";
@@ -26,15 +26,7 @@ const ProductReviews = ({ productId, product }) => {
     if (reviews.length === 0) {
       fetchReviews();
     }
-  }, [reviews.length, fetchReviews]);
-
-  // Handle review submitted from ReviewForm
-  const handleReviewSubmitted = (reviewData) => {
-    // You can refresh the reviews or update local state here
-    console.log("Review submitted successfully:", reviewData);
-    // Optionally refetch reviews or update the current product
-    fetchReviews();
-  };
+  }, [reviews.length, fetchReviews]); // Reviews are now written from order history, so no form needed here
 
   // Handle adding a new review (for the existing local review system)
   const handleAddReview = (reviewData) => {
@@ -45,9 +37,8 @@ const ProductReviews = ({ productId, product }) => {
       userEmail: user?.email || "anonymous@example.com",
       ...reviewData,
     });
-  };
-  // Check if user can add a review (simplified - in a real app this would check purchase history)
-  const canAddReview = !!user;
+  }; // Check if user can add a review (now only through order history)
+  const canAddReview = false; // Disabled - reviews now written from order history
   // Use API reviews data if available, otherwise fall back to local reviews
   const displayReviews =
     product.reviewsData && product.reviewsData.length > 0
@@ -131,14 +122,8 @@ const ProductReviews = ({ productId, product }) => {
       >
         Customer Reviews
       </h2>
-      {/* API-based Review Form */}
-      <div className="mb-8">
-        <ReviewForm
-          productId={productId}
-          onReviewSubmitted={handleReviewSubmitted}
-        />
-      </div>{" "}
-      {/* Existing Review List */}
+
+      {/* Review List */}
       <ReviewList
         productId={productId}
         reviews={displayReviews}

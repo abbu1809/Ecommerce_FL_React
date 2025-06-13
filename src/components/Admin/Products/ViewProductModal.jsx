@@ -370,7 +370,35 @@ const ViewProductModal = ({ product, onClose, onEdit }) => {
                               </p>
                             </div>
                           )}
-                        </div>
+                        </div>{" "}
+                        {/* Custom key-value pairs */}
+                        {option.custom_keys &&
+                          option.custom_values &&
+                          option.custom_keys.length > 0 && (
+                            <div className="grid grid-cols-2 gap-4 mb-3 mt-3 border-t pt-3">
+                              {option.custom_keys.map(
+                                (key, keyIndex) =>
+                                  key && (
+                                    <div key={keyIndex}>
+                                      <span
+                                        className="text-xs font-medium block mb-1"
+                                        style={{
+                                          color: "var(--text-secondary)",
+                                        }}
+                                      >
+                                        {key}:
+                                      </span>
+                                      <p
+                                        className="text-sm font-medium"
+                                        style={{ color: "var(--text-primary)" }}
+                                      >
+                                        {option.custom_values[keyIndex]}
+                                      </p>
+                                    </div>
+                                  )
+                              )}
+                            </div>
+                          )}
                         <div className="grid grid-cols-3 gap-4 pt-3 border-t">
                           <div>
                             <span
@@ -420,66 +448,6 @@ const ViewProductModal = ({ product, onClose, onEdit }) => {
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
-              {/* Legacy Variants (fallback) */}
-              {!product.valid_options && product.variant && (
-                <div className="space-y-4">
-                  {product.variant.colors &&
-                    product.variant.colors.length > 0 && (
-                      <div>
-                        <h3
-                          className="text-sm font-medium mb-2"
-                          style={{ color: "var(--text-primary)" }}
-                        >
-                          Available Colors
-                        </h3>
-                        <div className="flex flex-wrap gap-2">
-                          {product.variant.colors.map((color) => (
-                            <span
-                              key={color}
-                              className="px-3 py-1 text-xs rounded-full"
-                              style={{
-                                backgroundColor: "var(--bg-secondary)",
-                                color: "var(--text-primary)",
-                                border: "1px solid",
-                                borderColor: "var(--border-primary)",
-                              }}
-                            >
-                              {color}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                  {product.variant.storage &&
-                    product.variant.storage.length > 0 && (
-                      <div>
-                        <h3
-                          className="text-sm font-medium mb-2"
-                          style={{ color: "var(--text-primary)" }}
-                        >
-                          Available Storage Options
-                        </h3>
-                        <div className="flex flex-wrap gap-2">
-                          {product.variant.storage.map((option) => (
-                            <span
-                              key={option}
-                              className="px-3 py-1 text-xs rounded-full"
-                              style={{
-                                backgroundColor: "var(--bg-secondary)",
-                                color: "var(--text-primary)",
-                                border: "1px solid",
-                                borderColor: "var(--border-primary)",
-                              }}
-                            >
-                              {option}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                 </div>
               )}
             </div>

@@ -6,6 +6,7 @@ import ProductFilter from "../components/ProductList/ProductFilter";
 import ProductSorting from "../components/ProductList/ProductSorting";
 import ProductGrid from "../components/ProductList/ProductGrid";
 import NoResultsFound from "../components/ProductList/NoResultsFound";
+import Pagination from "../components/common/Pagination";
 import { useProductStore } from "../store/useProduct";
 
 const ProductList = () => {
@@ -29,6 +30,10 @@ const ProductList = () => {
   const [selectedColors, setSelectedColors] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedDiscount, setSelectedDiscount] = useState(null);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const PRODUCTS_PER_PAGE = 10;
 
   const { products, brands, loading, fetchProducts } = useProductStore();
 
@@ -194,6 +199,36 @@ const ProductList = () => {
 
   const filteredProducts = applyFilters();
 
+  // Pagination calculations
+  const totalProducts = filteredProducts.length;
+  const totalPages = Math.ceil(totalProducts / PRODUCTS_PER_PAGE);
+  const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+  const endIndex = startIndex + PRODUCTS_PER_PAGE;
+  const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    selectedBrands,
+    priceRange,
+    sortBy,
+    selectedRating,
+    stockFilters,
+    selectedStorage,
+    selectedRAM,
+    selectedColors,
+    selectedCategories,
+    selectedDiscount,
+    category,
+  ]);
+
   // Add resetFilters function
   const resetFilters = () => {
     setSelectedBrands([]);
@@ -267,11 +302,19 @@ const ProductList = () => {
           {/* Product Grid */}
           <div className="w-full md:w-3/4">
             {/* Results Header */}
-            <ProductSorting sortBy={sortBy} setSortBy={setSortBy} />
-
+            <ProductSorting sortBy={sortBy} setSortBy={setSortBy} />{" "}
             {/* Products Grid */}
-            <ProductGrid products={filteredProducts} loading={loading} />
-
+            <ProductGrid products={paginatedProducts} loading={loading} />
+            {/* Pagination */}
+            {!loading && totalProducts > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+                totalItems={totalProducts}
+                itemsPerPage={PRODUCTS_PER_PAGE}
+              />
+            )}
             {/* No Results */}
             {!loading && filteredProducts.length === 0 && (
               <NoResultsFound resetFilters={resetFilters} />

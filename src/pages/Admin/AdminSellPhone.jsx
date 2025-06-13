@@ -1,29 +1,60 @@
 import { useState, useEffect } from "react";
+import Pagination from "../../components/common/Pagination";
 import useAdminSellPhone from "../../store/Admin/useAdminSellPhone";
 
 const AdminSellPhone = () => {
   const [activeTab, setActiveTab] = useState("listings");
-  
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
   // Get state and functions from the store
-  const { 
-    catalogs, 
-    inquiries, 
-    fetchCatalogs, 
+  const {
+    catalogs,
+    inquiries,
+    fetchCatalogs,
     fetchInquiries,
     updateInquiryStatus,
-    deleteInquiry
+    deleteInquiry,
   } = useAdminSellPhone();
-
   // Fetch data when component mounts
   useEffect(() => {
     fetchCatalogs();
     fetchInquiries();
   }, [fetchCatalogs, fetchInquiries]);
 
+  // Get current data based on active tab
+  const getCurrentData = () => {
+    return activeTab === "listings" ? catalogs.list : inquiries.list;
+  };
+
+  const currentData = getCurrentData();
+
+  // Pagination calculations
+  const totalItems = currentData.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedData = currentData.slice(startIndex, endIndex);
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Reset to first page when tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">Phone Selling Management</h1>
+        <h1 className="text-2xl font-bold text-gray-800">
+          Phone Selling Management
+        </h1>
       </div>
 
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
@@ -54,8 +85,10 @@ const AdminSellPhone = () => {
           {activeTab === "listings" && (
             <div className="space-y-4">
               <h2 className="text-lg font-semibold">Phone Listings</h2>
-              <p className="text-gray-500">Manage your phone catalog listings here</p>
-              
+              <p className="text-gray-500">
+                Manage your phone catalog listings here
+              </p>
+
               {catalogs.loading ? (
                 <div className="text-center py-4">
                   <p className="text-gray-500">Loading catalogs...</p>
@@ -82,9 +115,12 @@ const AdminSellPhone = () => {
                           Actions
                         </th>
                       </tr>
-                    </thead>
+                    </thead>{" "}
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {catalogs.list.map((phone) => (
+                      {(activeTab === "listings"
+                        ? paginatedData
+                        : catalogs.list
+                      ).map((phone) => (
                         <tr key={phone.id}>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
@@ -103,7 +139,9 @@ const AdminSellPhone = () => {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{phone.brand}</div>
+                            <div className="text-sm text-gray-900">
+                              {phone.brand}
+                            </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900">
@@ -130,7 +168,7 @@ const AdminSellPhone = () => {
             <div className="space-y-4">
               <h2 className="text-lg font-semibold">Phone Inquiries</h2>
               <p className="text-gray-500">Manage sell phone inquiries here</p>
-              
+
               {inquiries.loading ? (
                 <div className="text-center py-4">
                   <p className="text-gray-500">Loading inquiries...</p>
@@ -165,7 +203,10 @@ const AdminSellPhone = () => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {inquiries.list.map((inquiry) => (
+                      {(activeTab === "orders"
+                        ? paginatedData
+                        : inquiries.list
+                      ).map((inquiry) => (
                         <tr key={inquiry.id}>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
@@ -190,11 +231,18 @@ const AdminSellPhone = () => {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                              ${inquiry.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                inquiry.status === 'approved' ? 'bg-green-100 text-green-800' : 
-                                inquiry.status === 'rejected' ? 'bg-red-100 text-red-800' : 
-                                'bg-gray-100 text-gray-800'}`}>
+                            <span
+                              className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                              ${
+                                inquiry.status === "pending"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : inquiry.status === "approved"
+                                  ? "bg-green-100 text-green-800"
+                                  : inquiry.status === "rejected"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-800"
+                              }`}
+                            >
                               {inquiry.status}
                             </span>
                           </td>
@@ -204,21 +252,28 @@ const AdminSellPhone = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             {inquiry.status === "pending" && (
                               <>
-                                <button 
-                                  onClick={() => updateInquiryStatus(inquiry.id, "approved")}
-                                  className="text-green-600 hover:text-green-900 mr-3">
+                                <button
+                                  onClick={() =>
+                                    updateInquiryStatus(inquiry.id, "approved")
+                                  }
+                                  className="text-green-600 hover:text-green-900 mr-3"
+                                >
                                   Approve
                                 </button>
-                                <button 
-                                  onClick={() => updateInquiryStatus(inquiry.id, "rejected")}
-                                  className="text-red-600 hover:text-red-900 mr-3">
+                                <button
+                                  onClick={() =>
+                                    updateInquiryStatus(inquiry.id, "rejected")
+                                  }
+                                  className="text-red-600 hover:text-red-900 mr-3"
+                                >
                                   Reject
                                 </button>
                               </>
                             )}
-                            <button 
+                            <button
                               onClick={() => deleteInquiry(inquiry.id)}
-                              className="text-gray-600 hover:text-gray-900">
+                              className="text-gray-600 hover:text-gray-900"
+                            >
                               Delete
                             </button>
                           </td>
@@ -229,8 +284,22 @@ const AdminSellPhone = () => {
                 </div>
               )}
             </div>
-          )}
+          )}{" "}
         </div>
+
+        {/* Pagination */}
+        {totalItems > 0 && (
+          <div className="px-6 pb-6">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              totalItems={totalItems}
+              itemsPerPage={ITEMS_PER_PAGE}
+              showItemCount={true}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

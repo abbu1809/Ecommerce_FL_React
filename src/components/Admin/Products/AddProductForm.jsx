@@ -21,10 +21,6 @@ const AddProductForm = ({ onClose, onSave }) => {
     specifications: {},
     attributes: {},
     features: [],
-    variant: {
-      colors: [],
-      storage: [],
-    },
     valid_options: [],
     featured: false,
     rating: 0,
@@ -197,35 +193,6 @@ const AddProductForm = ({ onClose, onSave }) => {
     });
   };
 
-  // Handle variant changes
-  const handleVariantChange = (type, index, value) => {
-    const newVariant = { ...formData.variant };
-    newVariant[type][index] = value;
-    setFormData({
-      ...formData,
-      variant: newVariant,
-    });
-  };
-
-  const addVariantOption = (type) => {
-    const newVariant = { ...formData.variant };
-    newVariant[type] = [...(newVariant[type] || []), ""];
-
-    setFormData({
-      ...formData,
-      variant: newVariant,
-    });
-  };
-  const removeVariantOption = (type, index) => {
-    const newVariant = { ...formData.variant };
-    newVariant[type] = newVariant[type].filter((_, i) => i !== index);
-
-    setFormData({
-      ...formData,
-      variant: newVariant,
-    });
-  };
-
   // Valid Options handlers
   const addValidOption = () => {
     const newOption = {
@@ -236,6 +203,8 @@ const AddProductForm = ({ onClose, onSave }) => {
       price: 0,
       discounted_price: 0,
       stock: 0,
+      custom_keys: [], // Array to store custom keys
+      custom_values: [], // Array to store corresponding values
     };
     setFormData({
       ...formData,
@@ -262,6 +231,64 @@ const AddProductForm = ({ onClose, onSave }) => {
           ? parseFloat(value) || 0
           : value,
     };
+    setFormData({
+      ...formData,
+      valid_options: newValidOptions,
+    });
+  };
+
+  // Add custom key-value pair to valid option
+  const addCustomKeyValue = (optionIndex) => {
+    const newValidOptions = [...formData.valid_options];
+    const option = newValidOptions[optionIndex];
+
+    // Initialize arrays if they don't exist
+    if (!option.custom_keys) option.custom_keys = [];
+    if (!option.custom_values) option.custom_values = [];
+
+    option.custom_keys.push("");
+    option.custom_values.push("");
+
+    setFormData({
+      ...formData,
+      valid_options: newValidOptions,
+    });
+  };
+
+  // Handle custom key change
+  const handleCustomKeyChange = (optionIndex, keyIndex, value) => {
+    const newValidOptions = [...formData.valid_options];
+    const option = newValidOptions[optionIndex];
+
+    option.custom_keys[keyIndex] = value;
+
+    setFormData({
+      ...formData,
+      valid_options: newValidOptions,
+    });
+  };
+
+  // Handle custom value change
+  const handleCustomValueChange = (optionIndex, valueIndex, value) => {
+    const newValidOptions = [...formData.valid_options];
+    const option = newValidOptions[optionIndex];
+
+    option.custom_values[valueIndex] = value;
+
+    setFormData({
+      ...formData,
+      valid_options: newValidOptions,
+    });
+  };
+
+  // Remove custom key-value pair
+  const removeCustomKeyValue = (optionIndex, keyIndex) => {
+    const newValidOptions = [...formData.valid_options];
+    const option = newValidOptions[optionIndex];
+
+    option.custom_keys.splice(keyIndex, 1);
+    option.custom_values.splice(keyIndex, 1);
+
     setFormData({
       ...formData,
       valid_options: newValidOptions,
@@ -642,7 +669,6 @@ const AddProductForm = ({ onClose, onSave }) => {
                   </div>
                 ))}
               </div>
-
               {/* Specifications */}
               <div>
                 <div className="flex justify-between items-center mb-2">
@@ -711,7 +737,6 @@ const AddProductForm = ({ onClose, onSave }) => {
                   )
                 )}{" "}
               </div>
-
               {/* Attributes */}
               <div>
                 <div className="flex justify-between items-center mb-2">
@@ -762,7 +787,6 @@ const AddProductForm = ({ onClose, onSave }) => {
                   </button>
                 </div>
               </div>
-
               {/* Valid Options Section */}
               <div>
                 <div className="flex justify-between items-center mb-2">
@@ -919,109 +943,80 @@ const AddProductForm = ({ onClose, onSave }) => {
                     <button
                       type="button"
                       onClick={() => removeValidOption(index)}
-                      className="mt-2 p-1.5 rounded-md"
+                      className="p-1.5 rounded-md mt-2"
                       style={{ color: "var(--error-color)" }}
                     >
                       <FiTrash2 size={16} />
                     </button>
-                  </div>
-                ))}
-              </div>
-
-              {/* Legacy Variants: Colors (for backward compatibility) */}
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <h3
-                    className="text-sm font-medium"
-                    style={{ color: "var(--text-primary)" }}
-                  >
-                    Available Colors
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={() => addVariantOption("colors")}
-                    className="text-xs flex items-center"
-                    style={{ color: "var(--brand-primary)" }}
-                  >
-                    <FiPlus size={14} className="mr-1" /> Add Color
-                  </button>
-                </div>
-
-                {formData.variant.colors.map((color, index) => (
-                  <div key={index} className="flex items-center mb-2">
-                    <input
-                      type="text"
-                      value={color}
-                      onChange={(e) =>
-                        handleVariantChange("colors", index, e.target.value)
-                      }
-                      className="flex-grow p-2 border rounded-md text-sm"
-                      style={{
-                        backgroundColor: "var(--bg-primary)",
-                        color: "var(--text-primary)",
-                        borderColor: "var(--border-primary)",
-                      }}
-                      placeholder="Color name"
-                    />
+                    <div className="mt-2">
+                      {option.custom_keys &&
+                        option.custom_keys.map((key, keyIndex) => (
+                          <div
+                            key={keyIndex}
+                            className="flex items-center gap-2"
+                          >
+                            <input
+                              type="text"
+                              value={key}
+                              onChange={(e) =>
+                                handleCustomKeyChange(
+                                  index,
+                                  keyIndex,
+                                  e.target.value
+                                )
+                              }
+                              placeholder="Custom Key"
+                              className="p-2 border rounded-md text-sm"
+                              style={{
+                                backgroundColor: "var(--bg-primary)",
+                                color: "var(--text-primary)",
+                                borderColor: "var(--border-primary)",
+                              }}
+                            />
+                            <input
+                              type="text"
+                              value={option.custom_values[keyIndex]}
+                              onChange={(e) =>
+                                handleCustomValueChange(
+                                  index,
+                                  keyIndex,
+                                  e.target.value
+                                )
+                              }
+                              placeholder="Custom Value"
+                              className="p-2 border rounded-md text-sm"
+                              style={{
+                                backgroundColor: "var(--bg-primary)",
+                                color: "var(--text-primary)",
+                                borderColor: "var(--border-primary)",
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                removeCustomKeyValue(index, keyIndex)
+                              }
+                              className="p-2 text-red-500 hover:text-red-700"
+                            >
+                              <span className="text-sm">Remove Valid Option</span>
+                              <FiTrash2 />
+                            </button>
+                          </div>
+                        ))}
+                    </div>
                     <button
                       type="button"
-                      onClick={() => removeVariantOption("colors", index)}
-                      className="ml-2 p-1.5 rounded-md"
-                      style={{ color: "var(--error-color)" }}
+                      onClick={() => addCustomKeyValue(index)}
+                      className="mt-2 p-1.5 rounded-md flex justify-between items-center"
+                      style={{ color: "var(--brand-primary)" }}
                     >
-                      <FiTrash2 size={16} />
+                      <span className="text-sm">Add Custom</span>
+                      <FiPlus size={16} />
                     </button>
                   </div>
                 ))}
-              </div>
-
-              {/* Variants: Storage */}
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <h3
-                    className="text-sm font-medium"
-                    style={{ color: "var(--text-primary)" }}
-                  >
-                    Storage Options
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={() => addVariantOption("storage")}
-                    className="text-xs flex items-center"
-                    style={{ color: "var(--brand-primary)" }}
-                  >
-                    <FiPlus size={14} className="mr-1" /> Add Storage Option
-                  </button>
-                </div>
-
-                {formData.variant.storage?.map((option, index) => (
-                  <div key={index} className="flex items-center mb-2">
-                    <input
-                      type="text"
-                      value={option}
-                      onChange={(e) =>
-                        handleVariantChange("storage", index, e.target.value)
-                      }
-                      className="flex-grow p-2 border rounded-md text-sm"
-                      style={{
-                        backgroundColor: "var(--bg-primary)",
-                        color: "var(--text-primary)",
-                        borderColor: "var(--border-primary)",
-                      }}
-                      placeholder="Storage option"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeVariantOption("storage", index)}
-                      className="ml-2 p-1.5 rounded-md"
-                      style={{ color: "var(--error-color)" }}
-                    >
-                      <FiTrash2 size={16} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-
+              </div>{" "}
+              {/* Images */}
               {/* Images */}
               <div>
                 <h3
@@ -1114,7 +1109,6 @@ const AddProductForm = ({ onClose, onSave }) => {
                   </label>
                 </div>
               </div>
-
               <div className="mt-4">
                 <h3
                   className="text-sm font-medium mb-2"
@@ -1158,7 +1152,6 @@ const AddProductForm = ({ onClose, onSave }) => {
                   </button>
                 </div>
               </div>
-
               <div
                 className="flex justify-between pt-4 border-t"
                 style={{ borderColor: "var(--border-primary)" }}
