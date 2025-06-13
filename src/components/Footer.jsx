@@ -5,87 +5,69 @@ import {
   FiMail,
   FiMapPin,
   FiClock,
-  FiFacebook,
-  FiInstagram,
-  FiTwitter,
-  FiYoutube,
-  FiArrowRight,
   FiChevronRight,
 } from "react-icons/fi";
+import {
+  FaAndroid,
+  FaGlobe,
+  FaApple,
+  FaWhatsapp,
+  FaFacebookF,
+  FaTwitter,
+  FaInstagram,
+  FaYoutube,
+  FaLinkedinIn,
+  FaCommentAlt,
+} from "react-icons/fa";
 import { ROUTES } from "../utils/constants";
-
-const Logo = ({ size = "medium", linkWrapper = true }) => {
-  const sizes = {
-    small: "h-8 w-auto",
-    medium: "h-12 w-auto",
-    large: "h-16 w-auto",
-  };
-
-  const content = (
-    <>
-      <img
-        src="/logo.jpg"
-        alt="Anand Mobiles"
-        className={`${sizes[size]} rounded-md`}
-      />
-      <span
-        style={{ color: "var(--brand-primary)" }}
-        className="ml-2 text-xl font-bold text-gray-900 hidden sm:inline-block"
-      >
-        Anand Mobiles
-      </span>
-    </>
-  );
-
-  if (linkWrapper) {
-    return (
-      <Link to="/" className="flex items-center">
-        {content}
-      </Link>
-    );
-  }
-
-  return <div className="flex items-center">{content}</div>;
-};
+import Logo from "./UI/Logo";
 
 const Footer = () => {
   // Quick Links data
   const quickLinks = [
     { name: "Home", path: ROUTES.HOME },
-    { name: "Products", path: ROUTES.PRODUCTS },
-    { name: "About Us", path: "/about" },
-    { name: "Contact", path: "/contact" },
-    { name: "FAQs", path: "/faqs" },
+    { name: "About", path: ROUTES.ABOUT },
+    { name: "Contact", path: ROUTES.CONTACT },
   ];
 
   // Customer Service links data
   const customerServiceLinks = [
-    { name: "My Account", path: ROUTES.PROFILE },
-    { name: "Orders & Returns", path: ROUTES.ORDERS },
-    { name: "Shopping Cart", path: ROUTES.CART },
-    { name: "Wishlist", path: "/wishlist" },
-    { name: "Support Center", path: "/support" },
+    { name: "Track Your Order", path: ROUTES.TRACK_ORDER },
+    { name: "Bulk Orders", path: ROUTES.BULK_ORDER },
   ];
 
-  // Payment methods
-  const paymentMethods = [
-    "Visa",
-    "Mastercard",
-    "UPI",
-    "PayTM",
-    "PhonePe",
-    "Cash On Delivery",
+  // Policies links data
+  const policyLinks = [
+    { name: "Terms & Conditions", path: "/terms-conditions" },
+    {
+      name: "Cancellation & Refund Policy",
+      path: "/cancellation-refund-policy",
+    },
+    { name: "Privacy Policy", path: "/privacy-policy" },
+    { name: "Shipping & Delivery Policy", path: "/shipping-delivery-policy" },
   ];
 
-  // Special policies
-  const specialPolicies = [
-    "No return policy",
-    "OTP verification before delivery",
-    "Product unboxing in front of customer",
-    "Extended warranty options available",
+  // Know More links data
+  const knowMoreLinks = [
+    { name: "Our Stores", path: "/our-stores" },
+    { name: "Service Center", url: "https://www.poorvika.com/service-center" },
   ];
 
-  const currentYear = new Date().getFullYear();
+  // Social media links
+  const socialLinks = [
+    { icon: <FaFacebookF />, url: "https://facebook.com", label: "Facebook" },
+    { icon: <FaTwitter />, url: "https://twitter.com", label: "Twitter" },
+    { icon: <FaInstagram />, url: "https://instagram.com", label: "Instagram" },
+    { icon: <FaYoutube />, url: "https://youtube.com", label: "YouTube" },
+    { icon: <FaLinkedinIn />, url: "https://linkedin.com", label: "LinkedIn" },
+  ];
+
+  // Footer policy links
+  const footerPolicyLinks = [
+    { name: "Privacy Policy", path: "/privacy-policy" },
+    { name: "Terms of Use", path: "/terms-conditions" },
+    { name: "Warranty Policy", path: "/warranty-policy" },
+  ];
 
   return (
     <footer className="relative overflow-hidden">
@@ -104,10 +86,9 @@ const Footer = () => {
           transform: "translate(30%, 30%)",
         }}
       />
-
       {/* Main footer */}
       <div
-        className="pt-16 pb-8"
+        className="pt-16 pb-1"
         style={{
           backgroundColor: "var(--bg-dark)",
           color: "var(--text-on-dark-bg)",
@@ -115,9 +96,9 @@ const Footer = () => {
       >
         <div className="container mx-auto px-4">
           {/* Top footer section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 mb-12">
             {/* Company info */}
-            <div className="space-y-5">
+            <div className="space-y-5 lg:col-span-2">
               <Logo linkWrapper={false} />
               <p
                 className="text-sm max-w-xs"
@@ -126,36 +107,31 @@ const Footer = () => {
                 Your trusted electronics partner offering the latest mobiles,
                 laptops, and accessories at competitive prices with excellent
                 customer service.
-              </p>
+              </p>{" "}
               <div
                 className="flex space-x-4 pt-2"
                 style={{ color: "var(--text-on-dark-bg)" }}
               >
                 {[
                   {
-                    icon: <FiFacebook />,
-                    label: "Facebook",
-                    url: "https://facebook.com",
+                    icon: <FaAndroid />,
+                    label: "Android",
+                    url: "https://android.com",
                   },
                   {
-                    icon: <FiInstagram />,
-                    label: "Instagram",
-                    url: "https://instagram.com",
+                    icon: <FaGlobe />,
+                    label: "Web",
+                    url: "https://web.dev",
                   },
                   {
-                    icon: <FiTwitter />,
-                    label: "Twitter",
-                    url: "https://twitter.com",
+                    icon: <FaApple />,
+                    label: "iOS",
+                    url: "https://apple.com/ios",
                   },
-                  {
-                    icon: <FiYoutube />,
-                    label: "YouTube",
-                    url: "https://youtube.com",
-                  },
-                ].map((social, index) => (
+                ].map((platform, index) => (
                   <a
                     key={index}
-                    href={social.url}
+                    href={platform.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
@@ -163,21 +139,34 @@ const Footer = () => {
                       backgroundColor: "rgba(255,255,255,0.08)",
                       color: "var(--text-on-dark-bg)",
                     }}
-                    aria-label={social.label}
+                    aria-label={platform.label}
                   >
-                    {social.icon}
+                    {platform.icon}
                   </a>
                 ))}
               </div>
+              {/* WhatsApp Channel Section */}
+              <div className="mt-4 pt-3 border-t border-gray-700">
+                <a
+                  href="https://whatsapp.com/channel/YOUR_CHANNEL_ID_HERE"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-300"
+                >
+                  <FaWhatsapp className="text-lg" />
+                  <span className="text-sm font-medium">
+                    Join WhatsApp channel for offers & updates
+                  </span>
+                </a>
+              </div>
             </div>
-
             {/* Quick Links */}
             <div className="space-y-4">
               <h3
                 className="font-semibold text-lg relative inline-block pb-2"
                 style={{ color: "var(--text-on-dark-bg)" }}
               >
-                Quick Links
+                Store
                 <span
                   className="absolute bottom-0 left-0 h-0.5 w-3/4"
                   style={{ backgroundColor: "var(--brand-primary)" }}
@@ -185,30 +174,25 @@ const Footer = () => {
               </h3>
               <ul className="space-y-3">
                 {quickLinks.map((link) => (
-                  <li key={link.name} className="group">
+                  <li key={link.name}>
                     <Link
                       to={link.path}
-                      className="text-sm flex items-center group-hover:translate-x-1 transition-transform duration-300"
+                      className="text-sm transition-colors duration-300 hover:text-white"
                       style={{ color: "var(--text-on-dark-bg)" }}
                     >
-                      <FiChevronRight
-                        style={{ color: "var(--brand-primary)" }}
-                        className="mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                      />
                       {link.name}
                     </Link>
                   </li>
                 ))}
               </ul>
             </div>
-
             {/* Customer Service */}
             <div className="space-y-4">
               <h3
                 className="font-semibold text-lg relative inline-block pb-2"
                 style={{ color: "var(--text-on-dark-bg)" }}
               >
-                Customer Service
+                Help
                 <span
                   className="absolute bottom-0 left-0 h-0.5 w-3/4"
                   style={{ backgroundColor: "var(--brand-primary)" }}
@@ -216,25 +200,84 @@ const Footer = () => {
               </h3>
               <ul className="space-y-3">
                 {customerServiceLinks.map((link) => (
-                  <li key={link.name} className="group">
+                  <li key={link.name}>
                     <Link
                       to={link.path}
-                      className="text-sm flex items-center group-hover:translate-x-1 transition-transform duration-300"
+                      className="text-sm transition-colors duration-300 hover:text-white"
                       style={{ color: "var(--text-on-dark-bg)" }}
                     >
-                      <FiChevronRight
-                        style={{ color: "var(--brand-primary)" }}
-                        className="mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                      />
                       {link.name}
                     </Link>
                   </li>
                 ))}
               </ul>
             </div>
-
-            {/* Contact Us */}
+            {/* Policies */}
             <div className="space-y-4">
+              <h3
+                className="font-semibold text-lg relative inline-block pb-2"
+                style={{ color: "var(--text-on-dark-bg)" }}
+              >
+                Policies
+                <span
+                  className="absolute bottom-0 left-0 h-0.5 w-3/4"
+                  style={{ backgroundColor: "var(--brand-primary)" }}
+                />
+              </h3>
+              <ul className="space-y-3">
+                {policyLinks.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      to={link.path}
+                      className="text-sm transition-colors duration-300 hover:text-white"
+                      style={{ color: "var(--text-on-dark-bg)" }}
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* Know More */}
+            <div className="space-y-4">
+              <h3
+                className="font-semibold text-lg relative inline-block pb-2"
+                style={{ color: "var(--text-on-dark-bg)" }}
+              >
+                Know More
+                <span
+                  className="absolute bottom-0 left-0 h-0.5 w-3/4"
+                  style={{ backgroundColor: "var(--brand-primary)" }}
+                />
+              </h3>
+              <ul className="space-y-3">
+                {knowMoreLinks.map((link) => (
+                  <li key={link.name}>
+                    {link.path ? (
+                      <Link
+                        to={link.path}
+                        className="text-sm transition-colors duration-300 hover:text-white"
+                        style={{ color: "var(--text-on-dark-bg)" }}
+                      >
+                        {link.name}
+                      </Link>
+                    ) : (
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm transition-colors duration-300 hover:text-white"
+                        style={{ color: "var(--text-on-dark-bg)" }}
+                      >
+                        {link.name}
+                      </a>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* Contact Us */}
+            {/* <div className="space-y-4">
               <h3
                 className="font-semibold text-lg relative inline-block pb-2"
                 style={{ color: "var(--text-on-dark-bg)" }}
@@ -299,6 +342,7 @@ const Footer = () => {
                     </span>
                   </div>
                 </li>
+               
                 <li>
                   <div className="text-sm flex items-center transition-colors duration-300">
                     <div
@@ -316,116 +360,65 @@ const Footer = () => {
                   </div>
                 </li>
               </ul>
-            </div>
+            </div> */}{" "}
           </div>
-
-          {/* Middle section - Payment methods */}
-          <div
-            className="rounded-2xl p-6 mb-8 relative overflow-hidden"
-            style={{
-              backgroundColor: "rgba(255,255,255,0.03)",
-              border: "1px solid rgba(255,255,255,0.05)",
-            }}
+        </div>
+      </div>{" "}
+      {/* New bottom footer - based on image */}
+      <div className="py-6 bg-blue-50 text-gray-700 w-full relative">
+        {/* WhatsApp and Chat icons - positioned at right side */}
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-2">
+          <a
+            href="https://wa.me/1234567890"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300"
+            aria-label="Contact us on WhatsApp"
           >
-            <div className="flex flex-col items-center">
-              <h4
-                className="text-base font-medium mb-5 relative inline-block"
-                style={{ color: "var(--brand-primary)" }}
-              >
-                Payment Methods We Accept
-                <span
-                  className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-0.5 w-1/2"
-                  style={{ backgroundColor: "var(--brand-primary)" }}
-                ></span>
-              </h4>
-              <div className="flex flex-wrap justify-center gap-3">
-                {paymentMethods.map((payment) => (
-                  <span
-                    key={payment}
-                    className="px-4 py-2 text-sm rounded-md transition-all duration-300 hover:scale-105"
-                    style={{
-                      backgroundColor: "rgba(255,255,255,0.05)",
-                      color: "var(--text-on-dark-bg)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                    }}
+            <FaWhatsapp size={20} />
+          </a>
+          <a
+            href="#chat"
+            className="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300"
+            aria-label="Open chat"
+          >
+            <FaCommentAlt size={18} />
+          </a>
+        </div>
+
+        <div className="container mx-auto">
+          <div className="flex flex-col items-center gap-6">
+            {/* Social section - centered */}
+            <div className="flex flex-col items-center gap-4">
+              <h4 className="text-sm font-medium">Let's get social</h4>
+              <div className="flex items-center gap-6">
+                {socialLinks.map((item, index) => (
+                  <a
+                    key={index}
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xl hover:text-blue-600 transition-colors duration-300"
+                    aria-label={item.label}
                   >
-                    {payment}
-                  </span>
+                    {item.icon}
+                  </a>
                 ))}
               </div>
             </div>
-          </div>
 
-          {/* Policies section */}
-          <div
-            className="mb-8 rounded-2xl overflow-hidden"
-            style={{
-              backgroundColor: "rgba(245, 158, 11, 0.05)",
-              border: "1px solid rgba(245, 158, 11, 0.15)",
-            }}
-          >
-            <h4
-              className="font-medium text-center py-3"
-              style={{
-                color: "var(--text-on-brand)",
-                backgroundColor: "var(--brand-primary)",
-              }}
-            >
-              Our Store Policies
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-4">
-              {specialPolicies.map((policy) => (
-                <div
-                  key={policy}
-                  className="text-sm flex items-center p-2 rounded-md"
-                  style={{
-                    backgroundColor: "rgba(255,255,255,0.05)",
-                    color: "var(--text-on-dark-bg)",
-                  }}
-                >
-                  <span
-                    className="w-2 h-2 rounded-full mr-2 flex-shrink-0"
-                    style={{ backgroundColor: "var(--brand-primary)" }}
-                  ></span>
-                  {policy}
-                </div>
+            {/* Policy links - centered below social */}
+            <div className="flex flex-wrap justify-center gap-4">
+              {footerPolicyLinks.map((link, index) => (
+                <React.Fragment key={link.name}>
+                  <Link to={link.path} className="text-xs hover:underline">
+                    {link.name}
+                  </Link>
+                  {index < footerPolicyLinks.length - 1 && (
+                    <span className="text-xs">•</span>
+                  )}
+                </React.Fragment>
               ))}
-            </div>
-          </div>
-
-          {/* Copyright */}
-          <div
-            className="pt-6 border-t text-center"
-            style={{
-              borderColor: "rgba(255,255,255,0.08)",
-              color: "var(--text-on-dark-bg)",
-            }}
-          >
-            <p className="text-xs mb-3">
-              &copy; {currentYear} Anand Mobiles. All rights reserved.
-            </p>
-            <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs">
-              <Link
-                to="/privacy-policy"
-                className="hover:text-white transition-colors duration-300"
-                style={{ color: "var(--text-on-dark-bg)" }}
-              >
-                Privacy Policy
-              </Link>
-              <Link
-                to="/terms-conditions"
-                className="hover:text-white transition-colors duration-300"
-                style={{ color: "var(--text-on-dark-bg)" }}
-              >
-                Terms & Conditions
-              </Link>
-              <Link
-                to="/return-policy"
-                className="hover:text-white transition-colors duration-300"
-                style={{ color: "var(--text-on-dark-bg)" }}
-              >
-                Return Policy
-              </Link>
             </div>
           </div>
         </div>
@@ -433,5 +426,4 @@ const Footer = () => {
     </footer>
   );
 };
-
 export default Footer;

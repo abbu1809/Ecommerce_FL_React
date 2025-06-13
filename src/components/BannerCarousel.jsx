@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+/* eslint-disable no-unused-vars */
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useBannerStore } from "../store/Admin/useBannerStore";
@@ -36,16 +37,14 @@ const BannerCarousel = () => {
   const { fetchPublicBanners, getCarouselBanners } = useBannerStore();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [[page, direction], setPage] = useState([0, 0]);
-
-  // Get carousel banners from store or use fallback
-  const carouselBanners = getCarouselBanners();
-  const banners = carouselBanners.length > 0 ? carouselBanners : fallbackImages;
-
   // Fetch banners on mount
   useEffect(() => {
     fetchPublicBanners();
   }, [fetchPublicBanners]);
 
+  // Get carousel banners from store or use fallback
+  const carouselBanners = getCarouselBanners();
+  const banners = carouselBanners.length > 0 ? carouselBanners : fallbackImages;
   // Auto-advance the slider
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -93,10 +92,9 @@ const BannerCarousel = () => {
   };
   return (
     <div
-      className="relative overflow-hidden rounded-xl w-full"
+      className="relative overflow-hidden w-full"
       style={{
         boxShadow: "var(--shadow-large)",
-        borderRadius: "var(--rounded-xl)",
         height: "500px",
       }}
     >
@@ -126,10 +124,10 @@ const BannerCarousel = () => {
             className="absolute inset-0 w-full"
           >
             {" "}
-            {/* High-quality image with subtle zoom effect */}{" "}
+            {/* High-quality image with subtle zoom effect */}
             <motion.img
               src={banners[currentIndex].image}
-              alt="Product"
+              alt={banners[currentIndex].title || "Banner"}
               className="w-full h-full object-cover"
               style={{
                 backgroundColor:
@@ -140,6 +138,8 @@ const BannerCarousel = () => {
               transition={{ duration: 0.5 }}
               loading="eager"
             />
+            {/* Banner content overlay */}
+            
             {/* Decorative elements */}
             <motion.div
               className="absolute top-0 right-0 w-64 h-64 opacity-20 rotate-45 translate-x-20 -translate-y-20"

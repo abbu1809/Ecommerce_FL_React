@@ -175,7 +175,8 @@ const Header = ({ categories }) => {
             "linear-gradient(to right, var(--brand-primary), var(--brand-primary-hover))",
         }}
       >
-        <div className="container mx-auto px-4">
+        {" "}
+        <div className="container mx-auto px-2 sm:px-3">
           <div className="flex items-center justify-between py-4">
             {/* Mobile menu button */}
             <button
@@ -441,11 +442,10 @@ const Header = ({ categories }) => {
             </div>
           </div>
         </div>
-      </div>
-
+      </div>{" "}
       {/* Mobile search bar - only visible on small screens */}
       <div
-        className="md:hidden px-4 py-3"
+        className="md:hidden px-2 py-3"
         style={{ backgroundColor: "var(--brand-primary-hover)" }}
       >
         <div className="relative">
@@ -546,8 +546,7 @@ const Header = ({ categories }) => {
           )}
         </div>
       </div>
-
-      {/* Category Navigation with floating effect and improved hover states */}
+      {/* Category Navigation with floating effect and improved hover states */}{" "}
       <nav
         className="bg-white shadow-md relative z-0"
         style={{
@@ -555,7 +554,7 @@ const Header = ({ categories }) => {
           boxShadow: "var(--shadow-medium)",
         }}
       >
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-2 sm:px-3">
           <ul className="hidden lg:flex items-center justify-between overflow-x-auto py-3.5 no-scrollbar">
             {categories?.map((category) => (
               <li key={category.id} className="whitespace-nowrap px-3">

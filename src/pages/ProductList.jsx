@@ -14,16 +14,28 @@ const ProductList = () => {
     ? category.charAt(0).toUpperCase() + category.slice(1).replace(/s$/, "")
     : null;
   const [showFilters, setShowFilters] = useState(false);
+
   // Filter states
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [priceRange, setPriceRange] = useState({ min: 0, max: 150000 });
   const [sortBy, setSortBy] = useState("popularity");
+  const [selectedRating, setSelectedRating] = useState(0);
+  const [stockFilters, setStockFilters] = useState({
+    inStock: false,
+    outOfStock: false,
+  });
+  const [selectedStorage, setSelectedStorage] = useState([]);
+  const [selectedRAM, setSelectedRAM] = useState([]);
+  const [selectedColors, setSelectedColors] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedDiscount, setSelectedDiscount] = useState(null);
 
   const { products, brands, loading, fetchProducts } = useProductStore();
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+
   // Transform products from store to match the expected format
   const transformedProducts = (products || []).map((product) => ({
     ...product,
@@ -41,11 +53,8 @@ const ProductList = () => {
       setSelectedBrands([...selectedBrands, brand]);
     }
   };
+  // This function is now handled within the ProductFilter component
 
-  const handlePriceChange = (e, bound) => {
-    const value = parseInt(e.target.value);
-    setPriceRange({ ...priceRange, [bound]: value });
-  };
   const applyFilters = () => {
     let filteredProducts = [...transformedProducts];
 
@@ -67,12 +76,105 @@ const ProductList = () => {
       );
     }
 
+    // Apply selected categories filter
+    if (selectedCategories.length > 0) {
+      filteredProducts = filteredProducts.filter((product) =>
+        selectedCategories.includes(product.category)
+      );
+    }
+
     // Apply price range filter
     filteredProducts = filteredProducts.filter(
       (product) =>
         product.discountPrice >= priceRange.min &&
         product.discountPrice <= priceRange.max
-    ); // Apply sorting
+    );
+
+    // Apply rating filter
+    if (selectedRating > 0) {
+      filteredProducts = filteredProducts.filter(
+        (product) => Math.round(product.rating || 0) >= selectedRating
+      );
+    }
+
+    // Apply stock filter
+    if (stockFilters.inStock && !stockFilters.outOfStock) {
+      filteredProducts = filteredProducts.filter(
+        (product) => product.stock > 0
+      );
+    } else if (!stockFilters.inStock && stockFilters.outOfStock) {
+      filteredProducts = filteredProducts.filter(
+        (product) => product.stock <= 0
+      );
+    }
+
+    // Apply storage filter
+    if (selectedStorage.length > 0) {
+      filteredProducts = filteredProducts.filter((product) => {
+        // Check if product has storageOptions and if any match the selected storage
+        if (product.storageOptions && Array.isArray(product.storageOptions)) {
+          return product.storageOptions.some((storage) =>
+            selectedStorage.includes(storage)
+          );
+        }
+        // Check if product has variant.storage and if any match the selected storage
+        if (product.variant && Array.isArray(product.variant.storage)) {
+          return product.variant.storage.some((storage) =>
+            selectedStorage.includes(storage)
+          );
+        }
+        return false;
+      });
+    }
+
+    // Apply RAM filter
+    if (selectedRAM.length > 0) {
+      filteredProducts = filteredProducts.filter((product) => {
+        // Check if product has ramOptions and if any match the selected RAM
+        if (product.ramOptions && Array.isArray(product.ramOptions)) {
+          return product.ramOptions.some((ram) => selectedRAM.includes(ram));
+        }
+        // Check if product has variant.ram and if any match the selected RAM
+        if (product.variant && Array.isArray(product.variant.ram)) {
+          return product.variant.ram.some((ram) => selectedRAM.includes(ram));
+        }
+        return false;
+      });
+    }
+
+    // Apply color filter
+    if (selectedColors.length > 0) {
+      filteredProducts = filteredProducts.filter((product) => {
+        // Check if product has colors and if any match the selected colors
+        if (product.colors && Array.isArray(product.colors)) {
+          return product.colors.some((color) => selectedColors.includes(color));
+        }
+        // Check if product has variant.colors and if any match the selected colors
+        if (product.variant && Array.isArray(product.variant.colors)) {
+          return product.variant.colors.some((color) =>
+            selectedColors.includes(color)
+          );
+        }
+        return false;
+      });
+    }
+
+    // Apply discount filter
+    if (selectedDiscount !== null) {
+      filteredProducts = filteredProducts.filter((product) => {
+        // Calculate discount percentage
+        const discountPercentage =
+          product.price && product.discountPrice
+            ? Math.round(
+                ((product.price - product.discountPrice) / product.price) * 100
+              )
+            : 0;
+
+        return discountPercentage >= selectedDiscount;
+      });
+    }
+
+    // Apply sorting
     if (sortBy === "price-low") {
       filteredProducts.sort((a, b) => a.discountPrice - b.discountPrice);
     } else if (sortBy === "price-high") {
@@ -96,7 +198,14 @@ const ProductList = () => {
   const resetFilters = () => {
     setSelectedBrands([]);
     setPriceRange({ min: 0, max: 150000 });
-    setSortBy("popularity"); // Reset sort order as well
+    setSortBy("popularity");
+    setSelectedRating(0);
+    setStockFilters({ inStock: false, outOfStock: false });
+    setSelectedStorage([]);
+    setSelectedRAM([]);
+    setSelectedColors([]);
+    setSelectedCategories([]);
+    setSelectedDiscount(null);
   };
 
   // Breadcrumb items
@@ -138,8 +247,21 @@ const ProductList = () => {
             toggleBrandFilter={toggleBrandFilter}
             priceRange={priceRange}
             setPriceRange={setPriceRange}
-            handlePriceChange={handlePriceChange}
             setSelectedBrands={setSelectedBrands}
+            stockFilters={stockFilters}
+            setStockFilters={setStockFilters}
+            selectedRating={selectedRating}
+            setSelectedRating={setSelectedRating}
+            selectedStorage={selectedStorage}
+            setSelectedStorage={setSelectedStorage}
+            selectedRAM={selectedRAM}
+            setSelectedRAM={setSelectedRAM}
+            selectedColors={selectedColors}
+            setSelectedColors={setSelectedColors}
+            selectedCategories={selectedCategories}
+            setSelectedCategories={setSelectedCategories}
+            selectedDiscount={selectedDiscount}
+            setSelectedDiscount={setSelectedDiscount}
           />
 
           {/* Product Grid */}

@@ -40,7 +40,6 @@ export const useBannerStore = create(
       set({ loading: true, error: null });
       try {
         const response = await adminApi.get("/admin/banners/public/");
-
         if (response.status === 200) {
           set({ banners: response.data.banners || [], loading: false });
           return response.data.banners;
@@ -181,23 +180,25 @@ export const useBannerStore = create(
       return banners.filter(
         (banner) => banner.position === position && banner.active
       );
-    },
-
-    // Get hero banners
+    }, // Get hero banners
     getHeroBanners: () => {
-      return get().getBannersByPosition("hero");
+      const { banners } = get();
+      return banners
+        .filter((banner) => banner.position === "hero" && banner.active)
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
     },
 
     // Get carousel banners
     getCarouselBanners: () => {
       const { banners } = get();
-      let carouselBanners = banners.filter(
-        (banner) =>
-          ["home-middle", "home-bottom", "carousel"].includes(
-            banner.position
-          ) && banner.active
-      );
-      console.log("Carousel Banners:", carouselBanners);
+      let carouselBanners = banners
+        .filter(
+          (banner) =>
+            ["home-middle", "home-bottom", "carousel"].includes(
+              banner.position
+            ) && banner.active
+        )
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
       return carouselBanners;
     },
 

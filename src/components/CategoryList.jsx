@@ -1,14 +1,48 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { RiSmartphoneLine } from "react-icons/ri";
-import { MdLaptopMac } from "react-icons/md";
-import { MdTablet } from "react-icons/md";
+import { RiSmartphoneLine, RiArrowRightSLine } from "react-icons/ri";
+import {
+  MdLaptopMac,
+  MdTablet,
+  MdKeyboardArrowLeft,
+  MdKeyboardArrowRight,
+} from "react-icons/md";
 import { BiHeadphone } from "react-icons/bi";
 import { FiPackage } from "react-icons/fi";
 import { BsHddStack } from "react-icons/bs";
+import useCategory from "../store/useCategory";
 
-const CategoryList = ({ categories }) => {
-  // Map of category-specific icons
+// Custom CSS for scrollbar hiding
+const scrollbarHideStyles = {
+  scrollbarWidth: "none", // Firefox
+  msOverflowStyle: "none", // IE/Edge
+};
+
+const CategoryList = () => {
+  const { categories, fetchCategories } = useCategory();
+  const [displayCategories, setDisplayCategories] = useState([]);
+
+  const carousel = useRef();
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+  useEffect(() => {
+    // Use backend categories or prop categories and sort them by order
+    if (categories && categories.length > 0) {
+      const sortedCategories = [...categories].sort(
+        (a, b) => (a.order || 0) - (b.order || 0)
+      );
+      setDisplayCategories(sortedCategories);
+    } else if (categories.list && categories.list.length > 0) {
+      const sortedCategories = [...categories.list].sort(
+        (a, b) => (a.order || 0) - (b.order || 0)
+      );
+      setDisplayCategories(sortedCategories);
+    }
+  }, [categories.list, categories]);
+
+  // Fallback icons if images fail to load
   const categoryIcons = {
     Smartphones: <RiSmartphoneLine className="w-full h-full" />,
     Laptops: <MdLaptopMac className="w-full h-full" />,
@@ -16,6 +50,19 @@ const CategoryList = ({ categories }) => {
     "Mobile Accessories": <FiPackage className="w-full h-full" />,
     "Laptop Accessories": <BsHddStack className="w-full h-full" />,
     "Audio Devices": <BiHeadphone className="w-full h-full" />,
+  }; // Handlers for slider controls
+  const scrollLeft = (e) => {
+    e.preventDefault();
+    if (carousel.current) {
+      carousel.current.scrollBy({ left: -300, behavior: "smooth" });
+    }
+  };
+
+  const scrollRight = (e) => {
+    e.preventDefault();
+    if (carousel.current) {
+      carousel.current.scrollBy({ left: 300, behavior: "smooth" });
+    }
   };
 
   return (
@@ -46,116 +93,137 @@ const CategoryList = ({ categories }) => {
         >
           Discover our wide range of products by browsing through popular
           categories
-        </p>
+        </p>{" "}
       </div>
-
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-5 px-4">
-        {categories.map((category) => (
-          <Link
-            key={category.id}
-            to={category.path}
-            className="group relative p-5 sm:p-6 flex flex-col items-center justify-center rounded-xl transition-all duration-500 hover:-translate-y-2 overflow-hidden"
-            style={{
-              backgroundColor: "var(--bg-primary)",
-              borderRadius: "var(--rounded-lg)",
-              boxShadow: "var(--shadow-medium)",
-              minHeight: "180px",
-              border: "1px solid var(--border-primary)",
-            }}
-          >
-            {/* Animated background gradient */}
-            <div
-              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-              style={{
-                background:
-                  "linear-gradient(135deg, var(--bg-accent-light) 0%, rgba(255,255,255,0.9) 100%)",
-                borderRadius: "var(--rounded-lg)",
-              }}
-            />
-
-            {/* Bottom animated border */}
-            <div
-              className="absolute bottom-0 left-0 right-0 h-1.5 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"
-              style={{
-                backgroundColor: "var(--brand-primary)",
-                transformOrigin: "left",
-              }}
-            />
-
-            {/* Decorative elements */}
-            <div
-              className="absolute top-0 right-0 w-24 h-24 -mr-12 -mt-12 rounded-full opacity-10 group-hover:opacity-20 transition-opacity duration-500"
-              style={{ backgroundColor: "var(--brand-primary)" }}
-            />
-
-            <div
-              className="absolute bottom-0 left-0 w-16 h-16 -ml-8 -mb-8 rounded-full opacity-10 group-hover:opacity-20 transition-opacity duration-500"
-              style={{ backgroundColor: "var(--brand-primary)" }}
-            />
-
-            {/* Icon container */}
-            <div
-              className="w-20 h-20 mb-5 rounded-full flex items-center justify-center transition-all duration-500 relative z-10 group-hover:scale-110 p-5"
-              style={{
-                backgroundColor: "var(--bg-accent-light)",
-                boxShadow: "0 4px 20px rgba(245, 158, 11, 0.15)",
-              }}
-            >
-              <div
-                className="w-12 h-12 transform group-hover:rotate-6 transition-transform duration-500"
-                style={{ color: "var(--brand-primary)" }}
-              >
-                {categoryIcons[category.name] || (
-                  <svg
-                    className="w-full h-full"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                )}
+      {/* Slider container with navigation */}
+      <div
+        className="relative px-2"
+        onKeyDown={(e) => {
+          if (e.key === "ArrowLeft") scrollLeft(e);
+          if (e.key === "ArrowRight") scrollRight(e);
+        }}
+      >
+        {/* Navigation buttons */}
+        <button
+          onClick={scrollLeft}
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-lg hover:bg-gray-100 transition-colors focus:outline-none"
+          style={{
+            boxShadow: "var(--shadow-medium)",
+            transform: "translateY(-50%) translateX(-5px)",
+            cursor: "pointer",
+          }}
+          aria-label="Scroll left"
+          type="button"
+        >
+          <MdKeyboardArrowLeft
+            className="w-6 h-6"
+            style={{ color: "var(--brand-primary)" }}
+          />
+        </button>
+        <button
+          onClick={scrollRight}
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-lg hover:bg-gray-100 transition-colors focus:outline-none"
+          style={{
+            boxShadow: "var(--shadow-medium)",
+            transform: "translateY(-50%) translateX(5px)",
+            cursor: "pointer",
+          }}
+          aria-label="Scroll right"
+          type="button"
+        >
+          <MdKeyboardArrowRight
+            className="w-6 h-6"
+            style={{ color: "var(--brand-primary)" }}
+          />{" "}
+        </button>
+        {/* Carousel container */}
+        <div
+          ref={carousel}
+          className="overflow-x-auto relative z-10 scrollbar-hide"
+          style={scrollbarHideStyles}
+          tabIndex="0"
+        >
+          <div className="flex gap-6 py-4 px-8">
+            {/* Display loading state */}
+            {categories.loading && (
+              <div className="flex justify-center w-full py-8">
+                <div
+                  className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2"
+                  style={{ borderColor: "var(--brand-primary)" }}
+                ></div>
               </div>
-            </div>
+            )}
 
-            <h3
-              className="text-lg sm:text-xl font-semibold transition-all duration-300 relative z-10 text-center mb-1 group-hover:text-brand-primary"
-              style={{
-                color: "var(--text-primary)",
-              }}
-            >
-              {category.name}
-            </h3>
+            {/* Display error state */}
+            {categories.error && (
+              <div className="flex justify-center w-full py-8 text-red-500">
+                Error loading categories: {categories.error}
+              </div>
+            )}
 
-            <span
-              className="text-sm flex items-center gap-1 font-medium relative z-10 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0"
-              style={{
-                color: "var(--brand-primary)",
-              }}
-            >
-              <span>Browse Now</span>
-              <svg
-                className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            {/* Display categories */}
+            {displayCategories.map((category) => (
+              <Link
+                key={category.id}
+                to={`${category.redirect_url}`}
+                className="flex-shrink-0 flex flex-col items-center transition-transform duration-300 hover:-translate-y-1"
+                style={{
+                  width: "280px",
+                }}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M14 5l7 7m0 0l-7 7m7-7H3"
-                />
-              </svg>
-            </span>
-          </Link>
-        ))}
+                {/* Image container */}{" "}
+                <div
+                  className="flex items-center justify-center mb-3 relative overflow-hidden transition-all duration-300 hover:shadow-lg"
+                  style={{
+                    width: "110px",
+                    height: "110px",
+                    borderRadius: "8px",
+                    padding: "5px",
+                    backgroundColor: "transparent",
+                  }}
+                >
+                  {category.image_url ? (
+                    <img
+                      src={category.image_url}
+                      alt={category.name}
+                      className="w-full h-full object-contain transition-transform duration-300 hover:scale-110"
+                      style={{
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        backgroundColor: "transparent",
+                      }}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.style.display = "none";
+                        if (e.target.nextSibling) {
+                          e.target.nextSibling.style.display = "block";
+                        }
+                      }}
+                    />
+                  ) : (
+                    <div
+                      className="w-full h-full flex items-center justify-center transition-transform duration-300 hover:scale-110"
+                      style={{ color: "var(--brand-primary)" }}
+                    >
+                      {categoryIcons[category.name] || (
+                        <RiArrowRightSLine className="w-14 h-14" />
+                      )}
+                    </div>
+                  )}
+                </div>
+                {/* Category name */}
+                <h3
+                  className="text-sm font-medium text-center transition-colors duration-300 hover:text-brand-primary"
+                  style={{
+                    color: "var(--text-primary)",
+                  }}
+                >
+                  {category.name}
+                </h3>
+              </Link>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -68,16 +68,9 @@ const Home = () => {
     if (inView) {
       loadMoreProducts();
     }
-  }, [inView, loadMoreProducts]);
-  // Mock data for categories - focused on electronics product catalog
-  const categories = [
-    { id: 1, name: "Smartphones", path: "/category/smartphones" },
-    { id: 2, name: "Laptops", path: "/category/laptops" },
-    { id: 3, name: "Tablets", path: "/category/tablets" },
-    { id: 4, name: "Mobile Accessories", path: "/category/mobile-accessories" },
-    { id: 5, name: "Laptop Accessories", path: "/category/laptop-accessories" },
-    { id: 6, name: "Audio Devices", path: "/category/audio" },
-  ];
+  }, [inView, loadMoreProducts]); // We don't need mock data anymore as CategoryList will fetch from backend
+  // Keeping as fallback in case backend is not available
+  const categories = [];
 
   return (
     <div
@@ -107,7 +100,7 @@ const Home = () => {
         style={{ backgroundColor: "var(--bg-primary)" }}
         className="py-12"
       >
-        <div className="container mx-auto px-4">
+        <div className="container">
           {" "}
           <h2
             style={{ color: "var(--text-primary)" }}

@@ -861,7 +861,7 @@ const EditProductModal = ({ product, onClose, onSave }) => {
                   </button>
                 </div>
 
-                {formData.variant.storage.map((option, index) => (
+                {formData.variant.storage?.map((option, index) => (
                   <div key={index} className="flex items-center mb-2">
                     <input
                       type="text"

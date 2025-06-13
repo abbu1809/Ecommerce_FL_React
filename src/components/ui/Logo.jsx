@@ -1,7 +1,14 @@
-import React from "react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useLogoStore } from "../../store/Admin/useLogoStore";
 
 const Logo = ({ size = "medium", linkWrapper = true, titleColor }) => {
+  const { logo, fetchLogo } = useLogoStore();
+
+  useEffect(() => {
+    fetchLogo();
+  }, [fetchLogo]);
+
   const sizes = {
     small: "h-8 w-auto",
     medium: "h-12 w-auto",
@@ -15,7 +22,7 @@ const Logo = ({ size = "medium", linkWrapper = true, titleColor }) => {
     <>
       <div className="relative">
         <img
-          src="/logo.jpg"
+          src={logo || "/logo.jpg"}
           alt="Anand Mobiles"
           className={`${sizes[size]} rounded-md transition-transform duration-300 hover:scale-105`}
           style={{
