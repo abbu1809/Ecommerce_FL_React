@@ -24,9 +24,8 @@ const Wishlist = () => {
     // Load wishlist data when component mounts
     fetchWishlist();
   }, [fetchWishlist, isAuthenticated]);
-
-  const handleRemoveFromWishlist = async (id) => {
-    const success = await removeItem(id);
+  const handleRemoveFromWishlist = async (itemId) => {
+    const success = await removeItem(itemId);
     if (success) {
       showRemoveFromWishlistToast();
     }
@@ -146,16 +145,16 @@ const Wishlist = () => {
                             style={{ color: "var(--text-primary)" }}
                           >
                             {item.name}
-                          </Link>
+                          </Link>{" "}
                           <p
                             className="font-bold mt-1 text-lg"
                             style={{ color: "var(--brand-primary)" }}
                           >
-                            ₹{item.price.toLocaleString()}
+                            ₹{item.price ? item.price.toLocaleString() : "N/A"}
                           </p>
                         </div>{" "}
                         <button
-                          onClick={() => handleRemoveFromWishlist(item.id)}
+                          onClick={() => handleRemoveFromWishlist(item.item_id)}
                           className="p-2 rounded-full transition-colors hover:bg-gray-100"
                           style={{ color: "var(--text-secondary)" }}
                           aria-label="Remove from wishlist"

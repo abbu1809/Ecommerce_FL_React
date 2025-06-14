@@ -201,27 +201,45 @@ const Product = () => {
       product.product_description ||
       "No description available",
     category: product.category || product.product_category || "General",
-    brand: product.brand || product.manufacturer || "Unknown Brand",
-    // Handle variants
+    brand: product.brand || product.manufacturer || "Unknown Brand", // Handle variants
     variant: product.variant || {},
     colors: product.variant?.colors || [],
     ramOptions: product.variant?.ram || [],
     storageOptions: product.variant?.storage || [],
     validOptions: product.valid_options || [],
     selectedColor: selectedVariant?.colors || null,
+
+    // Use variant-specific values when available
+    currentPrice:
+      selectedVariant?.discounted_price ||
+      selectedVariant?.price ||
+      product.discount_price ||
+      product.discountPrice ||
+      product.discounted_price ||
+      product.sale_price ||
+      product.price ||
+      0,
+    originalPrice:
+      selectedVariant?.price || product.price || product.original_price || 0,
+    currentStock:
+      selectedVariant?.stock ||
+      product.stock ||
+      product.quantity ||
+      product.inventory ||
+      0,
   }; // Debug normalized product
   console.log("Normalized product data:", normalizedProduct);
   console.log("Selected variant:", selectedVariant);
   const handleQuantityChange = (e) => {
     const value = parseInt(e.target.value);
-    const maxStock = selectedVariant?.stock || normalizedProduct.stock;
+    const maxStock = normalizedProduct.currentStock;
     if (value > 0 && value <= maxStock) {
       setQuantity(value);
     }
   };
 
   const incrementQuantity = () => {
-    const maxStock = selectedVariant?.stock || normalizedProduct.stock;
+    const maxStock = normalizedProduct.currentStock;
     if (quantity < maxStock) {
       setQuantity(quantity + 1);
     }
@@ -231,26 +249,21 @@ const Product = () => {
       setQuantity(quantity - 1);
     }
   };
-
   const addToCart = async () => {
     if (!user) {
       showCartErrorToast("Please log in to add items to cart");
       return;
     }
-
     try {
       const cartItem = {
         id: normalizedProduct.id,
         name: normalizedProduct.name,
-        price:
-          selectedVariant?.discounted_price ||
-          selectedVariant?.price ||
-          normalizedProduct.discountPrice ||
-          normalizedProduct.price,
+        price: normalizedProduct.currentPrice, // Use the computed current price
         image: normalizedProduct.images?.[0] || normalizedProduct.image,
-        quantity: quantity,
+        variant_id: selectedVariant?.id || null,
         variant: selectedVariant
           ? {
+              id: selectedVariant.id,
               color: selectedVariant.colors,
               storage: selectedVariant.storage,
               ram: selectedVariant.ram,
@@ -259,7 +272,7 @@ const Product = () => {
           : null,
       };
 
-      await addToCartStore(cartItem);
+      await addToCartStore(cartItem, quantity); // Pass quantity as separate parameter
       showAddToCartToast(normalizedProduct.name, quantity);
     } catch (error) {
       console.error("Error adding to cart:", error);
@@ -271,19 +284,16 @@ const Product = () => {
       showCartErrorToast("Please log in to add items to wishlist");
       return;
     }
-
     try {
       const wishlistItem = {
         id: normalizedProduct.id,
         name: normalizedProduct.name,
-        price:
-          selectedVariant?.discounted_price ||
-          selectedVariant?.price ||
-          normalizedProduct.discountPrice ||
-          normalizedProduct.price,
+        price: normalizedProduct.currentPrice, // Use the computed current price
         image: normalizedProduct.images?.[0] || normalizedProduct.image,
+        variant_id: selectedVariant?.id || null,
         variant: selectedVariant
           ? {
+              id: selectedVariant.id,
               color: selectedVariant.colors,
               storage: selectedVariant.storage,
               ram: selectedVariant.ram,
@@ -351,21 +361,17 @@ const Product = () => {
                 </div>
               )}{" "}
               <div className="border-t border-gray-200 py-4">
+                {" "}
                 <ProductQuantitySelector
                   quantity={quantity}
                   setQuantity={setQuantity}
-                  stock={selectedVariant?.stock || normalizedProduct.stock}
+                  stock={normalizedProduct.currentStock}
                   handleQuantityChange={handleQuantityChange}
                   incrementQuantity={incrementQuantity}
                   decrementQuantity={decrementQuantity}
                 />
                 <ProductActions
-                  price={
-                    selectedVariant?.discounted_price ||
-                    selectedVariant?.price ||
-                    normalizedProduct.discountPrice ||
-                    normalizedProduct.price
-                  }
+                  price={normalizedProduct.currentPrice}
                   addToCart={addToCart}
                   addToWishlist={addToWishlist}
                 />

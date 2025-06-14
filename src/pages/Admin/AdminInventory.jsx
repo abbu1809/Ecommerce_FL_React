@@ -15,9 +15,9 @@ const AdminInventory = () => {
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
-
   const { products, fetchProducts } = useAdminProducts();
-  const { getLowStockProducts, getInventoryStats } = useAdminInventory();
+  const { getLowStockProducts, getInventoryStats, getProductStockStatus } =
+    useAdminInventory();
 
   // Fetch products on component mount
   useEffect(() => {
@@ -28,7 +28,6 @@ const AdminInventory = () => {
   // Get low stock products and inventory stats
   const lowStockProducts = getLowStockProducts();
   const inventoryStats = getInventoryStats();
-
   // Filter products based on search and filters
   const filteredProducts = products.list.filter((product) => {
     const matchesSearch =
@@ -37,14 +36,19 @@ const AdminInventory = () => {
 
     const matchesCategory =
       categoryFilter === "all" || product.category === categoryFilter;
-
     let matchesStock = true;
     if (stockFilter === "in-stock") {
-      matchesStock = product.stock > 10;
+      const stockStatus = getProductStockStatus(product);
+      matchesStock =
+        stockStatus.status === "in-stock" && stockStatus.totalStock > 10;
     } else if (stockFilter === "low-stock") {
-      matchesStock = product.stock <= 10 && product.stock > 0;
+      const stockStatus = getProductStockStatus(product);
+      matchesStock =
+        ["low-stock", "partial-out-of-stock"].includes(stockStatus.status) &&
+        stockStatus.totalStock > 0;
     } else if (stockFilter === "out-of-stock") {
-      matchesStock = product.stock === 0;
+      const stockStatus = getProductStockStatus(product);
+      matchesStock = stockStatus.status === "out-of-stock";
     }
 
     return matchesSearch && matchesCategory && matchesStock;

@@ -42,9 +42,7 @@ const ProductVariantSelector = ({
                 value !== "" &&
                 typeof value === "string" &&
                 value.trim() !== "" &&
-                !value.includes("fgh") && // Filter out test data
-                !value.includes("dfg") && // Filter out test data
-                value.length < 50 // Reasonable length limit
+                value.length < 100 // Reasonable length limit
             )
         ),
       ];
@@ -93,57 +91,58 @@ const ProductVariantSelector = ({
     console.log("New selections:", newSelections);
     setVariantSelections(newSelections);
 
-    // Find matching valid option
-    const matchingOption = validOptions.find((option) => {
+    // First try to find an exact match
+    let matchingOption = validOptions.find((option) => {
       return Object.keys(newSelections).every((selectionKey) => {
         return option[selectionKey] === newSelections[selectionKey];
       });
     });
 
-    console.log("Matching option found:", matchingOption);
+    // If no exact match, find the option that has the selected key-value pair
+    if (!matchingOption) {
+      console.log(
+        "No exact match found, looking for option with selected value..."
+      );
+      matchingOption = validOptions.find((option) => {
+        return option[key] === value;
+      });
+    }
+
+    // If still no match, use the first available option
+    if (!matchingOption && validOptions.length > 0) {
+      console.log("Using first available option as fallback");
+      matchingOption = validOptions[0];
+    }
+
+    console.log("Selected option:", matchingOption);
     if (matchingOption) {
       console.log("Calling onVariantChange with:", matchingOption);
       onVariantChange(matchingOption);
-    } else {
-      console.log("No exact match found, looking for partial match...");
-      // Try to find a partial match or fallback
-      const partialMatch = validOptions.find((option) => {
-        return option[key] === value;
+
+      // Update all selections to match the found option
+      const updatedSelections = {};
+      Object.keys(availableOptions).forEach((optionKey) => {
+        if (
+          matchingOption[optionKey] !== undefined &&
+          matchingOption[optionKey] !== null &&
+          matchingOption[optionKey] !== ""
+        ) {
+          updatedSelections[optionKey] = matchingOption[optionKey];
+        }
       });
-      if (partialMatch) {
-        console.log("Using partial match:", partialMatch);
-        onVariantChange(partialMatch);
-        // Update selections to match the partial match
-        const updatedSelections = {};
-        Object.keys(availableOptions).forEach((optionKey) => {
-          if (partialMatch[optionKey] !== undefined) {
-            updatedSelections[optionKey] = partialMatch[optionKey];
-          }
-        });
-        setVariantSelections(updatedSelections);
-      }
+      setVariantSelections(updatedSelections);
     }
   };
 
-  const isOptionAvailable = (key, value) => {
-    // Check if this combination would result in a valid option
-    const testSelections = { ...variantSelections, [key]: value };
-
-    return validOptions.some((option) => {
-      return Object.keys(testSelections).every((selectionKey) => {
-        return option[selectionKey] === testSelections[selectionKey];
-      });
-    });
-  };
   const getDisplayName = (key) => {
-    const displayNames = {
-      colors: "Color",
-      storage: "Storage",
-      ram: "RAM",
-      size: "Screen Size",
-      resolution: "Resolution",
-    };
-    return displayNames[key] || key.charAt(0).toUpperCase() + key.slice(1);
+    // Just format the key name properly - no custom renaming
+    return (
+      key.charAt(0).toUpperCase() +
+      key
+        .slice(1)
+        .replace(/([A-Z])/g, " $1")
+        .trim()
+    );
   };
   const formatValue = (key, value) => {
     if (key === "storage") {
@@ -158,7 +157,8 @@ const ProductVariantSelector = ({
     if (key === "colors") {
       return value.charAt(0).toUpperCase() + value.slice(1);
     }
-    return value;
+    // For any other key, just return the value as is
+    return value.toString();
   };
   console.log("ProductVariantSelector rendered with:", {
     validOptions,
@@ -180,21 +180,18 @@ const ProductVariantSelector = ({
             {getDisplayName(key)}:
           </h4>
           <div className="flex flex-wrap gap-2">
+            {" "}
             {values.map((value) => {
               const isSelected = variantSelections[key] === value;
-              const isAvailable = isOptionAvailable(key, value);
 
               return (
                 <button
                   key={value}
                   onClick={() => handleSelectionChange(key, value)}
-                  disabled={!isAvailable}
-                  className={`px-3 py-2 text-sm font-medium rounded-md border transition-all duration-200 ${
+                  className={`px-3 py-2 text-sm font-medium rounded-md border transition-all duration-200 cursor-pointer ${
                     isSelected
                       ? "border-orange-500 bg-orange-50 text-orange-700"
-                      : isAvailable
-                      ? "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
-                      : "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50"
                   }`}
                 >
                   {key === "colors" && (

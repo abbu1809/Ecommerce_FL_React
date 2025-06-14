@@ -5,17 +5,25 @@ import {
   FiX,
   FiAlertTriangle,
   FiCheckCircle,
+  FiEye,
 } from "react-icons/fi";
 import useAdminProducts from "../../../store/Admin/useAdminProducts";
 import useAdminInventory from "../../../store/Admin/useAdminInventory";
+import VariantStockModal from "./VariantStockModal";
 
 const StockTable = ({ categoryFilter, stockFilter, searchQuery }) => {
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { products, fetchProducts } = useAdminProducts();
-  const { getFilteredInventory, updateProductStock, generateSKU } =
-    useAdminInventory();
+  const {
+    getFilteredInventory,
+    updateProductStock,
+    generateSKU,
+    getProductStockStatus,
+  } = useAdminInventory();
   // Helper function to get display price from product
   const getProductDisplayPrice = (product) => {
     if (!product) return 0;
@@ -94,23 +102,48 @@ const StockTable = ({ categoryFilter, stockFilter, searchQuery }) => {
       }
     }
   };
-
   const cancelEdit = () => {
     setEditingId(null);
     setEditValue("");
   };
 
-  const getStockStatusStyles = (stock, minStock = 5) => {
-    if (stock === 0) {
+  const openVariantModal = (product) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const closeVariantModal = () => {
+    setSelectedProduct(null);
+    setIsModalOpen(false);
+  };
+
+  const hasVariants = (product) => {
+    return product.valid_options && product.valid_options.length > 0;
+  };
+  const getStockStatusStyles = (product) => {
+    const stockStatus = getProductStockStatus(product);
+
+    // Check for variant-level issues first
+    if (stockStatus.status === "out-of-stock") {
       return {
         text: "Out of Stock",
         bgColor: "#FEF2F2",
         textColor: "#DC2626",
         icon: <FiAlertTriangle size={14} />,
       };
-    } else if (stock <= minStock) {
+    } else if (stockStatus.status === "partial-out-of-stock") {
       return {
-        text: "Low Stock",
+        text: "Variants Out",
+        bgColor: "#FEF2F2",
+        textColor: "#DC2626",
+        icon: <FiAlertTriangle size={14} />,
+      };
+    } else if (stockStatus.status === "low-stock") {
+      return {
+        text:
+          stockStatus.lowStockVariants.length > 0
+            ? "Variants Low"
+            : "Low Stock",
         bgColor: "#FFFBEB",
         textColor: "#D97706",
         icon: <FiAlertTriangle size={14} />,
@@ -203,10 +236,7 @@ const StockTable = ({ categoryFilter, stockFilter, searchQuery }) => {
           {filteredProducts
             .filter((product) => product && product.id) // Filter out null/undefined products
             .map((product) => {
-              const stockStatus = getStockStatusStyles(
-                getProductTotalStock(product),
-                5
-              );
+              const stockStatus = getStockStatusStyles(product);
               const productSKU = generateSKU(product);
               const productImage =
                 product.images && product.images.length > 0
@@ -256,7 +286,7 @@ const StockTable = ({ categoryFilter, stockFilter, searchQuery }) => {
                     >
                       {productSKU}
                     </div>
-                  </td>
+                  </td>{" "}
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     {editingId === product.id ? (
                       <div className="flex items-center justify-center">
@@ -306,27 +336,45 @@ const StockTable = ({ categoryFilter, stockFilter, searchQuery }) => {
                           className="text-sm font-medium mr-2"
                           style={{
                             color:
-                              product.stock === 0
+                              getProductTotalStock(product) === 0
                                 ? "var(--error-color)"
-                                : product.stock <= 5
+                                : getProductTotalStock(product) <= 5
                                 ? "var(--warning-color)"
                                 : "var(--text-primary)",
                           }}
                         >
-                          {product.stock}
+                          {getProductTotalStock(product)}
                         </div>
-                        <button
-                          onClick={() =>
-                            startEditing(product.id, product.stock)
-                          }
-                          className="p-1 rounded-md hover:bg-gray-100"
-                          title="Edit stock level"
-                        >
-                          <FiEdit2
-                            size={14}
-                            style={{ color: "var(--brand-primary)" }}
-                          />
-                        </button>
+                        <div className="flex space-x-1">
+                          {hasVariants(product) && (
+                            <button
+                              onClick={() => openVariantModal(product)}
+                              className="p-1 rounded-md hover:bg-gray-100"
+                              title="View variant stocks"
+                              style={{
+                                backgroundColor: "var(--bg-secondary)",
+                                color: "var(--brand-primary)",
+                              }}
+                            >
+                              <FiEye size={14} />
+                            </button>
+                          )}
+                          <button
+                            onClick={() =>
+                              startEditing(
+                                product.id,
+                                getProductTotalStock(product)
+                              )
+                            }
+                            className="p-1 rounded-md hover:bg-gray-100"
+                            title="Edit total stock level"
+                          >
+                            <FiEdit2
+                              size={14}
+                              style={{ color: "var(--brand-primary)" }}
+                            />
+                          </button>
+                        </div>
                       </div>
                     )}
                   </td>
@@ -422,10 +470,15 @@ const StockTable = ({ categoryFilter, stockFilter, searchQuery }) => {
             }}
             disabled
           >
-            Next
+            Next{" "}
           </button>
         </div>
       </div>
+      <VariantStockModal
+        isOpen={isModalOpen}
+        onClose={closeVariantModal}
+        product={selectedProduct}
+      />
     </div>
   );
 };

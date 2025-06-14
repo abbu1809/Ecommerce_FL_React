@@ -1,20 +1,70 @@
 import OrderTrackingTimeline from "../components/OrderTracking/OrderTrackingTimeline";
+import ReviewModal from "../components/OrderStatus/ReviewModal";
 import { Link } from "react-router-dom";
-import { FiArrowLeft, FiPackage, FiCalendar, FiInfo } from "react-icons/fi";
+import {
+  FiArrowLeft,
+  FiPackage,
+  FiCalendar,
+  FiInfo,
+  FiStar,
+} from "react-icons/fi";
+import { useState } from "react";
 
 const OrderTracking = () => {
+  // State for review modal
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [selectedProductForReview, setSelectedProductForReview] =
+    useState(null);
+
   // Example order status data (replace with real data from backend/store)
   const order = {
     id: "ORD123456",
-    status: "Out for Delivery",
+    status: "Delivered", // Changed to "Delivered" to demonstrate review functionality
     timeline: [
       { status: "Ordered", date: "2025-05-10T10:00:00Z" },
       { status: "Packed", date: "2025-05-11T09:00:00Z" },
       { status: "Shipped", date: "2025-05-12T14:00:00Z" },
       { status: "Out for Delivery", date: "2025-05-13T08:00:00Z" },
-      { status: "Delivered", date: null },
+      { status: "Delivered", date: "2025-05-14T14:30:00Z" },
     ],
     estimatedDelivery: "2025-05-14",
+    // Add order items for review functionality
+    orderItems: [
+      {
+        id: 1,
+        name: "iPhone 15 Pro",
+        brand: "Apple",
+        model: "A3101",
+        image: "/mobile1.png",
+        price: 99999,
+        quantity: 1,
+        orderId: "ORD123456",
+        orderDate: "2025-05-10T10:00:00Z",
+      },
+      {
+        id: 2,
+        name: "AirPods Pro",
+        brand: "Apple",
+        model: "A2931",
+        image: "/accessories.png",
+        price: 24999,
+        quantity: 1,
+        orderId: "ORD123456",
+        orderDate: "2025-05-10T10:00:00Z",
+      },
+    ],
+  };
+
+  // Handle opening review modal for a specific product
+  const handleWriteReview = (product) => {
+    setSelectedProductForReview(product);
+    setIsReviewModalOpen(true);
+  };
+
+  // Handle closing review modal
+  const handleCloseReviewModal = () => {
+    setIsReviewModalOpen(false);
+    setSelectedProductForReview(null);
   };
 
   return (
@@ -154,14 +204,123 @@ const OrderTracking = () => {
                 >
                   We'll update this page as your order progresses.
                 </p>
-              </div>
-
+              </div>{" "}
               <OrderTrackingTimeline
                 timeline={order.timeline}
                 currentStatus={order.status}
               />
+              {/* Order Items Section - Show only when delivered */}
+              {order.status === "Delivered" &&
+                order.orderItems &&
+                order.orderItems.length > 0 && (
+                  <div className="mt-8">
+                    <h3
+                      className="text-lg font-semibold mb-4 flex items-center"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      <FiPackage className="mr-2" size={20} />
+                      Order Items ({order.orderItems.length})
+                    </h3>
+
+                    <div className="space-y-4">
+                      {order.orderItems.map((item, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-4 rounded-lg border"
+                          style={{
+                            backgroundColor: "var(--bg-secondary)",
+                            borderColor: "var(--border-secondary)",
+                          }}
+                        >
+                          <div className="flex items-center space-x-4">
+                            {item.image ? (
+                              <img
+                                src={item.image}
+                                alt={item.name}
+                                className="w-16 h-16 object-cover rounded-lg"
+                              />
+                            ) : (
+                              <div
+                                className="w-16 h-16 rounded-lg flex items-center justify-center"
+                                style={{
+                                  backgroundColor: "var(--brand-primary)15",
+                                  color: "var(--brand-primary)",
+                                }}
+                              >
+                                <FiPackage size={24} />
+                              </div>
+                            )}
+
+                            <div>
+                              <h4
+                                className="font-medium text-base"
+                                style={{ color: "var(--text-primary)" }}
+                              >
+                                {item.name}
+                              </h4>
+                              {item.brand && (
+                                <p
+                                  className="text-sm"
+                                  style={{ color: "var(--text-secondary)" }}
+                                >
+                                  Brand: {item.brand}
+                                </p>
+                              )}
+                              {item.model && (
+                                <p
+                                  className="text-sm"
+                                  style={{ color: "var(--text-secondary)" }}
+                                >
+                                  Model: {item.model}
+                                </p>
+                              )}
+                              <p
+                                className="text-sm"
+                                style={{ color: "var(--text-secondary)" }}
+                              >
+                                Qty: {item.quantity}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center space-x-4">
+                            <div className="text-right">
+                              <div
+                                className="text-lg font-bold"
+                                style={{ color: "var(--brand-primary)" }}
+                              >
+                                ₹{item.price.toLocaleString()}
+                              </div>
+                            </div>
+
+                            {/* Review button for delivered items */}
+                            <button
+                              onClick={() => handleWriteReview(item)}
+                              className="flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 hover:bg-orange-100"
+                              style={{
+                                color: "var(--brand-primary)",
+                                border: "1px solid var(--brand-primary)",
+                              }}
+                              title="Write Review"
+                            >
+                              <FiStar size={16} className="mr-2" />
+                              Write Review
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
             </div>
           </div>
+
+          {/* Review Modal */}
+          <ReviewModal
+            isOpen={isReviewModalOpen}
+            onClose={handleCloseReviewModal}
+            product={selectedProductForReview}
+          />
         </div>
       </div>
     </div>

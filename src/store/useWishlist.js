@@ -25,11 +25,13 @@ export const useWishlistStore = create(
               id: item.product_id,
               item_id: item.item_id,
               name: item.name,
-              price: item.price,
+              price: item.price, // This now comes from variant or product pricing from backend
               image: item.image_url,
-              stock: item.stock || 1, // Default to 1 if not provided by API
+              stock: item.stock || 1, // This now comes from variant or product stock
               category: item.category || "Product",
               added_at: item.added_at,
+              variant_id: item.variant_id,
+              variant: item.variant, // Full variant details
             }));
 
             set({
@@ -66,10 +68,11 @@ export const useWishlistStore = create(
             set({ isLoading: false });
             return true; // Item already in wishlist
           }
-
           if (isAuthenticated) {
             // Send to server first
-            await api.post(`/users/wishlist/add/${product.id}/`);
+            await api.post(`/users/wishlist/add/${product.id}/`, {
+              variant_id: product.variant_id || null,
+            });
           }
 
           // Then update local state
@@ -90,31 +93,49 @@ export const useWishlistStore = create(
       },
 
       // Remove an item from the wishlist
-      removeItem: async (productId) => {
+      removeItem: async (itemId) => {
         try {
           set({ isLoading: true, error: null });
           const isAuthenticated = useAuthStore.getState().isAuthenticated;
 
           if (isAuthenticated) {
-            // Remove from server first
-            await api.delete(`/users/wishlist/remove/${productId}/`);
+            // Remove from server first using item_id
+            const response = await api.delete(
+              `/users/wishlist/remove/${itemId}/`
+            );
+
+            // Show success message
+            if (response.data.message) {
+              toast.success(response.data.message);
+            }
           }
 
           // Then update local state
           const { items } = get();
+          const removedItem = items.find((item) => item.item_id === itemId);
+
           set({
-            items: items.filter((item) => item.id !== productId),
+            items: items.filter((item) => item.item_id !== itemId),
             isLoading: false,
           });
 
+          // Show success for guest users
+          if (!isAuthenticated && removedItem) {
+            toast.success(`${removedItem.name} removed from wishlist`);
+          }
+
           return true;
         } catch (error) {
+          const errorMessage =
+            error.response?.data?.error ||
+            "Failed to remove item from wishlist";
           set({
             isLoading: false,
-            error:
-              error.response?.data?.error ||
-              "Failed to remove item from wishlist",
+            error: errorMessage,
           });
+
+          // Show error toast
+          toast.error(errorMessage);
           return false;
         }
       },
@@ -130,12 +151,11 @@ export const useWishlistStore = create(
         try {
           set({ isLoading: true, error: null });
           const isAuthenticated = useAuthStore.getState().isAuthenticated;
-
           if (isAuthenticated) {
-            // Clear server wishlist by removing each item
+            // Clear server wishlist by removing each item using item_id
             const { items } = get();
             const deletePromises = items.map((item) =>
-              api.delete(`/users/wishlist/remove/${item.id}/`)
+              api.delete(`/users/wishlist/remove/${item.item_id}/`)
             );
             await Promise.all(deletePromises);
           }

@@ -396,6 +396,50 @@ export const useAdminProducts = create((set, get) => ({
       };
     }
   },
+
+  // Update variant stock for a product
+  updateVariantStock: async (productId, variantUpdates) => {
+    set((state) => ({
+      products: {
+        ...state.products,
+        loading: true,
+        error: null,
+      },
+    }));
+
+    try {
+      const response = await adminApi.patch(
+        `/admin/products/${productId}/update-variant-stock/`,
+        { variant_updates: variantUpdates }
+      );
+
+      if (response.status === 200) {
+        // Refresh products to get updated data
+        await get().fetchProducts();
+
+        return {
+          success: true,
+          message:
+            response.data.message || "Variant stock updated successfully",
+          updatedVariants: response.data.updated_variants,
+        };
+      }
+    } catch (error) {
+      set((state) => ({
+        products: {
+          ...state.products,
+          loading: false,
+          error:
+            error.response?.data?.error || "Failed to update variant stock",
+        },
+      }));
+      return {
+        success: false,
+        message:
+          error.response?.data?.error || "Failed to update variant stock",
+      };
+    }
+  },
 }));
 
 export default useAdminProducts;

@@ -27,12 +27,14 @@ export const useCartStore = create(
               id: item.product_id,
               item_id: item.item_id,
               name: item.name,
-              price: item.price,
+              price: item.price, // This now comes from variant or product pricing from backend
               image: item.image_url,
               quantity: item.quantity,
-              stock: item.stock || 10, // Default to 10 if not provided by API
+              stock: item.stock || 10, // This now comes from variant or product stock
               category: item.category || "Product",
               added_at: item.added_at,
+              variant_id: item.variant_id,
+              variant: item.variant, // Full variant details
             }));
 
             set({
@@ -63,26 +65,36 @@ export const useCartStore = create(
         try {
           set({ isLoading: true, error: null });
           const isAuthenticated = useAuthStore.getState().isAuthenticated;
-
           if (isAuthenticated) {
             // Send to server first
             await api.post(`/users/cart/add/${product.id}/`, {
               quantity,
+              variant_id: product.variant_id || null,
             });
-          }
-
-          // Then update local state
+          } // Then update local state
           const { items } = get();
-          const existingItem = items.find((item) => item.id === product.id);
+          // For cart items with variants, we need to check both product_id and variant_id
+          const cartItemKey = product.variant_id
+            ? `${product.id}_${product.variant_id}`
+            : product.id;
+          const existingItem = items.find((item) => {
+            const itemKey = item.variant_id
+              ? `${item.id}_${item.variant_id}`
+              : item.id;
+            return itemKey === cartItemKey;
+          });
 
           if (existingItem) {
             // Update quantity if item already exists
             set({
-              items: items.map((item) =>
-                item.id === product.id
+              items: items.map((item) => {
+                const itemKey = item.variant_id
+                  ? `${item.id}_${item.variant_id}`
+                  : item.id;
+                return itemKey === cartItemKey
                   ? { ...item, quantity: item.quantity + quantity }
-                  : item
-              ),
+                  : item;
+              }),
               isLoading: false,
             });
           } else {
@@ -107,59 +119,83 @@ export const useCartStore = create(
       },
 
       // Remove an item from the cart
-      removeItem: async (productId) => {
+      removeItem: async (itemId) => {
         try {
           set({ isLoading: true, error: null });
           const isAuthenticated = useAuthStore.getState().isAuthenticated;
 
           if (isAuthenticated) {
-            // Remove from server first
-            await api.delete(`/users/cart/remove/${productId}/`);
+            // Remove from server first using item_id
+            const response = await api.delete(`/users/cart/remove/${itemId}/`);
+
+            // Show success message
+            if (response.data.message) {
+              toast.success(response.data.message);
+            }
           }
 
           // Then update local state
           const { items } = get();
+          const removedItem = items.find((item) => item.item_id === itemId);
+
           set({
-            items: items.filter((item) => item.id !== productId),
+            items: items.filter((item) => item.item_id !== itemId),
             isLoading: false,
           });
 
           // Update cart totals
           updateTotals();
+
+          // Show success for guest users
+          if (!isAuthenticated && removedItem) {
+            toast.success(`${removedItem.name} removed from cart`);
+          }
+
           return true;
         } catch (error) {
+          const errorMessage =
+            error.response?.data?.error || "Failed to remove item from cart";
           set({
             isLoading: false,
-            error:
-              error.response?.data?.error || "Failed to remove item from cart",
+            error: errorMessage,
           });
+
+          // Show error toast
+          toast.error(errorMessage);
           return false;
         }
       },
 
       // Update item quantity
-      updateQuantity: async (productId, quantity) => {
+      updateQuantity: async (itemId, quantity) => {
         try {
           set({ isLoading: true, error: null });
           const isAuthenticated = useAuthStore.getState().isAuthenticated;
 
           if (quantity <= 0) {
             // Call removeItem if quantity is zero or negative
-            return get().removeItem(productId);
+            return get().removeItem(itemId);
           }
 
           if (isAuthenticated) {
             // For authenticated users, we need to remove and re-add with new quantity
             // since there's no specific update endpoint
-            await api.delete(`/users/cart/remove/${productId}/`);
-            await api.post(`/users/cart/add/${productId}/`, { quantity });
+            const { items } = get();
+            const item = items.find((item) => item.item_id === itemId);
+            if (item) {
+              await api.delete(`/users/cart/remove/${itemId}/`);
+              await api.post(`/users/cart/add/${item.id}/`, {
+                quantity,
+                variant_id: item.variant_id || null,
+              });
+            }
           }
 
           // Update local state
           const { items } = get();
           set({
             items: items.map((item) =>
-              item.id === productId ? { ...item, quantity } : item
+              item.item_id === itemId ? { ...item, quantity } : item
             ),
             isLoading: false,
           });
@@ -182,12 +218,11 @@ export const useCartStore = create(
         try {
           set({ isLoading: true, error: null });
           const isAuthenticated = useAuthStore.getState().isAuthenticated;
-
           if (isAuthenticated) {
-            // Clear server cart by removing each item
+            // Clear server cart by removing each item using item_id
             const { items } = get();
             const deletePromises = items.map((item) =>
-              api.delete(`/users/cart/remove/${item.id}/`)
+              api.delete(`/users/cart/remove/${item.item_id}/`)
             );
             await Promise.all(deletePromises);
           }

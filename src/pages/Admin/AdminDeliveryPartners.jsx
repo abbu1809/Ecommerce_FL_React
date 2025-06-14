@@ -9,6 +9,13 @@ import {
   FiFilter,
   FiRefreshCw,
   FiUser,
+  FiPhone,
+  FiMail,
+  FiMapPin,
+  FiCalendar,
+  FiTruck,
+  FiClock,
+  FiEye,
 } from "react-icons/fi";
 import Pagination from "../../components/common/Pagination";
 
@@ -19,6 +26,8 @@ const AdminDeliveryPartners = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [showModal, setShowModal] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [partnerDetails, setPartnerDetails] = useState(null);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -29,10 +38,14 @@ const AdminDeliveryPartners = () => {
       console.error("Error fetching delivery partners:", error);
     });
   }, [fetchDeliveryPartners]); // We're handling verification directly in confirmVerify now
-
   const openVerifyModal = (partner) => {
     setSelectedPartner(partner);
     setShowModal(true);
+  };
+
+  const openDetailsModal = (partner) => {
+    setPartnerDetails(partner);
+    setShowDetailsModal(true);
   };
   const confirmVerify = async () => {
     if (selectedPartner) {
@@ -257,13 +270,9 @@ const AdminDeliveryPartners = () => {
                         )}{" "}
                         <button
                           className="text-gray-600 hover:text-gray-900"
-                          onClick={() => {
-                            toast.info(
-                              `Viewing details for ${partner.name} - This feature is coming soon!`
-                            );
-                          }}
+                          onClick={() => openDetailsModal(partner)}
                         >
-                          <FiUser className="inline mr-1" />
+                          <FiEye className="inline mr-1" />
                           Details
                         </button>
                       </td>
@@ -351,6 +360,441 @@ const AdminDeliveryPartners = () => {
                       Verify Partner
                     </button>
                   </div>
+                </div>{" "}
+              </div>
+            </div>
+          )}
+
+          {/* Delivery Partner Details Modal */}
+          {showDetailsModal && partnerDetails && (
+            <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50">
+              <div
+                className="bg-white rounded-lg shadow-xl max-w-3xl w-full mx-4 max-h-90vh overflow-hidden"
+                style={{
+                  backgroundColor: "var(--bg-primary)",
+                  borderRadius: "var(--rounded-lg)",
+                  maxHeight: "90vh",
+                }}
+              >
+                {/* Header */}
+                <div
+                  className="px-6 py-4 border-b flex justify-between items-center"
+                  style={{ borderColor: "var(--border-primary)" }}
+                >
+                  <div>
+                    <h2
+                      className="text-xl font-semibold flex items-center"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      <FiUser className="mr-2" />
+                      Delivery Partner Details
+                    </h2>
+                    <p
+                      className="text-sm mt-1"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      Complete information for {partnerDetails.name}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowDetailsModal(false)}
+                    className="p-2 hover:bg-gray-100 rounded-md"
+                    style={{ borderRadius: "var(--rounded-md)" }}
+                  >
+                    <FiX size={20} style={{ color: "var(--text-secondary)" }} />
+                  </button>
+                </div>
+
+                {/* Content */}
+                <div
+                  className="p-6 overflow-y-auto"
+                  style={{ maxHeight: "calc(90vh - 140px)" }}
+                >
+                  {/* Status Badge */}
+                  <div className="mb-6">
+                    <div className="flex items-center space-x-3">
+                      <span
+                        className="text-lg font-medium"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        Status:
+                      </span>
+                      {partnerDetails.is_verified ? (
+                        <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 flex items-center">
+                          <FiCheck className="mr-1" size={16} />
+                          Verified
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800 flex items-center">
+                          <FiClock className="mr-1" size={16} />
+                          Pending Verification
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Basic Information Section */}
+                  <div className="mb-6">
+                    <h3
+                      className="text-lg font-medium mb-4 flex items-center"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      <FiUser className="mr-2" />
+                      Basic Information
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <span
+                          className="text-sm font-medium block mb-1"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          Full Name:
+                        </span>
+                        <p
+                          className="text-base font-medium"
+                          style={{ color: "var(--text-primary)" }}
+                        >
+                          {partnerDetails.name}
+                        </p>
+                      </div>
+                      <div>
+                        <span
+                          className="text-sm font-medium block mb-1"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          Partner ID:
+                        </span>
+                        <p
+                          className="text-base font-mono"
+                          style={{ color: "var(--text-primary)" }}
+                        >
+                          {partnerDetails.partner_id}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Contact Information Section */}
+                  <div className="mb-6">
+                    <h3
+                      className="text-lg font-medium mb-4 flex items-center"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      <FiPhone className="mr-2" />
+                      Contact Information
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <span
+                          className="text-sm font-medium block mb-1"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          <FiMail className="inline mr-1" />
+                          Email Address:
+                        </span>
+                        <p
+                          className="text-base"
+                          style={{ color: "var(--text-primary)" }}
+                        >
+                          {partnerDetails.email}
+                        </p>
+                      </div>
+                      <div>
+                        <span
+                          className="text-sm font-medium block mb-1"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          <FiPhone className="inline mr-1" />
+                          Phone Number:
+                        </span>
+                        <p
+                          className="text-base"
+                          style={{ color: "var(--text-primary)" }}
+                        >
+                          {partnerDetails.phone}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Address Information Section */}
+                  {(partnerDetails.address ||
+                    partnerDetails.city ||
+                    partnerDetails.state ||
+                    partnerDetails.pincode) && (
+                    <div className="mb-6">
+                      <h3
+                        className="text-lg font-medium mb-4 flex items-center"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        <FiMapPin className="mr-2" />
+                        Address Information
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {partnerDetails.address && (
+                          <div className="md:col-span-2">
+                            <span
+                              className="text-sm font-medium block mb-1"
+                              style={{ color: "var(--text-secondary)" }}
+                            >
+                              Address:
+                            </span>
+                            <p
+                              className="text-base"
+                              style={{ color: "var(--text-primary)" }}
+                            >
+                              {partnerDetails.address}
+                            </p>
+                          </div>
+                        )}
+                        {partnerDetails.city && (
+                          <div>
+                            <span
+                              className="text-sm font-medium block mb-1"
+                              style={{ color: "var(--text-secondary)" }}
+                            >
+                              City:
+                            </span>
+                            <p
+                              className="text-base"
+                              style={{ color: "var(--text-primary)" }}
+                            >
+                              {partnerDetails.city}
+                            </p>
+                          </div>
+                        )}
+                        {partnerDetails.state && (
+                          <div>
+                            <span
+                              className="text-sm font-medium block mb-1"
+                              style={{ color: "var(--text-secondary)" }}
+                            >
+                              State:
+                            </span>
+                            <p
+                              className="text-base"
+                              style={{ color: "var(--text-primary)" }}
+                            >
+                              {partnerDetails.state}
+                            </p>
+                          </div>
+                        )}
+                        {partnerDetails.pincode && (
+                          <div>
+                            <span
+                              className="text-sm font-medium block mb-1"
+                              style={{ color: "var(--text-secondary)" }}
+                            >
+                              Pincode:
+                            </span>
+                            <p
+                              className="text-base"
+                              style={{ color: "var(--text-primary)" }}
+                            >
+                              {partnerDetails.pincode}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Vehicle Information Section */}
+                  {(partnerDetails.vehicle_type ||
+                    partnerDetails.vehicle_number ||
+                    partnerDetails.license_number) && (
+                    <div className="mb-6">
+                      <h3
+                        className="text-lg font-medium mb-4 flex items-center"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        <FiTruck className="mr-2" />
+                        Vehicle Information
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {partnerDetails.vehicle_type && (
+                          <div>
+                            <span
+                              className="text-sm font-medium block mb-1"
+                              style={{ color: "var(--text-secondary)" }}
+                            >
+                              Vehicle Type:
+                            </span>
+                            <p
+                              className="text-base"
+                              style={{ color: "var(--text-primary)" }}
+                            >
+                              {partnerDetails.vehicle_type}
+                            </p>
+                          </div>
+                        )}
+                        {partnerDetails.vehicle_number && (
+                          <div>
+                            <span
+                              className="text-sm font-medium block mb-1"
+                              style={{ color: "var(--text-secondary)" }}
+                            >
+                              Vehicle Number:
+                            </span>
+                            <p
+                              className="text-base font-mono"
+                              style={{ color: "var(--text-primary)" }}
+                            >
+                              {partnerDetails.vehicle_number}
+                            </p>
+                          </div>
+                        )}
+                        {partnerDetails.license_number && (
+                          <div>
+                            <span
+                              className="text-sm font-medium block mb-1"
+                              style={{ color: "var(--text-secondary)" }}
+                            >
+                              License Number:
+                            </span>
+                            <p
+                              className="text-base font-mono"
+                              style={{ color: "var(--text-primary)" }}
+                            >
+                              {partnerDetails.license_number}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Timestamps Section */}
+                  <div className="mb-4">
+                    <h3
+                      className="text-lg font-medium mb-4 flex items-center"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      <FiCalendar className="mr-2" />
+                      Registration Details
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <span
+                          className="text-sm font-medium block mb-1"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          Registration Date:
+                        </span>
+                        <p
+                          className="text-base"
+                          style={{ color: "var(--text-primary)" }}
+                        >
+                          {new Date(
+                            partnerDetails.created_at
+                          ).toLocaleDateString("en-IN", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </p>
+                      </div>
+                      <div>
+                        <span
+                          className="text-sm font-medium block mb-1"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          Registration Time:
+                        </span>
+                        <p
+                          className="text-base"
+                          style={{ color: "var(--text-primary)" }}
+                        >
+                          {new Date(
+                            partnerDetails.created_at
+                          ).toLocaleTimeString("en-IN", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </p>
+                      </div>
+                      {partnerDetails.updated_at &&
+                        partnerDetails.updated_at !==
+                          partnerDetails.created_at && (
+                          <>
+                            <div>
+                              <span
+                                className="text-sm font-medium block mb-1"
+                                style={{ color: "var(--text-secondary)" }}
+                              >
+                                Last Updated:
+                              </span>
+                              <p
+                                className="text-base"
+                                style={{ color: "var(--text-primary)" }}
+                              >
+                                {new Date(
+                                  partnerDetails.updated_at
+                                ).toLocaleDateString("en-IN", {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                })}
+                              </p>
+                            </div>
+                            <div>
+                              <span
+                                className="text-sm font-medium block mb-1"
+                                style={{ color: "var(--text-secondary)" }}
+                              >
+                                Update Time:
+                              </span>
+                              <p
+                                className="text-base"
+                                style={{ color: "var(--text-primary)" }}
+                              >
+                                {new Date(
+                                  partnerDetails.updated_at
+                                ).toLocaleTimeString("en-IN", {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </p>
+                            </div>
+                          </>
+                        )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div
+                  className="px-6 py-4 border-t flex justify-end space-x-3"
+                  style={{ borderColor: "var(--border-primary)" }}
+                >
+                  {!partnerDetails.is_verified && (
+                    <button
+                      onClick={() => {
+                        setShowDetailsModal(false);
+                        openVerifyModal(partnerDetails);
+                      }}
+                      className="px-4 py-2 text-sm font-medium rounded-md"
+                      style={{
+                        backgroundColor: "var(--success-color)",
+                        color: "white",
+                        borderRadius: "var(--rounded-md)",
+                      }}
+                    >
+                      <FiCheck className="inline mr-1" size={16} />
+                      Verify Partner
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setShowDetailsModal(false)}
+                    className="px-4 py-2 text-sm font-medium rounded-md"
+                    style={{
+                      backgroundColor: "var(--bg-secondary)",
+                      color: "var(--text-secondary)",
+                      borderRadius: "var(--rounded-md)",
+                    }}
+                  >
+                    Close
+                  </button>
                 </div>
               </div>
             </div>

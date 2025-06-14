@@ -13,20 +13,70 @@ const ProductCard = ({ product }) => {
     addItem: addToWishlist,
     isInWishlist,
     removeItem: removeFromWishlist,
+    items: wishlistItems,
   } = useWishlistStore();
   const isWishlisted = isInWishlist(product.id);
-
+  // Get pricing from first variant if available, otherwise use product pricing
+  const firstVariant = product.valid_options?.[0];
+  const displayPrice =
+    firstVariant?.discounted_price ||
+    firstVariant?.price ||
+    product.discount_price ||
+    product.discountPrice ||
+    product.discounted_price ||
+    product.sale_price ||
+    product.price ||
+    0;
+  const originalPrice =
+    firstVariant?.price || product.price || product.original_price || 0;
   const handleAddToCart = () => {
-    addToCart(product, 1);
+    // Get the first valid option as default variant if available
+    const defaultVariant = product.valid_options?.[0] || null;
+    const productWithVariant = {
+      ...product,
+      price: displayPrice, // Use computed display price
+      variant_id: defaultVariant?.id || null,
+      variant: defaultVariant
+        ? {
+            id: defaultVariant.id,
+            color: defaultVariant.colors,
+            storage: defaultVariant.storage,
+            ram: defaultVariant.ram,
+            price: defaultVariant.discounted_price || defaultVariant.price,
+          }
+        : null,
+    };
+
+    addToCart(productWithVariant, 1);
     toast.success(`${product.name} added to cart!`);
   };
-
   const handleWishlistToggle = () => {
     if (isWishlisted) {
-      removeFromWishlist(product.id);
-      toast.success(`${product.name} removed from wishlist!`);
+      // Find the wishlist item that matches this product to get the correct item_id
+      const wishlistItem = wishlistItems.find((item) => item.id === product.id);
+      if (wishlistItem) {
+        removeFromWishlist(wishlistItem.item_id);
+        toast.success(`${product.name} removed from wishlist!`);
+      }
     } else {
-      addToWishlist(product);
+      // Get the first valid option as default variant if available
+      const defaultVariant = product.valid_options?.[0] || null;
+      const productWithVariant = {
+        ...product,
+        price: displayPrice, // Use computed display price
+        variant_id: defaultVariant?.id || null,
+        variant: defaultVariant
+          ? {
+              id: defaultVariant.id,
+              color: defaultVariant.colors,
+              storage: defaultVariant.storage,
+              ram: defaultVariant.ram,
+              price: defaultVariant.discounted_price || defaultVariant.price,
+            }
+          : null,
+      };
+
+      addToWishlist(productWithVariant);
       toast.success(`${product.name} added to wishlist!`);
     }
   };
@@ -64,8 +114,8 @@ const ProductCard = ({ product }) => {
             alt={product.name}
             className="max-h-48 w-auto object-contain transform transition-transform duration-300 group-hover:scale-110"
           />
-        </div>
-        {product.discount && (
+        </div>{" "}
+        {displayPrice < originalPrice && (
           <span
             className="absolute top-3 left-3 text-xs font-medium px-2.5 py-1 rounded-md"
             style={{
@@ -73,7 +123,8 @@ const ProductCard = ({ product }) => {
               color: "white",
             }}
           >
-            {product.discount} OFF
+            {Math.round(((originalPrice - displayPrice) / originalPrice) * 100)}
+            % OFF
           </span>
         )}
       </Link>
@@ -102,20 +153,20 @@ const ProductCard = ({ product }) => {
               >
                 {product.rating}
               </span>
-            </div>
+            </div>{" "}
             <div className="flex items-center mb-3">
               <p
                 className="font-bold text-lg"
                 style={{ color: "var(--text-accent)" }}
               >
-                ₹{product.discountPrice.toLocaleString()}
+                ₹{displayPrice.toLocaleString()}
               </p>
-              {product.discount && (
+              {displayPrice < originalPrice && (
                 <p
                   className="text-sm line-through ml-2"
                   style={{ color: "var(--text-secondary)" }}
                 >
-                  ₹{product.price.toLocaleString()}
+                  ₹{originalPrice.toLocaleString()}
                 </p>
               )}
             </div>

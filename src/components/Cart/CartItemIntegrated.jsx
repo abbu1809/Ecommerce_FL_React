@@ -27,11 +27,10 @@ const CartItemIntegrated = ({ item }) => {
       setIsUpdating(false);
     }
   };
-
   const handleRemoveItem = async () => {
     setIsUpdating(true);
     try {
-      const success = await removeItem(item.id);
+      const success = await removeItem(item.item_id);
       if (success) {
         showRemoveFromCartToast();
       }

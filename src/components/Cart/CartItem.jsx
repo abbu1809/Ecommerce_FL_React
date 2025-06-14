@@ -42,8 +42,9 @@ const CartItem = ({ item, updateQuantity, removeItem }) => {
       </td>
       <td className="py-6 px-4">
         <div className="flex items-center justify-center">
+          {" "}
           <button
-            onClick={() => updateQuantity(item.id, -1)}
+            onClick={() => updateQuantity(item.item_id, -1)}
             className="flex items-center justify-center w-8 h-8 rounded-md focus:outline-none transition-all duration-200"
             style={{
               backgroundColor: "var(--bg-accent-light)",
@@ -60,7 +61,7 @@ const CartItem = ({ item, updateQuantity, removeItem }) => {
             {item.quantity}
           </span>
           <button
-            onClick={() => updateQuantity(item.id, 1)}
+            onClick={() => updateQuantity(item.item_id, 1)}
             className="flex items-center justify-center w-8 h-8 rounded-md focus:outline-none transition-all duration-200"
             style={{
               backgroundColor: "var(--bg-accent-light)",
@@ -79,8 +80,9 @@ const CartItem = ({ item, updateQuantity, removeItem }) => {
         ₹{(item.price * item.quantity).toLocaleString()}
       </td>
       <td className="py-6 px-4 text-center">
+        {" "}
         <button
-          onClick={() => removeItem(item.id)}
+          onClick={() => removeItem(item.item_id)}
           className="p-2.5 rounded-full hover:bg-red-50 transition-all duration-200 focus:outline-none"
           style={{
             color: "var(--error-color)",

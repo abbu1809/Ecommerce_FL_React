@@ -1,7 +1,9 @@
 import React from "react";
 import { FiAlertTriangle, FiRefreshCw } from "react-icons/fi";
+import useAdminInventory from "../../../store/Admin/useAdminInventory";
 
 const LowStockNotification = ({ products }) => {
+  const { getProductTotalStock, getProductStockStatus } = useAdminInventory();
   if (!products || products.length === 0) {
     return (
       <div
@@ -54,14 +56,54 @@ const LowStockNotification = ({ products }) => {
             <p>
               {products.length} product{products.length > 1 ? "s" : ""} running
               low on stock:
-            </p>
+            </p>{" "}
             <ul className="mt-2 space-y-1">
-              {products.slice(0, 3).map((product) => (
-                <li key={product.id} className="flex justify-between">
-                  <span>{product.name}</span>
-                  <span className="font-medium">{product.stock} left</span>
-                </li>
-              ))}
+              {products.slice(0, 3).map((product) => {
+                const stockStatus = getProductStockStatus(product);
+                const totalStock = getProductTotalStock(product);
+
+                return (
+                  <li key={product.id} className="space-y-1">
+                    <div className="flex justify-between">
+                      <span className="font-medium">{product.name}</span>
+                      <span className="font-medium">{totalStock} total</span>
+                    </div>
+                    {stockStatus.details.length > 0 && (
+                      <div
+                        className="text-xs ml-2"
+                        style={{ color: "#92400E" }}
+                      >
+                        • {stockStatus.details.join(", ")}
+                      </div>
+                    )}
+                    {(stockStatus.lowStockVariants.length > 0 ||
+                      stockStatus.outOfStockVariants.length > 0) && (
+                      <div className="text-xs ml-2 space-y-0.5">
+                        {stockStatus.outOfStockVariants.map((variant, idx) => (
+                          <div key={`out-${idx}`} style={{ color: "#DC2626" }}>
+                            •{" "}
+                            {variant.colors ||
+                              variant.storage ||
+                              variant.ram ||
+                              `Variant ${variant.id}`}
+                            : Out of stock
+                          </div>
+                        ))}
+                        {stockStatus.lowStockVariants.map((variant, idx) => (
+                          <div key={`low-${idx}`} style={{ color: "#D97706" }}>
+                            •{" "}
+                            {variant.colors ||
+                              variant.storage ||
+                              variant.ram ||
+                              `Variant ${variant.id}`}
+                            : {variant.stock} left
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
               {products.length > 3 && (
                 <li className="font-medium">
                   ...and {products.length - 3} more

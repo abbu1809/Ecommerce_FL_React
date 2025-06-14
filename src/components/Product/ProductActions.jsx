@@ -2,7 +2,6 @@ import React from "react";
 import {
   FiHeart,
   FiShoppingCart,
-  FiShare2,
   FiTruck,
   FiCreditCard,
   FiShield,
@@ -75,7 +74,6 @@ const ProductActions = ({ addToCart, addToWishlist, price }) => {
           <FiShoppingCart className="mr-2" />
           Add to Cart
         </Button>
-
         <Button
           onClick={addToWishlist}
           variant="outline"
@@ -87,23 +85,7 @@ const ProductActions = ({ addToCart, addToWishlist, price }) => {
         >
           <FiHeart className="mr-2" />
           Add to Wishlist
-        </Button>
-      </div>
-
-      {/* Share button */}
-      <div className="flex justify-end">
-        <button
-          className="inline-flex items-center px-3 py-1 rounded-full transition-colors duration-300"
-          style={{
-            backgroundColor: "var(--bg-secondary)",
-            color: "var(--text-secondary)",
-            borderWidth: "1px",
-            borderColor: "var(--border-primary)",
-          }}
-        >
-          <FiShare2 className="mr-1" />
-          <span>Share</span>
-        </button>
+        </Button>{" "}
       </div>
 
       {/* Divider */}
