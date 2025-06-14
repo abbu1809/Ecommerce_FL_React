@@ -10,9 +10,11 @@ import {
   FiBarChart2,
   FiMapPin,
   FiChevronRight,
+  FiChevronLeft,
   FiStar,
 } from "react-icons/fi";
 import { DeliveryLayout } from "../../components/Delivery";
+import { DeliveryStatusModal } from "../../components/Delivery";
 import useDeliveryPartnerStore from "../../store/Delivery/useDeliveryPartnerStore";
 import { toast } from "../../utils/toast";
 
@@ -25,11 +27,21 @@ const DeliveryDashboard = () => {
     rating: 4.8, // Static for now
   });
   const [recentDeliveries, setRecentDeliveries] = useState([]);
-  const [upcomingDeliveries, setUpcomingDeliveries] = useState([]);
+  const [upcomingDeliveries, setUpcomingDeliveries] = useState([]); // New state for modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDelivery, setSelectedDelivery] = useState(null);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   // Get store methods
-  const { fetchAssignedDeliveries, fetchDeliveryHistory } =
-    useDeliveryPartnerStore();
+  const {
+    fetchAssignedDeliveries,
+    fetchDeliveryHistory,
+    updateDeliveryStatus,
+  } = useDeliveryPartnerStore();
 
   // Helper functions for formatting
   const formatAddress = useCallback((addressObj) => {
@@ -312,7 +324,7 @@ const DeliveryDashboard = () => {
             style={{ color: "var(--text-secondary)" }}
           >
             {delivery.time}
-          </p>
+          </p>{" "}
           {delivery.reason && (
             <p
               className="text-xs mt-1 text-right"
@@ -321,6 +333,17 @@ const DeliveryDashboard = () => {
               {delivery.reason}
             </p>
           )}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewDetails(delivery);
+            }}
+            className="flex items-center justify-end text-xs font-medium mt-2"
+            style={{ color: "var(--brand-primary)" }}
+          >
+            View Details
+            <FiChevronRight size={14} className="ml-0.5" />
+          </button>
         </div>
       </div>
     </div>
@@ -384,7 +407,7 @@ const DeliveryDashboard = () => {
                 </p>
               </div>
             </div>
-          </div>
+          </div>{" "}
           <div>
             <div
               className="flex items-center text-xs mb-2"
@@ -393,20 +416,151 @@ const DeliveryDashboard = () => {
               <FiClock size={12} className="mr-1" />
               {delivery.scheduledTime}
             </div>
-            <Link
-              to={`/delivery/status-update/${delivery.id}`}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleViewDetails(delivery);
+              }}
               className="flex items-center justify-end text-xs font-medium"
               style={{ color: "var(--brand-primary)" }}
             >
               View Details
               <FiChevronRight size={14} className="ml-0.5" />
-            </Link>
+            </button>
           </div>
         </div>
       </div>
     );
+  }; // Handle opening the status update modal
+  const handleViewDetails = (delivery) => {
+    // When we click view details, fetch complete information for this delivery
+    const fetchFullDeliveryDetails = async () => {
+      try {
+        // Fetch the complete delivery details using the delivery ID
+        const deliveryData = await fetchAssignedDeliveries();
+        const fullDelivery = deliveryData.find(
+          (item) => item.order_id === delivery.id
+        );
+
+        if (fullDelivery) {
+          // Transform the API data to match the format expected by DeliveryStatusModal
+          const formattedDelivery = {
+            id: fullDelivery.order_id,
+            orderId: fullDelivery.order_id,
+            customer: {
+              name: fullDelivery.customer_name || "Customer",
+              phone: fullDelivery.customer_phone || "N/A",
+              address: formatAddress(fullDelivery.delivery_address),
+            },
+            status:
+              fullDelivery.delivery_status || fullDelivery.status || "assigned",
+            order_items:
+              fullDelivery.order_items?.map((item) => ({
+                ...item,
+                // Ensure name is properly formatted from the available data
+                name:
+                  item.name ||
+                  (item.brand && item.variant_details?.storage
+                    ? `${item.brand} ${item.variant_details.storage}`
+                    : item.brand || "Product"),
+              })) || [],
+            item_count:
+              fullDelivery.item_count || fullDelivery.order_items?.length || 0,
+            expectedDelivery: fullDelivery.estimated_delivery,
+            delivery_address: fullDelivery.delivery_address,
+            // Format payment information more comprehensively
+            paymentType: fullDelivery.payment_method || "Online Payment",
+            paymentStatus: fullDelivery.status || "payment_successful",
+            paymentAmount: `₹${
+              fullDelivery.total_amount?.toLocaleString() || 0
+            }`,
+            currency: fullDelivery.currency || "INR",
+            total_amount: fullDelivery.total_amount,
+            // Include all timestamps
+            assignedOn: fullDelivery.assigned_at,
+            created_at: fullDelivery.created_at,
+            estimatedDelivery: fullDelivery.estimated_delivery,
+            // Include all original data for reference
+            ...fullDelivery,
+          };
+
+          setSelectedDelivery(formattedDelivery);
+          setIsModalOpen(true);
+        } else {
+          // If no full delivery data found, just use the summary we have
+          setSelectedDelivery(delivery);
+          setIsModalOpen(true);
+          console.warn("Could not find full delivery details", delivery.id);
+        }
+      } catch (error) {
+        console.error("Error fetching delivery details:", error);
+        // Fall back to using the summary data we already have
+        setSelectedDelivery(delivery);
+        setIsModalOpen(true);
+        toast.error("Could not fetch complete delivery details");
+      }
+    };
+
+    fetchFullDeliveryDetails();
   };
 
+  // Handle closing the modal
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedDelivery(null);
+  };
+  // Calculate pagination for recent deliveries
+  const indexOfLastRecentItem = currentPage * itemsPerPage;
+  const indexOfFirstRecentItem = indexOfLastRecentItem - itemsPerPage;
+  const currentRecentDeliveries = recentDeliveries.slice(
+    indexOfFirstRecentItem,
+    indexOfLastRecentItem
+  );
+
+  // Calculate pagination for upcoming deliveries
+  const indexOfLastUpcomingItem = currentPage * itemsPerPage;
+  const indexOfFirstUpcomingItem = indexOfLastUpcomingItem - itemsPerPage;
+  const currentUpcomingDeliveries = upcomingDeliveries.slice(
+    indexOfFirstUpcomingItem,
+    indexOfLastUpcomingItem
+  );
+
+  // Change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Handle status update
+  const handleStatusUpdate = async (orderId, status, additionalData) => {
+    setIsUpdatingStatus(true);
+    try {
+      // Update status using the store function
+      await updateDeliveryStatus(orderId, status, additionalData);
+
+      // Update local state for recentDeliveries
+      setRecentDeliveries((prev) =>
+        prev.map((delivery) =>
+          delivery.id === orderId ? { ...delivery, status: status } : delivery
+        )
+      );
+
+      // Update local state for upcomingDeliveries
+      setUpcomingDeliveries((prev) =>
+        prev.map((delivery) =>
+          delivery.id === orderId ? { ...delivery, status: status } : delivery
+        )
+      );
+
+      toast.success("Delivery status updated successfully");
+
+      // Close modal
+      setIsModalOpen(false);
+      setSelectedDelivery(null);
+    } catch (error) {
+      console.error("Error updating delivery status:", error);
+      toast.error("Failed to update delivery status");
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
 
   return (
     <DeliveryLayout>
@@ -445,7 +599,6 @@ const DeliveryDashboard = () => {
             </div>
           </div>
         </div>
-
         {isLoading ? (
           <div className="flex justify-center items-center py-20">
             <div
@@ -507,16 +660,106 @@ const DeliveryDashboard = () => {
                       View All
                       <FiChevronRight size={14} className="ml-0.5" />
                     </Link>
-                  </div>
-
+                  </div>{" "}
                   <div className="space-y-3">
                     {upcomingDeliveries.length > 0 ? (
-                      upcomingDeliveries.map((delivery) => (
-                        <UpcomingDeliveryItem
-                          key={delivery.id}
-                          delivery={delivery}
-                        />
-                      ))
+                      <>
+                        {currentUpcomingDeliveries.map((delivery) => (
+                          <UpcomingDeliveryItem
+                            key={delivery.id}
+                            delivery={delivery}
+                          />
+                        ))}
+
+                        {/* Pagination for upcoming deliveries */}
+                        {upcomingDeliveries.length > itemsPerPage && (
+                          <div className="flex justify-center mt-4">
+                            <nav className="flex items-center">
+                              <button
+                                onClick={() => paginate(currentPage - 1)}
+                                disabled={currentPage === 1}
+                                className="px-2 py-1 rounded-l-md"
+                                style={{
+                                  backgroundColor:
+                                    currentPage === 1
+                                      ? "var(--bg-disabled)"
+                                      : "var(--bg-secondary)",
+                                  color:
+                                    currentPage === 1
+                                      ? "var(--text-disabled)"
+                                      : "var(--text-primary)",
+                                  cursor:
+                                    currentPage === 1
+                                      ? "not-allowed"
+                                      : "pointer",
+                                }}
+                              >
+                                <FiChevronLeft size={16} />
+                              </button>
+
+                              {Array.from({
+                                length: Math.ceil(
+                                  upcomingDeliveries.length / itemsPerPage
+                                ),
+                              }).map((_, index) => (
+                                <button
+                                  key={index}
+                                  onClick={() => paginate(index + 1)}
+                                  className="px-2 py-1"
+                                  style={{
+                                    backgroundColor:
+                                      currentPage === index + 1
+                                        ? "var(--brand-primary)"
+                                        : "var(--bg-secondary)",
+                                    color:
+                                      currentPage === index + 1
+                                        ? "white"
+                                        : "var(--text-primary)",
+                                  }}
+                                >
+                                  {index + 1}
+                                </button>
+                              ))}
+
+                              <button
+                                onClick={() => paginate(currentPage + 1)}
+                                disabled={
+                                  currentPage ===
+                                  Math.ceil(
+                                    upcomingDeliveries.length / itemsPerPage
+                                  )
+                                }
+                                className="px-2 py-1 rounded-r-md"
+                                style={{
+                                  backgroundColor:
+                                    currentPage ===
+                                    Math.ceil(
+                                      upcomingDeliveries.length / itemsPerPage
+                                    )
+                                      ? "var(--bg-disabled)"
+                                      : "var(--bg-secondary)",
+                                  color:
+                                    currentPage ===
+                                    Math.ceil(
+                                      upcomingDeliveries.length / itemsPerPage
+                                    )
+                                      ? "var(--text-disabled)"
+                                      : "var(--text-primary)",
+                                  cursor:
+                                    currentPage ===
+                                    Math.ceil(
+                                      upcomingDeliveries.length / itemsPerPage
+                                    )
+                                      ? "not-allowed"
+                                      : "pointer",
+                                }}
+                              >
+                                <FiChevronRight size={16} />
+                              </button>
+                            </nav>
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <div
                         className="py-6 text-center"
@@ -551,16 +794,106 @@ const DeliveryDashboard = () => {
                       View History
                       <FiChevronRight size={14} className="ml-0.5" />
                     </Link>
-                  </div>
-
+                  </div>{" "}
                   <div className="space-y-3">
                     {recentDeliveries.length > 0 ? (
-                      recentDeliveries.map((delivery) => (
-                        <RecentDeliveryItem
-                          key={delivery.id}
-                          delivery={delivery}
-                        />
-                      ))
+                      <>
+                        {currentRecentDeliveries.map((delivery) => (
+                          <RecentDeliveryItem
+                            key={delivery.id}
+                            delivery={delivery}
+                          />
+                        ))}
+
+                        {/* Pagination for recent deliveries */}
+                        {recentDeliveries.length > itemsPerPage && (
+                          <div className="flex justify-center mt-4">
+                            <nav className="flex items-center">
+                              <button
+                                onClick={() => paginate(currentPage - 1)}
+                                disabled={currentPage === 1}
+                                className="px-2 py-1 rounded-l-md"
+                                style={{
+                                  backgroundColor:
+                                    currentPage === 1
+                                      ? "var(--bg-disabled)"
+                                      : "var(--bg-secondary)",
+                                  color:
+                                    currentPage === 1
+                                      ? "var(--text-disabled)"
+                                      : "var(--text-primary)",
+                                  cursor:
+                                    currentPage === 1
+                                      ? "not-allowed"
+                                      : "pointer",
+                                }}
+                              >
+                                <FiChevronLeft size={16} />
+                              </button>
+
+                              {Array.from({
+                                length: Math.ceil(
+                                  recentDeliveries.length / itemsPerPage
+                                ),
+                              }).map((_, index) => (
+                                <button
+                                  key={index}
+                                  onClick={() => paginate(index + 1)}
+                                  className="px-2 py-1"
+                                  style={{
+                                    backgroundColor:
+                                      currentPage === index + 1
+                                        ? "var(--brand-primary)"
+                                        : "var(--bg-secondary)",
+                                    color:
+                                      currentPage === index + 1
+                                        ? "white"
+                                        : "var(--text-primary)",
+                                  }}
+                                >
+                                  {index + 1}
+                                </button>
+                              ))}
+
+                              <button
+                                onClick={() => paginate(currentPage + 1)}
+                                disabled={
+                                  currentPage ===
+                                  Math.ceil(
+                                    recentDeliveries.length / itemsPerPage
+                                  )
+                                }
+                                className="px-2 py-1 rounded-r-md"
+                                style={{
+                                  backgroundColor:
+                                    currentPage ===
+                                    Math.ceil(
+                                      recentDeliveries.length / itemsPerPage
+                                    )
+                                      ? "var(--bg-disabled)"
+                                      : "var(--bg-secondary)",
+                                  color:
+                                    currentPage ===
+                                    Math.ceil(
+                                      recentDeliveries.length / itemsPerPage
+                                    )
+                                      ? "var(--text-disabled)"
+                                      : "var(--text-primary)",
+                                  cursor:
+                                    currentPage ===
+                                    Math.ceil(
+                                      recentDeliveries.length / itemsPerPage
+                                    )
+                                      ? "not-allowed"
+                                      : "pointer",
+                                }}
+                              >
+                                <FiChevronRight size={16} />
+                              </button>
+                            </nav>
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <div
                         className="py-6 text-center"
@@ -660,8 +993,17 @@ const DeliveryDashboard = () => {
               </div>
             </div>
           </>
-        )}
+        )}{" "}
+        {/* Modal is declared at the bottom of the component */}
       </div>
+      {/* Status Update Modal */}
+      <DeliveryStatusModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        delivery={selectedDelivery}
+        onStatusUpdate={handleStatusUpdate}
+        isSubmitting={isUpdatingStatus}
+      />
     </DeliveryLayout>
   );
 };

@@ -5,6 +5,8 @@ import {
   FiArrowLeft,
   FiSearch,
   FiAlertCircle,
+  FiChevronLeft,
+  FiChevronRight,
 } from "react-icons/fi";
 import { DeliveryLayout, DeliveryStatusModal } from "../../components/Delivery";
 import Button from "../../components/ui/Button";
@@ -23,6 +25,10 @@ const DeliveryStatusUpdate = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDelivery, setSelectedDelivery] = useState(null);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   // Get store methods
   const { fetchAssignedDeliveries, updateDeliveryStatus, assignedDeliveries } =
@@ -51,7 +57,6 @@ const DeliveryStatusUpdate = () => {
       setIsLoading(false);
     }
   }, [fetchAssignedDeliveries]);
-
   useEffect(() => {
     // Transform the API response to match our component's data structure
     const formattedDeliveries = assignedDeliveries?.map((delivery) => ({
@@ -61,14 +66,32 @@ const DeliveryStatusUpdate = () => {
       customerAddress: formatAddress(delivery.delivery_address),
       customerPhone: delivery.customer_phone || "N/A",
       status: delivery.delivery_status || delivery.status || "assigned",
-      items: [], // Items not available in current API response
-      itemCount: "Unknown", // Will need to fetch separately
+      // Properly format order items for display
+      order_items:
+        delivery.order_items?.map((item) => ({
+          ...item,
+          // Ensure name is properly formatted from the available data
+          name:
+            item.name ||
+            (item.brand && item.variant_details?.storage
+              ? `${item.brand} ${item.variant_details.storage}`
+              : item.brand || "Product"),
+        })) || [],
+      items: delivery.order_items || [], // Keep for backward compatibility
+      item_count: delivery.item_count || delivery.order_items?.length || 0,
+      itemCount: delivery.item_count || delivery.order_items?.length || 0,
       expectedDelivery: delivery.estimated_delivery,
       assignedOn: delivery.assigned_at,
       paymentType: delivery.payment_method || "Online Payment",
-      paymentAmount: `${delivery.currency || "INR"} ${
-        delivery.total_amount || 0
-      }`,
+      paymentAmount: `₹${delivery.total_amount?.toLocaleString() || 0}`,
+      // Ensure customer information is properly structured
+      customer: {
+        name: delivery.customer_name || "Customer",
+        phone: delivery.customer_phone || "N/A",
+        address: formatAddress(delivery.delivery_address),
+      },
+      // Include all original data for reference
+      ...delivery,
     }));
 
     setDeliveries(formattedDeliveries);
@@ -102,16 +125,46 @@ const DeliveryStatusUpdate = () => {
               phone: foundDelivery.customer_phone || "N/A",
               address: formatAddress(foundDelivery.delivery_address),
             },
-            items: [], // Items not available in current API response
-            itemCount: "Unknown", // Will need to fetch separately
+            // Properly format order items for display
+            order_items:
+              foundDelivery.order_items?.map((item) => ({
+                ...item,
+                // Ensure name is properly formatted from the available data
+                name:
+                  item.name ||
+                  (item.brand && item.variant_details?.storage
+                    ? `${item.brand} ${item.variant_details.storage}`
+                    : item.brand || "Product"),
+              })) || [],
+            items: foundDelivery.order_items || [], // Keep for backward compatibility
+            item_count:
+              foundDelivery.item_count ||
+              foundDelivery.order_items?.length ||
+              0,
+            itemCount:
+              foundDelivery.item_count ||
+              foundDelivery.order_items?.length ||
+              0,
+            // Format payment information
             paymentType: foundDelivery.payment_method || "Online Payment",
-            paymentAmount: `${foundDelivery.currency || "INR"} ${
-              foundDelivery.total_amount || "0"
+            payment_method: foundDelivery.payment_method || "Online Payment",
+            paymentStatus: foundDelivery.status || "payment_successful",
+            paymentAmount: `₹${
+              foundDelivery.total_amount?.toLocaleString() || 0
             }`,
+            total_amount: foundDelivery.total_amount,
+            currency: foundDelivery.currency || "INR",
             deliveryInstructions: foundDelivery.delivery_instructions || "",
+            // Multiple date fields to ensure compatibility
+            expectedDelivery: foundDelivery.estimated_delivery,
             estimatedDelivery: foundDelivery.estimated_delivery,
+            estimated_delivery: foundDelivery.estimated_delivery,
             assignedOn: foundDelivery.assigned_at,
+            assigned_at: foundDelivery.assigned_at,
             assignedPartnerName: foundDelivery.assigned_partner_name,
+            delivery_address: foundDelivery.delivery_address,
+            // Include all original data for reference
+            ...foundDelivery,
           });
         } else {
           throw new Error("Delivery not found");
@@ -155,13 +208,39 @@ const DeliveryStatusUpdate = () => {
     );
 
     setDeliveries(filtered);
-  };
-  // Handle selecting a delivery from the list
+  }; // Handle selecting a delivery from the list
   const handleSelectDelivery = (deliveryId) => {
-    const delivery = deliveries.find((d) => d.id === deliveryId);
-    if (delivery) {
-      setSelectedDelivery(delivery);
-      setIsModalOpen(true);
+    try {
+      const delivery = deliveries.find((d) => d.id === deliveryId);
+      if (delivery) {
+        // Format the delivery data for the modal to ensure all required fields
+        const formattedDelivery = {
+          ...delivery,
+          // Ensure proper customer object structure
+          customer: {
+            name:
+              delivery.customer?.name || delivery.customerName || "Customer",
+            phone: delivery.customer?.phone || delivery.customerPhone || "N/A",
+            address: delivery.customer?.address || delivery.customerAddress,
+          },
+          // Ensure order_items exists and is properly formatted
+          order_items: delivery.order_items || delivery.items || [],
+          // Set correct item count
+          item_count:
+            delivery.item_count ||
+            delivery.itemCount ||
+            delivery.order_items?.length ||
+            0 ||
+            delivery.items?.length ||
+            0,
+        };
+
+        setSelectedDelivery(formattedDelivery);
+        setIsModalOpen(true);
+      }
+    } catch (error) {
+      console.error("Error processing delivery details:", error);
+      toast.error("Could not load delivery details");
     }
   };
   // Handle status update
@@ -189,17 +268,66 @@ const DeliveryStatusUpdate = () => {
     } finally {
       setIsUpdatingStatus(false);
     }
-  };
-  // Handle opening modal for specific delivery
+  }; // Handle opening modal for specific delivery
   const handleOpenModal = () => {
-    setSelectedDelivery(delivery);
+    // Ensure the delivery object has all the fields needed by the modal
+    const formattedDelivery = {
+      ...delivery,
+      // Make sure order_items is properly structured
+      order_items:
+        delivery.order_items?.map((item) => ({
+          ...item,
+          name:
+            item.name ||
+            (item.brand && item.variant_details?.storage
+              ? `${item.brand} ${item.variant_details.storage}`
+              : item.brand || "Product"),
+        })) ||
+        delivery.items ||
+        [],
+
+      // Ensure customer information is properly formatted
+      customer: {
+        name: delivery.customer?.name || delivery.customerName || "Customer",
+        phone: delivery.customer?.phone || delivery.customerPhone || "N/A",
+        address:
+          delivery.customer?.address ||
+          formatAddress(delivery.delivery_address) ||
+          delivery.customerAddress,
+      },
+
+      // Ensure all necessary fields exist
+      item_count:
+        delivery.item_count ||
+        delivery.itemCount ||
+        delivery.order_items?.length ||
+        0 ||
+        delivery.items?.length ||
+        0,
+
+      // Format payment information consistently
+      paymentType:
+        delivery.paymentType || delivery.payment_method || "Online Payment",
+      paymentAmount:
+        delivery.paymentAmount ||
+        `₹${delivery.total_amount?.toLocaleString() || 0}`,
+    };
+
+    setSelectedDelivery(formattedDelivery);
     setIsModalOpen(true);
   };
-
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedDelivery(null);
   };
+
+  // Calculate pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = deliveries.slice(indexOfFirstItem, indexOfLastItem);
+
+  // Change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   // If no ID is provided, show the list of deliveries for status update
   if (!id) {
@@ -246,7 +374,7 @@ const DeliveryStatusUpdate = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {deliveries?.map((delivery) => (
+              {currentItems.map((delivery) => (
                 <div
                   key={delivery.id}
                   className="p-4 rounded-lg cursor-pointer transition-all hover:shadow-md"
@@ -295,7 +423,6 @@ const DeliveryStatusUpdate = () => {
                                 : "var(--warning-color)",
                           }}
                         >
-                          {" "}
                           {delivery.status === "assigned" ||
                           delivery.status === "shipped" ||
                           delivery.status === "payment_successful"
@@ -330,7 +457,83 @@ const DeliveryStatusUpdate = () => {
                     </div>
                   </div>
                 </div>
-              ))}{" "}
+              ))}
+
+              {/* Pagination */}
+              {deliveries.length > itemsPerPage && (
+                <div className="flex justify-center mt-6">
+                  <nav className="flex items-center">
+                    <button
+                      onClick={() => paginate(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="px-3 py-2 rounded-l-md"
+                      style={{
+                        backgroundColor:
+                          currentPage === 1
+                            ? "var(--bg-disabled)"
+                            : "var(--bg-secondary)",
+                        color:
+                          currentPage === 1
+                            ? "var(--text-disabled)"
+                            : "var(--text-primary)",
+                        cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      <FiChevronLeft />
+                    </button>
+
+                    {Array.from({
+                      length: Math.ceil(deliveries.length / itemsPerPage),
+                    }).map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => paginate(index + 1)}
+                        className="px-4 py-2"
+                        style={{
+                          backgroundColor:
+                            currentPage === index + 1
+                              ? "var(--brand-primary)"
+                              : "var(--bg-secondary)",
+                          color:
+                            currentPage === index + 1
+                              ? "white"
+                              : "var(--text-primary)",
+                        }}
+                      >
+                        {index + 1}
+                      </button>
+                    ))}
+
+                    <button
+                      onClick={() => paginate(currentPage + 1)}
+                      disabled={
+                        currentPage ===
+                        Math.ceil(deliveries.length / itemsPerPage)
+                      }
+                      className="px-3 py-2 rounded-r-md"
+                      style={{
+                        backgroundColor:
+                          currentPage ===
+                          Math.ceil(deliveries.length / itemsPerPage)
+                            ? "var(--bg-disabled)"
+                            : "var(--bg-secondary)",
+                        color:
+                          currentPage ===
+                          Math.ceil(deliveries.length / itemsPerPage)
+                            ? "var(--text-disabled)"
+                            : "var(--text-primary)",
+                        cursor:
+                          currentPage ===
+                          Math.ceil(deliveries.length / itemsPerPage)
+                            ? "not-allowed"
+                            : "pointer",
+                      }}
+                    >
+                      <FiChevronRight />
+                    </button>
+                  </nav>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -411,8 +614,8 @@ const DeliveryStatusUpdate = () => {
                 >
                   {delivery.orderId}
                 </span>
-              </div>
-            </div>{" "}
+              </div>{" "}
+            </div>
             <div
               className="mt-4 md:mt-0 px-3 py-1 rounded-full text-xs font-semibold"
               style={{
@@ -454,7 +657,7 @@ const DeliveryStatusUpdate = () => {
           >
             <p style={{ color: "var(--error-color)" }}>{error}</p>
           </div>
-        )}{" "}
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             {/* Delivery Status Update Section */}
@@ -500,7 +703,6 @@ const DeliveryStatusUpdate = () => {
                 Delivery Details
               </h2>
               <div className="space-y-4">
-                {" "}
                 <div>
                   <h3
                     className="text-sm font-medium mb-2"
@@ -544,8 +746,8 @@ const DeliveryStatusUpdate = () => {
                     >
                       {new Date(
                         delivery.estimatedDelivery
-                      ).toLocaleDateString()}{" "}
-                      at{" "}
+                      ).toLocaleDateString()}
+                      at
                       {new Date(delivery.estimatedDelivery).toLocaleTimeString(
                         [],
                         { hour: "2-digit", minute: "2-digit" }
@@ -557,17 +759,82 @@ const DeliveryStatusUpdate = () => {
                   className="pt-4 border-t"
                   style={{ borderColor: "var(--border-primary)" }}
                 >
+                  {" "}
                   <h3
                     className="text-sm font-medium mb-2"
                     style={{ color: "var(--text-secondary)" }}
                   >
                     Items (
-                    {delivery.items && delivery.items.length > 0
-                      ? delivery.items.length
-                      : "Unknown"}
+                    {delivery.item_count ||
+                      (delivery.order_items && delivery.order_items.length) ||
+                      (delivery.items && delivery.items.length) ||
+                      "Unknown"}
                     )
                   </h3>
-                  {delivery.items && delivery.items.length > 0 ? (
+                  {delivery.order_items && delivery.order_items.length > 0 ? (
+                    <ul className="space-y-2">
+                      {delivery.order_items.map((item, index) => (
+                        <li
+                          key={index}
+                          className="flex justify-between text-sm border-b pb-1 last:border-b-0"
+                          style={{ borderColor: "var(--border-primary)" }}
+                        >
+                          <div className="flex flex-col">
+                            <span
+                              className="font-medium"
+                              style={{ color: "var(--text-primary)" }}
+                            >
+                              {item.name ||
+                                item.brand +
+                                  " " +
+                                  (item.variant_details?.storage || "") ||
+                                "Product"}
+                            </span>
+                            <span style={{ color: "var(--text-secondary)" }}>
+                              Qty: {item.quantity}
+                            </span>
+                            {item.variant_details && (
+                              <span
+                                className="text-xs mt-0.5"
+                                style={{ color: "var(--text-secondary)" }}
+                              >
+                                {[
+                                  item.variant_details.ram,
+                                  item.variant_details.storage,
+                                  item.variant_details.colors,
+                                ]
+                                  .filter(Boolean)
+                                  .join(", ")}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex flex-col items-end">
+                            <span
+                              className="font-medium"
+                              style={{ color: "var(--text-primary)" }}
+                            >
+                              ₹
+                              {item.price_at_purchase ||
+                                item.variant_details?.discounted_price ||
+                                item.price ||
+                                "N/A"}
+                            </span>
+                            {item.variant_details?.price &&
+                              item.variant_details?.discounted_price &&
+                              item.variant_details.price >
+                                item.variant_details.discounted_price && (
+                                <span
+                                  className="line-through text-xs"
+                                  style={{ color: "var(--text-secondary)" }}
+                                >
+                                  ₹{item.variant_details.price}
+                                </span>
+                              )}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : delivery.items && delivery.items.length > 0 ? (
                     <ul className="space-y-2">
                       {delivery.items.map((item, index) => (
                         <li
@@ -578,7 +845,7 @@ const DeliveryStatusUpdate = () => {
                             {item.name} x{item.quantity}
                           </span>
                           <span style={{ color: "var(--text-secondary)" }}>
-                            {item.price}
+                            ₹{item.price}
                           </span>
                         </li>
                       ))}
@@ -647,8 +914,8 @@ const DeliveryStatusUpdate = () => {
                       {delivery.deliveryInstructions}
                     </p>
                   </div>
-                )}
-              </div>{" "}
+                )}{" "}
+              </div>
             </div>
           </div>
         </div>

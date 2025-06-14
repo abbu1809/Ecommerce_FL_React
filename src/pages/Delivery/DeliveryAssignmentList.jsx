@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { FiSearch, FiFilter, FiAlertCircle } from "react-icons/fi";
+import {
+  FiSearch,
+  FiFilter,
+  FiAlertCircle,
+  FiChevronLeft,
+  FiChevronRight,
+} from "react-icons/fi";
 import { DeliveryLayout, DeliveryStatusModal } from "../../components/Delivery";
 import { DeliveryCard } from "../../components/Delivery";
 import useDeliveryPartnerStore from "../../store/Delivery/useDeliveryPartnerStore";
@@ -14,6 +20,10 @@ const DeliveryAssignmentList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDelivery, setSelectedDelivery] = useState(null);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   // Get fetchAssignedDeliveries and updateDeliveryStatus functions from the store
   const { fetchAssignedDeliveries, updateDeliveryStatus, assignedDeliveries } =
@@ -45,7 +55,6 @@ const DeliveryAssignmentList = () => {
 
     fetchAssignments();
   }, [fetchAssignedDeliveries]);
-
   useEffect(() => {
     // Transform the API response to match our component's data structure
     const formattedDeliveries = assignedDeliveries?.map((delivery) => ({
@@ -54,20 +63,41 @@ const DeliveryAssignmentList = () => {
       customer: {
         name: delivery.customer_name || "Customer",
         phone: delivery.customer_phone || "N/A",
+        address: formatAddress(delivery.delivery_address),
       },
       address: formatAddress(delivery.delivery_address),
       customerPhone: delivery.customer_phone || "N/A",
-      items: [], // Items not available in current API response
-      itemCount: "N/A", // Will need to fetch separately or show as unavailable
+      order_items:
+        delivery.order_items?.map((item) => ({
+          ...item,
+          // Ensure name is properly formatted from the available data
+          name:
+            item.name ||
+            (item.brand && item.variant_details?.storage
+              ? `${item.brand} ${item.variant_details.storage}`
+              : item.brand || "Product"),
+        })) || [],
+      item_count: delivery.item_count || delivery.order_items?.length || 0,
       status: delivery.delivery_status || "pending",
       priority: getPriority(delivery),
       distance: "N/A", // Calculate if needed
       expectedDelivery: delivery.estimated_delivery,
+      estimated_delivery: delivery.estimated_delivery,
+      estimatedDelivery: delivery.estimated_delivery,
       assignedDate: delivery.assigned_at,
-      paymentType: "N/A", // Add if available in API
+      assigned_at: delivery.assigned_at,
+      // Format payment information
+      paymentType: delivery.payment_method || "Online Payment",
+      payment_method: delivery.payment_method || "Online Payment",
+      paymentStatus: delivery.status || "payment_successful",
+      paymentAmount: `₹${delivery.total_amount?.toLocaleString() || 0}`,
       createdAt: delivery.created_at,
+      created_at: delivery.created_at,
       total_amount: delivery.total_amount,
       currency: delivery.currency || "INR",
+      delivery_address: delivery.delivery_address,
+      // Include all original data for reference
+      ...delivery,
     }));
 
     setAssignments(formattedDeliveries);
@@ -120,13 +150,46 @@ const DeliveryAssignmentList = () => {
     setFilteredAssignments(results);
   }, [searchTerm, filter, assignments]);
   const handleAcceptDelivery = async (orderId) => {
-    // Find the delivery to show in modal
-    const delivery = assignments.find(
-      (assignment) => assignment.id === orderId
-    );
-    if (delivery) {
-      setSelectedDelivery(delivery);
-      setIsModalOpen(true);
+    try {
+      // Find the delivery to show in modal
+      const delivery = assignments.find(
+        (assignment) => assignment.id === orderId
+      );
+
+      if (delivery) {
+        // Transform the delivery data to ensure it has the format expected by the modal
+        const formattedDelivery = {
+          ...delivery,
+          // Ensure these fields exist for the modal
+          id: delivery.id || delivery.order_id,
+          orderId: delivery.orderId || delivery.order_id,
+          customer: {
+            name:
+              delivery.customer?.name || delivery.customer_name || "Customer",
+            phone:
+              delivery.customer?.phone ||
+              delivery.customer_phone ||
+              delivery.customerPhone ||
+              "N/A",
+            address:
+              delivery.customer?.address ||
+              formatAddress(delivery.delivery_address),
+          },
+          status: delivery.status || delivery.delivery_status || "assigned",
+          order_items: delivery.order_items || [],
+          item_count:
+            delivery.item_count ||
+            delivery.itemCount ||
+            (delivery.order_items && delivery.order_items.length) ||
+            0,
+        };
+
+        setSelectedDelivery(formattedDelivery);
+        setIsModalOpen(true);
+      }
+    } catch (error) {
+      console.error("Error processing delivery details:", error);
+      toast.error("Could not load delivery details");
     }
   };
   const handleStatusUpdate = async (orderId, status, additionalData) => {
@@ -165,11 +228,21 @@ const DeliveryAssignmentList = () => {
       setIsUpdatingStatus(false);
     }
   };
-
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedDelivery(null);
   };
+
+  // Calculate pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredAssignments.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+
+  // Change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <DeliveryLayout>
@@ -239,15 +312,95 @@ const DeliveryAssignmentList = () => {
             ></div>
           </div>
         ) : filteredAssignments?.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {filteredAssignments?.map((assignment) => (
-              <DeliveryCard
-                key={assignment.id}
-                delivery={assignment}
-                onAccept={() => handleAcceptDelivery(assignment.id)}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {currentItems.map((assignment) => (
+                <DeliveryCard
+                  key={assignment.id}
+                  delivery={assignment}
+                  onAccept={() => handleAcceptDelivery(assignment.id)}
+                />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {filteredAssignments.length > itemsPerPage && (
+              <div className="flex justify-center mt-6">
+                <nav className="flex items-center">
+                  <button
+                    onClick={() => paginate(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="px-3 py-2 rounded-l-md"
+                    style={{
+                      backgroundColor:
+                        currentPage === 1
+                          ? "var(--bg-disabled)"
+                          : "var(--bg-secondary)",
+                      color:
+                        currentPage === 1
+                          ? "var(--text-disabled)"
+                          : "var(--text-primary)",
+                      cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    <FiChevronLeft />
+                  </button>
+
+                  {Array.from({
+                    length: Math.ceil(
+                      filteredAssignments.length / itemsPerPage
+                    ),
+                  }).map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => paginate(index + 1)}
+                      className="px-4 py-2"
+                      style={{
+                        backgroundColor:
+                          currentPage === index + 1
+                            ? "var(--brand-primary)"
+                            : "var(--bg-secondary)",
+                        color:
+                          currentPage === index + 1
+                            ? "white"
+                            : "var(--text-primary)",
+                      }}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+
+                  <button
+                    onClick={() => paginate(currentPage + 1)}
+                    disabled={
+                      currentPage ===
+                      Math.ceil(filteredAssignments.length / itemsPerPage)
+                    }
+                    className="px-3 py-2 rounded-r-md"
+                    style={{
+                      backgroundColor:
+                        currentPage ===
+                        Math.ceil(filteredAssignments.length / itemsPerPage)
+                          ? "var(--bg-disabled)"
+                          : "var(--bg-secondary)",
+                      color:
+                        currentPage ===
+                        Math.ceil(filteredAssignments.length / itemsPerPage)
+                          ? "var(--text-disabled)"
+                          : "var(--text-primary)",
+                      cursor:
+                        currentPage ===
+                        Math.ceil(filteredAssignments.length / itemsPerPage)
+                          ? "not-allowed"
+                          : "pointer",
+                    }}
+                  >
+                    <FiChevronRight />
+                  </button>
+                </nav>
+              </div>
+            )}
+          </>
         ) : (
           <div
             className="flex flex-col items-center justify-center p-8 rounded-lg"

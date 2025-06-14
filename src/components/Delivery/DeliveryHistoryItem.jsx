@@ -25,7 +25,7 @@ const statusIcons = {
   Failed: <FiX size={16} />,
 };
 
-const DeliveryHistoryItem = ({ delivery }) => {
+const DeliveryHistoryItem = ({ delivery, onViewDetails }) => {
   // Safely handle date displays with fallbacks
   const formatDate = (dateStr) => {
     if (!dateStr) return "N/A";
@@ -48,6 +48,28 @@ const DeliveryHistoryItem = ({ delivery }) => {
       console.error("Invalid date format:", dateStr, err);
       return "";
     }
+  };
+
+  // Helper function to format address objects
+  const formatAddress = (addressObj) => {
+    if (!addressObj) return "No address provided";
+
+    // If it's already a string, return it
+    if (typeof addressObj === "string") return addressObj;
+
+    // If it's an object, extract the address components
+    if (typeof addressObj === "object") {
+      const { street_address, city, state, postal_code } = addressObj;
+      const addressParts = [street_address, city, state, postal_code]
+        .filter(Boolean)
+        .filter((part) => typeof part === "string" && part.trim() !== "");
+
+      return addressParts.length > 0
+        ? addressParts.join(", ")
+        : "No address provided";
+    }
+
+    return "No address provided";
   };
 
   // Get the appropriate status color and icon, defaulting if not found
@@ -102,6 +124,15 @@ const DeliveryHistoryItem = ({ delivery }) => {
                 )} at ${formatTime(delivery.completedDate)}`
               : "In progress"}
           </div>
+          {/* Item count */}
+          {(delivery.order_items?.length > 0 || delivery.items?.length > 0) && (
+            <div
+              className="text-xs mt-1"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              {delivery.order_items?.length || delivery.items?.length} items
+            </div>
+          )}
         </div>
         <div className="text-right">
           <div
@@ -122,8 +153,17 @@ const DeliveryHistoryItem = ({ delivery }) => {
             ₹{amount}
           </div>
           <div className="text-xs" style={{ color: "var(--brand-primary)" }}>
-            {delivery.paymentMethod || "Online"}
+            {delivery.payment_details?.method ||
+              delivery.paymentMethod ||
+              "Online"}
           </div>
+          <button
+            onClick={onViewDetails}
+            className="flex items-center justify-end text-xs font-medium mt-2"
+            style={{ color: "var(--brand-primary)" }}
+          >
+            View Details
+          </button>
         </div>
       </div>
 
@@ -142,7 +182,7 @@ const DeliveryHistoryItem = ({ delivery }) => {
               Delivery Address
             </div>
             <div className="text-sm" style={{ color: "var(--text-primary)" }}>
-              {delivery.address || "No address provided"}
+              {formatAddress(delivery.address)}
             </div>
           </div>
         </div>

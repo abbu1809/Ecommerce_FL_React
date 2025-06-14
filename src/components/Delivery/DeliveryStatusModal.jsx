@@ -21,7 +21,7 @@ const DeliveryStatusModal = ({
   isSubmitting = false,
 }) => {
   const [photoPreview, setPhotoPreview] = useState(null);
-  console.log('de',delivery)
+  console.log("de", delivery);
   const [newStatus, setNewStatus] = useState(delivery?.status || "processing");
   const [otp, setOtp] = useState("");
   const [notes, setNotes] = useState("");
@@ -739,7 +739,7 @@ const DeliveryStatusModal = ({
                             ? "Returning"
                             : delivery.status}
                         </span>
-                      </div>
+                      </div>{" "}
                       {/* Customer Information */}
                       <div>
                         <h5
@@ -752,20 +752,50 @@ const DeliveryStatusModal = ({
                           className="text-sm font-semibold"
                           style={{ color: "var(--text-primary)" }}
                         >
-                          {delivery.customer?.name}
+                          {delivery.customer?.name || "Customer"}
                         </p>
                         <p
                           className="text-xs"
                           style={{ color: "var(--text-primary)" }}
                         >
-                          {delivery.customer?.phone}
+                          {delivery.customer?.phone ||
+                            delivery.customer_phone ||
+                            "N/A"}
                         </p>
-                        <p
-                          className="text-xs mt-1"
-                          style={{ color: "var(--text-primary)" }}
+
+                        {/* Delivery Address */}
+                        <h5
+                          className="text-xs font-medium mb-1 mt-2"
+                          style={{ color: "var(--text-secondary)" }}
                         >
-                          {delivery.customer?.address}
-                        </p>
+                          Delivery Address
+                        </h5>
+                        {delivery.delivery_address ? (
+                          <p
+                            className="text-xs"
+                            style={{ color: "var(--text-primary)" }}
+                          >
+                            {delivery.delivery_address.street_address}
+                            <br />
+                            {delivery.delivery_address.city},{" "}
+                            {delivery.delivery_address.state}{" "}
+                            {delivery.delivery_address.postal_code}
+                          </p>
+                        ) : delivery.customer?.address ? (
+                          <p
+                            className="text-xs"
+                            style={{ color: "var(--text-primary)" }}
+                          >
+                            {delivery.customer.address}
+                          </p>
+                        ) : (
+                          <p
+                            className="text-xs"
+                            style={{ color: "var(--text-secondary)" }}
+                          >
+                            Address not available
+                          </p>
+                        )}
                       </div>
                       {/* Items */}
                       <div>
@@ -775,40 +805,85 @@ const DeliveryStatusModal = ({
                         >
                           Items (
                           {delivery.item_count ||
-                            delivery.itemCount ||
                             (delivery.order_items &&
                               delivery.order_items.length) ||
                             (delivery.items && delivery.items.length) ||
                             "Unknown"}
                           )
-                          {delivery.item_count}
                         </h5>
-                        <div className="max-h-16 overflow-y-auto">
+                        <div className="max-h-32 overflow-y-auto">
                           {delivery.order_items &&
                           delivery.order_items.length > 0 ? (
-                            <ul className="space-y-1">
+                            <ul className="space-y-2">
                               {delivery.order_items.map((item, index) => (
                                 <li
                                   key={index}
-                                  className="flex justify-between text-xs"
+                                  className="flex justify-between text-xs border-b pb-1 last:border-b-0"
+                                  style={{
+                                    borderColor: "var(--border-primary)",
+                                  }}
                                 >
-                                  <span
-                                    style={{ color: "var(--text-primary)" }}
-                                  >
-                                    {item.name ||
-                                      item.variant_details?.name ||
-                                      "Product"}{" "}
-                                    x{item.quantity}
-                                  </span>
-                                  <span
-                                    style={{ color: "var(--text-secondary)" }}
-                                  >
-                                    ₹
-                                    {item.price_at_purchase ||
-                                      item.variant_details?.discounted_price ||
-                                      item.price ||
-                                      "N/A"}
-                                  </span>
+                                  <div className="flex flex-col">
+                                    <span
+                                      className="font-medium"
+                                      style={{ color: "var(--text-primary)" }}
+                                    >
+                                      {item.name ||
+                                        item.brand +
+                                          " " +
+                                          (item.variant_details?.storage ||
+                                            "") ||
+                                        "Product"}
+                                    </span>
+                                    <span
+                                      style={{ color: "var(--text-secondary)" }}
+                                    >
+                                      Qty: {item.quantity}
+                                    </span>
+                                    {item.variant_details && (
+                                      <span
+                                        className="text-xs mt-0.5"
+                                        style={{
+                                          color: "var(--text-secondary)",
+                                        }}
+                                      >
+                                        {[
+                                          item.variant_details.ram,
+                                          item.variant_details.storage,
+                                          item.variant_details.colors,
+                                        ]
+                                          .filter(Boolean)
+                                          .join(", ")}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="flex flex-col items-end">
+                                    <span
+                                      className="font-medium"
+                                      style={{ color: "var(--text-primary)" }}
+                                    >
+                                      ₹
+                                      {item.price_at_purchase ||
+                                        item.variant_details
+                                          ?.discounted_price ||
+                                        item.price ||
+                                        "N/A"}
+                                    </span>
+                                    {item.variant_details?.price &&
+                                      item.variant_details?.discounted_price &&
+                                      item.variant_details.price >
+                                        item.variant_details
+                                          .discounted_price && (
+                                        <span
+                                          className="line-through text-xs"
+                                          style={{
+                                            color: "var(--text-secondary)",
+                                          }}
+                                        >
+                                          ₹{item.variant_details.price}
+                                        </span>
+                                      )}
+                                  </div>
                                 </li>
                               ))}
                             </ul>
@@ -827,7 +902,7 @@ const DeliveryStatusModal = ({
                                   <span
                                     style={{ color: "var(--text-secondary)" }}
                                   >
-                                    {item.price}
+                                    ₹{item.price}
                                   </span>
                                 </li>
                               ))}
@@ -854,9 +929,13 @@ const DeliveryStatusModal = ({
                           className="text-sm font-medium"
                           style={{ color: "var(--text-primary)" }}
                         >
-                          {delivery.expectedDelivery
+                          {delivery.expectedDelivery ||
+                          delivery.estimated_delivery ||
+                          delivery.estimatedDelivery
                             ? new Date(
-                                delivery.expectedDelivery
+                                delivery.expectedDelivery ||
+                                  delivery.estimated_delivery ||
+                                  delivery.estimatedDelivery
                               ).toLocaleDateString()
                             : "Not specified"}
                         </p>
@@ -864,17 +943,60 @@ const DeliveryStatusModal = ({
                           className="text-xs"
                           style={{ color: "var(--text-secondary)" }}
                         >
-                          {delivery.expectedDelivery
+                          {delivery.expectedDelivery ||
+                          delivery.estimated_delivery ||
+                          delivery.estimatedDelivery
                             ? new Date(
-                                delivery.expectedDelivery
+                                delivery.expectedDelivery ||
+                                  delivery.estimated_delivery ||
+                                  delivery.estimatedDelivery
                               ).toLocaleTimeString([], {
                                 hour: "2-digit",
                                 minute: "2-digit",
                               })
                             : ""}
-                        </p>
+                        </p>{" "}
                       </div>
-                    </div>{" "}
+                      {/* Payment Information */}
+                      <div className="mt-3">
+                        <h5
+                          className="text-xs font-medium mb-1"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          Payment Information
+                        </h5>
+                        <div className="flex justify-between text-xs">
+                          <span style={{ color: "var(--text-primary)" }}>
+                            Payment Type
+                          </span>
+                          <span
+                            className="font-medium"
+                            style={{
+                              color:
+                                delivery.paymentType === "Cash on Delivery"
+                                  ? "var(--warning-color)"
+                                  : "var(--success-color)",
+                            }}
+                          >
+                            {delivery.payment_method ||
+                              delivery.paymentType ||
+                              "Online Payment"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-xs mt-1">
+                          <span style={{ color: "var(--text-primary)" }}>
+                            Amount
+                          </span>
+                          <span
+                            className="font-medium"
+                            style={{ color: "var(--text-primary)" }}
+                          >
+                            {delivery.paymentAmount ||
+                              `₹${delivery.total_amount || 0}`}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

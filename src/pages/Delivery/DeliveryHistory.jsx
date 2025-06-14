@@ -1,7 +1,18 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useLocation } from "react-router-dom";
-import { FiSearch, FiFilter, FiDownload, FiCalendar } from "react-icons/fi";
-import { DeliveryLayout, DeliveryHistoryItem } from "../../components/Delivery";
+import {
+  FiSearch,
+  FiFilter,
+  FiDownload,
+  FiCalendar,
+  FiChevronLeft,
+  FiChevronRight,
+} from "react-icons/fi";
+import {
+  DeliveryLayout,
+  DeliveryHistoryItem,
+  DeliveryStatusModal,
+} from "../../components/Delivery";
 import { toast } from "../../utils/toast";
 import useDeliveryPartnerStore from "../../store/Delivery/useDeliveryPartnerStore";
 
@@ -15,6 +26,13 @@ const DeliveryHistory = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [successMessage, setSuccessMessage] = useState("");
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDelivery, setSelectedDelivery] = useState(null);
   // Access the store
   const { fetchDeliveryHistory } = useDeliveryPartnerStore();
 
@@ -22,10 +40,20 @@ const DeliveryHistory = () => {
   const formatAddress = useCallback((addressObj) => {
     if (!addressObj) return "N/A";
 
-    const { street_address, city, state, postal_code } = addressObj;
-    return [street_address, city, state, postal_code]
-      .filter(Boolean)
-      .join(", ");
+    // If it's already a string, return it
+    if (typeof addressObj === "string") return addressObj;
+
+    // If it's an object, extract the address components
+    if (typeof addressObj === "object") {
+      const { street_address, city, state, postal_code } = addressObj;
+      const addressParts = [street_address, city, state, postal_code]
+        .filter(Boolean)
+        .filter((part) => typeof part === "string" && part.trim() !== "");
+
+      return addressParts.length > 0 ? addressParts.join(", ") : "N/A";
+    }
+
+    return "N/A";
   }, []);
 
   useEffect(() => {
@@ -39,7 +67,6 @@ const DeliveryHistory = () => {
       return () => clearTimeout(timer);
     }
   }, [location.state?.successMessage]);
-
   useEffect(() => {
     // Fetch delivery history from the store
     const getDeliveryHistory = async () => {
@@ -48,21 +75,53 @@ const DeliveryHistory = () => {
         const history = await fetchDeliveryHistory();
 
         // Transform API data to match DeliveryHistoryItem component structure
-        const transformedHistory = history.map((delivery) => ({
-          id: delivery.order_id,
-          orderId: delivery.order_id,
-          customer: delivery.customer_name || "Customer",
-          address: formatAddress(delivery.delivery_address),
-          status: transformStatus(delivery.delivery_status || ""),
-          completedDate:
-            delivery.delivered_at || delivery.updated_at || delivery.created_at,
-          expectedDelivery:
-            delivery.estimated_delivery || new Date().toISOString(),
-          amount: parseFloat(delivery.total_amount || "0"),
-          paymentMethod: delivery.payment_method || "Online",
-          notes: delivery.notes || "",
-          items: delivery.items || [],
-        }));
+        const transformedHistory = history.map((delivery) => {
+          // Safely format the address
+          const formattedAddress = formatAddress(
+            delivery.address || delivery.delivery_address
+          );
+
+          return {
+            id: delivery.order_id,
+            orderId: delivery.order_id,
+            customer: delivery.customer_name || "Customer",
+            customer_phone: delivery.customer_phone,
+            address: formattedAddress,
+            delivery_address: delivery.address || delivery.delivery_address,
+            status: transformStatus(delivery.delivery_status || ""),
+            delivery_status: delivery.delivery_status,
+            completedDate:
+              delivery.delivered_at ||
+              delivery.updated_at ||
+              delivery.created_at,
+            expectedDelivery:
+              delivery.estimated_delivery || new Date().toISOString(),
+            estimated_delivery: delivery.estimated_delivery,
+            amount: parseFloat(delivery.total_amount || "0"),
+            total_amount: delivery.total_amount,
+            paymentMethod:
+              delivery.payment_details?.method ||
+              delivery.payment_method ||
+              "Online",
+            payment_method:
+              delivery.payment_details?.method || delivery.payment_method,
+            notes: delivery.notes || "",
+            order_items: delivery.order_items || [],
+            tracking_info: delivery.tracking_info || {},
+            // Include payment details
+            payment_details: delivery.payment_details || {
+              method: delivery.payment_method || "Online",
+              status: delivery.status || "payment_successful",
+            },
+            currency: delivery.currency || "INR",
+            created_at: delivery.created_at,
+            updated_at: delivery.updated_at,
+            assigned_at: delivery.assigned_at,
+            delivered_at: delivery.delivered_at,
+            // Preserve all original data
+            ...delivery,
+          };
+        });
 
         setDeliveries(transformedHistory);
         setFilteredDeliveries(transformedHistory);
@@ -140,6 +199,49 @@ const DeliveryHistory = () => {
 
     setFilteredDeliveries(results);
   }, [searchTerm, dateFilter, statusFilter, deliveries]);
+  // Handle viewing delivery details
+  const handleViewDetails = (delivery) => {
+    // Ensure address is properly formatted as string
+    const customerAddress =
+      typeof delivery.address === "string"
+        ? delivery.address
+        : formatAddress(delivery.delivery_address);
+
+    setSelectedDelivery({
+      ...delivery,
+      // Ensure we have all the properties the modal expects
+      customer: {
+        name: delivery.customer || "Customer",
+        phone: delivery.customer_phone || "N/A",
+        address: customerAddress,
+      },
+      paymentType:
+        delivery.payment_details?.method || delivery.payment_method || "Online",
+      paymentStatus:
+        delivery.payment_details?.status ||
+        delivery.status ||
+        "payment_successful",
+      paymentAmount: `₹${delivery.total_amount?.toLocaleString() || 0}`,
+    });
+    setIsModalOpen(true);
+  };
+
+  // Handle closing the modal
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedDelivery(null);
+  };
+
+  // Calculate pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredDeliveries.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+
+  // Change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   // Handle export to CSV
   const handleExport = () => {
@@ -207,7 +309,6 @@ const DeliveryHistory = () => {
             <p style={{ color: "var(--success-color)" }}>{successMessage}</p>
           </div>
         )}
-
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <h1
             className="text-2xl font-bold mb-4 md:mb-0"
@@ -228,7 +329,6 @@ const DeliveryHistory = () => {
             Export History
           </button>
         </div>
-
         <div className="flex flex-col md:flex-row justify-between mb-6">
           <div className="flex flex-col md:flex-row w-full gap-3">
             <div className="relative flex-grow md:w-64">
@@ -304,7 +404,6 @@ const DeliveryHistory = () => {
             </div>
           </div>
         </div>
-
         {isLoading ? (
           <div className="flex justify-center items-center py-20">
             <div
@@ -314,12 +413,89 @@ const DeliveryHistory = () => {
           </div>
         ) : filteredDeliveries.length > 0 ? (
           <div className="space-y-4">
-            {filteredDeliveries.map((delivery) => (
+            {currentItems.map((delivery) => (
               <DeliveryHistoryItem
-                key={delivery.order_id}
+                key={delivery.order_id || delivery.id}
                 delivery={delivery}
+                onViewDetails={() => handleViewDetails(delivery)}
               />
             ))}
+
+            {/* Pagination */}
+            {filteredDeliveries.length > itemsPerPage && (
+              <div className="flex justify-center mt-6">
+                <nav className="flex items-center">
+                  <button
+                    onClick={() => paginate(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="px-3 py-2 rounded-l-md"
+                    style={{
+                      backgroundColor:
+                        currentPage === 1
+                          ? "var(--bg-disabled)"
+                          : "var(--bg-secondary)",
+                      color:
+                        currentPage === 1
+                          ? "var(--text-disabled)"
+                          : "var(--text-primary)",
+                      cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    <FiChevronLeft />
+                  </button>
+
+                  {Array.from({
+                    length: Math.ceil(filteredDeliveries.length / itemsPerPage),
+                  }).map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => paginate(index + 1)}
+                      className="px-4 py-2"
+                      style={{
+                        backgroundColor:
+                          currentPage === index + 1
+                            ? "var(--brand-primary)"
+                            : "var(--bg-secondary)",
+                        color:
+                          currentPage === index + 1
+                            ? "white"
+                            : "var(--text-primary)",
+                      }}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+
+                  <button
+                    onClick={() => paginate(currentPage + 1)}
+                    disabled={
+                      currentPage ===
+                      Math.ceil(filteredDeliveries.length / itemsPerPage)
+                    }
+                    className="px-3 py-2 rounded-r-md"
+                    style={{
+                      backgroundColor:
+                        currentPage ===
+                        Math.ceil(filteredDeliveries.length / itemsPerPage)
+                          ? "var(--bg-disabled)"
+                          : "var(--bg-secondary)",
+                      color:
+                        currentPage ===
+                        Math.ceil(filteredDeliveries.length / itemsPerPage)
+                          ? "var(--text-disabled)"
+                          : "var(--text-primary)",
+                      cursor:
+                        currentPage ===
+                        Math.ceil(filteredDeliveries.length / itemsPerPage)
+                          ? "not-allowed"
+                          : "pointer",
+                    }}
+                  >
+                    <FiChevronRight />
+                  </button>
+                </nav>
+              </div>
+            )}
           </div>
         ) : (
           <div
@@ -356,8 +532,16 @@ const DeliveryHistory = () => {
                 : "Your completed deliveries will appear here once you've made some deliveries."}
             </p>
           </div>
-        )}
+        )}{" "}
       </div>
+
+      {/* Status Modal */}
+      <DeliveryStatusModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        delivery={selectedDelivery || {}}
+        isReadOnly={true}
+      />
     </DeliveryLayout>
   );
 };
