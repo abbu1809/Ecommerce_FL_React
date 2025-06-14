@@ -15,6 +15,7 @@ import {
 import OrderDetailModal from "./OrderDetailModal";
 import useOrderStore from "../../store/useOrder";
 import toast from "react-hot-toast";
+import { formatDateTime } from "../../utils/dateUtils";
 
 const statusIcons = {
   pending_payment: <FiClock />,

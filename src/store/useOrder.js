@@ -186,12 +186,11 @@ export const useOrderStore = create((set) => ({
           0
         ) * 100
       );
-
       const orderData = {
         address_id: addressId,
         amount: totalAmountInPaise,
         currency: "INR",
-        product_ids: cartItems.map((item) => item.id),
+        product_ids: cartItems.map((item) => item.item_id), // Use item_id (cart item ID) instead of id (product_id)
       };
 
       console.log("Order data being sent:", orderData);
@@ -306,17 +305,26 @@ export const useOrderStore = create((set) => ({
 
       // Calculate total amount in paise (assuming product.price is in rupees)
       const totalAmountInPaise = Math.round(product.price * quantity * 100);
-
       const orderData = {
         address_id: addressId,
         amount: totalAmountInPaise,
         currency: "INR",
         product_ids: [product.id],
+        // For single product orders, include product details directly
+        single_product_order: true,
+        product_details: {
+          product_id: product.id,
+          quantity: quantity,
+          variant_id: product.variant_id || null,
+        },
       };
 
       console.log("Single product order data being sent:", orderData);
 
-      const response = await api.post("/users/orders/create/", orderData);
+      const response = await api.post(
+        "/users/order/razorpay/create/",
+        orderData
+      );
 
       console.log("Single product API response:", response.data);
 

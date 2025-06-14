@@ -18,6 +18,7 @@ import OrderDetailModal from "./OrderDetailModal";
 import ReviewModal from "./ReviewModal";
 import useOrderStore from "../../store/useOrder";
 import toast from "react-hot-toast";
+import { formatDateTime } from "../../utils/dateUtils";
 
 const statusIcons = {
   pending_payment: <FiClock />,
@@ -223,20 +224,17 @@ const OrderStatusListWithReviews = ({ orders }) => {
                         >
                           {getStatusDisplay(latestStatus)}
                         </span>
-                      </div>
+                      </div>{" "}
                       <div
                         className="text-xs"
                         style={{ color: "var(--text-secondary)" }}
                       >
                         <span className="hidden sm:inline mx-2">•</span>
                         Placed:{" "}
-                        {new Date(
-                          order.created_at
-                        ).toLocaleDateString()} at{" "}
-                        {new Date(order.created_at).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {(() => {
+                          const dateTime = formatDateTime(order.created_at);
+                          return `${dateTime.date} at ${dateTime.time}`;
+                        })()}
                       </div>
                     </div>
                     <div className="mt-2 flex flex-wrap gap-4 text-sm">

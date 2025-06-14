@@ -30,12 +30,12 @@ const CartItem = ({ item, updateQuantity, removeItem }) => {
               style={{ color: "var(--text-primary)" }}
             >
               {item.name}
-            </Link>
+            </Link>{" "}
             <span
               className="text-sm block mt-1"
               style={{ color: "var(--text-secondary)" }}
             >
-              ₹{item.price.toLocaleString()} each
+              ₹{(item.price || 0).toLocaleString()} each
             </span>
           </div>
         </div>
@@ -72,12 +72,12 @@ const CartItem = ({ item, updateQuantity, removeItem }) => {
             <FiPlus size={16} />
           </button>
         </div>
-      </td>
+      </td>{" "}
       <td
         className="py-6 px-4 text-right text-lg font-semibold"
         style={{ color: "var(--brand-primary)" }}
       >
-        ₹{(item.price * item.quantity).toLocaleString()}
+        ₹{((item.price || 0) * item.quantity).toLocaleString()}
       </td>
       <td className="py-6 px-4 text-center">
         {" "}
