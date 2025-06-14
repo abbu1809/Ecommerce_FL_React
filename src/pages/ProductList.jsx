@@ -15,7 +15,6 @@ const ProductList = () => {
     ? category.charAt(0).toUpperCase() + category.slice(1).replace(/s$/, "")
     : null;
   const [showFilters, setShowFilters] = useState(false);
-
   // Filter states
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [priceRange, setPriceRange] = useState({ min: 0, max: 150000 });
@@ -30,6 +29,7 @@ const ProductList = () => {
   const [selectedColors, setSelectedColors] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedDiscount, setSelectedDiscount] = useState(null);
+  const [selectedAttributes, setSelectedAttributes] = useState({}); // New state for dynamic attributes
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -111,21 +111,20 @@ const ProductList = () => {
       filteredProducts = filteredProducts.filter(
         (product) => product.stock <= 0
       );
-    }
-
-    // Apply storage filter
+    } // Apply storage filter
     if (selectedStorage.length > 0) {
       filteredProducts = filteredProducts.filter((product) => {
-        // Check if product has storageOptions and if any match the selected storage
-        if (product.storageOptions && Array.isArray(product.storageOptions)) {
-          return product.storageOptions.some((storage) =>
-            selectedStorage.includes(storage)
-          );
-        }
         // Check if product has variant.storage and if any match the selected storage
         if (product.variant && Array.isArray(product.variant.storage)) {
           return product.variant.storage.some((storage) =>
             selectedStorage.includes(storage)
+          );
+        }
+        // Check if product has valid_options with storage and if any match the selected storage
+        if (product.valid_options && Array.isArray(product.valid_options)) {
+          return product.valid_options.some(
+            (option) =>
+              option.storage && selectedStorage.includes(option.storage)
           );
         }
         return false;
@@ -135,13 +134,11 @@ const ProductList = () => {
     // Apply RAM filter
     if (selectedRAM.length > 0) {
       filteredProducts = filteredProducts.filter((product) => {
-        // Check if product has ramOptions and if any match the selected RAM
-        if (product.ramOptions && Array.isArray(product.ramOptions)) {
-          return product.ramOptions.some((ram) => selectedRAM.includes(ram));
-        }
-        // Check if product has variant.ram and if any match the selected RAM
-        if (product.variant && Array.isArray(product.variant.ram)) {
-          return product.variant.ram.some((ram) => selectedRAM.includes(ram));
+        // Check if product has valid_options with ram and if any match the selected RAM
+        if (product.valid_options && Array.isArray(product.valid_options)) {
+          return product.valid_options.some(
+            (option) => option.ram && selectedRAM.includes(option.ram)
+          );
         }
         return false;
       });
@@ -150,17 +147,46 @@ const ProductList = () => {
     // Apply color filter
     if (selectedColors.length > 0) {
       filteredProducts = filteredProducts.filter((product) => {
-        // Check if product has colors and if any match the selected colors
-        if (product.colors && Array.isArray(product.colors)) {
-          return product.colors.some((color) => selectedColors.includes(color));
-        }
         // Check if product has variant.colors and if any match the selected colors
         if (product.variant && Array.isArray(product.variant.colors)) {
           return product.variant.colors.some((color) =>
             selectedColors.includes(color)
           );
         }
+        // Check if product has valid_options with colors and if any match the selected colors
+        if (product.valid_options && Array.isArray(product.valid_options)) {
+          return product.valid_options.some(
+            (option) => option.colors && selectedColors.includes(option.colors)
+          );
+        }
         return false;
+      });
+    }
+
+    // Apply dynamic attribute filters
+    if (selectedAttributes && Object.keys(selectedAttributes).length > 0) {
+      filteredProducts = filteredProducts.filter((product) => {
+        return Object.entries(selectedAttributes).every(
+          ([attributeKey, selectedValues]) => {
+            if (!selectedValues || selectedValues.length === 0) return true;
+
+            // Check in product attributes
+            if (product.attributes && product.attributes[attributeKey]) {
+              return selectedValues.includes(product.attributes[attributeKey]);
+            }
+
+            // Check in valid_options
+            if (product.valid_options && Array.isArray(product.valid_options)) {
+              return product.valid_options.some(
+                (option) =>
+                  option[attributeKey] &&
+                  selectedValues.includes(option[attributeKey])
+              );
+            }
+
+            return false;
+          }
+        );
       });
     }
 
@@ -211,7 +237,6 @@ const ProductList = () => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
@@ -226,6 +251,7 @@ const ProductList = () => {
     selectedColors,
     selectedCategories,
     selectedDiscount,
+    selectedAttributes,
     category,
   ]);
 
@@ -241,6 +267,7 @@ const ProductList = () => {
     setSelectedColors([]);
     setSelectedCategories([]);
     setSelectedDiscount(null);
+    setSelectedAttributes({});
   };
 
   // Breadcrumb items
@@ -274,10 +301,13 @@ const ProductList = () => {
         </div>
 
         <div className="flex flex-col md:flex-row justify-between items-start gap-6">
+          {" "}
           <ProductFilter
             showFilters={showFilters}
             setShowFilters={setShowFilters}
             brands={brands}
+            products={transformedProducts}
+            currentCategory={category}
             selectedBrands={selectedBrands}
             toggleBrandFilter={toggleBrandFilter}
             priceRange={priceRange}
@@ -297,8 +327,9 @@ const ProductList = () => {
             setSelectedCategories={setSelectedCategories}
             selectedDiscount={selectedDiscount}
             setSelectedDiscount={setSelectedDiscount}
+            selectedAttributes={selectedAttributes}
+            setSelectedAttributes={setSelectedAttributes}
           />
-
           {/* Product Grid */}
           <div className="w-full md:w-3/4">
             {/* Results Header */}
