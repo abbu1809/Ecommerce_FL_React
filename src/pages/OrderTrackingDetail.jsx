@@ -43,12 +43,12 @@ const OrderTrackingDetail = () => {
   const { id: orderId } = useParams();
   console.log("OrderTrackingDetail rendered with orderId:", orderId); // Debug log
   const { getOrderById, currentOrder, isLoading, error } = useOrderStore();
-
   // State for review functionality
   const [showReviewCard, setShowReviewCard] = useState(false);
   const [selectedProductForReview, setSelectedProductForReview] =
     useState(null);
   const [rating, setRating] = useState(0);
+  const [reviewTitle, setReviewTitle] = useState("");
   const [comment, setComment] = useState("");
   const [hoveredRating, setHoveredRating] = useState(0);
   const [reviewedProducts, setReviewedProducts] = useState(new Set());
@@ -76,8 +76,7 @@ const OrderTrackingDetail = () => {
     fetchOrderDetails();
   }, [orderId, getOrderById]);
 
-  console.log("Order fetched successfully:", currentOrder); //
-  // Handle opening review card for a specific product
+  console.log("Order fetched successfully:", currentOrder); //  // Handle opening review card for a specific product
   const handleWriteReview = (product) => {
     const productId = product.product_id || product.id;
 
@@ -90,16 +89,17 @@ const OrderTrackingDetail = () => {
     setSelectedProductForReview(product);
     setShowReviewCard(true);
     setRating(0);
+    setReviewTitle("");
     setComment("");
     setHoveredRating(0);
     clearReviewError();
   };
-
   // Handle closing review card
   const handleCloseReview = () => {
     setShowReviewCard(false);
     setSelectedProductForReview(null);
     setRating(0);
+    setReviewTitle("");
     setComment("");
     setHoveredRating(0);
   };
@@ -116,9 +116,13 @@ const OrderTrackingDetail = () => {
       toast.error("Product information not available");
       return;
     }
-
     if (rating === 0) {
       toast.error("Please select a rating");
+      return;
+    }
+
+    if (!reviewTitle.trim()) {
+      toast.error("Please enter a review title");
       return;
     }
 
@@ -131,10 +135,10 @@ const OrderTrackingDetail = () => {
       handleCloseReview();
       return;
     }
-
     clearReviewError();
     const reviewData = {
       rating: rating,
+      title: reviewTitle.trim(),
       comment: comment.trim(),
       verified_purchase: true,
       order_id:
@@ -160,31 +164,55 @@ const OrderTrackingDetail = () => {
   useEffect(() => {
     const loadReviewStatuses = async () => {
       const orderItems = currentOrder?.order_items || currentOrder?.orderItems;
-      if (orderItems && isAuthenticated && user) {
+      console.log("Loading review statuses for items:", orderItems); // Debug log
+
+      if (orderItems && orderItems.length > 0 && isAuthenticated && user) {
         const reviewedSet = new Set();
 
         for (const item of orderItems) {
           const productId = item.product_id || item.id;
+          console.log(
+            "Checking review for product:",
+            productId,
+            "Item data:",
+            item
+          ); // Debug log
+
           if (productId) {
-            const result = await checkExistingReview(productId);
-            if (result.success && result.has_reviewed) {
-              reviewedSet.add(productId);
+            try {
+              const result = await checkExistingReview(productId);
+              console.log(`Review check result for ${productId}:`, result); // Debug log
+
+              if (result.success && result.has_reviewed) {
+                reviewedSet.add(productId);
+                console.log(`Product ${productId} has been reviewed`); // Debug log
+              }
+            } catch (error) {
+              console.error(
+                `Error checking review for product ${productId}:`,
+                error
+              );
             }
           }
         }
 
+        console.log("Final reviewed products set:", Array.from(reviewedSet)); // Debug log
         setReviewedProducts(reviewedSet);
+      } else {
+        console.log("Review status loading skipped:", {
+          orderItems: !!orderItems,
+          orderItemsLength: orderItems?.length,
+          isAuthenticated,
+          user: !!user,
+        });
       }
     };
 
-    loadReviewStatuses();
-  }, [
-    currentOrder?.order_items,
-    currentOrder?.orderItems,
-    isAuthenticated,
-    user,
-    checkExistingReview,
-  ]);
+    // Only run this if we have the current order loaded
+    if (currentOrder) {
+      loadReviewStatuses();
+    }
+  }, [currentOrder, isAuthenticated, user, checkExistingReview]);
 
   // Transform the current order data to match component expectations
   const transformOrderData = (orderData) => {
@@ -1166,8 +1194,25 @@ const OrderTrackingDetail = () => {
                           </div>
                         </div>{" "}
                         {/* Review button for delivered items */}
-                        {item.hasReviewed ||
-                        reviewedProducts.has(item.product_id || item.id) ? (
+                        {(() => {
+                          const productId = item.product_id || item.id;
+                          const hasReviewed = reviewedProducts.has(productId);
+                          console.log(`Review check for item:`, {
+                            productId,
+                            hasReviewed,
+                            reviewedProducts: Array.from(reviewedProducts),
+                            reviewedProductsSize: reviewedProducts.size,
+                            item,
+                          });
+
+                          // Temporary debug: show the raw check
+                          console.log(
+                            `Direct check: reviewedProducts.has("${productId}") =`,
+                            reviewedProducts.has(productId)
+                          );
+
+                          return hasReviewed;
+                        })() ? (
                           <div className="flex items-center px-3 py-2 rounded-lg text-sm font-medium bg-green-50 border border-green-200">
                             <FiCheckCircle
                               size={16}
@@ -1358,6 +1403,35 @@ const OrderTrackingDetail = () => {
                     )}
                   </div>
 
+                  {/* Review Title */}
+                  <div className="mb-6">
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      Review Title *
+                    </label>{" "}
+                    <input
+                      type="text"
+                      value={reviewTitle}
+                      onChange={(e) => setReviewTitle(e.target.value)}
+                      placeholder="Write a brief title for your review"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
+                      style={{
+                        borderColor: "var(--border-primary)",
+                        backgroundColor: "var(--bg-primary)",
+                        color: "var(--text-primary)",
+                      }}
+                      maxLength={100}
+                    />
+                    <p
+                      className="text-xs mt-1"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      {reviewTitle.length}/100 characters
+                    </p>
+                  </div>
+
                   {/* Comment */}
                   <div className="mb-6">
                     <label
@@ -1365,18 +1439,17 @@ const OrderTrackingDetail = () => {
                       style={{ color: "var(--text-primary)" }}
                     >
                       Your Review
-                    </label>
+                    </label>{" "}
                     <textarea
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
                       placeholder="Share your thoughts about this product... What did you like or dislike about it?"
                       rows={4}
-                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 transition-colors duration-200"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
                       style={{
                         borderColor: "var(--border-primary)",
                         backgroundColor: "var(--bg-primary)",
                         color: "var(--text-primary)",
-                        focusRingColor: "var(--brand-primary)",
                       }}
                       maxLength={1000}
                     />
@@ -1422,10 +1495,12 @@ const OrderTrackingDetail = () => {
                       }}
                     >
                       Cancel
-                    </button>
+                    </button>{" "}
                     <button
                       type="submit"
-                      disabled={reviewLoading || rating === 0}
+                      disabled={
+                        reviewLoading || rating === 0 || !reviewTitle.trim()
+                      }
                       className="px-6 py-2 rounded-md font-medium transition-all duration-200 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{
                         backgroundColor: "var(--brand-primary)",

@@ -178,7 +178,7 @@ const Product = () => {
           helpful: review.helpful_count || 0,
           helpful_count: review.helpful_count || 0,
           is_marked_helpful: review.is_marked_helpful || false,
-          title: `${review.rating} star review`,
+          title: `${review.title}`,
           reported_count: review.reported_count || 0,
           helpful_users: review.helpful_users || [],
         }))
