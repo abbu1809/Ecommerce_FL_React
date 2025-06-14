@@ -61,7 +61,6 @@ const ReviewModal = ({ isOpen, onClose, product }) => {
     }
 
     clearReviewError();
-
     const reviewData = {
       rating: rating,
       comment: comment.trim(),
@@ -71,7 +70,9 @@ const ReviewModal = ({ isOpen, onClose, product }) => {
       purchase_date: product.orderDate,
     };
 
-    const result = await addReview(product.id, reviewData);
+    // Use productId if available, otherwise fallback to id
+    const productIdToUse = product.productId || product.id;
+    const result = await addReview(productIdToUse, reviewData);
     if (result.success) {
       // Reset form
       setRating(0);
@@ -204,7 +205,6 @@ const ReviewModal = ({ isOpen, onClose, product }) => {
               {reviewError}
             </div>
           )}
-
           {/* Rating Selection */}
           <div className="mb-6">
             <label
@@ -241,8 +241,7 @@ const ReviewModal = ({ isOpen, onClose, product }) => {
                 {rating} out of 5 stars
               </p>
             )}
-          </div>
-
+          </div>{" "}
           {/* Comment */}
           <div className="mb-6">
             <label
@@ -278,8 +277,19 @@ const ReviewModal = ({ isOpen, onClose, product }) => {
                 </p>
               )}
             </div>
+            <div
+              className="mt-2 p-2 rounded-md"
+              style={{ backgroundColor: "var(--success-color)15" }}
+            >
+              <p
+                className="text-xs flex items-center"
+                style={{ color: "var(--success-color)" }}
+              >
+                <FiPackage size={12} className="mr-1" />
+                This review will be marked as a verified purchase
+              </p>
+            </div>
           </div>
-
           {/* Action Buttons */}
           <div className="flex justify-end space-x-3">
             <button

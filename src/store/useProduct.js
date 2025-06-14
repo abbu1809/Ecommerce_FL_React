@@ -238,6 +238,26 @@ export const useProductStore = create((set, get) => ({
     set({ reviewError: null });
   },
 
+  // Check if user has already reviewed a product
+  checkExistingReview: async (productId) => {
+    try {
+      const response = await api.get(
+        `/users/product/${productId}/check_review/`
+      );
+      return {
+        success: true,
+        has_reviewed: response.data.has_reviewed || false,
+      };
+    } catch (error) {
+      console.error("Error checking existing review:", error);
+      return {
+        success: false,
+        has_reviewed: false,
+        error: error.response?.data?.error || "Failed to check existing review",
+      };
+    }
+  },
+
   // Mark review as helpful
   markReviewHelpful: async (productId, reviewId) => {
     try {

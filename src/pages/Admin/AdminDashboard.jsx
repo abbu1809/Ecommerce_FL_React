@@ -39,7 +39,6 @@ const AdminDashboard = () => {
       color: colors[index],
     };
   });
-
   // Fetch dashboard data on component mount
   useEffect(() => {
     fetchDashboardData();

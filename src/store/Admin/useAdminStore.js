@@ -115,61 +115,166 @@ export const useAdminStore = create(
         });
       }
       return product;
-    },
-
-    // Dashboard actions
+    }, // Dashboard actions
     fetchDashboardData: async () => {
       set((state) => ({ dashboard: { ...state.dashboard, loading: true } }));
 
       try {
-        // For now, use the previous simulated data until dashboard API endpoints are available
+        // Fetch all required data for dashboard
+        const [ordersResponse, usersResponse, productsResponse] =
+          await Promise.all([
+            adminApi.get("/admin/get_all_orders"),
+            adminApi.get("/admin/get_all_users"),
+            adminApi.get("/admin/get_all_products"),
+          ]);
+
+        const orders = ordersResponse.data.orders || [];
+        const users = usersResponse.data.users || [];
+        const products = productsResponse.data.products || [];
+
+        // Calculate dashboard statistics
+        const now = new Date();
+        const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        const lastMonth = new Date(
+          now.getFullYear(),
+          now.getMonth() - 1,
+          now.getDate()
+        );
+
+        // Total Sales (exclude cancelled orders)
+        const validOrders = orders.filter(
+          (order) =>
+            order.status !== "cancelled" && order.status !== "pending_payment"
+        );
+        const totalSales = validOrders.reduce(
+          (sum, order) => sum + (order.total_amount || 0),
+          0
+        );
+
+        // Last month's sales for comparison
+        const lastMonthOrders = validOrders.filter((order) => {
+          const orderDate = new Date(order.created_at);
+          return (
+            orderDate >= lastMonth &&
+            orderDate < new Date(now.getFullYear(), now.getMonth(), 1)
+          );
+        });
+        const lastMonthSales = lastMonthOrders.reduce(
+          (sum, order) => sum + (order.total_amount || 0),
+          0
+        );
+        const salesChange =
+          lastMonthSales > 0
+            ? (((totalSales - lastMonthSales) / lastMonthSales) * 100).toFixed(
+                1
+              )
+            : 0;
+
+        // New Orders (last 24 hours)
+        const newOrders = orders.filter((order) => {
+          const orderDate = new Date(order.created_at);
+          return orderDate >= yesterday;
+        }).length;
+
+        // New Customers (last 24 hours)
+        const newCustomers = users.filter((user) => {
+          const userDate = new Date(user.created_at);
+          return userDate >= yesterday;
+        }).length;
+
+        // Low Stock Items (stock < 10)
+        const lowStockItems = products.filter(
+          (product) => (product.stock || 0) < 10
+        ).length;
+
         const stats = [
           {
             title: "Total Sales",
-            value: "₹125,430",
-            change: "+12.5%",
-            isPositive: true,
+            value: `₹${totalSales.toLocaleString()}`,
+            change: `${salesChange >= 0 ? "+" : ""}${salesChange}%`,
+            isPositive: salesChange >= 0,
           },
           {
             title: "New Orders",
-            value: "42",
-            change: "+8.2%",
+            value: newOrders.toString(),
+            change: "+8.2%", // You can calculate this based on previous period if needed
             isPositive: true,
           },
           {
             title: "New Customers",
-            value: "18",
-            change: "+5.7%",
+            value: newCustomers.toString(),
+            change: "+5.7%", // You can calculate this based on previous period if needed
             isPositive: true,
           },
           {
             title: "Low Stock Items",
-            value: "7",
-            change: "-2.3%",
-            isPositive: false,
+            value: lowStockItems.toString(),
+            change: lowStockItems > 0 ? "-2.3%" : "0%",
+            isPositive: lowStockItems === 0,
           },
         ];
 
-        const topProducts = [
-          { id: 1, name: "Smartphone X", sales: 145, revenue: 14500 },
-          { id: 2, name: "Laptop Pro", sales: 98, revenue: 78400 },
-          { id: 3, name: "Wireless Headphones", sales: 82, revenue: 4100 },
-          { id: 4, name: "Smart Watch", sales: 65, revenue: 9750 },
-          { id: 5, name: "HD Camera", sales: 49, revenue: 7350 },
+        // Calculate top products from order data
+        const productSales = {};
+        validOrders.forEach((order) => {
+          order.order_items?.forEach((item) => {
+            if (!productSales[item.product_id]) {
+              productSales[item.product_id] = {
+                id: item.product_id,
+                name: item.name || "Unknown Product",
+                sales: 0,
+                revenue: 0,
+              };
+            }
+            productSales[item.product_id].sales += item.quantity || 1;
+            productSales[item.product_id].revenue += item.total_item_price || 0;
+          });
+        });
+
+        const topProducts = Object.values(productSales)
+          .sort((a, b) => b.revenue - a.revenue)
+          .slice(0, 5);
+
+        // Calculate sales data by month for the chart
+        const salesByMonth = {};
+        const monthNames = [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
         ];
 
-        // Get the first 5 orders for recent orders
-        const ordersResponse = await adminApi.get("/admin/get_all_orders");
-        const recentOrders = ordersResponse.data.orders.slice(0, 5);
+        // Initialize current year months
+        for (let i = 0; i < 12; i++) {
+          const monthKey = monthNames[i];
+          salesByMonth[monthKey] = 0;
+        }
 
-        const salesData = [
-          { month: "Jan", sales: 4000 },
-          { month: "Feb", sales: 6000 },
-          { month: "Mar", sales: 8000 },
-          { month: "Apr", sales: 7500 },
-          { month: "May", sales: 12000 },
-          { month: "Jun", sales: 9800 },
-        ];
+        validOrders.forEach((order) => {
+          const orderDate = new Date(order.created_at);
+          const monthKey = monthNames[orderDate.getMonth()];
+          salesByMonth[monthKey] += order.total_amount || 0;
+        });
+
+        const salesData = Object.entries(salesByMonth).map(
+          ([month, sales]) => ({
+            month,
+            sales: Math.round(sales),
+          })
+        );
+
+        // Get recent orders (first 5)
+        const recentOrders = orders
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+          .slice(0, 5);
 
         set({
           dashboard: {
@@ -181,6 +286,7 @@ export const useAdminStore = create(
           },
         });
       } catch (error) {
+        console.error("Dashboard data fetch error:", error);
         set((state) => ({
           dashboard: {
             ...state.dashboard,

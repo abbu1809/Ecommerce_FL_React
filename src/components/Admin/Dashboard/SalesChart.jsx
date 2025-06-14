@@ -1,9 +1,21 @@
 import React, { useState } from "react";
-import { FiCalendar, FiChevronDown, FiDownload } from "react-icons/fi";
+import {
+  FiCalendar,
+  FiChevronDown,
+  FiDownload,
+  FiTrendingUp,
+} from "react-icons/fi";
+import useAdminStore from "../../../store/Admin/useAdminStore";
 
 // In a real application, you'd use a chart library like Chart.js, Recharts, or Nivo
 const SalesChart = () => {
   const [period, setPeriod] = useState("yearly");
+  const { dashboard } = useAdminStore();
+  const { salesData } = dashboard;
+
+  // Calculate total sales from the data
+  const totalSales =
+    salesData?.reduce((sum, data) => sum + (data.sales || 0), 0) || 0;
 
   return (
     <div
@@ -60,46 +72,69 @@ const SalesChart = () => {
             Export
           </button>
         </div>
-      </div>
-
+      </div>{" "}
       <div className="h-64 flex items-center justify-center mb-4">
-        {/* Placeholder for chart */}
-        <div className="text-center">
-          <div
-            className="w-full h-48 rounded-lg mb-4 overflow-hidden relative"
-            style={{ backgroundColor: "var(--bg-secondary)" }}
-          >
-            <div className="flex justify-between absolute left-0 right-0 bottom-0 px-4">
-              {[...Array(6)].map((_, i) => (
-                <div
-                  key={i}
-                  className="w-12 rounded-t-lg"
-                  style={{
-                    height: `${Math.random() * 100 + 20}px`,
-                    backgroundColor: "var(--brand-primary)",
-                    opacity: 0.8,
-                  }}
-                ></div>
-              ))}
-              {[...Array(6)].map((_, i) => (
-                <div
-                  key={i + 6}
-                  className="w-12 rounded-t-lg"
-                  style={{
-                    height: `${Math.random() * 80 + 40}px`,
-                    backgroundColor: "var(--brand-secondary)",
-                    opacity: 0.7,
-                  }}
-                ></div>
-              ))}
+        {/* Placeholder for chart with real data visualization */}
+        <div className="text-center w-full">
+          {salesData && salesData.length > 0 ? (
+            <div
+              className="w-full h-48 rounded-lg mb-4 overflow-hidden relative flex items-end justify-between p-4"
+              style={{ backgroundColor: "var(--bg-secondary)" }}
+            >
+              {salesData.map((data, i) => {
+                const maxSales = Math.max(
+                  ...salesData.map((d) => d.sales || 0)
+                );
+                const height =
+                  maxSales > 0
+                    ? Math.max((data.sales / maxSales) * 120, 20)
+                    : 20;
+
+                return (
+                  <div key={i} className="flex flex-col items-center">
+                    <div
+                      className="w-8 rounded-t-lg transition-all duration-300 hover:opacity-80"
+                      style={{
+                        height: `${height}px`,
+                        backgroundColor: "var(--brand-primary)",
+                        opacity: 0.9,
+                      }}
+                      title={`${data.month}: ₹${
+                        data.sales?.toLocaleString() || 0
+                      }`}
+                    ></div>
+                    <span
+                      className="text-xs mt-2 font-medium"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      {data.month}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
-          </div>
+          ) : (
+            <div
+              className="w-full h-48 rounded-lg mb-4 flex items-center justify-center"
+              style={{ backgroundColor: "var(--bg-secondary)" }}
+            >
+              <div className="text-center">
+                <FiTrendingUp
+                  size={32}
+                  className="mx-auto mb-2"
+                  style={{ color: "var(--text-secondary)" }}
+                />
+                <p style={{ color: "var(--text-secondary)" }}>
+                  No sales data available
+                </p>
+              </div>
+            </div>
+          )}
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-            (This is a placeholder for an actual chart component)
+            Monthly sales overview ({salesData?.length || 0} months)
           </p>
         </div>
-      </div>
-
+      </div>{" "}
       <div
         className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t"
         style={{ borderColor: "var(--border-primary)" }}
@@ -112,47 +147,55 @@ const SalesChart = () => {
             className="text-xl font-bold"
             style={{ color: "var(--text-primary)" }}
           >
-            ₹425,652
+            ₹{totalSales.toLocaleString()}
           </p>
           <div
             className="text-xs font-medium mt-1"
             style={{ color: "var(--success-color)" }}
           >
-            +8.5% vs last period
+            Current year total
           </div>
         </div>
         <div>
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-            Total Orders
+            Peak Month
           </p>
           <p
             className="text-xl font-bold"
             style={{ color: "var(--text-primary)" }}
           >
-            1,482
+            {salesData && salesData.length > 0
+              ? salesData.reduce(
+                  (max, data) => (data.sales > max.sales ? data : max),
+                  salesData[0]
+                ).month
+              : "N/A"}
           </p>
           <div
             className="text-xs font-medium mt-1"
             style={{ color: "var(--success-color)" }}
           >
-            +5.2% vs last period
+            Highest sales month
           </div>
         </div>
         <div>
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-            Average Order
+            Average Monthly
           </p>
           <p
             className="text-xl font-bold"
             style={{ color: "var(--text-primary)" }}
           >
-            ₹28,720
+            ₹
+            {salesData && salesData.length > 0
+              ? Math.round(totalSales / salesData.length).toLocaleString()
+              : "0"}
           </p>
           <div
             className="text-xs font-medium mt-1"
             style={{ color: "var(--success-color)" }}
           >
-            +2.8% vs last period
+            Monthly average
           </div>
         </div>
       </div>

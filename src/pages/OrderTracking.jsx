@@ -1,5 +1,4 @@
 import OrderTrackingTimeline from "../components/OrderTracking/OrderTrackingTimeline";
-import ReviewModal from "../components/OrderStatus/ReviewModal";
 import { Link } from "react-router-dom";
 import {
   FiArrowLeft,
@@ -7,14 +6,27 @@ import {
   FiCalendar,
   FiInfo,
   FiStar,
+  FiX,
 } from "react-icons/fi";
 import { useState } from "react";
+import toast from "react-hot-toast";
+import { useProductStore } from "../store/useProduct";
+import { useAuthStore } from "../store/useAuth";
 
 const OrderTracking = () => {
-  // State for review modal
-  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  // State for review functionality
+  const [showReviewCard, setShowReviewCard] = useState(false);
   const [selectedProductForReview, setSelectedProductForReview] =
     useState(null);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [hoveredRating, setHoveredRating] = useState(0);
+  const [reviewedProducts, setReviewedProducts] = useState(new Set());
+
+  // Store hooks
+  const { addReview, reviewLoading, reviewError, clearReviewError } =
+    useProductStore();
+  const { isAuthenticated, user } = useAuthStore();
 
   // Example order status data (replace with real data from backend/store)
   const order = {
@@ -32,6 +44,7 @@ const OrderTracking = () => {
     orderItems: [
       {
         id: 1,
+        productId: 1, // Add productId for proper review linking
         name: "iPhone 15 Pro",
         brand: "Apple",
         model: "A3101",
@@ -40,9 +53,11 @@ const OrderTracking = () => {
         quantity: 1,
         orderId: "ORD123456",
         orderDate: "2025-05-10T10:00:00Z",
+        hasReviewed: false, // Track if user has already reviewed this product
       },
       {
         id: 2,
+        productId: 2, // Add productId for proper review linking
         name: "AirPods Pro",
         brand: "Apple",
         model: "A2931",
@@ -51,20 +66,91 @@ const OrderTracking = () => {
         quantity: 1,
         orderId: "ORD123456",
         orderDate: "2025-05-10T10:00:00Z",
+        hasReviewed: false, // Track if user has already reviewed this product
       },
     ],
-  };
-
-  // Handle opening review modal for a specific product
+  }; // Handle opening review card for a specific product
   const handleWriteReview = (product) => {
+    const productId = product.productId || product.id;
+
+    // Check if user has already reviewed this product
+    if (reviewedProducts.has(productId) || product.hasReviewed) {
+      toast.info("You have already reviewed this product");
+      return;
+    }
+
     setSelectedProductForReview(product);
-    setIsReviewModalOpen(true);
+    setShowReviewCard(true);
+    setRating(0);
+    setComment("");
+    setHoveredRating(0);
+    clearReviewError();
   };
 
-  // Handle closing review modal
-  const handleCloseReviewModal = () => {
-    setIsReviewModalOpen(false);
+  // Handle closing review card
+  const handleCloseReview = () => {
+    setShowReviewCard(false);
     setSelectedProductForReview(null);
+    setRating(0);
+    setComment("");
+    setHoveredRating(0);
+  };
+  // Handle review submission
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+
+    if (!isAuthenticated) {
+      toast.error("Please log in to write a review");
+      return;
+    }
+
+    if (!selectedProductForReview) {
+      toast.error("Product information not available");
+      return;
+    }
+
+    if (rating === 0) {
+      toast.error("Please select a rating");
+      return;
+    }
+
+    const productIdToUse =
+      selectedProductForReview.productId || selectedProductForReview.id;
+
+    // Double-check if user has already reviewed this product
+    if (
+      reviewedProducts.has(productIdToUse) ||
+      selectedProductForReview.hasReviewed
+    ) {
+      toast.error("You have already reviewed this product");
+      handleCloseReview();
+      return;
+    }
+
+    clearReviewError();
+
+    const reviewData = {
+      rating: rating,
+      comment: comment.trim(),
+      verified_purchase: true,
+      order_id: selectedProductForReview.orderId,
+      purchase_date: selectedProductForReview.orderDate,
+    };
+
+    const result = await addReview(productIdToUse, reviewData);
+
+    if (result.success) {
+      toast.success("Review submitted successfully!");
+
+      // Update the reviewed products set
+      setReviewedProducts((prev) => new Set([...prev, productIdToUse]));
+
+      handleCloseReview();
+      // Update the order item to show it has been reviewed
+      // In a real app, you would refresh the order data from the server
+    } else {
+      toast.error(result.error || "Failed to submit review. Please try again.");
+    }
   };
 
   return (
@@ -291,36 +377,273 @@ const OrderTracking = () => {
                               >
                                 ₹{item.price.toLocaleString()}
                               </div>
-                            </div>
-
+                            </div>{" "}
                             {/* Review button for delivered items */}
-                            <button
-                              onClick={() => handleWriteReview(item)}
-                              className="flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 hover:bg-orange-100"
-                              style={{
-                                color: "var(--brand-primary)",
-                                border: "1px solid var(--brand-primary)",
-                              }}
-                              title="Write Review"
-                            >
-                              <FiStar size={16} className="mr-2" />
-                              Write Review
-                            </button>
+                            {item.hasReviewed ||
+                            reviewedProducts.has(item.productId || item.id) ? (
+                              <div className="flex items-center px-3 py-2 rounded-lg text-sm font-medium bg-green-50 border border-green-200">
+                                <FiStar
+                                  size={16}
+                                  className="mr-2 text-green-600"
+                                />
+                                <span className="text-green-700">Reviewed</span>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => handleWriteReview(item)}
+                                className="flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 hover:bg-orange-100"
+                                style={{
+                                  color: "var(--brand-primary)",
+                                  border: "1px solid var(--brand-primary)",
+                                }}
+                                title="Write Review"
+                              >
+                                <FiStar size={16} className="mr-2" />
+                                Write Review
+                              </button>
+                            )}
                           </div>
                         </div>
-                      ))}
+                      ))}{" "}
                     </div>
                   </div>
                 )}
+              {/* Review Card - Show when writing review */}
+              {showReviewCard && selectedProductForReview && (
+                <div className="mt-8">
+                  <div
+                    className="p-6 rounded-xl border-2 border-dashed animate-fadeIn"
+                    style={{
+                      backgroundColor: "var(--bg-primary)",
+                      borderColor: "var(--brand-primary)",
+                      boxShadow: "var(--shadow-medium)",
+                    }}
+                  >
+                    {/* Review Card Header */}
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center">
+                        <div
+                          className="w-10 h-10 rounded-full flex items-center justify-center mr-3"
+                          style={{
+                            backgroundColor: "var(--bg-accent-light)",
+                            color: "var(--brand-primary)",
+                          }}
+                        >
+                          <FiStar size={20} />
+                        </div>
+                        <div>
+                          <h3
+                            className="text-xl font-bold"
+                            style={{ color: "var(--text-primary)" }}
+                          >
+                            Write a Review
+                          </h3>
+                          <p
+                            className="text-sm"
+                            style={{ color: "var(--text-secondary)" }}
+                          >
+                            Share your experience with this product
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={handleCloseReview}
+                        className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
+                        style={{ color: "var(--text-secondary)" }}
+                      >
+                        <FiX size={20} />
+                      </button>
+                    </div>
+
+                    {/* Product Info */}
+                    <div
+                      className="p-4 mb-6 rounded-lg border"
+                      style={{
+                        backgroundColor: "var(--bg-secondary)",
+                        borderColor: "var(--border-primary)",
+                      }}
+                    >
+                      <div className="flex items-center">
+                        {selectedProductForReview.image && (
+                          <img
+                            src={selectedProductForReview.image}
+                            alt={selectedProductForReview.name}
+                            className="w-16 h-16 object-cover rounded-lg mr-3"
+                          />
+                        )}
+                        <div className="flex-1">
+                          <h4
+                            className="font-semibold text-base"
+                            style={{ color: "var(--text-primary)" }}
+                          >
+                            {selectedProductForReview.name}
+                          </h4>
+                          <p
+                            className="text-sm"
+                            style={{ color: "var(--text-secondary)" }}
+                          >
+                            From Order #{selectedProductForReview.orderId}
+                          </p>
+                          <div className="flex items-center mt-1">
+                            <FiPackage
+                              size={12}
+                              className="mr-1"
+                              style={{ color: "var(--success-color)" }}
+                            />
+                            <span
+                              className="text-xs"
+                              style={{ color: "var(--success-color)" }}
+                            >
+                              Verified Purchase
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Review Form */}
+                    <form onSubmit={handleSubmitReview}>
+                      {reviewError && (
+                        <div
+                          className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded mb-4"
+                          style={{
+                            backgroundColor: "var(--error-bg)",
+                            borderColor: "var(--error-border)",
+                            color: "var(--error-color)",
+                          }}
+                        >
+                          {reviewError}
+                        </div>
+                      )}
+
+                      {/* Rating Selection */}
+                      <div className="mb-6">
+                        <label
+                          className="block text-sm font-medium mb-3"
+                          style={{ color: "var(--text-primary)" }}
+                        >
+                          Rating *
+                        </label>
+                        <div className="flex items-center space-x-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              className="focus:outline-none transition-transform duration-200 hover:scale-110"
+                              onMouseEnter={() => setHoveredRating(star)}
+                              onMouseLeave={() => setHoveredRating(0)}
+                              onClick={() => setRating(star)}
+                            >
+                              <FiStar
+                                className={`w-8 h-8 transition-colors duration-200 ${
+                                  star <= (hoveredRating || rating)
+                                    ? "fill-yellow-400 text-yellow-400"
+                                    : "text-gray-300 hover:text-yellow-300"
+                                }`}
+                              />
+                            </button>
+                          ))}
+                        </div>
+                        {rating > 0 && (
+                          <p
+                            className="text-sm mt-2"
+                            style={{ color: "var(--text-secondary)" }}
+                          >
+                            {rating} out of 5 stars
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Comment */}
+                      <div className="mb-6">
+                        <label
+                          className="block text-sm font-medium mb-2"
+                          style={{ color: "var(--text-primary)" }}
+                        >
+                          Your Review
+                        </label>
+                        <textarea
+                          value={comment}
+                          onChange={(e) => setComment(e.target.value)}
+                          placeholder="Share your thoughts about this product... What did you like or dislike about it?"
+                          rows={4}
+                          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 transition-colors duration-200"
+                          style={{
+                            borderColor: "var(--border-primary)",
+                            backgroundColor: "var(--bg-primary)",
+                            color: "var(--text-primary)",
+                            focusRingColor: "var(--brand-primary)",
+                          }}
+                          maxLength={1000}
+                        />
+                        <div className="flex justify-between items-center mt-1">
+                          <p
+                            className="text-xs"
+                            style={{ color: "var(--text-secondary)" }}
+                          >
+                            {comment.length}/1000 characters
+                          </p>
+                          {user && (
+                            <p
+                              className="text-xs"
+                              style={{ color: "var(--text-secondary)" }}
+                            >
+                              Reviewing as {user.name || user.email}
+                            </p>
+                          )}
+                        </div>
+                        <div
+                          className="mt-2 p-2 rounded-md"
+                          style={{ backgroundColor: "var(--success-color)15" }}
+                        >
+                          <p
+                            className="text-xs flex items-center"
+                            style={{ color: "var(--success-color)" }}
+                          >
+                            <FiPackage size={12} className="mr-1" />
+                            This review will be marked as a verified purchase
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex justify-end space-x-3">
+                        <button
+                          type="button"
+                          onClick={handleCloseReview}
+                          className="px-4 py-2 rounded-md font-medium transition-colors duration-200 hover:bg-gray-100"
+                          style={{
+                            color: "var(--text-secondary)",
+                            border: "1px solid var(--border-primary)",
+                          }}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={reviewLoading || rating === 0}
+                          className="px-6 py-2 rounded-md font-medium transition-all duration-200 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                          style={{
+                            backgroundColor: "var(--brand-primary)",
+                            color: "var(--text-on-brand)",
+                          }}
+                        >
+                          {reviewLoading ? (
+                            <div className="flex items-center">
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                              Submitting...
+                            </div>
+                          ) : (
+                            "Submit Review"
+                          )}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-
-          {/* Review Modal */}
-          <ReviewModal
-            isOpen={isReviewModalOpen}
-            onClose={handleCloseReviewModal}
-            product={selectedProductForReview}
-          />
         </div>
       </div>
     </div>
