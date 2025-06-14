@@ -53,18 +53,17 @@ import AdminSellPhone from "./pages/Admin/AdminSellPhone";
 // Layout component that will be used across all pages
 const Layout = () => {
   // Mock data for categories
-  const categories = [
-    { id: 1, name: "Smartphones", path: "/category/smartphones" },
-    { id: 2, name: "Laptops", path: "/category/laptops" },
-    { id: 3, name: "Tablets", path: "/category/tablets" },
-    { id: 4, name: "Mobile Accessories", path: "/category/mobile-accessories" },
-    { id: 5, name: "Laptop Accessories", path: "/category/laptop-accessories" },
-    { id: 6, name: "Audio Devices", path: "/category/audio" },
-  ];
-
+  // const categories = [
+  //   { id: 1, name: "Smartphones", path: "/category/smartphones" },
+  //   { id: 2, name: "Laptops", path: "/category/laptops" },
+  //   { id: 3, name: "Tablets", path: "/category/tablets" },
+  //   { id: 4, name: "Mobile Accessories", path: "/category/mobile-accessories" },
+  //   { id: 5, name: "Laptop Accessories", path: "/category/laptop-accessories" },
+  //   { id: 6, name: "Audio Devices", path: "/category/audio" },
+  // ];
   return (
     <>
-      <Header categories={categories} />
+      <Header />
       <Outlet />
       <Footer />
     </>

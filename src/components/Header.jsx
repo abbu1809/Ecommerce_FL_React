@@ -17,7 +17,7 @@ import { useWishlistStore } from "../store/useWishlist";
 import { Link, useNavigate } from "react-router-dom";
 import { useProductStore } from "../store/useProduct";
 
-const Header = ({ categories }) => {
+const Header = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchSuggestions, setSearchSuggestions] = useState([]);
@@ -27,7 +27,7 @@ const Header = ({ categories }) => {
   const { isAuthenticated } = useAuthStore();
   const { itemCount: cartItemCount, totalAmount, fetchCart } = useCartStore();
   const { items: wishlistItems, fetchWishlist } = useWishlistStore();
-  const { searchProducts } = useProductStore();
+  const { searchProducts, fetchProducts } = useProductStore();
   const [location, setLocation] = useState({
     city: "Bhopal",
     loading: false,
@@ -35,6 +35,338 @@ const Header = ({ categories }) => {
   });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const [dropdownTimeout, setDropdownTimeout] = useState(null);
+
+  // Enhanced mega menu structure based on your product data
+  const megaMenuCategories = [
+    {
+      id: 1,
+      name: "Mobiles & Accessories",
+      path: "/products/smartphones",
+      subcategories: [
+        {
+          title: "Mobiles",
+          items: [
+            {
+              name: "iPhone",
+              path: "/products/smartphones?brand=Apple",
+              brands: ["Apple"],
+            },
+            {
+              name: "Samsung Galaxy",
+              path: "/products/smartphones?brand=Samsung",
+              brands: ["Samsung"],
+            },
+            {
+              name: "Xiaomi",
+              path: "/products/smartphones?brand=MI",
+              brands: ["MI"],
+            },
+            {
+              name: "OnePlus",
+              path: "/products/smartphones?brand=Oneplus",
+              brands: ["Oneplus"],
+            },
+            {
+              name: "Oppo",
+              path: "/products/smartphones?brand=Oppo",
+              brands: ["Oppo"],
+            },
+            {
+              name: "Vivo",
+              path: "/products/smartphones?brand=Vivo",
+              brands: ["Vivo"],
+            },
+            {
+              name: "Nothing",
+              path: "/products/smartphones?brand=Nothing",
+              brands: ["Nothing"],
+            },
+            {
+              name: "Motorola",
+              path: "/products/smartphones?brand=Motorola",
+              brands: ["Motorola"],
+            },
+            {
+              name: "Nokia",
+              path: "/products/smartphones?brand=Nokia",
+              brands: ["Nokia"],
+            },
+            {
+              name: "Lava",
+              path: "/products/smartphones?brand=Lava",
+              brands: ["Lava"],
+            },
+            {
+              name: "iQOO",
+              path: "/products/smartphones?brand=iQOO",
+              brands: ["iQOO"],
+            },
+          ],
+        },
+        {
+          title: "Mobile Accessories",
+          items: [
+            { name: "Chargers", path: "/products/accessories?type=chargers" },
+            {
+              name: "Power Banks",
+              path: "/products/accessories?type=powerbanks",
+            },
+            {
+              name: "Cases & Covers",
+              path: "/products/accessories?type=cases",
+            },
+            {
+              name: "Screen Protectors",
+              path: "/products/accessories?type=screen-protectors",
+            },
+            {
+              name: "Mobile Holders",
+              path: "/products/accessories?type=holders",
+            },
+            {
+              name: "Cables & Connectors",
+              path: "/products/accessories?type=cables",
+            },
+            {
+              name: "Memory Cards",
+              path: "/products/accessories?type=memory-cards",
+            },
+          ],
+        },
+        {
+          title: "Accessories Brands",
+          items: [
+            { name: "Ambrane", path: "/products/accessories?brand=Ambrane" },
+            { name: "HapiPola", path: "/products/accessories?brand=HapiPola" },
+            {
+              name: "Cool Touch",
+              path: "/products/accessories?brand=Cool Touch",
+            },
+            { name: "Fitfit", path: "/products/accessories?brand=Fitfit" },
+            { name: "New Case", path: "/products/accessories?brand=New Case" },
+            {
+              name: "Smart Touch",
+              path: "/products/accessories?brand=Smart Touch",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: 2,
+      name: "Computers & Tablets",
+      path: "/products/laptops",
+      subcategories: [
+        {
+          title: "Laptops",
+          items: [
+            {
+              name: "Samsung Laptops",
+              path: "/products/laptops?brand=Samsung",
+              brands: ["Samsung"],
+            },
+            {
+              name: "HP Laptops",
+              path: "/products/laptops?brand=HP",
+              brands: ["HP"],
+            },
+            { name: "Gaming Laptops", path: "/products/laptops?type=gaming" },
+            {
+              name: "Business Laptops",
+              path: "/products/laptops?type=business",
+            },
+            { name: "2-in-1 Laptops", path: "/products/laptops?type=2-in-1" },
+          ],
+        },
+        {
+          title: "Tablets",
+          items: [
+            {
+              name: "Samsung Galaxy Tab",
+              path: "/products/tablets?brand=Samsung",
+              brands: ["Samsung"],
+            },
+            {
+              name: "Xiaomi Pad",
+              path: "/products/tablets?brand=MI",
+              brands: ["MI"],
+            },
+            {
+              name: "OnePlus Pad",
+              path: "/products/tablets?brand=Oneplus",
+              brands: ["Oneplus"],
+            },
+            {
+              name: "Motorola Tab",
+              path: "/products/tablets?brand=Motorola",
+              brands: ["Motorola"],
+            },
+            {
+              name: "Redmi Pad",
+              path: "/products/tablets?brand=MI",
+              brands: ["MI"],
+            },
+          ],
+        },
+        {
+          title: "Laptop Accessories",
+          items: [
+            {
+              name: "Laptop Bags",
+              path: "/products/accessories?type=laptop-bags",
+            },
+            {
+              name: "Laptop Stands",
+              path: "/products/accessories?type=laptop-stands",
+            },
+            {
+              name: "Cooling Pads",
+              path: "/products/accessories?type=cooling-pads",
+            },
+            {
+              name: "Wireless Mouse",
+              path: "/products/accessories?type=mouse",
+            },
+            { name: "Keyboards", path: "/products/accessories?type=keyboards" },
+          ],
+        },
+      ],
+    },
+    {
+      id: 3,
+      name: "TV & Audio",
+      path: "/products/televisions",
+      subcategories: [
+        {
+          title: "Smart TVs",
+          items: [
+            {
+              name: "Xiaomi Smart TV",
+              path: "/products/televisions?brand=Xiaomi",
+              brands: ["Xiaomi"],
+            },
+            {
+              name: "Mi TV",
+              path: "/products/televisions?brand=Mi",
+              brands: ["Mi"],
+            },
+            {
+              name: "Cellecor TV",
+              path: "/products/televisions?brand=Cellecor",
+              brands: ["Cellecor"],
+            },
+            { name: "4K TVs", path: "/products/televisions?resolution=4K" },
+            {
+              name: "Full HD TVs",
+              path: "/products/televisions?resolution=Full HD",
+            },
+            { name: "Android TVs", path: "/products/televisions?os=Android" },
+          ],
+        },
+        {
+          title: "Audio Devices",
+          items: [
+            {
+              name: "Bluetooth Speakers",
+              path: "/products/speakers?type=bluetooth",
+            },
+            {
+              name: "Wireless Speakers",
+              path: "/products/speakers?type=wireless",
+            },
+            {
+              name: "Portable Speakers",
+              path: "/products/speakers?type=portable",
+            },
+            { name: "Home Audio", path: "/products/speakers?type=home-audio" },
+          ],
+        },
+        {
+          title: "Audio Brands",
+          items: [
+            {
+              name: "JBL",
+              path: "/products/speakers?brand=JBL",
+              brands: ["JBL"],
+            },
+            {
+              name: "boAt",
+              path: "/products/speakers?brand=Boat",
+              brands: ["Boat"],
+            },
+            {
+              name: "Zebronics",
+              path: "/products/speakers?brand=Zebronics",
+              brands: ["Zebronics"],
+            },
+            {
+              name: "Digitek",
+              path: "/products/speakers?brand=Digiteck",
+              brands: ["Digiteck"],
+            },
+            {
+              name: "Edifier",
+              path: "/products/speakers?brand=Edifier",
+              brands: ["Edifier"],
+            },
+            {
+              name: "Ultra Prolink",
+              path: "/products/speakers?brand=Ultra Prolink",
+              brands: ["Ultra Prolink"],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: 4,
+      name: "Smart Technology",
+      path: "/products/smartwatches",
+      subcategories: [
+        {
+          title: "Wearables",
+          items: [
+            { name: "Smartwatches", path: "/products/smartwatches" },
+            { name: "Fitness Bands", path: "/products/fitness-bands" },
+            { name: "Wireless Earbuds", path: "/products/earbuds" },
+            { name: "Smart Rings", path: "/products/smart-rings" },
+          ],
+        },
+        {
+          title: "Smart Home",
+          items: [
+            { name: "Smart Speakers", path: "/products/smart-speakers" },
+            { name: "Smart Lights", path: "/products/smart-lights" },
+            { name: "Smart Plugs", path: "/products/smart-plugs" },
+            { name: "Security Cameras", path: "/products/security-cameras" },
+          ],
+        },
+      ],
+    },
+  ];
+
+  // Handle dropdown interactions
+  const handleDropdownEnter = (categoryId) => {
+    if (dropdownTimeout) {
+      clearTimeout(dropdownTimeout);
+      setDropdownTimeout(null);
+    }
+    setActiveDropdown(categoryId);
+  };
+
+  const handleDropdownLeave = () => {
+    const timeout = setTimeout(() => {
+      setActiveDropdown(null);
+    }, 200);
+    setDropdownTimeout(timeout);
+  };
+
+  // Fetch products to get categories when component mounts
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   // Close suggestions when clicking outside
   useEffect(() => {
@@ -178,7 +510,6 @@ const Header = ({ categories }) => {
         {" "}
         <div className="container mx-auto px-2 sm:px-3">
           <div className="flex items-center justify-between py-4">
-            {/* Mobile menu button */}
             <button
               className="lg:hidden p-2 rounded-full hover:bg-white/10 transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -545,156 +876,299 @@ const Header = ({ categories }) => {
             </div>
           )}
         </div>
-      </div>
-      {/* Category Navigation with floating effect and improved hover states */}{" "}
+      </div>{" "}
+      {/* Mega Menu Navigation */}
       <nav
-        className="bg-white shadow-md relative z-0"
+        className="bg-white shadow-md relative"
         style={{
           backgroundColor: "var(--bg-primary)",
           boxShadow: "var(--shadow-medium)",
+          zIndex: 40,
         }}
       >
-        <div className="container mx-auto px-2 sm:px-3">
-          <ul className="hidden lg:flex items-center justify-between overflow-x-auto py-3.5 no-scrollbar">
-            {categories?.map((category) => (
-              <li key={category.id} className="whitespace-nowrap px-3">
+        {" "}
+        <div className="container mx-auto px-2 sm:px-3 relative">
+          <ul
+            className="hidden lg:flex items-center justify-between py-3.5"
+            style={{ overflow: "visible" }}
+          >
+            {megaMenuCategories?.map((category) => (
+              <li
+                key={category.id}
+                className="whitespace-nowrap px-3 relative"
+                style={{ position: "relative" }}
+                onMouseEnter={() => handleDropdownEnter(category.id)}
+                onMouseLeave={handleDropdownLeave}
+              >
                 <Link
                   to={category.path}
-                  className="text-sm font-medium transition-all duration-300 relative group py-1.5 px-2 hover:text-brand-primary"
+                  className="text-sm font-medium transition-all duration-300 relative group py-1.5 px-2 hover:text-brand-primary flex items-center"
                   style={{
                     color: "var(--text-primary)",
                   }}
                 >
                   <span className="relative z-10">{category.name}</span>
+                  <svg
+                    className="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
                   <span
-                    className="absolute left-0 right-0 bottom-0 h-0.5 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"
-                    style={{ backgroundColor: "var(--brand-primary)" }}
-                  ></span>
-                  <span
-                    className="absolute inset-0 bg-gray-50 rounded-md scale-95 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300 -z-10"
-                    style={{ backgroundColor: "var(--bg-accent-light)" }}
+                    className="absolute bottom-0 left-0 w-0 h-0.5 bg-brand-primary transition-all duration-300 group-hover:w-full rounded-full"
+                    style={{
+                      backgroundColor: "var(--brand-primary)",
+                    }}
                   ></span>
                 </Link>
               </li>
             ))}
-          </ul>
 
-          {/* Mobile menu drawer */}
-          <div
-            className={`lg:hidden fixed inset-0 z-50 transition-all duration-300 ${
-              isMenuOpen ? "opacity-100 visible" : "opacity-0 invisible"
-            }`}
-            style={{
-              backgroundColor: "rgba(0,0,0,0.5)",
-              backdropFilter: "blur(4px)",
-            }}
-          >
-            <div
-              className={`absolute top-0 left-0 h-full w-3/4 max-w-xs bg-white shadow-2xl transition-transform duration-300 transform ${
-                isMenuOpen ? "translate-x-0" : "-translate-x-full"
-              }`}
-              style={{ backgroundColor: "var(--bg-primary)" }}
-            >
-              <div
-                className="p-4 border-b"
-                style={{ borderColor: "var(--border-primary)" }}
+            {/* Browse All Categories Link */}
+            <li className="whitespace-nowrap px-3">
+              <Link
+                to="/products"
+                className="text-sm font-medium transition-all duration-300 relative group py-1.5 px-2 hover:text-brand-primary"
+                style={{
+                  color: "var(--text-primary)",
+                }}
               >
-                <Logo
-                  size="small"
-                  linkWrapper={false}
-                  titleColor="var(--text-primary)"
-                />
-                <button
-                  className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100"
-                  onClick={() => setIsMenuOpen(false)}
-                  aria-label="Close menu"
-                >
-                  <FiX
-                    className="w-5 h-5"
-                    style={{ color: "var(--text-primary)" }}
-                  />
-                </button>
-              </div>{" "}
-              <div className="py-4">
-                {/* Account section in mobile menu */}
-                {isAuthenticated && (
-                  <div className="mb-4">
-                    <h3
-                      className="px-4 text-xs uppercase font-semibold mb-2"
-                      style={{ color: "var(--text-secondary)" }}
-                    >
-                      My Account
-                    </h3>
-                    <ul>
-                      <li>
-                        <Link
-                          to="/profile"
-                          className="block px-4 py-2.5 hover:bg-gray-50 transition-colors"
-                          style={{ color: "var(--text-primary)" }}
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          Profile
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          to="/profile/addresses"
-                          className="block px-4 py-2.5 hover:bg-gray-50 transition-colors"
-                          style={{ color: "var(--text-primary)" }}
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          My Addresses
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          to="/orders"
-                          className="block px-4 py-2.5 hover:bg-gray-50 transition-colors"
-                          style={{ color: "var(--text-primary)" }}
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          Orders
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          to="/wishlist"
-                          className="block px-4 py-2.5 hover:bg-gray-50 transition-colors"
-                          style={{ color: "var(--text-primary)" }}
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          Wishlist
-                        </Link>
-                      </li>
-                    </ul>
-                  </div>
-                )}
+                <span className="relative z-10">Browse All</span>
+                <span
+                  className="absolute bottom-0 left-0 w-0 h-0.5 bg-brand-primary transition-all duration-300 group-hover:w-full rounded-full"
+                  style={{
+                    backgroundColor: "var(--brand-primary)",
+                  }}
+                ></span>
+              </Link>
+            </li>
+          </ul>{" "}
+          {/* Shared Mega Dropdown Menu - Always Centered */}
+          {activeDropdown && (
+            <div
+              className="absolute bg-white shadow-2xl border-t-2"
+              style={{
+                backgroundColor: "var(--bg-primary)",
+                borderTopColor: "var(--brand-primary)",
+                boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)",
+                zIndex: 9999,
+                top: "100%",
+                left: "0",
+                right: "0",
+                width: "100vw",
+                marginLeft: "calc(-50vw + 50%)",
+                marginTop: "4px",
+              }}
+              onMouseEnter={() => handleDropdownEnter(activeDropdown)}
+              onMouseLeave={handleDropdownLeave}
+            >
+              <div className="px-8 py-8">
+                {(() => {
+                  const activeCategory = megaMenuCategories.find(
+                    (cat) => cat.id === activeDropdown
+                  );
+                  if (!activeCategory) return null;
 
+                  return (
+                    <>
+                      <div className="grid grid-cols-3 gap-8 p-8">
+                        {activeCategory.subcategories.map(
+                          (subcategory, index) => (
+                            <div key={index} className="space-y-4">
+                              <h3
+                                className="font-semibold text-lg pb-2 border-b"
+                                style={{
+                                  color: "var(--brand-primary)",
+                                  borderBottomColor: "var(--border-primary)",
+                                }}
+                              >
+                                {subcategory.title}
+                              </h3>
+                              <ul className="space-y-2">
+                                {subcategory.items.map((item, itemIndex) => (
+                                  <li key={itemIndex}>
+                                    <Link
+                                      to={item.path}
+                                      className="text-sm text-gray-600 hover:text-brand-primary transition-colors duration-200 block py-1"
+                                      style={{ color: "var(--text-secondary)" }}
+                                    >
+                                      {item.name}
+                                    </Link>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )
+                        )}
+                      </div>
+
+                      {/* Featured Products Section */}
+                      <div
+                        className="border-t p-6"
+                        style={{ borderTopColor: "var(--border-primary)" }}
+                      >
+                        <div className="flex items-center justify-between mb-4">
+                          <h4
+                            className="font-semibold text-base"
+                            style={{ color: "var(--text-primary)" }}
+                          >
+                            Featured Products
+                          </h4>
+                          <Link
+                            to={activeCategory.path}
+                            className="text-sm font-medium hover:underline"
+                            style={{ color: "var(--brand-primary)" }}
+                          >
+                            View All →
+                          </Link>
+                        </div>
+                        <div className="grid grid-cols-4 gap-4">
+                          {/* Featured products will be displayed here based on category */}
+                          <div className="text-center text-sm text-gray-500">
+                            Featured products for {activeCategory.name}
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+          )}
+        </div>
+      </nav>
+      {/* Mobile menu drawer */}
+      <div
+        className={`lg:hidden fixed inset-0 z-50 transition-all duration-300 ${
+          isMenuOpen ? "opacity-100 visible" : "opacity-0 invisible"
+        }`}
+        style={{
+          backgroundColor: "rgba(0,0,0,0.5)",
+          backdropFilter: "blur(4px)",
+        }}
+      >
+        <div
+          className={`absolute top-0 left-0 h-full w-3/4 max-w-xs bg-white shadow-2xl transition-transform duration-300 transform ${
+            isMenuOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+          style={{ backgroundColor: "var(--bg-primary)" }}
+        >
+          <div
+            className="p-4 border-b"
+            style={{ borderColor: "var(--border-primary)" }}
+          >
+            <Logo
+              size="small"
+              linkWrapper={false}
+              titleColor="var(--text-primary)"
+            />
+            <button
+              className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100"
+              onClick={() => setIsMenuOpen(false)}
+              aria-label="Close menu"
+            >
+              <FiX
+                className="w-5 h-5"
+                style={{ color: "var(--text-primary)" }}
+              />
+            </button>
+          </div>
+
+          <div className="py-4">
+            {/* Account section in mobile menu */}
+            {isAuthenticated && (
+              <div className="mb-4">
                 <h3
                   className="px-4 text-xs uppercase font-semibold mb-2"
                   style={{ color: "var(--text-secondary)" }}
                 >
-                  Categories
+                  My Account
                 </h3>
                 <ul>
-                  {categories?.map((category) => (
-                    <li key={category.id}>
-                      <Link
-                        to={category.path}
-                        className="block px-4 py-2.5 hover:bg-gray-50 transition-colors"
-                        style={{ color: "var(--text-primary)" }}
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        {category.name}
-                      </Link>
-                    </li>
-                  ))}
+                  <li>
+                    <Link
+                      to="/profile"
+                      className="block px-4 py-2.5 hover:bg-gray-50 transition-colors"
+                      style={{ color: "var(--text-primary)" }}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Profile
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/profile/addresses"
+                      className="block px-4 py-2.5 hover:bg-gray-50 transition-colors"
+                      style={{ color: "var(--text-primary)" }}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      My Addresses
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/orders"
+                      className="block px-4 py-2.5 hover:bg-gray-50 transition-colors"
+                      style={{ color: "var(--text-primary)" }}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Orders
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/wishlist"
+                      className="block px-4 py-2.5 hover:bg-gray-50 transition-colors"
+                      style={{ color: "var(--text-primary)" }}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Wishlist
+                    </Link>
+                  </li>
                 </ul>
               </div>
-            </div>
+            )}
+
+            <h3
+              className="px-4 text-xs uppercase font-semibold mb-2"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              Categories
+            </h3>
+            <ul>
+              {megaMenuCategories?.map((category) => (
+                <li key={category.id}>
+                  <Link
+                    to={category.path}
+                    className="block px-4 py-2.5 hover:bg-gray-50 transition-colors"
+                    style={{ color: "var(--text-primary)" }}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {category.name}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <Link
+                  to="/products"
+                  className="block px-4 py-2.5 hover:bg-gray-50 transition-colors font-medium"
+                  style={{ color: "var(--brand-primary)" }}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Browse All Products
+                </Link>
+              </li>
+            </ul>
           </div>
         </div>
-      </nav>
+      </div>
     </header>
   );
 };

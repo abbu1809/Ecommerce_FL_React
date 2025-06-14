@@ -20,7 +20,7 @@ import {
   FaCommentAlt,
 } from "react-icons/fa";
 import { ROUTES } from "../utils/constants";
-import Logo from "./UI/Logo";
+import Logo from "./ui/Logo";
 
 const Footer = () => {
   // Quick Links data
