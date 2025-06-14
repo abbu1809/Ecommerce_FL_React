@@ -4,7 +4,7 @@ import { deliveryApi } from "../../services/api";
 import { DELIVERY_TOKEN_KEY } from "../../utils/constants";
 
 export const useDeliveryPartnerStore = create(
-  devtools((set) => ({
+  devtools((set, get) => ({
     // Auth state
     isAuthenticated: !!localStorage.getItem(DELIVERY_TOKEN_KEY),
     partner: JSON.parse(localStorage.getItem("delivery_partner") || "null"),
@@ -14,6 +14,9 @@ export const useDeliveryPartnerStore = create(
     // Dashboard data
     assignedDeliveries: [],
     deliveryHistory: [],
+
+    // Profile data
+    partnerProfile: null,
 
     // Auth actions
     registerPartner: async (partnerData) => {
@@ -72,12 +75,63 @@ export const useDeliveryPartnerStore = create(
       }
     },
 
+    // Profile management actions
+    fetchPartnerProfile: async () => {
+      set({ loading: true, error: null });
+      try {
+        const response = await deliveryApi.get("/partners/profile/");
+
+        const partnerData = response.data.partner;
+
+        set({
+          partnerProfile: partnerData,
+          loading: false,
+          error: null,
+        });
+
+        return partnerData;
+      } catch (error) {
+        set({
+          loading: false,
+          error: error.response?.data?.error || "Failed to fetch profile",
+        });
+        throw error;
+      }
+    },
+
+    updatePartnerProfile: async (profileData) => {
+      set({ loading: true, error: null });
+      try {
+        const response = await deliveryApi.patch(
+          "/partners/profile/update/",
+          profileData
+        );
+
+        // Refresh profile data after successful update
+        await get().fetchPartnerProfile();
+
+        set({
+          loading: false,
+          error: null,
+        });
+
+        return response.data;
+      } catch (error) {
+        set({
+          loading: false,
+          error: error.response?.data?.error || "Failed to update profile",
+        });
+        throw error;
+      }
+    },
+
     logoutPartner: () => {
       localStorage.removeItem(DELIVERY_TOKEN_KEY);
       localStorage.removeItem("delivery_partner");
       set({
         isAuthenticated: false,
         partner: null,
+        partnerProfile: null,
         assignedDeliveries: [],
         deliveryHistory: [],
       });

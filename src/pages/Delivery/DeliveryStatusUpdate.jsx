@@ -61,7 +61,8 @@ const DeliveryStatusUpdate = () => {
       customerAddress: formatAddress(delivery.delivery_address),
       customerPhone: delivery.customer_phone || "N/A",
       status: delivery.delivery_status || delivery.status || "assigned",
-      items: delivery.items || [],
+      items: [], // Items not available in current API response
+      itemCount: "Unknown", // Will need to fetch separately
       expectedDelivery: delivery.estimated_delivery,
       assignedOn: delivery.assigned_at,
       paymentType: delivery.payment_method || "Online Payment",
@@ -101,7 +102,8 @@ const DeliveryStatusUpdate = () => {
               phone: foundDelivery.customer_phone || "N/A",
               address: formatAddress(foundDelivery.delivery_address),
             },
-            items: foundDelivery.items || [],
+            items: [], // Items not available in current API response
+            itemCount: "Unknown", // Will need to fetch separately
             paymentType: foundDelivery.payment_method || "Online Payment",
             paymentAmount: `${foundDelivery.currency || "INR"} ${
               foundDelivery.total_amount || "0"
@@ -559,11 +561,15 @@ const DeliveryStatusUpdate = () => {
                     className="text-sm font-medium mb-2"
                     style={{ color: "var(--text-secondary)" }}
                   >
-                    Items ({delivery.items ? delivery.items.length : 0})
+                    Items (
+                    {delivery.items && delivery.items.length > 0
+                      ? delivery.items.length
+                      : "Unknown"}
+                    )
                   </h3>
-                  <ul className="space-y-2">
-                    {delivery.items &&
-                      delivery.items.map((item, index) => (
+                  {delivery.items && delivery.items.length > 0 ? (
+                    <ul className="space-y-2">
+                      {delivery.items.map((item, index) => (
                         <li
                           key={index}
                           className="flex justify-between text-sm"
@@ -576,7 +582,16 @@ const DeliveryStatusUpdate = () => {
                           </span>
                         </li>
                       ))}
-                  </ul>
+                    </ul>
+                  ) : (
+                    <p
+                      className="text-sm"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      Item details not available. Contact support for order
+                      details.
+                    </p>
+                  )}
                 </div>
                 <div
                   className="pt-4 border-t"

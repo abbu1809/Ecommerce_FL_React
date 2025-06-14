@@ -261,7 +261,11 @@ const OrderTable = ({ onSelectOrder, statusFilter, searchQuery }) => {
                         className="text-sm"
                         style={{ color: "var(--text-primary)" }}
                       >
-                        {order.order_items?.length || 0} items
+                        {order.order_items?.reduce(
+                          (total, item) => total + (item.quantity || 0),
+                          0
+                        ) || 0}{" "}
+                        items
                       </div>
                       {order.order_items?.length > 0 && (
                         <div

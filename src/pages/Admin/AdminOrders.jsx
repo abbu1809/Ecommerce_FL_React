@@ -31,9 +31,9 @@ const AdminOrders = () => {
   // Filter orders based on status and search query
   const filteredOrders = orders.list.filter((order) => {
     const matchesSearch =
-      order.id?.toString().includes(searchQuery) ||
-      order.customer_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.customer_email?.toLowerCase().includes(searchQuery.toLowerCase());
+      order.order_id?.toString().includes(searchQuery) ||
+      order.user_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.invoice_id?.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesStatus =
       statusFilter === "all" || order.status === statusFilter;

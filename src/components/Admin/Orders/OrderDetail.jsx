@@ -562,7 +562,7 @@ const OrderDetail = ({ order }) => {
                         className="text-xs mt-1"
                         style={{ color: "var(--text-secondary)" }}
                       >
-                        Qty: {item.quantity} × ₹
+                        Qty: {item.quantity || 1} × ₹
                         {item.price_at_purchase?.toLocaleString()}
                       </p>
                     </div>

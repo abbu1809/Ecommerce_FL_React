@@ -48,33 +48,36 @@ const DeliveryAssignmentList = () => {
 
   useEffect(() => {
     // Transform the API response to match our component's data structure
-    const formattedDeliveries = assignedDeliveries?.map(
-      (delivery) => ({
-        id: delivery.order_id,
-        orderId: delivery.order_id,
-        customer: {
-          name: delivery.customer_name || "Customer",
-          phone: delivery.customer_phone || "N/A",
-        },
-        address: formatAddress(delivery.delivery_address),
-        customerPhone: delivery.customer_phone || "N/A",
-        items: delivery.items || [],
-        status: delivery.delivery_status || "pending",
-        priority: getPriority(delivery),
-        distance: "N/A", // Calculate if needed
-        expectedDelivery: delivery.estimated_delivery,
-        assignedDate: delivery.assigned_at,
-        paymentType: "N/A", // Add if available in API
-        createdAt: delivery.created_at,
-        total_amount: delivery.total_amount,
-        currency: delivery.currency || "INR",
-      })
-    );
+    const formattedDeliveries = assignedDeliveries?.map((delivery) => ({
+      id: delivery.order_id,
+      orderId: delivery.order_id,
+      customer: {
+        name: delivery.customer_name || "Customer",
+        phone: delivery.customer_phone || "N/A",
+      },
+      address: formatAddress(delivery.delivery_address),
+      customerPhone: delivery.customer_phone || "N/A",
+      items: [], // Items not available in current API response
+      itemCount: "N/A", // Will need to fetch separately or show as unavailable
+      status: delivery.delivery_status || "pending",
+      priority: getPriority(delivery),
+      distance: "N/A", // Calculate if needed
+      expectedDelivery: delivery.estimated_delivery,
+      assignedDate: delivery.assigned_at,
+      paymentType: "N/A", // Add if available in API
+      createdAt: delivery.created_at,
+      total_amount: delivery.total_amount,
+      currency: delivery.currency || "INR",
+    }));
 
     setAssignments(formattedDeliveries);
     setFilteredAssignments(formattedDeliveries);
 
-  console.log("DeliveryAssignmentList rendered",assignments ,filteredAssignments);
+    console.log(
+      "DeliveryAssignmentList rendered",
+      assignments,
+      filteredAssignments
+    );
   }, [assignedDeliveries, formatAddress]);
 
   const getPriority = (delivery) => {

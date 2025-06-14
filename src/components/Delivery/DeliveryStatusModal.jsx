@@ -21,6 +21,7 @@ const DeliveryStatusModal = ({
   isSubmitting = false,
 }) => {
   const [photoPreview, setPhotoPreview] = useState(null);
+  console.log('de',delivery)
   const [newStatus, setNewStatus] = useState(delivery?.status || "processing");
   const [otp, setOtp] = useState("");
   const [notes, setNotes] = useState("");
@@ -772,12 +773,48 @@ const DeliveryStatusModal = ({
                           className="text-xs font-medium mb-1"
                           style={{ color: "var(--text-secondary)" }}
                         >
-                          Items ({delivery.items ? delivery.items.length : 0})
+                          Items (
+                          {delivery.item_count ||
+                            delivery.itemCount ||
+                            (delivery.order_items &&
+                              delivery.order_items.length) ||
+                            (delivery.items && delivery.items.length) ||
+                            "Unknown"}
+                          )
+                          {delivery.item_count}
                         </h5>
                         <div className="max-h-16 overflow-y-auto">
-                          <ul className="space-y-1">
-                            {delivery.items &&
-                              delivery.items.map((item, index) => (
+                          {delivery.order_items &&
+                          delivery.order_items.length > 0 ? (
+                            <ul className="space-y-1">
+                              {delivery.order_items.map((item, index) => (
+                                <li
+                                  key={index}
+                                  className="flex justify-between text-xs"
+                                >
+                                  <span
+                                    style={{ color: "var(--text-primary)" }}
+                                  >
+                                    {item.name ||
+                                      item.variant_details?.name ||
+                                      "Product"}{" "}
+                                    x{item.quantity}
+                                  </span>
+                                  <span
+                                    style={{ color: "var(--text-secondary)" }}
+                                  >
+                                    ₹
+                                    {item.price_at_purchase ||
+                                      item.variant_details?.discounted_price ||
+                                      item.price ||
+                                      "N/A"}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : delivery.items && delivery.items.length > 0 ? (
+                            <ul className="space-y-1">
+                              {delivery.items.map((item, index) => (
                                 <li
                                   key={index}
                                   className="flex justify-between text-xs"
@@ -794,7 +831,15 @@ const DeliveryStatusModal = ({
                                   </span>
                                 </li>
                               ))}
-                          </ul>
+                            </ul>
+                          ) : (
+                            <p
+                              className="text-xs"
+                              style={{ color: "var(--text-secondary)" }}
+                            >
+                              Item details not available
+                            </p>
+                          )}
                         </div>
                       </div>{" "}
                       {/* Estimated Delivery */}
@@ -828,42 +873,6 @@ const DeliveryStatusModal = ({
                               })
                             : ""}
                         </p>
-                      </div>
-                      {/* Payment Information */}
-                      <div>
-                        <h5
-                          className="text-xs font-medium mb-1"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
-                          Payment Information
-                        </h5>
-                        <div className="flex justify-between text-xs">
-                          <span style={{ color: "var(--text-primary)" }}>
-                            Payment Type
-                          </span>
-                          <span
-                            className="font-medium"
-                            style={{
-                              color:
-                                delivery.paymentType === "Cash on Delivery"
-                                  ? "var(--warning-color)"
-                                  : "var(--success-color)",
-                            }}
-                          >
-                            {delivery.paymentType}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-xs mt-1">
-                          <span style={{ color: "var(--text-primary)" }}>
-                            Amount
-                          </span>
-                          <span
-                            className="font-bold"
-                            style={{ color: "var(--text-primary)" }}
-                          >
-                            {delivery.paymentAmount || delivery.total_amount}
-                          </span>
-                        </div>
                       </div>
                     </div>{" "}
                   </div>

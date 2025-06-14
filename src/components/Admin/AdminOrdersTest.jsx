@@ -65,7 +65,9 @@ const AdminOrdersTest = () => {
         const product = await getProductById(productId);
         results.getProductById = {
           success: true,
-          message: `Fetched product: ${product.name || "N/A"}`,
+          message: `Fetched product: ${product.name || "N/A"} (Qty: ${
+            orders.list[0].order_items[0].quantity || 1
+          })`,
           data: product,
         };
       }
@@ -241,6 +243,15 @@ const AdminOrdersTest = () => {
         <h3>Current Orders in Store:</h3>
         <p>Total Orders: {orders.list.length}</p>
         <p>Loading: {orders.loading ? "Yes" : "No"}</p>
+        {orders.list.length > 0 && (
+          <p>
+            Total Items in First Order:{" "}
+            {orders.list[0].order_items?.reduce(
+              (total, item) => total + (item.quantity || 0),
+              0
+            ) || 0}
+          </p>
+        )}
 
         {orders.list.length > 0 && (
           <details>
