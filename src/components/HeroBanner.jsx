@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import Button from "./ui/Button";
 import { useBannerStore } from "../store/Admin/useBannerStore";
 
@@ -33,6 +34,7 @@ const fallbackImages = [
 
 const HeroBanner = () => {
   const { fetchPublicBanners, getHeroBanners } = useBannerStore();
+  const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [[page, direction], setPage] = useState([0, 0]);
   // Fetch banners on mount
@@ -68,6 +70,14 @@ const HeroBanner = () => {
     const newIndex = (currentIndex + 1) % images.length;
     setPage([newIndex, 1]); // 1 for forward direction
     setCurrentIndex(newIndex);
+  };
+
+  // Handle button click navigation
+  const handleButtonClick = (link) => {
+    if (link) {
+      // Navigate to the category page or specific route
+      navigate(`/category/${link}`);
+    }
   };
 
   // Variants for Framer Motion
@@ -125,16 +135,9 @@ const HeroBanner = () => {
                   backgroundColor: images[currentIndex].backgroundColor,
                 }}
                 loading="eager"
-              />
-              {/* Enhanced gradient overlay with improved animation */}
-              <div
-                className="absolute inset-0 flex flex-col justify-center px-8 md:px-14"
-                style={{
-                  background:
-                    "linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.65) 40%, rgba(0,0,0,0.2) 100%)",
-                  backdropFilter: "blur(2px)",
-                }}
-              >
+              />{" "}
+              {/* Content overlay without dark background */}
+              <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-14">
                 <div className="max-w-lg relative">
                   {" "}
                   {/* Animated badge */}
@@ -148,7 +151,6 @@ const HeroBanner = () => {
                         backgroundColor: "var(--brand-primary)",
                         color: "var(--text-on-brand)",
                         boxShadow: "0 8px 25px rgba(245, 158, 11, 0.5)",
-                        backdropFilter: "blur(4px)",
                       }}
                     >
                       {images[currentIndex].tag}
@@ -205,10 +207,14 @@ const HeroBanner = () => {
                     transition={{ delay: 0.8, duration: 0.6 }}
                     className="flex flex-wrap gap-4"
                   >
+                    {" "}
                     <Button
                       variant="primary"
                       fullWidth={false}
                       size="lg"
+                      onClick={() =>
+                        handleButtonClick(images[currentIndex].link)
+                      }
                       className="transition-all duration-500 hover:translate-y-[-4px] hover:shadow-xl relative overflow-hidden group"
                       style={{
                         backgroundColor: "var(--brand-primary)",
@@ -236,17 +242,18 @@ const HeroBanner = () => {
                         </svg>
                       </span>
                       <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 transform -skew-x-30 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out"></span>
-                    </Button>
-
+                    </Button>{" "}
                     {images[currentIndex].link && (
                       <Button
                         variant="outline"
                         fullWidth={false}
                         size="lg"
+                        onClick={() =>
+                          handleButtonClick(images[currentIndex].link)
+                        }
                         className="transition-all duration-500 hover:translate-y-[-4px] hover:shadow-xl relative overflow-hidden group"
                         style={{
                           backgroundColor: "rgba(255, 255, 255, 0.12)",
-                          backdropFilter: "blur(8px)",
                           borderColor: "rgba(255, 255, 255, 0.4)",
                           color: "var(--text-on-brand)",
                           borderRadius: "var(--rounded-md)",
@@ -272,7 +279,7 @@ const HeroBanner = () => {
               whileHover={{ opacity: 1, scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={handlePrevious}
-              className="bg-black/30 hover:bg-black/50 text-white p-2 rounded-r-lg backdrop-blur-sm ml-2"
+              className="bg-black/30 hover:bg-black/50 text-white p-2 rounded-r-lg ml-2"
               aria-label="Previous slide"
             >
               <svg
@@ -297,7 +304,7 @@ const HeroBanner = () => {
               whileHover={{ opacity: 1, scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleNext}
-              className="bg-black/30 hover:bg-black/50 text-white p-2 rounded-l-lg backdrop-blur-sm mr-2"
+              className="bg-black/30 hover:bg-black/50 text-white p-2 rounded-l-lg mr-2"
               aria-label="Next slide"
             >
               <svg
