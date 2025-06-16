@@ -67,7 +67,6 @@ const AdminSellPhone = () => {
     }
   }, [activeTab, fetchCatalogs, fetchInquiries, fetchFaq]);
 
-  // Helper function to convert nested brands object to flat array for overview
   const getBrandsArray = () => {
     if (!catalogs.data || typeof catalogs.data !== 'object') {
       return [];
