@@ -405,8 +405,7 @@ const Footer = () => {
                   </a>
                 ))}
               </div>
-            </div>
-
+            </div>{" "}
             {/* Policy links - centered below social */}
             <div className="flex flex-wrap justify-center gap-4">
               {footerPolicyLinks.map((link, index) => (
@@ -419,6 +418,13 @@ const Footer = () => {
                   )}
                 </React.Fragment>
               ))}
+            </div>
+            {/* Copyright section */}
+            <div className="text-center pt-4 border-t border-gray-300">
+              <p className="text-xs text-gray-600">
+                Copyright © Anand mobiles | All Rights Reserved | Developed By :
+                <Link to="https://byteversal.in/">Byteversal.in</Link>
+              </p>
             </div>
           </div>
         </div>
