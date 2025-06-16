@@ -1,315 +1,417 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { FiPlusCircle, FiMinusCircle, FiX } from 'react-icons/fi'; // Using react-icons
-import Button from '../../ui/Button'; // Assuming custom Button component
-import Input from '../../ui/Input'; // Assuming custom Input component
+import { FiPlus, FiTrash2, FiX, FiLoader } from 'react-icons/fi';
 import useAdminSellPhoneStore from '../../../store/Admin/useAdminSellPhone';
 
 const ModelFormModal = ({ open, onClose, brandId, seriesId, modelToEdit }) => {
-  const [modelName, setModelName] = useState('');
-  const [modelImage, setModelImage] = useState('');
-  const [variantOptions, setVariantOptions] = useState([{ name: '', options: [''] }]);
-  const [questionGroups, setQuestionGroups] = useState([{ groupName: '', questions: [{ questionText: '', options: [''], answerType: 'radio' }] }]);
-
-  const addModel = useAdminSellPhoneStore((state) => state.addModel);
-  const updateModel = useAdminSellPhoneStore((state) => state.updateModel);
-  const fetchCatalogs = useAdminSellPhoneStore((state) => state.fetchCatalogs); // Corrected: Was fetchSellPhoneCatalog
+  const { addModel, updateModel } = useAdminSellPhoneStore();
+  
+  const [formData, setFormData] = useState({
+    id: '',
+    display_name: '',
+    image_url: '',
+    launch_year: new Date().getFullYear(),
+    demand_score: 5,
+    variant_options: {
+      ram: [''],
+      storage: [''],
+      color: ['']
+    },
+    variant_prices: {}
+  });
+  
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (modelToEdit) {
-      setModelName(modelToEdit.name || '');
-      setModelImage(modelToEdit.image || '');
-      setVariantOptions(modelToEdit.variantOptions && modelToEdit.variantOptions.length > 0 ? modelToEdit.variantOptions : [{ name: '', options: [''] }]);
-      setQuestionGroups(modelToEdit.questionGroups && modelToEdit.questionGroups.length > 0 ? modelToEdit.questionGroups : [{ groupName: '', questions: [{ questionText: '', options: [''], answerType: 'radio' }] }]);
+      setFormData({
+        id: modelToEdit.id || '',
+        display_name: modelToEdit.display_name || '',
+        image_url: modelToEdit.image_url || '',
+        launch_year: modelToEdit.launch_year || new Date().getFullYear(),
+        demand_score: modelToEdit.demand_score || 5,
+        variant_options: {
+          ram: modelToEdit.variant_options?.ram || [''],
+          storage: modelToEdit.variant_options?.storage || [''],
+          color: modelToEdit.variant_options?.color || ['']
+        },
+        variant_prices: modelToEdit.variant_prices || {}
+      });
     } else {
-      setModelName('');
-      setModelImage('');
-      setVariantOptions([{ name: '', options: [''] }]);
-      setQuestionGroups([{ groupName: '', questions: [{ questionText: '', options: [''], answerType: 'radio' }] }]);
+      setFormData({
+        id: '',
+        display_name: '',
+        image_url: '',
+        launch_year: new Date().getFullYear(),
+        demand_score: 5,
+        variant_options: {
+          ram: [''],
+          storage: [''],
+          color: ['']
+        },
+        variant_prices: {}
+      });
     }
   }, [modelToEdit]);
 
-  const handleSubmit = async () => {
-    const modelData = {
-      name: modelName,
-      image: modelImage,
-      variantOptions,
-      questionGroups,
-    };
+  const handleChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
-    try {
-      if (modelToEdit) {
-        await updateModel(brandId, seriesId, modelToEdit.id, modelData);
-      } else {
-        await addModel(brandId, seriesId, modelData);
+  const handleVariantOptionChange = (type, index, value) => {
+    setFormData(prev => ({
+      ...prev,
+      variant_options: {
+        ...prev.variant_options,
+        [type]: prev.variant_options[type].map((item, i) => i === index ? value : item)
       }
-      await fetchCatalogs(); // Corrected: Was fetchSellPhoneCatalog
+    }));
+  };
+
+  const addVariantOption = (type) => {
+    setFormData(prev => ({
+      ...prev,
+      variant_options: {
+        ...prev.variant_options,
+        [type]: [...prev.variant_options[type], '']
+      }
+    }));
+  };
+
+  const removeVariantOption = (type, index) => {
+    setFormData(prev => ({
+      ...prev,
+      variant_options: {
+        ...prev.variant_options,
+        [type]: prev.variant_options[type].filter((_, i) => i !== index)
+      }
+    }));
+  };
+
+  const handlePriceChange = (storage, ram, price) => {
+    setFormData(prev => ({
+      ...prev,
+      variant_prices: {
+        ...prev.variant_prices,
+        [storage]: {
+          ...prev.variant_prices[storage],
+          [ram]: parseInt(price) || 0
+        }
+      }
+    }));
+  };
+
+  const generatePricingMatrix = () => {
+    const storageOptions = formData.variant_options.storage.filter(s => s.trim());
+    const ramOptions = formData.variant_options.ram.filter(r => r.trim());
+    
+    return storageOptions.map(storage => (
+      <div key={storage} className="mb-4 p-4 border rounded">
+        <h4 className="font-medium mb-2">{storage} Storage</h4>
+        {ramOptions.map(ram => (
+          <div key={`${storage}-${ram}`} className="flex items-center space-x-2 mb-2">
+            <label className="w-16 text-sm">{ram}:</label>
+            <input
+              type="number"
+              placeholder="Price"
+              value={formData.variant_prices[storage]?.[ram] || ''}
+              onChange={(e) => handlePriceChange(storage, ram, e.target.value)}
+              className="flex-1 px-3 py-1 border border-gray-300 rounded text-sm"
+            />
+          </div>
+        ))}
+      </div>
+    ));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      // Clean up empty variant options
+      const cleanedData = {
+        ...formData,
+        variant_options: {
+          ram: formData.variant_options.ram.filter(r => r.trim()),
+          storage: formData.variant_options.storage.filter(s => s.trim()),
+          color: formData.variant_options.color.filter(c => c.trim())
+        }
+      };
+      
+      if (modelToEdit) {
+        await updateModel(seriesId, modelToEdit.id, cleanedData);
+      } else {
+        await addModel(seriesId, cleanedData);
+      }
       onClose();
     } catch (error) {
-      console.error("Failed to save model:", error);
-      // Add user-facing error handling here
+      console.error("Model form submission error:", error);
     }
-  };
-
-  // Variant Options Handlers
-  const handleVariantOptionChange = (index, field, value) => {
-    const newVariantOptions = [...variantOptions];
-    newVariantOptions[index][field] = value;
-    setVariantOptions(newVariantOptions);
-  };
-
-  const handleVariantSubOptionChange = (variantIndex, subOptionIndex, value) => {
-    const newVariantOptions = [...variantOptions];
-    newVariantOptions[variantIndex].options[subOptionIndex] = value;
-    setVariantOptions(newVariantOptions);
-  };
-
-  const addVariantOption = () => {
-    setVariantOptions([...variantOptions, { name: '', options: [''] }]);
-  };
-
-  const removeVariantOption = (index) => {
-    const newVariantOptions = variantOptions.filter((_, i) => i !== index);
-    setVariantOptions(newVariantOptions);
-  };
-
-  const addVariantSubOption = (variantIndex) => {
-    const newVariantOptions = [...variantOptions];
-    newVariantOptions[variantIndex].options.push('');
-    setVariantOptions(newVariantOptions);
-  };
-
-  const removeVariantSubOption = (variantIndex, subOptionIndex) => {
-    const newVariantOptions = [...variantOptions];
-    newVariantOptions[variantIndex].options = newVariantOptions[variantIndex].options.filter((_, i) => i !== subOptionIndex);
-    setVariantOptions(newVariantOptions);
-  };
-
-
-  // Question Groups Handlers
-  const handleQuestionGroupChange = (groupIndex, field, value) => {
-    const newQuestionGroups = [...questionGroups];
-    newQuestionGroups[groupIndex][field] = value;
-    setQuestionGroups(newQuestionGroups);
-  };
-
-  const addQuestionGroup = () => {
-    setQuestionGroups([...questionGroups, { groupName: '', questions: [{ questionText: '', options: [''], answerType: 'radio' }] }]);
-  };
-
-  const removeQuestionGroup = (groupIndex) => {
-    const newQuestionGroups = questionGroups.filter((_, i) => i !== groupIndex);
-    setQuestionGroups(newQuestionGroups);
-  };
-
-  // Questions within a group Handlers
-  const handleQuestionChange = (groupIndex, questionIndex, field, value) => {
-    const newQuestionGroups = [...questionGroups];
-    newQuestionGroups[groupIndex].questions[questionIndex][field] = value;
-    setQuestionGroups(newQuestionGroups);
-  };
-
-  const addQuestion = (groupIndex) => {
-    const newQuestionGroups = [...questionGroups];
-    newQuestionGroups[groupIndex].questions.push({ questionText: '', options: [''], answerType: 'radio' });
-    setQuestionGroups(newQuestionGroups);
-  };
-
-  const removeQuestion = (groupIndex, questionIndex) => {
-    const newQuestionGroups = [...questionGroups];
-    newQuestionGroups[groupIndex].questions = newQuestionGroups[groupIndex].questions.filter((_, i) => i !== questionIndex);
-    setQuestionGroups(newQuestionGroups);
-  };
-
-  // Question Options Handlers
-  const handleQuestionOptionChange = (groupIndex, questionIndex, optionIndex, value) => {
-    const newQuestionGroups = [...questionGroups];
-    newQuestionGroups[groupIndex].questions[questionIndex].options[optionIndex] = value;
-    setQuestionGroups(newQuestionGroups);
-  };
-
-  const addQuestionOption = (groupIndex, questionIndex) => {
-    const newQuestionGroups = [...questionGroups];
-    newQuestionGroups[groupIndex].questions[questionIndex].options.push('');
-    setQuestionGroups(newQuestionGroups);
-  };
-
-  const removeQuestionOption = (groupIndex, questionIndex, optionIndex) => {
-    const newQuestionGroups = [...questionGroups];
-    newQuestionGroups[groupIndex].questions[questionIndex].options = newQuestionGroups[groupIndex].questions[questionIndex].options.filter((_, i) => i !== optionIndex);
-    setQuestionGroups(newQuestionGroups);
+    setIsLoading(false);
   };
 
   if (!open) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">
-            {modelToEdit ? 'Edit Model' : 'Add New Model'}
-          </h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            <FiX size={24} />
-          </button>
-        </div>
-        
-        <div className="space-y-4">
-          <Input
-            label="Model Name"
-            value={modelName}
-            onChange={(e) => setModelName(e.target.value)}
-            fullWidth
-            placeholder="Enter model name"
-          />
-          <Input
-            label="Model Image URL"
-            value={modelImage}
-            onChange={(e) => setModelImage(e.target.value)}
-            fullWidth
-            placeholder="Enter model image URL"
-          />
+    <div 
+      className="fixed inset-0 z-50 overflow-y-auto"
+      style={{ 
+        backgroundColor: "var(--bg-overlay)",
+        backdropFilter: "blur(4px)" 
+      }}
+    >
+      <div className="flex items-center justify-center min-h-screen p-4">
+        <div 
+          className="w-full max-w-4xl transform transition-all duration-300 animate-slideIn"
+          style={{
+            backgroundColor: "var(--bg-primary)",
+            borderRadius: "var(--rounded-lg)",
+            boxShadow: "var(--shadow-large)",
+            border: "1px solid var(--border-primary)"
+          }}
+        >
+          {/* Header */}
+          <div 
+            className="flex justify-between items-center p-6 border-b"
+            style={{ borderColor: "var(--border-primary)" }}
+          >
+            <h2 
+              className="text-xl font-semibold"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {modelToEdit ? 'Edit Model' : 'Add New Model'}
+            </h2>
+            <button 
+              onClick={onClose} 
+              className="p-2 rounded-md transition-colors hover:bg-gray-50"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              <FiX className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Basic Information */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Model ID
+              </label>
+              <input
+                type="text"
+                value={formData.id}
+                onChange={(e) => handleChange('id', e.target.value)}
+                placeholder="e.g., iphone_14_pro"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                required
+                disabled={modelToEdit}
+              />
+              {modelToEdit && (
+                <p className="text-xs text-gray-500 mt-1">Model ID cannot be changed</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Display Name
+              </label>
+              <input
+                type="text"
+                value={formData.display_name}
+                onChange={(e) => handleChange('display_name', e.target.value)}
+                placeholder="e.g., iPhone 14 Pro"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Image URL
+              </label>
+              <input
+                type="url"
+                value={formData.image_url}
+                onChange={(e) => handleChange('image_url', e.target.value)}
+                placeholder="https://example.com/image.jpg"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Launch Year
+              </label>
+              <input
+                type="number"
+                value={formData.launch_year}
+                onChange={(e) => handleChange('launch_year', parseInt(e.target.value))}
+                min="2000"
+                max="2030"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Demand Score (1-10)
+              </label>
+              <input
+                type="number"
+                value={formData.demand_score}
+                onChange={(e) => handleChange('demand_score', parseInt(e.target.value))}
+                min="1"
+                max="10"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                required
+              />
+            </div>
+          </div>
 
           {/* Variant Options */}
-          <div className="mt-6">
-            <h3 className="text-lg font-medium mb-2">Variant Options</h3>
-            {variantOptions.map((variant, variantIndex) => (
-              <div key={variantIndex} className="p-4 my-2 border border-gray-200 rounded-md">
-                <div className="flex items-center justify-between mb-2">
-                  <Input
-                    label={`Variant Option ${variantIndex + 1} Name (e.g., Storage, Color)`}
-                    value={variant.name}
-                    onChange={(e) => handleVariantOptionChange(variantIndex, 'name', e.target.value)}
-                    fullWidth
-                    className="mr-2"
-                    placeholder="Variant Name"
+          <div className="space-y-4">
+            <h4 className="text-lg font-medium">Variant Options</h4>
+            
+            {/* RAM Options */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">RAM Options</label>
+              {formData.variant_options.ram.map((ram, index) => (
+                <div key={index} className="flex items-center space-x-2 mb-2">
+                  <input
+                    type="text"
+                    value={ram}
+                    onChange={(e) => handleVariantOptionChange('ram', index, e.target.value)}
+                    placeholder="e.g., 6GB"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
                   />
-                  <button onClick={() => removeVariantOption(variantIndex)} className="text-red-500 hover:text-red-700 p-1">
-                    <FiMinusCircle size={20} />
+                  <button
+                    type="button"
+                    onClick={() => removeVariantOption('ram', index)}
+                    className="text-red-500 hover:text-red-700"
+                    disabled={formData.variant_options.ram.length === 1}
+                  >
+                    <FaTrash />
                   </button>
                 </div>
-                {variant.options.map((subOption, subOptionIndex) => (
-                  <div className="flex items-center ml-4 mt-2" key={subOptionIndex}>
-                    <Input
-                      label={`Option ${subOptionIndex + 1}`}
-                      value={subOption}
-                      onChange={(e) => handleVariantSubOptionChange(variantIndex, subOptionIndex, e.target.value)}
-                      fullWidth
-                      className="mr-2"
-                      placeholder="Option Value"
-                    />
-                    <button onClick={() => removeVariantSubOption(variantIndex, subOptionIndex)} className="text-red-500 hover:text-red-700 p-1">
-                      <FiMinusCircle size={18} />
-                    </button>
-                    {subOptionIndex === variant.options.length - 1 && (
-                      <button onClick={() => addVariantSubOption(variantIndex)} className="text-blue-500 hover:text-blue-700 p-1 ml-1">
-                        <FiPlusCircle size={18} />
-                      </button>
-                    )}
-                  </div>
-                ))}
-                {variant.options.length === 0 && (
-                    <Button onClick={() => addVariantSubOption(variantIndex)} variant="outlined" size="sm" className="mt-2 ml-4">
-                        <FiPlusCircle className="mr-1" /> Add Option
-                    </Button>
-                )}
-              </div>
-            ))}
-            <Button onClick={addVariantOption} variant="outlined" className="my-2">
-              <FiPlusCircle className="mr-2" /> Add Variant Option Group
-            </Button>
-          </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => addVariantOption('ram')}
+                className="flex items-center text-blue-500 hover:text-blue-700"
+              >
+                <FaPlus className="mr-1" /> Add RAM Option
+              </button>
+            </div>
 
-          {/* Question Groups */}
-          <div className="mt-6">
-            <h3 className="text-lg font-medium mb-2">Question Groups</h3>
-            {questionGroups.map((group, groupIndex) => (
-              <div key={groupIndex} className="p-4 my-2 border border-gray-200 rounded-md">
-                <div className="flex items-center justify-between mb-2">
-                  <Input
-                    label={`Question Group ${groupIndex + 1} Name (e.g., Condition, Accessories)`}
-                    value={group.groupName}
-                    onChange={(e) => handleQuestionGroupChange(groupIndex, 'groupName', e.target.value)}
-                    fullWidth
-                    className="mr-2"
-                    placeholder="Group Name"
+            {/* Storage Options */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Storage Options</label>
+              {formData.variant_options.storage.map((storage, index) => (
+                <div key={index} className="flex items-center space-x-2 mb-2">
+                  <input
+                    type="text"
+                    value={storage}
+                    onChange={(e) => handleVariantOptionChange('storage', index, e.target.value)}
+                    placeholder="e.g., 128GB"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
                   />
-                  <button onClick={() => removeQuestionGroup(groupIndex)} className="text-red-500 hover:text-red-700 p-1">
-                    <FiMinusCircle size={20} />
+                  <button
+                    type="button"
+                    onClick={() => removeVariantOption('storage', index)}
+                    className="text-red-500 hover:text-red-700"
+                    disabled={formData.variant_options.storage.length === 1}
+                  >
+                    <FaTrash />
                   </button>
                 </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => addVariantOption('storage')}
+                className="flex items-center text-blue-500 hover:text-blue-700"
+              >
+                <FaPlus className="mr-1" /> Add Storage Option
+              </button>
+            </div>
 
-                {/* Questions within the group */}
-                {group.questions.map((question, questionIndex) => (
-                  <div key={questionIndex} className="p-3 my-2 ml-4 border border-dashed border-gray-300 rounded-md">
-                    <div className="flex items-center justify-between mb-2">
-                      <Input
-                        label={`Question ${questionIndex + 1} Text`}
-                        value={question.questionText}
-                        onChange={(e) => handleQuestionChange(groupIndex, questionIndex, 'questionText', e.target.value)}
-                        fullWidth
-                        className="mr-2"
-                        placeholder="Question Text"
-                      />
-                      <button onClick={() => removeQuestion(groupIndex, questionIndex)} className="text-red-500 hover:text-red-700 p-1">
-                        <FiMinusCircle size={18} />
-                      </button>
-                    </div>
-                    <Input
-                      label="Answer Type (e.g., radio, checkbox, select)"
-                      value={question.answerType}
-                      onChange={(e) => handleQuestionChange(groupIndex, questionIndex, 'answerType', e.target.value)}
-                      fullWidth
-                      className="mt-1"
-                      placeholder="Answer Type"
-                    />
-
-                    {/* Options for the question */}
-                    <p className="text-sm text-gray-600 mt-2 ml-1">Options for Question {questionIndex + 1}:</p>
-                    {question.options.map((option, optionIndex) => (
-                      <div className="flex items-center ml-2 mt-1" key={optionIndex}>
-                        <Input
-                          label={`Option ${optionIndex + 1}`}
-                          value={option}
-                          onChange={(e) => handleQuestionOptionChange(groupIndex, questionIndex, optionIndex, e.target.value)}
-                          fullWidth
-                          className="mr-2"
-                          placeholder="Option Value"
-                          size="sm"
-                        />
-                        <button onClick={() => removeQuestionOption(groupIndex, questionIndex, optionIndex)} className="text-red-500 hover:text-red-700 p-1">
-                          <FiMinusCircle size={16} />
-                        </button>
-                        {optionIndex === question.options.length - 1 && (
-                          <button onClick={() => addQuestionOption(groupIndex, questionIndex)} className="text-blue-500 hover:text-blue-700 p-1 ml-1">
-                            <FiPlusCircle size={16} />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                    {question.options.length === 0 && (
-                        <Button onClick={() => addQuestionOption(groupIndex, questionIndex)} variant="outlined" size="sm" className="mt-1 ml-2">
-                           <FiPlusCircle className="mr-1" /> Add Option
-                        </Button>
-                    )}
-                  </div>
-                ))}
-                <Button onClick={() => addQuestion(groupIndex)} variant="outlined" size="sm" className="my-2 ml-4">
-                  <FiPlusCircle className="mr-2" /> Add Question to this Group
-                </Button>
-              </div>
-            ))}
-            <Button onClick={addQuestionGroup} variant="outlined" className="my-2">
-              <FiPlusCircle className="mr-2" /> Add Question Group
-            </Button>
+            {/* Color Options */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Color Options</label>
+              {formData.variant_options.color.map((color, index) => (
+                <div key={index} className="flex items-center space-x-2 mb-2">
+                  <input
+                    type="text"
+                    value={color}
+                    onChange={(e) => handleVariantOptionChange('color', index, e.target.value)}
+                    placeholder="e.g., Deep Purple"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeVariantOption('color', index)}
+                    className="text-red-500 hover:text-red-700"
+                    disabled={formData.variant_options.color.length === 1}
+                  >
+                    <FaTrash />
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => addVariantOption('color')}
+                className="flex items-center text-blue-500 hover:text-blue-700"
+              >
+                <FaPlus className="mr-1" /> Add Color Option
+              </button>
+            </div>
           </div>
 
-          <div className="mt-6 flex justify-end space-x-3">
-            <Button onClick={onClose} variant="secondary">Cancel</Button>
-            <Button onClick={handleSubmit} variant="primary">
-              {modelToEdit ? 'Save Changes' : 'Add Model'}
-            </Button>
+          {/* Pricing Matrix */}
+          <div>
+            <h4 className="text-lg font-medium mb-4">Variant Pricing</h4>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              {generatePricingMatrix()}
+            </div>
           </div>
+
+          {/* Preview */}
+          {formData.image_url && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Image Preview</label>
+              <img 
+                src={formData.image_url} 
+                alt="Model preview" 
+                className="w-32 h-32 object-contain border rounded"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+            </div>
+          )}
+
+          {/* Form Actions */}
+          <div className="flex items-center justify-end space-x-4 pt-6">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isLoading}
+              className="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md border border-gray-300 transition duration-150 ease-in-out disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="px-6 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out disabled:opacity-50"
+            >
+              {isLoading ? (modelToEdit ? 'Updating...' : 'Adding...') : (modelToEdit ? 'Update Model' : 'Add Model')}            </button>
+          </div>
+        </form>
         </div>
       </div>
     </div>
@@ -319,25 +421,9 @@ const ModelFormModal = ({ open, onClose, brandId, seriesId, modelToEdit }) => {
 ModelFormModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  brandId: PropTypes.string,
-  seriesId: PropTypes.string,
-  modelToEdit: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    name: PropTypes.string,
-    image: PropTypes.string,
-    variantOptions: PropTypes.arrayOf(PropTypes.shape({
-      name: PropTypes.string,
-      options: PropTypes.arrayOf(PropTypes.string),
-    })),
-    questionGroups: PropTypes.arrayOf(PropTypes.shape({
-      groupName: PropTypes.string,
-      questions: PropTypes.arrayOf(PropTypes.shape({
-        questionText: PropTypes.string,
-        options: PropTypes.arrayOf(PropTypes.string),
-        answerType: PropTypes.string,
-      })),
-    })),
-  }),
+  brandId: PropTypes.string.isRequired,
+  seriesId: PropTypes.string.isRequired,
+  modelToEdit: PropTypes.object,
 };
 
 export default ModelFormModal;

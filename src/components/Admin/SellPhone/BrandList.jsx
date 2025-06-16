@@ -5,7 +5,7 @@ import BrandFormModal from './BrandFormModal';
 import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
 
 const BrandList = ({ brands, onSelectBrand, selectedBrandId }) => {
-  const { deleteBrand, fetchSellPhoneCatalog } = useAdminSellPhoneStore();
+  const { deleteBrand, fetchCatalogs } = useAdminSellPhoneStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBrand, setEditingBrand] = useState(null);
 
@@ -15,23 +15,22 @@ const BrandList = ({ brands, onSelectBrand, selectedBrandId }) => {
   };
 
   const handleEditBrand = (brand, event) => {
-    event.stopPropagation(); // Prevent row selection
+    event.stopPropagation();
     setEditingBrand(brand);
     setIsModalOpen(true);
   };
 
   const handleDeleteBrand = async (brandId, event) => {
-    event.stopPropagation(); // Prevent row selection
+    event.stopPropagation();
     if (window.confirm('Are you sure you want to delete this brand and all its series and models?')) {
       try {
         await deleteBrand(brandId);
-        await fetchSellPhoneCatalog(); // Ensure catalog is refetched
+        await fetchCatalogs();
         if (selectedBrandId === brandId) {
-          onSelectBrand(null); // Deselect if the deleted brand was selected
+          onSelectBrand(null);
         }
       } catch (error) {
         console.error("Failed to delete brand:", error);
-        // Error toast is likely handled in the store
       }
     }
   };
@@ -39,7 +38,7 @@ const BrandList = ({ brands, onSelectBrand, selectedBrandId }) => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingBrand(null);
-  }
+  };
 
   if (!brands || brands.length === 0) {
     return (
@@ -75,12 +74,21 @@ const BrandList = ({ brands, onSelectBrand, selectedBrandId }) => {
       {brands.map((brand) => (
         <div
           key={brand.id}
-          className="mb-2 border rounded-md hover:bg-gray-100 p-2 flex justify-between items-center"
+          className={`mb-2 border rounded-md hover:bg-gray-100 p-2 flex justify-between items-center cursor-pointer ${
+            selectedBrandId === brand.id ? 'bg-blue-50 border-blue-300' : ''
+          }`}
+          onClick={() => onSelectBrand(brand.id)}
         >
-          <span onClick={() => onSelectBrand(brand.id)} className="cursor-pointer flex-grow">
-            {brand.name}
-          </span>
-          <div>
+          <div className="flex items-center">
+            {brand.logo_url && (
+              <img src={brand.logo_url} alt={brand.name} className="w-8 h-8 rounded-full mr-3" />
+            )}
+            <div>
+              <div className="font-medium">{brand.name}</div>
+              <div className="text-sm text-gray-500">{brand.seriesCount} series</div>
+            </div>
+          </div>
+          <div onClick={(e) => e.stopPropagation()}>
             <button
               onClick={(e) => handleEditBrand(brand, e)}
               className="mr-2 text-blue-500 hover:text-blue-700 p-1"
@@ -107,8 +115,8 @@ BrandList.propTypes = {
   brands: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
-    image: PropTypes.string,
-    series: PropTypes.array,
+    logo_url: PropTypes.string,
+    seriesCount: PropTypes.number,
   })).isRequired,
   onSelectBrand: PropTypes.func.isRequired,
   selectedBrandId: PropTypes.string,

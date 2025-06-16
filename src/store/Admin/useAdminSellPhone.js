@@ -6,10 +6,6 @@ import { toast } from "../../utils/toast";
 const useAdminSellPhone = create(
   persist(
     (set, get) => ({
-      catalogs: { data: [], loading: false, error: null },
-      inquiries: { data: [], loading: false, error: null },
-      faq: { data: [], loading: false, error: null },
-
       // State for sell phone inquiries
       inquiries: {
         list: [],
@@ -17,11 +13,18 @@ const useAdminSellPhone = create(
         error: null,
       },
 
-      // State for sell phone catalogs - updated structure
+      // State for sell phone catalogs - updated structure to match API response
       catalogs: {
-        data: null, // Changed from list: [] to data: null to store the nested brands object
+        data: null, // Will store the nested brands object: { brands: { apple: {...}, samsung: {...} } }
         loading: false,
         error: null,
+      },
+
+      // FAQ state
+      faq: { 
+        data: [], 
+        loading: false, 
+        error: null 
       },
 
       // Currently selected inquiry for viewing details
@@ -232,79 +235,73 @@ const useAdminSellPhone = create(
             error: error.response?.data?.error || "Failed to fetch phone catalogs",
           };
         }
-      },
-
-      // Add a new brand
+      },      // Add a new brand
       addBrand: async (brandData) => {
         // brandData should be an object like { id: "apple", logo_url: "..." }
-        // The store will be optimistic and add it, then refetch or update based on API response.
         set((state) => ({
           catalogs: { ...state.catalogs, loading: true, error: null },
         }));
         try {
-          // Assuming endpoint /sell-mobile/catalog/brands for POSTing new brand
-          // The backend should create the brand with an empty phone_series object.
-          const response = await adminApi.post("/sell-mobile/catalog/brands", brandData);
-          if (response.status === 201 || response.status === 200) { // 201 Created or 200 OK
-            // Successfully added, refetch all catalogs to get the updated list
-            // Or, if API returns the new brand structure, update state directly
+          const response = await adminApi.post("/sell-mobile/catalog/brands/", brandData);
+          if (response.status === 201 || response.status === 200) {
             set((state) => ({
               catalogs: {
                 ...state.catalogs,
                 loading: false,
-                // Optionally update data optimistically or wait for refetch
               },
             }));
-            // Trigger a refetch of catalogs
-            useAdminSellPhone.getState().fetchCatalogs();
+            // Refetch catalogs to get updated data
+            await get().fetchCatalogs();
+            toast.success("Brand added successfully");
             return { success: true, data: response.data };
           } else {
             throw new Error(response.data?.error || "Failed to add brand");
           }
         } catch (error) {
+          const errorMsg = error.response?.data?.error || error.message || "Failed to add brand";
           set((state) => ({
             catalogs: {
               ...state.catalogs,
               loading: false,
-              error: error.message || "Failed to add brand",
+              error: errorMsg,
             },
           }));
-          return { success: false, error: error.message || "Failed to add brand" };
+          toast.error(errorMsg);
+          return { success: false, error: errorMsg };
         }
       },
 
       // Update an existing brand (e.g., logo_url)
       updateBrand: async (brandId, updatedData) => {
-        // updatedData could be { logo_url: "new_url" }
         set((state) => ({
           catalogs: { ...state.catalogs, loading: true, error: null },
         }));
         try {
-          // Assuming endpoint /sell-mobile/catalog/brands/{brandId} for PUT
-          const response = await adminApi.put(`/sell-mobile/catalog/brands/${brandId}`, updatedData);
+          const response = await adminApi.put(`/sell-mobile/catalog/brands/${brandId}/`, updatedData);
           if (response.status === 200) {
             set((state) => ({
               catalogs: {
                 ...state.catalogs,
                 loading: false,
-                // Update data optimistically or wait for refetch
               },
             }));
-            // Trigger a refetch of catalogs
-            useAdminSellPhone.getState().fetchCatalogs();
+            await get().fetchCatalogs();
+            toast.success("Brand updated successfully");
             return { success: true, data: response.data };
           } else {
             throw new Error(response.data?.error || "Failed to update brand");
           }
         } catch (error) {
+          const errorMsg = error.response?.data?.error || error.message || "Failed to update brand";
           set((state) => ({
             catalogs: {
               ...state.catalogs,
               loading: false,
-              error: error.message || "Failed to update brand",
+              error: errorMsg,
             },
           }));
-          return { success: false, error: error.message || "Failed to update brand" };
+          toast.error(errorMsg);
+          return { success: false, error: errorMsg };
         }
       },
 
@@ -314,136 +311,366 @@ const useAdminSellPhone = create(
           catalogs: { ...state.catalogs, loading: true, error: null },
         }));
         try {
-          // Assuming endpoint /sell-mobile/catalog/brands/{brandId} for DELETE
-          const response = await adminApi.delete(`/sell-mobile/catalog/brands/${brandId}`);
-          if (response.status === 200 || response.status === 204) { // 204 No Content or 200 OK
+          const response = await adminApi.delete(`/sell-mobile/catalog/brands/${brandId}/`);
+          if (response.status === 200 || response.status === 204) {
             set((state) => ({
               catalogs: {
                 ...state.catalogs,
                 loading: false,
-                // Update data optimistically or wait for refetch
               },
             }));
-            // Trigger a refetch of catalogs
-            useAdminSellPhone.getState().fetchCatalogs();
+            await get().fetchCatalogs();
+            toast.success("Brand deleted successfully");
             return { success: true };
           } else {
             throw new Error(response.data?.error || "Failed to delete brand");
           }
         } catch (error) {
+          const errorMsg = error.response?.data?.error || error.message || "Failed to delete brand";
           set((state) => ({
             catalogs: {
               ...state.catalogs,
               loading: false,
-              error: error.message || "Failed to delete brand",
+              error: errorMsg,
             },
           }));
-          return { success: false, error: error.message || "Failed to delete brand" };
+          toast.error(errorMsg);
+          return { success: false, error: errorMsg };
         }
-      },
-
-      // Series CRUD
+      },      // Series CRUD
       addSeries: async (brandId, seriesData) => {
+        set((state) => ({
+          catalogs: { ...state.catalogs, loading: true, error: null },
+        }));
         try {
-          const response = await api.post(`/sell-mobile/catalog/brands/${brandId}/series/`, seriesData);
-          if (response.status === 201) {
+          const response = await adminApi.post(`/sell-mobile/catalog/brands/${brandId}/series/`, seriesData);
+          if (response.status === 201 || response.status === 200) {
+            set((state) => ({
+              catalogs: {
+                ...state.catalogs,
+                loading: false,
+              },
+            }));
+            await get().fetchCatalogs();
             toast.success("Series added successfully");
-            get().fetchCatalogs();
-            return response.data;
+            return { success: true, data: response.data };
           }
         } catch (error) {
-          console.error("Failed to add series:", error);
-          toast.error(error.response?.data?.message || "Failed to add series");
+          const errorMsg = error.response?.data?.error || error.message || "Failed to add series";
+          set((state) => ({
+            catalogs: {
+              ...state.catalogs,
+              loading: false,
+              error: errorMsg,
+            },
+          }));
+          toast.error(errorMsg);
           throw error;
         }
       },
+      
       updateSeries: async (brandId, seriesId, seriesData) => {
+        set((state) => ({
+          catalogs: { ...state.catalogs, loading: true, error: null },
+        }));
         try {
-          const response = await api.put(`/sell-mobile/catalog/brands/${brandId}/series/${seriesId}/`, seriesData);
+          const response = await adminApi.put(`/sell-mobile/catalog/brands/${brandId}/series/${seriesId}/`, seriesData);
           if (response.status === 200) {
+            set((state) => ({
+              catalogs: {
+                ...state.catalogs,
+                loading: false,
+              },
+            }));
+            await get().fetchCatalogs();
             toast.success("Series updated successfully");
-            get().fetchCatalogs();
-            return response.data;
+            return { success: true, data: response.data };
           }
         } catch (error) {
-          console.error("Failed to update series:", error);
-          toast.error(error.response?.data?.message || "Failed to update series");
+          const errorMsg = error.response?.data?.error || error.message || "Failed to update series";
+          set((state) => ({
+            catalogs: {
+              ...state.catalogs,
+              loading: false,
+              error: errorMsg,
+            },
+          }));
+          toast.error(errorMsg);
           throw error;
         }
       },
+      
       deleteSeries: async (brandId, seriesId) => {
+        set((state) => ({
+          catalogs: { ...state.catalogs, loading: true, error: null },
+        }));
         try {
-          const response = await api.delete(`/sell-mobile/catalog/brands/${brandId}/series/${seriesId}/`);
+          const response = await adminApi.delete(`/sell-mobile/catalog/brands/${brandId}/series/${seriesId}/`);
           if (response.status === 204 || response.status === 200) {
+            set((state) => ({
+              catalogs: {
+                ...state.catalogs,
+                loading: false,
+              },
+            }));
+            await get().fetchCatalogs();
             toast.success("Series deleted successfully");
-            get().fetchCatalogs();
-            return true;
+            return { success: true };
           }
         } catch (error) {
-          console.error("Failed to delete series:", error);
-          toast.error(error.response?.data?.message || "Failed to delete series");
+          const errorMsg = error.response?.data?.error || error.message || "Failed to delete series";
+          set((state) => ({
+            catalogs: {
+              ...state.catalogs,
+              loading: false,
+              error: errorMsg,
+            },
+          }));
+          toast.error(errorMsg);
           throw error;
         }
       },
 
       // Model CRUD
       addModel: async (seriesId, modelData) => {
-        // Assuming modelData includes image file or image URL
-        // If it's a file, it might need FormData handling depending on API setup
+        set((state) => ({
+          catalogs: { ...state.catalogs, loading: true, error: null },
+        }));
         try {
-          const response = await api.post(`/sell-mobile/catalog/series/${seriesId}/models/`, modelData);
-          if (response.status === 201) {
+          const response = await adminApi.post(`/sell-mobile/catalog/series/${seriesId}/models/`, modelData);
+          if (response.status === 201 || response.status === 200) {
+            set((state) => ({
+              catalogs: {
+                ...state.catalogs,
+                loading: false,
+              },
+            }));
+            await get().fetchCatalogs();
             toast.success("Model added successfully");
-            get().fetchCatalogs();
-            return response.data;
+            return { success: true, data: response.data };
           }
         } catch (error) {
-          console.error("Failed to add model:", error);
-          toast.error(error.response?.data?.message || "Failed to add model");
-          throw error;
-        }
-      },
-      updateModel: async (seriesId, modelId, modelData) => {
-        try {
-          const response = await api.put(`/sell-mobile/catalog/series/${seriesId}/models/${modelId}/`, modelData);
-          if (response.status === 200) {
-            toast.success("Model updated successfully");
-            get().fetchCatalogs();
-            return response.data;
-          }
-        } catch (error) {
-          console.error("Failed to update model:", error);
-          toast.error(error.response?.data?.message || "Failed to update model");
-          throw error;
-        }
-      },
-      deleteModel: async (seriesId, modelId) => {
-        try {
-          const response = await api.delete(`/sell-mobile/catalog/series/${seriesId}/models/${modelId}/`);
-          if (response.status === 204 || response.status === 200) {
-            toast.success("Model deleted successfully");
-            get().fetchCatalogs();
-            return true;
-          }
-        } catch (error) {
-          console.error("Failed to delete model:", error);
-          toast.error(error.response?.data?.message || "Failed to delete model");
+          const errorMsg = error.response?.data?.error || error.message || "Failed to add model";
+          set((state) => ({
+            catalogs: {
+              ...state.catalogs,
+              loading: false,
+              error: errorMsg,
+            },
+          }));
+          toast.error(errorMsg);
           throw error;
         }
       },
       
-      // FAQ CRUD (example, adjust as needed)
+      updateModel: async (seriesId, modelId, modelData) => {
+        set((state) => ({
+          catalogs: { ...state.catalogs, loading: true, error: null },
+        }));
+        try {
+          const response = await adminApi.put(`/sell-mobile/catalog/series/${seriesId}/models/${modelId}/`, modelData);
+          if (response.status === 200) {
+            set((state) => ({
+              catalogs: {
+                ...state.catalogs,
+                loading: false,
+              },
+            }));
+            await get().fetchCatalogs();
+            toast.success("Model updated successfully");
+            return { success: true, data: response.data };
+          }
+        } catch (error) {
+          const errorMsg = error.response?.data?.error || error.message || "Failed to update model";
+          set((state) => ({
+            catalogs: {
+              ...state.catalogs,
+              loading: false,
+              error: errorMsg,
+            },
+          }));
+          toast.error(errorMsg);
+          throw error;
+        }
+      },
+      
+      deleteModel: async (seriesId, modelId) => {
+        set((state) => ({
+          catalogs: { ...state.catalogs, loading: true, error: null },
+        }));
+        try {
+          const response = await adminApi.delete(`/sell-mobile/catalog/series/${seriesId}/models/${modelId}/`);
+          if (response.status === 204 || response.status === 200) {
+            set((state) => ({
+              catalogs: {
+                ...state.catalogs,
+                loading: false,
+              },
+            }));
+            await get().fetchCatalogs();
+            toast.success("Model deleted successfully");
+            return { success: true };
+          }
+        } catch (error) {
+          const errorMsg = error.response?.data?.error || error.message || "Failed to delete model";
+          set((state) => ({
+            catalogs: {
+              ...state.catalogs,
+              loading: false,
+              error: errorMsg,
+            },
+          }));
+          toast.error(errorMsg);
+          throw error;
+        }
+      },        // FAQ CRUD - Updated to match Django REST framework views
       fetchFaq: async () => {
-        // ...existing code...
+        set((state) => ({
+          faq: { ...state.faq, loading: true, error: null },
+        }));
+        try {
+          const response = await adminApi.get("/sell-mobile/faqs/");
+          // Handle different possible response structures from Django
+          let faqData = [];
+          if (response.data.faqs) {
+            // If data is nested under 'faqs' key
+            faqData = response.data.faqs;
+          } else if (Array.isArray(response.data)) {
+            // If data is directly an array
+            faqData = response.data;
+          } else if (response.data.results) {
+            // If using Django REST framework pagination
+            faqData = response.data.results;
+          } else if (response.data.data) {
+            // If data is nested under 'data' key
+            faqData = response.data.data;
+          }
+
+          set({
+            faq: {
+              data: faqData,
+              loading: false,
+              error: null,
+            },
+          });
+          return { success: true, data: faqData };
+        } catch (error) {
+          const errorMsg = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          "Failed to fetch FAQs";
+          set((state) => ({
+            faq: {
+              ...state.faq,
+              loading: false,
+              error: errorMsg,
+            },
+          }));
+          toast.error(errorMsg);
+          return { success: false, error: errorMsg };
+        }
       },
-      addFaq: async (faqData) => {
-        // ...existing code...
+        addFaq: async (faqData) => {
+        set((state) => ({
+          faq: { ...state.faq, loading: true, error: null },
+        }));
+        try {
+          const response = await adminApi.post("/sell-mobile/faqs/", faqData);
+          if (response.status === 201 || response.status === 200) {
+            // Refresh FAQ list to get the latest data
+            await get().fetchFaq();
+            const message = response.data.message || 
+                           response.data.detail || 
+                           "FAQ added successfully";
+            toast.success(message);
+            return { success: true, data: response.data };
+          } else {
+            throw new Error("Unexpected response status");
+          }
+        } catch (error) {
+          const errorMsg = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.response?.data?.detail ||
+                          error.message || 
+                          "Failed to add FAQ";
+          set((state) => ({
+            faq: {
+              ...state.faq,
+              loading: false,
+              error: errorMsg,
+            },
+          }));
+          toast.error(errorMsg);
+          throw error;
+        }
       },
-      updateFaq: async (faqId, faqData) => {
-        // ...existing code...
+        updateFaq: async (faqId, faqData) => {
+        set((state) => ({
+          faq: { ...state.faq, loading: true, error: null },
+        }));
+        try {
+          const response = await adminApi.put(`/sell-mobile/faqs/${faqId}/`, faqData);
+          if (response.status === 200) {
+            // Refresh FAQ list to get the latest data
+            await get().fetchFaq();
+            const message = response.data.message || 
+                           response.data.detail || 
+                           "FAQ updated successfully";
+            toast.success(message);
+            return { success: true, data: response.data };
+          } else {
+            throw new Error("Unexpected response status");
+          }
+        } catch (error) {
+          const errorMsg = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.response?.data?.detail ||
+                          error.message || 
+                          "Failed to update FAQ";
+          set((state) => ({
+            faq: {
+              ...state.faq,
+              loading: false,
+              error: errorMsg,
+            },
+          }));
+          toast.error(errorMsg);
+          throw error;
+        }
       },
-      deleteFaq: async (faqId) => {
-        // ...existing code...
+        deleteFaq: async (faqId) => {
+        set((state) => ({
+          faq: { ...state.faq, loading: true, error: null },
+        }));
+        try {
+          const response = await adminApi.delete(`/sell-mobile/faqs/${faqId}/`);
+          if (response.status === 204 || response.status === 200) {
+            // Refresh FAQ list to get the latest data
+            await get().fetchFaq();
+            const message = response.data?.message || 
+                           response.data?.detail || 
+                           "FAQ deleted successfully";
+            toast.success(message);
+            return { success: true };
+          } else {
+            throw new Error("Unexpected response status");
+          }
+        } catch (error) {
+          const errorMsg = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.response?.data?.detail ||
+                          error.message || 
+                          "Failed to delete FAQ";
+          set((state) => ({
+            faq: {
+              ...state.faq,
+              loading: false,
+              error: errorMsg,
+            },
+          }));
+          toast.error(errorMsg);
+          throw error;
+        }
       },
     }),
     {

@@ -3,29 +3,43 @@ import PropTypes from 'prop-types';
 import useAdminSellPhone from '../../../store/Admin/useAdminSellPhone';
 import { FiX, FiLoader } from 'react-icons/fi';
 
-const SeriesFormModal = ({ open, onClose, seriesToEdit, brandId }) => {
-  const { addSeries, updateSeries } = useAdminSellPhone();
-  const [formData, setFormData] = useState({
-    name: '',
-    description: ''
+const FaqFormModal = ({ open, onClose, faqToEdit }) => {
+  const { addFaq, updateFaq } = useAdminSellPhone();  const [formData, setFormData] = useState({
+    question: '',
+    answer: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    if (seriesToEdit) {
+    if (faqToEdit) {
       setFormData({
-        name: seriesToEdit.name || '',
-        description: seriesToEdit.description || ''
+        question: faqToEdit.question || '',
+        answer: faqToEdit.answer || ''
       });
     } else {
       setFormData({
-        name: '',
-        description: ''
+        question: '',
+        answer: ''
       });
     }
     setErrors({});
-  }, [seriesToEdit, open]);
+  }, [faqToEdit]);
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.question.trim()) {
+      newErrors.question = 'Question is required';
+    }
+    
+    if (!formData.answer.trim()) {
+      newErrors.answer = 'Answer is required';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -33,31 +47,7 @@ const SeriesFormModal = ({ open, onClose, seriesToEdit, brandId }) => {
       ...prev,
       [name]: value
     }));
-    
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
   };
-
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!formData.name.trim()) {
-      newErrors.name = 'Series name is required';
-    }
-    
-    if (!formData.description.trim()) {
-      newErrors.description = 'Description is required';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -68,26 +58,19 @@ const SeriesFormModal = ({ open, onClose, seriesToEdit, brandId }) => {
     setIsLoading(true);
     
     try {
-      if (seriesToEdit) {
-        await updateSeries(brandId, seriesToEdit.id, formData);
+      if (faqToEdit) {
+        await updateFaq(faqToEdit.id, formData);
       } else {
-        await addSeries(brandId, formData);
+        await addFaq(formData);
       }
       onClose();
     } catch (error) {
-      console.error("Series form submission error:", error);
-      // Error handling is done in the store with toast notifications
+      console.error("FAQ form submission error:", error);
+      // Error handling is already done in the store functions
     } finally {
       setIsLoading(false);
     }
   };
-
-  const handleClose = () => {
-    setFormData({ name: '', description: '' });
-    setErrors({});
-    onClose();
-  };
-
   if (!open) return null;
 
   return (
@@ -99,7 +82,7 @@ const SeriesFormModal = ({ open, onClose, seriesToEdit, brandId }) => {
       }}
     >
       <div 
-        className="w-full max-w-lg transform transition-all duration-300 animate-slideIn"
+        className="w-full max-w-2xl transform transition-all duration-300 animate-slideIn"
         style={{
           backgroundColor: "var(--bg-primary)",
           borderRadius: "var(--rounded-lg)",
@@ -116,10 +99,10 @@ const SeriesFormModal = ({ open, onClose, seriesToEdit, brandId }) => {
             className="text-xl font-semibold"
             style={{ color: "var(--text-primary)" }}
           >
-            {seriesToEdit ? 'Edit Series' : 'Add New Series'}
+            {faqToEdit ? 'Edit FAQ' : 'Add New FAQ'}
           </h2>
           <button
-            onClick={handleClose}
+            onClick={onClose}
             className="p-2 rounded-md transition-colors hover:bg-gray-50"
             disabled={isLoading}
             style={{ color: "var(--text-secondary)" }}
@@ -129,82 +112,82 @@ const SeriesFormModal = ({ open, onClose, seriesToEdit, brandId }) => {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Series Name */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">          {/* Question */}
           <div className="space-y-2">
             <label 
-              htmlFor="name" 
+              htmlFor="question" 
               className="block text-sm font-medium"
               style={{ color: "var(--text-primary)" }}
             >
-              Series Name *
+              Question *
             </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
+            <input 
+              type="text" 
+              id="question"
+              name="question"
+              value={formData.question} 
               onChange={handleChange}
+              placeholder="Enter the FAQ question"
               className="w-full px-3 py-2.5 border rounded-md text-sm focus:outline-none focus:ring-2 transition-all duration-200"
               style={{
                 backgroundColor: "var(--bg-primary)",
                 color: "var(--text-primary)",
-                borderColor: errors.name ? "var(--error-color)" : "var(--border-primary)",
+                borderColor: errors.question ? "var(--error-color)" : "var(--border-primary)",
                 borderRadius: "var(--rounded-md)"
               }}
-              placeholder="Enter series name (e.g., iPhone 15)"
+              required 
               disabled={isLoading}
             />
-            {errors.name && (
+            {errors.question && (
               <p 
                 className="text-sm"
                 style={{ color: "var(--error-color)" }}
               >
-                {errors.name}
+                {errors.question}
               </p>
             )}
           </div>
-
-          {/* Description */}
+          
+          {/* Answer */}
           <div className="space-y-2">
             <label 
-              htmlFor="description" 
+              htmlFor="answer" 
               className="block text-sm font-medium"
               style={{ color: "var(--text-primary)" }}
             >
-              Description *
+              Answer *
             </label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
+            <textarea 
+              id="answer"
+              name="answer"
+              value={formData.answer} 
               onChange={handleChange}
-              rows={4}
+              placeholder="Enter the FAQ answer"
+              rows={6}
               className="w-full px-3 py-2.5 border rounded-md text-sm focus:outline-none focus:ring-2 transition-all duration-200 resize-none"
               style={{
                 backgroundColor: "var(--bg-primary)",
                 color: "var(--text-primary)",
-                borderColor: errors.description ? "var(--error-color)" : "var(--border-primary)",
+                borderColor: errors.answer ? "var(--error-color)" : "var(--border-primary)",
                 borderRadius: "var(--rounded-md)"
               }}
-              placeholder="Enter series description"
+              required 
               disabled={isLoading}
             />
-            {errors.description && (
+            {errors.answer && (
               <p 
                 className="text-sm"
                 style={{ color: "var(--error-color)" }}
               >
-                {errors.description}
+                {errors.answer}
               </p>
             )}
-          </div>
-
-          {/* Form Actions */}
+          </div>          {/* Form Actions */}
           <div className="flex items-center justify-end space-x-3 pt-4 border-t" style={{ borderColor: "var(--border-primary)" }}>
-            <button
-              type="button"
-              onClick={handleClose}
+            <button 
+              type="button" 
+              onClick={onClose} 
+              disabled={isLoading}
               className="px-4 py-2.5 text-sm font-medium rounded-md border transition-all duration-200 hover:bg-gray-50 disabled:opacity-50"
               style={{
                 backgroundColor: "var(--bg-primary)",
@@ -212,12 +195,12 @@ const SeriesFormModal = ({ open, onClose, seriesToEdit, brandId }) => {
                 borderColor: "var(--border-primary)",
                 borderRadius: "var(--rounded-md)"
               }}
-              disabled={isLoading}
             >
               Cancel
             </button>
-            <button
-              type="submit"
+            <button 
+              type="submit" 
+              disabled={isLoading}
               className="px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-200 hover:opacity-90 disabled:opacity-50 flex items-center space-x-2"
               style={{
                 backgroundColor: "var(--brand-primary)",
@@ -225,14 +208,13 @@ const SeriesFormModal = ({ open, onClose, seriesToEdit, brandId }) => {
                 borderRadius: "var(--rounded-md)",
                 boxShadow: "var(--shadow-small)"
               }}
-              disabled={isLoading}
             >
               {isLoading && <FiLoader className="w-4 h-4 animate-spin" />}
               <span>
                 {isLoading ? (
-                  seriesToEdit ? 'Updating...' : 'Adding...'
+                  faqToEdit ? 'Updating...' : 'Adding...'
                 ) : (
-                  seriesToEdit ? 'Update Series' : 'Add Series'
+                  faqToEdit ? 'Update FAQ' : 'Add FAQ'
                 )}
               </span>
             </button>
@@ -243,11 +225,14 @@ const SeriesFormModal = ({ open, onClose, seriesToEdit, brandId }) => {
   );
 };
 
-SeriesFormModal.propTypes = {
+FaqFormModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  seriesToEdit: PropTypes.object,
-  brandId: PropTypes.string.isRequired,
+  faqToEdit: PropTypes.shape({
+    id: PropTypes.string,
+    question: PropTypes.string,
+    answer: PropTypes.string,
+  }),
 };
 
-export default SeriesFormModal;
+export default FaqFormModal;

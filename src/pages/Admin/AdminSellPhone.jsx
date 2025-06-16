@@ -1,13 +1,32 @@
 import React, { useState, useEffect } from "react";
 import useAdminSellPhone from "../../store/Admin/useAdminSellPhone";
 import Pagination from "../../components/common/Pagination";
-import ManageSellPhoneCatalog from "../../components/Admin/SellPhone/ManageSellPhoneCatalog";
-import Button from "../../components/ui/Button"; // Changed to custom Button
-import { FaEdit } from "react-icons/fa"; // Changed from @mui/icons-material to react-icons/fa
+import Button from "../../components/ui/Button";
+import { FaEdit, FaTrash, FaPlus, FaEye, FaArrowLeft } from "react-icons/fa";
+
+// Import SellPhone components
+import BrandList from "../../components/Admin/SellPhone/BrandList";
+import SeriesList from "../../components/Admin/SellPhone/SeriesList";
+import ModelList from "../../components/Admin/SellPhone/ModelList";
+import BrandFormModal from "../../components/Admin/SellPhone/BrandFormModal";
+import SeriesFormModal from "../../components/Admin/SellPhone/SeriesFormModal";
+import ModelFormModal from "../../components/Admin/SellPhone/ModelFormModal";
+import FaqFormModal from "../../components/Admin/SellPhone/FaqFormModal";
 
 const AdminSellPhone = () => {
-  const [activeTab, setActiveTab] = useState("listings");
-  const [listingsViewMode, setListingsViewMode] = useState("flatList"); // 'flatList' or 'manageCatalog'
+  const [activeTab, setActiveTab] = useState("catalog");
+  const [catalogView, setCatalogView] = useState("overview"); // 'overview', 'manageCatalog'
+  
+  // Navigation state for catalog management
+  const [selectedBrandId, setSelectedBrandId] = useState(null);
+  const [selectedSeriesId, setSelectedSeriesId] = useState(null);
+  const [selectedModel, setSelectedModel] = useState(null);
+    // Modal states
+  const [showBrandModal, setShowBrandModal] = useState(false);
+  const [showSeriesModal, setShowSeriesModal] = useState(false);
+  const [showModelModal, setShowModelModal] = useState(false);
+  const [showFaqModal, setShowFaqModal] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -15,62 +34,129 @@ const AdminSellPhone = () => {
 
   // Get state and functions from the store
   const {
-    catalogs, // This is sellPhoneCatalog from the store
+    catalogs,
     inquiries,
-    fetchCatalogs, // Corrected: Was fetchSellPhoneCatalog
+    faq,
+    fetchCatalogs,
     fetchInquiries,
+    fetchFaq,
     updateInquiryStatus,
     deleteInquiry,
+    addBrand,
+    updateBrand,
+    deleteBrand,
+    addSeries,
+    updateSeries,
+    deleteSeries,
+    addModel,
+    updateModel,
+    deleteModel,
+    addFaq,
+    updateFaq,
+    deleteFaq,
   } = useAdminSellPhone();
 
-  // Fetch data when component mounts
+  // Fetch data when component mounts or tab changes
   useEffect(() => {
-    if (activeTab === "listings" && listingsViewMode === "flatList") {
-      fetchCatalogs(); // Corrected: Was fetchSellPhoneCatalog
-    }
-    if (activeTab === "inquiries") {
+    if (activeTab === "catalog") {
+      fetchCatalogs();
+    } else if (activeTab === "inquiries") {
       fetchInquiries();
+    } else if (activeTab === "faqs") {
+      fetchFaq();
     }
-  }, [activeTab, listingsViewMode, fetchCatalogs, fetchInquiries]); // Corrected: Was fetchSellPhoneCatalog
+  }, [activeTab, fetchCatalogs, fetchInquiries, fetchFaq]);
 
-  // Get current data based on active tab
-  const getCurrentData = () => {
-    if (activeTab === "listings" && listingsViewMode === "flatList") {
-      // Process the new catalogs.data structure (which is an array of brands)
-      if (!catalogs.data || !Array.isArray(catalogs.data)) {
+  // Helper function to convert nested brands object to flat array for overview
+  const getBrandsArray = () => {
+    if (!catalogs.data || typeof catalogs.data !== 'object') {
+      return [];
+    }
+    
+    return Object.keys(catalogs.data).map(brandId => ({
+      id: brandId,
+      name: brandId.charAt(0).toUpperCase() + brandId.slice(1),
+      logo_url: catalogs.data[brandId].logo_url,
+      seriesCount: catalogs.data[brandId].phone_series ? Object.keys(catalogs.data[brandId].phone_series).length : 0,
+      ...catalogs.data[brandId]
+    }));
+  };
+
+  // Helper function to get series array for selected brand
+  const getSeriesArray = (brandId) => {
+    if (!catalogs.data || !catalogs.data[brandId] || !catalogs.data[brandId].phone_series) {
+      return [];
+    }
+    
+    const phoneSeries = catalogs.data[brandId].phone_series;
+    return Object.keys(phoneSeries).map(seriesId => ({
+      id: seriesId,
+      display_name: phoneSeries[seriesId].display_name,
+      modelCount: phoneSeries[seriesId].phones ? Object.keys(phoneSeries[seriesId].phones).length : 0,
+      ...phoneSeries[seriesId]
+    }));
+  };
+
+  // Helper function to get models array for selected series
+  const getModelsArray = (brandId, seriesId) => {
+    if (!catalogs.data || !catalogs.data[brandId] || !catalogs.data[brandId].phone_series || !catalogs.data[brandId].phone_series[seriesId] || !catalogs.data[brandId].phone_series[seriesId].phones) {
+      return [];
+    }
+    
+    const phones = catalogs.data[brandId].phone_series[seriesId].phones;
+    return Object.keys(phones).map(phoneId => ({
+      id: phoneId,
+      display_name: phones[phoneId].display_name,
+      image_url: phones[phoneId].image_url,
+      launch_year: phones[phoneId].launch_year,
+      demand_score: phones[phoneId].demand_score,
+      ...phones[phoneId]
+    }));
+  };
+
+  // Get current data for overview based on active tab
+  const getCurrentOverviewData = () => {
+    if (activeTab === "catalog") {
+      const brandsObject = catalogs.data;
+      if (!brandsObject || typeof brandsObject !== 'object' || Array.isArray(brandsObject)) {
         return [];
       }
+
       const allPhones = [];
-      catalogs.data.forEach((brand) => {
-        brand.series?.forEach((series) => {
-          series.models?.forEach((model) => {
-            allPhones.push({
-              id: `${brand.id}-${series.id}-${model.id}`, // Create a unique ID for the flat list
-              name: model.name,
-              image: model.image || brand.image, // Use model image, fallback to brand image
-              brand: brand.name,
-              series: series.name,
-              // Assuming variantOptions and questionGroups are not directly displayed in this flat list
-              // Or if they are, you'd need to decide how to represent them.
-              // For simplicity, let's use placeholders or omit them from the flat list for now.
-              // variant_options: model.variantOptions, // This would need further processing to display nicely
-              // launch_year: model.launch_year, // This field is not in the new structure directly on model
-              // The old structure had launch_year, variant_options.ram, variant_options.storage
-              // The new structure has model.variantOptions as [{name: 'Storage', options: ['128GB', '256GB']}]
-              // We need to adapt the table columns accordingly or simplify.
-              // For now, let's adjust columns to what's available: Name, Brand, Series, Image.
-            });
+      Object.keys(brandsObject).forEach(brandId => {
+        const brandDetails = brandsObject[brandId];
+        if (brandDetails && brandDetails.phone_series && typeof brandDetails.phone_series === 'object') {
+          Object.keys(brandDetails.phone_series).forEach(seriesId => {
+            const seriesDetails = brandDetails.phone_series[seriesId];
+            if (seriesDetails && seriesDetails.phones && typeof seriesDetails.phones === 'object') {
+              Object.keys(seriesDetails.phones).forEach(phoneId => {
+                const phoneDetails = seriesDetails.phones[phoneId];
+                if (phoneDetails) {
+                  allPhones.push({
+                    id: `${brandId}-${seriesId}-${phoneId}`,
+                    name: phoneDetails.display_name,
+                    image: phoneDetails.image_url || brandDetails.logo_url,
+                    brand: brandId,
+                    series: seriesDetails.display_name,
+                    launch_year: phoneDetails.launch_year,
+                    demand_score: phoneDetails.demand_score,
+                  });
+                }
+              });
+            }
           });
-        });
+        }
       });
       return allPhones;
     } else if (activeTab === "inquiries") {
-      return inquiries.data || [];
+      return inquiries.list || [];
+    } else if (activeTab === "faqs") {
+      return faq.data || [];
     }
-    return []; // Default empty array
+    return [];
   };
 
-  const currentData = getCurrentData();
+  const currentData = getCurrentOverviewData();
 
   // Pagination calculations
   const totalItems = currentData.length;
@@ -85,152 +171,465 @@ const AdminSellPhone = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Reset to first page when tab changes or view mode changes
+  // Reset to first page when tab changes
   useEffect(() => {
     setCurrentPage(1);
-    if (activeTab !== "listings") {
-      setListingsViewMode("flatList"); // Reset to flat list if navigating away from listings tab
-    }
+    setCatalogView("overview");
+    setSelectedBrandId(null);
+    setSelectedSeriesId(null);
+    setSelectedModel(null);
   }, [activeTab]);
 
-  const renderListingsContent = () => {
-    if (listingsViewMode === "manageCatalog") {
+  // Navigation handlers
+  const handleBackToBrands = () => {
+    setSelectedBrandId(null);
+    setSelectedSeriesId(null);
+    setSelectedModel(null);
+  };
+
+  const handleBackToSeries = () => {
+    setSelectedSeriesId(null);
+    setSelectedModel(null);
+  };
+
+  const handleSelectBrand = (brandId) => {
+    setSelectedBrandId(brandId);
+    setSelectedSeriesId(null);
+    setSelectedModel(null);
+  };
+
+  const handleSelectSeries = (seriesId) => {
+    setSelectedSeriesId(seriesId);
+    setSelectedModel(null);
+  };
+
+  // Modal handlers
+  const handleBrandModal = (brand = null) => {
+    setEditingItem(brand);
+    setShowBrandModal(true);
+  };
+
+  const handleSeriesModal = (series = null) => {
+    setEditingItem(series);
+    setShowSeriesModal(true);
+  };
+
+  const handleModelModal = (model = null) => {
+    setEditingItem(model);
+    setShowModelModal(true);
+  };
+  const closeModals = () => {
+    setShowBrandModal(false);
+    setShowSeriesModal(false);
+    setShowModelModal(false);
+    setShowFaqModal(false);
+    setEditingItem(null);
+  };
+
+  // CRUD handlers
+  const handleDeleteBrand = async (brandId) => {
+    if (window.confirm('Are you sure you want to delete this brand and all its series and models?')) {
+      await deleteBrand(brandId);
+      if (selectedBrandId === brandId) {
+        setSelectedBrandId(null);
+        setSelectedSeriesId(null);
+      }
+    }
+  };
+
+  const handleDeleteSeries = async (seriesId) => {
+    if (window.confirm('Are you sure you want to delete this series and all its models?')) {
+      await deleteSeries(selectedBrandId, seriesId);
+      if (selectedSeriesId === seriesId) {
+        setSelectedSeriesId(null);
+      }
+    }
+  };
+
+  const handleDeleteModel = async (modelId) => {
+    if (window.confirm('Are you sure you want to delete this model?')) {
+      await deleteModel(selectedSeriesId, modelId);
+    }
+  };
+
+  const renderCatalogContent = () => {
+    if (catalogView === "overview") {
       return (
         <>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Manage Phone Catalog</h2>
+            <div>
+              <h2 className="text-lg font-semibold">Phone Catalog Overview</h2>
+              <p className="text-gray-500">Overview of all phone models in the catalog</p>
+            </div>
             <Button
-              variant="outlined"
-              onClick={() => setListingsViewMode("flatList")}
-              className="border border-gray-300 hover:bg-gray-100 text-gray-700 font-semibold py-2 px-4 rounded shadow transition duration-150 ease-in-out" // Example styling
+              onClick={() => setCatalogView("manageCatalog")}
+              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center"
             >
-              Back to Flat List View
+              <FaEdit className="mr-2" /> Manage Catalog
             </Button>
           </div>
-          <ManageSellPhoneCatalog />
+
+          {catalogs.loading ? (
+            <div className="text-center py-4">
+              <p className="text-gray-500">Loading catalog overview...</p>
+            </div>
+          ) : catalogs.error ? (
+            <div className="text-center py-4">
+              <p className="text-red-500">{catalogs.error}</p>
+            </div>
+          ) : paginatedData.length === 0 ? (
+            <div className="text-center py-4">
+              <p className="text-gray-500">No phone listings found.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brand</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Series</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Launch Year</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Demand Score</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {paginatedData.map((phone) => (
+                    <tr key={phone.id}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          {phone.image && (
+                            <div className="h-10 w-10 flex-shrink-0">
+                              <img className="h-10 w-10 rounded-full object-cover" src={phone.image} alt={phone.name} />
+                            </div>
+                          )}
+                          <div className={phone.image ? "ml-4" : ""}>
+                            <div className="text-sm font-medium text-gray-900">{phone.name}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{phone.brand}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{phone.series}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{phone.launch_year}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{phone.demand_score}/10</div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {totalItems > 0 && (
+                <div className="pt-4">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                    totalItems={totalItems}
+                    itemsPerPage={ITEMS_PER_PAGE}
+                    showItemCount={true}
+                  />
+                </div>
+              )}
+            </div>
+          )}
         </>
       );
     }
 
-    // flatList view
-    return (
-      <>
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h2 className="text-lg font-semibold inline-flex items-center">
-              Phone Listings Overview
+    // Manage Catalog View
+    if (catalogView === "manageCatalog") {
+      return (
+        <>
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center space-x-4">
+              <Button
+                onClick={() => setCatalogView("overview")}
+                className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded flex items-center"
+              >
+                <FaArrowLeft className="mr-2" /> Back to Overview
+              </Button>
+              {selectedBrandId && (
+                <Button
+                  onClick={handleBackToBrands}
+                  className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded flex items-center"
+                >
+                  <FaArrowLeft className="mr-2" /> Back to Brands
+                </Button>
+              )}
+              {selectedSeriesId && (
+                <Button
+                  onClick={handleBackToSeries}
+                  className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded flex items-center"
+                >
+                  <FaArrowLeft className="mr-2" /> Back to Series
+                </Button>
+              )}
+            </div>
+            <h2 className="text-lg font-semibold">
+              {!selectedBrandId ? "Manage Brands" : 
+               !selectedSeriesId ? `Manage ${selectedBrandId} Series` : 
+               `Manage ${selectedSeriesId} Models`}
             </h2>
-            <p className="text-gray-500">
-              A simplified view of all phone models. Use "Manage Catalog" for
-              detailed editing.
-            </p>
           </div>
-          <Button
-            variant="contained"
-            startIcon={<FaEdit />} // Assuming your custom Button supports startIcon or similar prop
-            onClick={() => setListingsViewMode("manageCatalog")}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded shadow transition duration-150 ease-in-out" // Example styling, adjust as needed
-          >
-            Manage Full Catalog
-          </Button>
-        </div>
 
-        {catalogs.loading ? (
+          {catalogs.loading ? (
+            <div className="text-center py-4">
+              <p className="text-gray-500">Loading catalog...</p>
+            </div>
+          ) : catalogs.error ? (
+            <div className="text-center py-4">
+              <p className="text-red-500">{catalogs.error}</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Brands Management */}
+              {!selectedBrandId && (
+                <div className="lg:col-span-3">
+                  <div className="bg-white shadow rounded-lg p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-xl font-semibold">Brands</h3>
+                      <Button
+                        onClick={() => handleBrandModal()}
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center"
+                      >
+                        <FaPlus className="mr-2" /> Add Brand
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {getBrandsArray().map((brand) => (
+                        <div key={brand.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center">
+                              {brand.logo_url && (
+                                <img src={brand.logo_url} alt={brand.name} className="w-8 h-8 rounded-full mr-2" />
+                              )}
+                              <h4 className="font-semibold">{brand.name}</h4>
+                            </div>
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => handleBrandModal(brand)}
+                                className="text-blue-500 hover:text-blue-700"
+                              >
+                                <FaEdit />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteBrand(brand.id)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <FaTrash />
+                              </button>
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-2">{brand.seriesCount} series</p>
+                          <Button
+                            onClick={() => handleSelectBrand(brand.id)}
+                            className="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded text-sm"
+                          >
+                            <FaEye className="mr-1" /> Manage Series
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Series Management */}
+              {selectedBrandId && !selectedSeriesId && (
+                <div className="lg:col-span-3">
+                  <div className="bg-white shadow rounded-lg p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-xl font-semibold">Series for {selectedBrandId}</h3>
+                      <Button
+                        onClick={() => handleSeriesModal()}
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center"
+                      >
+                        <FaPlus className="mr-2" /> Add Series
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {getSeriesArray(selectedBrandId).map((series) => (
+                        <div key={series.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-semibold">{series.display_name}</h4>
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => handleSeriesModal(series)}
+                                className="text-blue-500 hover:text-blue-700"
+                              >
+                                <FaEdit />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteSeries(series.id)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <FaTrash />
+                              </button>
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-2">{series.modelCount} models</p>
+                          <Button
+                            onClick={() => handleSelectSeries(series.id)}
+                            className="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded text-sm"
+                          >
+                            <FaEye className="mr-1" /> Manage Models
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Models Management */}
+              {selectedBrandId && selectedSeriesId && (
+                <div className="lg:col-span-3">
+                  <div className="bg-white shadow rounded-lg p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-xl font-semibold">Models for {selectedSeriesId}</h3>
+                      <Button
+                        onClick={() => handleModelModal()}
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center"
+                      >
+                        <FaPlus className="mr-2" /> Add Model
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {getModelsArray(selectedBrandId, selectedSeriesId).map((model) => (
+                        <div key={model.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center">
+                              {model.image_url && (
+                                <img src={model.image_url} alt={model.display_name} className="w-12 h-12 rounded mr-2" />
+                              )}
+                              <div>
+                                <h4 className="font-semibold">{model.display_name}</h4>
+                                <p className="text-xs text-gray-500">{model.launch_year}</p>
+                              </div>
+                            </div>
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => handleModelModal(model)}
+                                className="text-blue-500 hover:text-blue-700"
+                              >
+                                <FaEdit />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteModel(model.id)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <FaTrash />
+                              </button>
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-600">Demand Score: {model.demand_score}/10</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      );
+    }
+  };
+  const renderInquiriesContent = () => {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold">Phone Sell Inquiries</h2>
+        <p className="text-gray-500">Manage customer inquiries for selling phones</p>
+
+        {inquiries.loading ? (
           <div className="text-center py-4">
-            <p className="text-gray-500">Loading catalog overview...</p>
+            <p className="text-gray-500">Loading inquiries...</p>
           </div>
-        ) : catalogs.error ? (
+        ) : inquiries.error ? (
           <div className="text-center py-4">
-            <p className="text-red-500">
-              {typeof catalogs.error === "string"
-                ? catalogs.error
-                : catalogs.error?.message || "Error loading catalog overview."}
-            </p>
+            <p className="text-red-500">{inquiries.error}</p>
           </div>
-        ) : paginatedData.length === 0 && !catalogs.loading ? (
+        ) : paginatedData.length === 0 ? (
           <div className="text-center py-4">
-            <p className="text-gray-500">No phone listings found in the overview.</p>
+            <p className="text-gray-500">No inquiries found.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Phone
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Brand
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Series
-                  </th>
-                  {/* Columns like Variants and Launch Year need to be re-evaluated based on new data structure */}
-                  {/* For now, removing them from the flat list for simplicity as they require more complex data mapping */}
-                  {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Variants (RAM/Storage)
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Launch Year
-                  </th> */}
-                  {/* Actions like Edit/Delete on this flat list might be confusing if main editing is in ManageSellPhoneCatalog */}
-                  {/* Consider removing actions here or making them navigate to the specific item in ManageSellPhoneCatalog */}
-                  {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th> */}
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone Variant</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Condition</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedData.map((phone) => (
-                  <tr key={phone.id}>
+                {paginatedData.map((inquiry) => (
+                  <tr key={inquiry.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        {phone.image && (
-                          <div className="h-10 w-10 flex-shrink-0">
-                            <img
-                              className="h-10 w-10 rounded-full object-cover"
-                              src={phone.image}
-                              alt={phone.name}
-                            />
-                          </div>
-                        )}
-                        <div className={phone.image ? "ml-4" : ""}>
-                          <div className="text-sm font-medium text-gray-900">
-                            {phone.name}
-                          </div>
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{inquiry.user_name}</div>
+                          <div className="text-sm text-gray-500">{inquiry.user_email}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{phone.brand}</div>
+                      <div className="text-sm text-gray-900">{inquiry.selected_variant}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{phone.series}</div>
-                    </td>
-                    {/* <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
-                        {phone.variant_options?.ram?.join(", ")} /{" "}
-                        {phone.variant_options?.storage?.join(", ")}
-                      </div>
+                      <div className="text-sm text-gray-900">{inquiry.selected_condition}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {phone.launch_year}
-                      </div>
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                        ${inquiry.status === "pending" ? "bg-yellow-100 text-yellow-800" :
+                          inquiry.status === "approved" ? "bg-green-100 text-green-800" :
+                          inquiry.status === "rejected" ? "bg-red-100 text-red-800" :
+                          "bg-gray-100 text-gray-800"}`}>
+                        {inquiry.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(inquiry.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button className="text-indigo-600 hover:text-indigo-900 mr-3">
-                        Edit
-                      </button>
-                      <button className="text-red-600 hover:text-red-900">
+                      {inquiry.status === "pending" && (
+                        <>
+                          <button
+                            onClick={() => updateInquiryStatus(inquiry.id, "approved")}
+                            className="text-green-600 hover:text-green-900 mr-3"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => updateInquiryStatus(inquiry.id, "rejected")}
+                            className="text-red-600 hover:text-red-900 mr-3"
+                          >
+                            Reject
+                          </button>
+                        </>
+                      )}
+                      <button
+                        onClick={() => deleteInquiry(inquiry.id)}
+                        className="text-gray-600 hover:text-gray-900"
+                      >
                         Delete
                       </button>
-                    </td> */}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            {totalItems > 0 && listingsViewMode === "flatList" && (
+            {totalItems > 0 && (
               <div className="pt-4">
                 <Pagination
                   currentPage={currentPage}
@@ -244,27 +643,104 @@ const AdminSellPhone = () => {
             )}
           </div>
         )}
-      </>
+      </div>
+    );
+  };
+
+  const renderFaqContent = () => {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-lg font-semibold">Frequently Asked Questions</h2>
+            <p className="text-gray-500">Manage FAQs related to phone selling</p>
+          </div>
+          <Button
+            onClick={() => setShowFaqModal(true)}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center"
+          >
+            <FaPlus className="mr-2" /> Add FAQ
+          </Button>
+        </div>
+
+        {faq.loading ? (
+          <div className="text-center py-4">
+            <p className="text-gray-500">Loading FAQs...</p>
+          </div>
+        ) : faq.error ? (
+          <div className="text-center py-4">
+            <p className="text-red-500">{faq.error}</p>
+          </div>
+        ) : paginatedData.length === 0 ? (
+          <div className="text-center py-4">
+            <p className="text-gray-500">No FAQs found.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {paginatedData.map((faqItem) => (
+              <div key={faqItem.id} className="bg-white shadow rounded-lg p-6">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{faqItem.question}</h3>
+                    <p className="text-gray-600">{faqItem.answer}</p>
+                  </div>
+                  <div className="flex space-x-2 ml-4">
+                    <button
+                      onClick={() => {
+                        setEditingItem(faqItem);
+                        setShowFaqModal(true);
+                      }}
+                      className="text-blue-500 hover:text-blue-700"
+                    >
+                      <FaEdit />
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (window.confirm('Are you sure you want to delete this FAQ?')) {
+                          deleteFaq(faqItem.id);
+                        }
+                      }}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {totalItems > 0 && (
+              <div className="pt-4">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                  totalItems={totalItems}
+                  itemsPerPage={ITEMS_PER_PAGE}
+                  showItemCount={true}
+                />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     );
   };
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">
-          Phone Selling Management
-        </h1>
+        <h1 className="text-2xl font-bold text-gray-800">Phone Selling Management</h1>
       </div>
 
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <div className="flex border-b">
           <button
             className={`px-6 py-3 font-medium ${
-              activeTab === "listings"
+              activeTab === "catalog"
                 ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50"
                 : "text-gray-500 hover:text-gray-700"
             }`}
-            onClick={() => setActiveTab("listings")}
+            onClick={() => setActiveTab("catalog")}
           >
             Catalog
           </button>
@@ -291,151 +767,46 @@ const AdminSellPhone = () => {
         </div>
 
         <div className="p-6">
-          {activeTab === "listings" && renderListingsContent()}
-          {activeTab === "inquiries" && (
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold">Phone Inquiries</h2>
-              <p className="text-gray-500">Manage sell phone inquiries here</p>
-
-              {inquiries.loading ? (
-                <div className="text-center py-4">
-                  <p className="text-gray-500">Loading inquiries...</p>
-                </div>
-              ) : inquiries.error ? (
-                <div className="text-center py-4">
-                  <p className="text-red-500">{inquiries.error}</p>
-                </div>
-              ) : paginatedData.length === 0 && !inquiries.loading ? (
-                <div className="text-center py-4">
-                  <p className="text-gray-500">No inquiries found.</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          User
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Phone Variant
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Condition
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Date
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {paginatedData.map((inquiry) => (
-                        <tr key={inquiry.id}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <div className="ml-4">
-                                <div className="text-sm font-medium text-gray-900">
-                                  {inquiry.user_name}
-                                </div>
-                                <div className="text-sm text-gray-500">
-                                  {inquiry.user_email}
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
-                              {inquiry.selected_variant}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
-                              {inquiry.selected_condition}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span
-                              className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                              ${
-                                inquiry.status === "pending"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : inquiry.status === "approved"
-                                  ? "bg-green-100 text-green-800"
-                                  : inquiry.status === "rejected"
-                                  ? "bg-red-100 text-red-800"
-                                  : "bg-gray-100 text-gray-800"
-                              }`}
-                            >
-                              {inquiry.status}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {new Date(inquiry.created_at).toLocaleDateString()}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            {inquiry.status === "pending" && (
-                              <>
-                                <button
-                                  onClick={() =>
-                                    updateInquiryStatus(inquiry.id, "approved")
-                                  }
-                                  className="text-green-600 hover:text-green-900 mr-3"
-                                >
-                                  Approve
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    updateInquiryStatus(inquiry.id, "rejected")
-                                  }
-                                  className="text-red-600 hover:text-red-900 mr-3"
-                                >
-                                  Reject
-                                </button>
-                              </>
-                            )}
-                            <button
-                              onClick={() => deleteInquiry(inquiry.id)}
-                              className="text-gray-600 hover:text-gray-900"
-                            >
-                              Delete
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
-          {activeTab === "faqs" && (
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold">Frequently Asked Questions</h2>
-              <p className="text-gray-500">
-                Manage FAQs related to phone selling
-              </p>
-              {/* Placeholder for FAQs content */}
-              <div className="text-center py-4">
-                <p className="text-gray-500">FAQs content will be here.</p>
-                {/* You can add a simple list or a more complex component later */}
-                {/* Example:
-                <ul className="list-disc list-inside">
-                  <li>How do I list my phone for sale?</li>
-                  <li>What conditions are accepted?</li>
-                  <li>How do I get paid?</li>
-                </ul>
-                */}
-              </div>
-            </div>
-          )} {/* Added FAQs tab content */}
+          {activeTab === "catalog" && renderCatalogContent()}
+          {activeTab === "inquiries" && renderInquiriesContent()}
+          {activeTab === "faqs" && renderFaqContent()}
         </div>
       </div>
+
+      {/* Modals */}
+      {showBrandModal && (
+        <BrandFormModal
+          open={showBrandModal}
+          onClose={closeModals}
+          brandToEdit={editingItem}
+        />
+      )}
+      
+      {showSeriesModal && (
+        <SeriesFormModal
+          open={showSeriesModal}
+          onClose={closeModals}
+          brandId={selectedBrandId}
+          seriesToEdit={editingItem}
+        />
+      )}
+        {showModelModal && (
+        <ModelFormModal
+          open={showModelModal}
+          onClose={closeModals}
+          seriesId={selectedSeriesId}
+          brandId={selectedBrandId}
+          modelToEdit={editingItem}
+        />
+      )}
+      
+      {showFaqModal && (
+        <FaqFormModal
+          open={showFaqModal}
+          onClose={closeModals}
+          faqToEdit={editingItem}
+        />
+      )}
     </div>
   );
 };
