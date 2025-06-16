@@ -39,7 +39,6 @@ const BrandList = ({ brands, onSelectBrand, selectedBrandId }) => {
     setIsModalOpen(false);
     setEditingBrand(null);
   };
-
   if (!brands || brands.length === 0) {
     return (
       <div className="p-4 bg-white shadow-md rounded-lg">
@@ -47,9 +46,16 @@ const BrandList = ({ brands, onSelectBrand, selectedBrandId }) => {
           <h2 className="text-2xl font-semibold">Brands</h2>
           <button
             onClick={handleAddBrand}
-            className="bg-blue-500 text-white font-bold py-2 px-4 rounded flex items-center transition-all duration-200 hover:opacity-90"
+            className="px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-200 hover:opacity-90 flex items-center space-x-2"
+            style={{
+              backgroundColor: "var(--brand-primary)",
+              color: "var(--text-on-brand)",
+              borderRadius: "var(--rounded-md)",
+              boxShadow: "var(--shadow-small)"
+            }}
           >
-            <FaPlus className="mr-2" /> Add Brand
+            <FaPlus className="w-4 h-4" /> 
+            <span>Add Brand</span>
           </button>
         </div>
         <div className="text-center text-gray-500">
@@ -60,15 +66,21 @@ const BrandList = ({ brands, onSelectBrand, selectedBrandId }) => {
     );
   }
 
-  return (
-    <div className="p-4 bg-white shadow-md rounded-lg">
+  return (    <div className="p-4 bg-white shadow-md rounded-lg">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold">Brands</h2>
         <button
           onClick={handleAddBrand}
-          className="bg-blue-500 text-white font-bold py-2 px-4 rounded flex items-center transition-all duration-200 hover:opacity-90"
+          className="px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-200 hover:opacity-90 flex items-center space-x-2"
+          style={{
+            backgroundColor: "var(--brand-primary)",
+            color: "var(--text-on-brand)",
+            borderRadius: "var(--rounded-md)",
+            boxShadow: "var(--shadow-small)"
+          }}
         >
-          <FaPlus className="mr-2" /> Add Brand
+          <FaPlus className="w-4 h-4" /> 
+          <span>Add Brand</span>
         </button>
       </div>
       {brands.map((brand) => (
@@ -86,21 +98,30 @@ const BrandList = ({ brands, onSelectBrand, selectedBrandId }) => {
               <div className="font-medium">{brand.name}</div>
               <div className="text-sm text-gray-500">{brand.seriesCount} series</div>
             </div>
-          </div>
-          <div onClick={(e) => e.stopPropagation()}>
+          </div>          <div onClick={(e) => e.stopPropagation()}>
             <button
               onClick={(e) => handleEditBrand(brand, e)}
-              className="mr-2 text-blue-500 p-1 transition-all duration-200 hover:opacity-70"
+              className="mr-2 p-2 rounded-md transition-all duration-200 hover:opacity-70"
+              style={{
+                backgroundColor: "var(--warning-color)",
+                color: "var(--text-on-brand)",
+                borderRadius: "var(--rounded-md)"
+              }}
               aria-label="edit"
             >
-              <FaEdit />
+              <FaEdit className="w-3 h-3" />
             </button>
             <button
               onClick={(e) => handleDeleteBrand(brand.id, e)}
-              className="text-red-500 p-1 transition-all duration-200 hover:opacity-70"
+              className="p-2 rounded-md transition-all duration-200 hover:opacity-70"
+              style={{
+                backgroundColor: "var(--error-color)",
+                color: "var(--text-on-brand)",
+                borderRadius: "var(--rounded-md)"
+              }}
               aria-label="delete"
             >
-              <FaTrash />
+              <FaTrash className="w-3 h-3" />
             </button>
           </div>
         </div>

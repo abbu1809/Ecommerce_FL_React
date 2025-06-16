@@ -411,8 +411,7 @@ const ModelFormModal = ({ open, onClose, brandId, seriesId, modelToEdit }) => {
             </button>
             <button
               type="submit"
-              disabled={isLoading}
-              className="px-6 py-2 text-sm font-medium rounded-md transition-all duration-200 hover:opacity-90 disabled:opacity-50 flex items-center space-x-2"
+              disabled={isLoading}              className="px-6 py-2 text-sm font-medium rounded-md transition-all duration-200 hover:opacity-90 disabled:opacity-50 flex items-center space-x-2"
               style={{
                 backgroundColor: "var(--brand-primary)",
                 color: "var(--text-on-brand)",
@@ -420,7 +419,15 @@ const ModelFormModal = ({ open, onClose, brandId, seriesId, modelToEdit }) => {
                 boxShadow: "var(--shadow-small)"
               }}
             >
-              {isLoading ? (modelToEdit ? 'Updating...' : 'Adding...') : (modelToEdit ? 'Update Model' : 'Add Model')}            </button>
+              {isLoading && <FiLoader className="w-4 h-4 animate-spin" />}
+              <span>
+                {isLoading ? (
+                  modelToEdit ? 'Updating...' : 'Adding...'
+                ) : (
+                  modelToEdit ? 'Update Model' : 'Add Model'
+                )}
+              </span>
+            </button>
           </div>
         </form>
         </div>

@@ -47,12 +47,18 @@ const SeriesList = ({ brandId, series, onSelectSeries, selectedSeriesId }) => {
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-semibold">
             Series for {brandId ? brandId.name : "Selected Brand"}
-          </h3>
-          <button
+          </h3>          <button
             onClick={handleAddSeries}
-            className="bg-green-500 text-white font-bold py-2 px-4 rounded flex items-center transition-all duration-200 hover:opacity-90"
+            className="px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-200 hover:opacity-90 flex items-center space-x-2"
+            style={{
+              backgroundColor: "var(--success-color)",
+              color: "var(--text-on-brand)",
+              borderRadius: "var(--rounded-md)",
+              boxShadow: "var(--shadow-small)"
+            }}
           >
-            <FaPlus className="mr-2" /> Add New Series
+            <FaPlus className="w-4 h-4" /> 
+            <span>Add New Series</span>
           </button>
         </div>
         <p className="text-gray-500">No series found for this brand.</p>
@@ -66,12 +72,18 @@ const SeriesList = ({ brandId, series, onSelectSeries, selectedSeriesId }) => {
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-xl font-semibold">
           Series for {brandId ? brandId.name : "Selected Brand"}
-        </h3>
-        <button
+        </h3>        <button
           onClick={handleAddSeries}
-          className="bg-green-500 text-white font-bold py-2 px-4 rounded flex items-center transition-all duration-200 hover:opacity-90"
+          className="px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-200 hover:opacity-90 flex items-center space-x-2"
+          style={{
+            backgroundColor: "var(--success-color)",
+            color: "var(--text-on-brand)",
+            borderRadius: "var(--rounded-md)",
+            boxShadow: "var(--shadow-small)"
+          }}
         >
-          <FaPlus className="mr-2" /> Add Series
+          <FaPlus className="w-4 h-4" /> 
+          <span>Add Series</span>
         </button>
       </div>
       {!brandId && <p className="text-gray-500">Select a brand to see its series.</p>}
@@ -83,27 +95,36 @@ const SeriesList = ({ brandId, series, onSelectSeries, selectedSeriesId }) => {
           >
             <span onClick={() => onSelectSeries(seriesItem.id)} className="cursor-pointer flex-grow">
               {seriesItem.name}
-            </span>
-            <div>
+            </span>            <div>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   handleEditSeries(seriesItem, e);
                 }}
-                className="mr-2 text-blue-500 p-1 transition-all duration-200 hover:opacity-70"
+                className="mr-2 p-2 rounded-md transition-all duration-200 hover:opacity-70"
+                style={{
+                  backgroundColor: "var(--warning-color)",
+                  color: "var(--text-on-brand)",
+                  borderRadius: "var(--rounded-md)"
+                }}
                 aria-label="edit"
               >
-                <FaEdit />
+                <FaEdit className="w-3 h-3" />
               </button>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDeleteSeries(seriesItem.id, e);
                 }}
-                className="text-red-500 p-1 transition-all duration-200 hover:opacity-70"
+                className="p-2 rounded-md transition-all duration-200 hover:opacity-70"
+                style={{
+                  backgroundColor: "var(--error-color)",
+                  color: "var(--text-on-brand)",
+                  borderRadius: "var(--rounded-md)"
+                }}
                 aria-label="delete"
               >
-                <FaTrash />
+                <FaTrash className="w-3 h-3" />
               </button>
             </div>
           </div>

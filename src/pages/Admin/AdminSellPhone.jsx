@@ -260,13 +260,19 @@ const AdminSellPhone = () => {
             <div>
               <h2 className="text-lg font-semibold">Phone Catalog Overview</h2>
               <p className="text-gray-500">Overview of all phone models in the catalog</p>
-            </div>
-            <Button
+            </div>            <button
               onClick={() => setCatalogView("manageCatalog")}
-              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center"
+              className="px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-200 hover:opacity-90 flex items-center space-x-2"
+              style={{
+                backgroundColor: "var(--success-color)",
+                color: "var(--text-on-brand)",
+                borderRadius: "var(--rounded-md)",
+                boxShadow: "var(--shadow-small)"
+              }}
             >
-              <FaEdit className="mr-2" /> Manage Catalog
-            </Button>
+              <FaEdit className="w-4 h-4" /> 
+              <span>Manage Catalog</span>
+            </button>
           </div>
 
           {catalogs.loading ? (
@@ -346,29 +352,49 @@ const AdminSellPhone = () => {
     if (catalogView === "manageCatalog") {
       return (
         <>
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center space-x-4">
-              <Button
+          <div className="flex justify-between items-center mb-4">            <div className="flex items-center space-x-4">
+              <button
                 onClick={() => setCatalogView("overview")}
-                className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded flex items-center"
+                className="px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-200 hover:opacity-90 flex items-center space-x-2"
+                style={{
+                  backgroundColor: "var(--brand-primary)",
+                  color: "var(--text-on-brand)",
+                  borderRadius: "var(--rounded-md)",
+                  boxShadow: "var(--shadow-small)"
+                }}
               >
-                <FaArrowLeft className="mr-2" /> Back to Overview
-              </Button>
+                <FaArrowLeft className="w-4 h-4" /> 
+                <span>Back to Overview</span>
+              </button>
               {selectedBrandId && (
-                <Button
+                <button
                   onClick={handleBackToBrands}
-                  className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded flex items-center"
+                  className="px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-200 hover:opacity-90 flex items-center space-x-2"
+                  style={{
+                    backgroundColor: "var(--brand-primary)",
+                    color: "var(--text-on-brand)",
+                    borderRadius: "var(--rounded-md)",
+                    boxShadow: "var(--shadow-small)"
+                  }}
                 >
-                  <FaArrowLeft className="mr-2" /> Back to Brands
-                </Button>
+                  <FaArrowLeft className="w-4 h-4" /> 
+                  <span>Back to Brands</span>
+                </button>
               )}
               {selectedSeriesId && (
-                <Button
+                <button
                   onClick={handleBackToSeries}
-                  className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded flex items-center"
+                  className="px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-200 hover:opacity-90 flex items-center space-x-2"
+                  style={{
+                    backgroundColor: "var(--brand-primary)",
+                    color: "var(--text-on-brand)",
+                    borderRadius: "var(--rounded-md)",
+                    boxShadow: "var(--shadow-small)"
+                  }}
                 >
-                  <FaArrowLeft className="mr-2" /> Back to Series
-                </Button>
+                  <FaArrowLeft className="w-4 h-4" /> 
+                  <span>Back to Series</span>
+                </button>
               )}
             </div>
             <h2 className="text-lg font-semibold">
@@ -393,13 +419,19 @@ const AdminSellPhone = () => {
                 <div className="lg:col-span-3">
                   <div className="bg-white shadow rounded-lg p-6">
                     <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-xl font-semibold">Brands</h3>
-                      <Button
+                      <h3 className="text-xl font-semibold">Brands</h3>                      <button
                         onClick={() => handleBrandModal()}
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center"
+                        className="px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-200 hover:opacity-90 flex items-center space-x-2"
+                        style={{
+                          backgroundColor: "var(--brand-primary)",
+                          color: "var(--text-on-brand)",
+                          borderRadius: "var(--rounded-md)",
+                          boxShadow: "var(--shadow-small)"
+                        }}
                       >
-                        <FaPlus className="mr-2" /> Add Brand
-                      </Button>
+                        <FaPlus className="w-4 h-4" /> 
+                        <span>Add Brand</span>
+                      </button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {getBrandsArray().map((brand) => (
@@ -410,29 +442,43 @@ const AdminSellPhone = () => {
                                 <img src={brand.logo_url} alt={brand.name} className="w-8 h-8 rounded-full mr-2" />
                               )}
                               <h4 className="font-semibold">{brand.name}</h4>
-                            </div>
-                            <div className="flex space-x-2">
+                            </div>                            <div className="flex space-x-2">
                               <button
                                 onClick={() => handleBrandModal(brand)}
-                                className="text-blue-500 hover:text-blue-700"
+                                className="p-2 rounded-md transition-all duration-200 hover:opacity-70"
+                                style={{
+                                  backgroundColor: "var(--warning-color)",
+                                  color: "var(--text-on-brand)",
+                                  borderRadius: "var(--rounded-md)"
+                                }}
                               >
-                                <FaEdit />
+                                <FaEdit className="w-3 h-3" />
                               </button>
                               <button
                                 onClick={() => handleDeleteBrand(brand.id)}
-                                className="text-red-500 hover:text-red-700"
+                                className="p-2 rounded-md transition-all duration-200 hover:opacity-70"
+                                style={{
+                                  backgroundColor: "var(--error-color)",
+                                  color: "var(--text-on-brand)",
+                                  borderRadius: "var(--rounded-md)"
+                                }}
                               >
-                                <FaTrash />
+                                <FaTrash className="w-3 h-3" />
                               </button>
                             </div>
                           </div>
-                          <p className="text-sm text-gray-600 mb-2">{brand.seriesCount} series</p>
-                          <Button
+                          <p className="text-sm text-gray-600 mb-2">{brand.seriesCount} series</p>                          <button
                             onClick={() => handleSelectBrand(brand.id)}
-                            className="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded text-sm"
+                            className="w-full px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 hover:opacity-90 flex items-center justify-center space-x-2"
+                            style={{
+                              backgroundColor: "var(--success-color)",
+                              color: "var(--text-on-brand)",
+                              borderRadius: "var(--rounded-md)"
+                            }}
                           >
-                            <FaEye className="mr-1" /> Manage Series
-                          </Button>
+                            <FaEye className="w-3 h-3" /> 
+                            <span>Manage Series</span>
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -445,41 +491,61 @@ const AdminSellPhone = () => {
                 <div className="lg:col-span-3">
                   <div className="bg-white shadow rounded-lg p-6">
                     <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-xl font-semibold">Series for {selectedBrandId}</h3>
-                      <Button
+                      <h3 className="text-xl font-semibold">Series for {selectedBrandId}</h3>                      <button
                         onClick={() => handleSeriesModal()}
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center"
+                        className="px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-200 hover:opacity-90 flex items-center space-x-2"
+                        style={{
+                          backgroundColor: "var(--brand-primary)",
+                          color: "var(--text-on-brand)",
+                          borderRadius: "var(--rounded-md)",
+                          boxShadow: "var(--shadow-small)"
+                        }}
                       >
-                        <FaPlus className="mr-2" /> Add Series
-                      </Button>
+                        <FaPlus className="w-4 h-4" /> 
+                        <span>Add Series</span>
+                      </button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {getSeriesArray(selectedBrandId).map((series) => (
                         <div key={series.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                           <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-semibold">{series.display_name}</h4>
-                            <div className="flex space-x-2">
+                            <h4 className="font-semibold">{series.display_name}</h4>                            <div className="flex space-x-2">
                               <button
                                 onClick={() => handleSeriesModal(series)}
-                                className="text-blue-500 hover:text-blue-700"
+                                className="p-2 rounded-md transition-all duration-200 hover:opacity-70"
+                                style={{
+                                  backgroundColor: "var(--warning-color)",
+                                  color: "var(--text-on-brand)",
+                                  borderRadius: "var(--rounded-md)"
+                                }}
                               >
-                                <FaEdit />
+                                <FaEdit className="w-3 h-3" />
                               </button>
                               <button
                                 onClick={() => handleDeleteSeries(series.id)}
-                                className="text-red-500 hover:text-red-700"
+                                className="p-2 rounded-md transition-all duration-200 hover:opacity-70"
+                                style={{
+                                  backgroundColor: "var(--error-color)",
+                                  color: "var(--text-on-brand)",
+                                  borderRadius: "var(--rounded-md)"
+                                }}
                               >
-                                <FaTrash />
+                                <FaTrash className="w-3 h-3" />
                               </button>
                             </div>
                           </div>
-                          <p className="text-sm text-gray-600 mb-2">{series.modelCount} models</p>
-                          <Button
+                          <p className="text-sm text-gray-600 mb-2">{series.modelCount} models</p>                          <button
                             onClick={() => handleSelectSeries(series.id)}
-                            className="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded text-sm"
+                            className="w-full px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 hover:opacity-90 flex items-center justify-center space-x-2"
+                            style={{
+                              backgroundColor: "var(--success-color)",
+                              color: "var(--text-on-brand)",
+                              borderRadius: "var(--rounded-md)"
+                            }}
                           >
-                            <FaEye className="mr-1" /> Manage Models
-                          </Button>
+                            <FaEye className="w-3 h-3" /> 
+                            <span>Manage Models</span>
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -492,13 +558,19 @@ const AdminSellPhone = () => {
                 <div className="lg:col-span-3">
                   <div className="bg-white shadow rounded-lg p-6">
                     <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-xl font-semibold">Models for {selectedSeriesId}</h3>
-                      <Button
+                      <h3 className="text-xl font-semibold">Models for {selectedSeriesId}</h3>                      <button
                         onClick={() => handleModelModal()}
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center"
+                        className="px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-200 hover:opacity-90 flex items-center space-x-2"
+                        style={{
+                          backgroundColor: "var(--brand-primary)",
+                          color: "var(--text-on-brand)",
+                          borderRadius: "var(--rounded-md)",
+                          boxShadow: "var(--shadow-small)"
+                        }}
                       >
-                        <FaPlus className="mr-2" /> Add Model
-                      </Button>
+                        <FaPlus className="w-4 h-4" /> 
+                        <span>Add Model</span>
+                      </button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {getModelsArray(selectedBrandId, selectedSeriesId).map((model) => (
@@ -512,19 +584,28 @@ const AdminSellPhone = () => {
                                 <h4 className="font-semibold">{model.display_name}</h4>
                                 <p className="text-xs text-gray-500">{model.launch_year}</p>
                               </div>
-                            </div>
-                            <div className="flex space-x-2">
+                            </div>                            <div className="flex space-x-2">
                               <button
                                 onClick={() => handleModelModal(model)}
-                                className="text-blue-500 hover:text-blue-700"
+                                className="p-2 rounded-md transition-all duration-200 hover:opacity-70"
+                                style={{
+                                  backgroundColor: "var(--warning-color)",
+                                  color: "var(--text-on-brand)",
+                                  borderRadius: "var(--rounded-md)"
+                                }}
                               >
-                                <FaEdit />
+                                <FaEdit className="w-3 h-3" />
                               </button>
                               <button
                                 onClick={() => handleDeleteModel(model.id)}
-                                className="text-red-500 hover:text-red-700"
+                                className="p-2 rounded-md transition-all duration-200 hover:opacity-70"
+                                style={{
+                                  backgroundColor: "var(--error-color)",
+                                  color: "var(--text-on-brand)",
+                                  borderRadius: "var(--rounded-md)"
+                                }}
                               >
-                                <FaTrash />
+                                <FaTrash className="w-3 h-3" />
                               </button>
                             </div>
                           </div>
@@ -654,13 +735,19 @@ const AdminSellPhone = () => {
           <div>
             <h2 className="text-lg font-semibold">Frequently Asked Questions</h2>
             <p className="text-gray-500">Manage FAQs related to phone selling</p>
-          </div>
-          <Button
+          </div>          <button
             onClick={() => setShowFaqModal(true)}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center"
+            className="px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-200 hover:opacity-90 flex items-center space-x-2"
+            style={{
+              backgroundColor: "var(--brand-primary)",
+              color: "var(--text-on-brand)",
+              borderRadius: "var(--rounded-md)",
+              boxShadow: "var(--shadow-small)"
+            }}
           >
-            <FaPlus className="mr-2" /> Add FAQ
-          </Button>
+            <FaPlus className="w-4 h-4" /> 
+            <span>Add FAQ</span>
+          </button>
         </div>
 
         {faq.loading ? (

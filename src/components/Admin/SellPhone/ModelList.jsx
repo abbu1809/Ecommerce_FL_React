@@ -38,12 +38,17 @@ const ModelList = ({ brandId, seriesId, models }) => {
   if (!models || models.length === 0) {
     return (
       <div>
-        <p className="text-gray-600 mb-4">No models found for this series. Start by adding a new model.</p>
-        <button 
+        <p className="text-gray-600 mb-4">No models found for this series. Start by adding a new model.</p>        <button 
           onClick={handleAddModel} 
-          className="bg-green-500 text-white font-semibold py-2 px-4 rounded shadow transition-all duration-200 hover:opacity-90"
+          className="px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-200 hover:opacity-90 flex items-center space-x-2"
+          style={{
+            backgroundColor: "var(--success-color)",
+            color: "var(--text-on-brand)",
+            borderRadius: "var(--rounded-md)",
+            boxShadow: "var(--shadow-small)"
+          }}
         >
-          Add New Model
+          <span>Add New Model</span>
         </button>
         {isModalOpen && (
           <ModelFormModal 
@@ -60,12 +65,17 @@ const ModelList = ({ brandId, seriesId, models }) => {
 
   return (
     <div className="overflow-x-auto mt-4">
-      <div className="flex justify-end mb-4">
-        <button 
+      <div className="flex justify-end mb-4">        <button 
           onClick={handleAddModel} 
-          className="bg-blue-500 text-white font-semibold py-2 px-4 rounded shadow transition-all duration-200 hover:opacity-90"
+          className="px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-200 hover:opacity-90 flex items-center space-x-2"
+          style={{
+            backgroundColor: "var(--brand-primary)",
+            color: "var(--text-on-brand)",
+            borderRadius: "var(--rounded-md)",
+            boxShadow: "var(--shadow-small)"
+          }}
         >
-          Add New Model
+          <span>Add New Model</span>
         </button>
       </div>
       <table className="min-w-full bg-white shadow-md rounded-lg">
@@ -88,17 +98,26 @@ const ModelList = ({ brandId, seriesId, models }) => {
               {/* <td className="py-3 px-4">{model.launch_year}</td> Commenting out */}
               <td className="py-3 px-4">
                 {model.image && <img src={model.image} alt={model.name} className="h-10 w-10 object-cover" />}
-              </td>
-              <td className="py-3 px-4">
+              </td>              <td className="py-3 px-4">
                 <button 
                   onClick={() => handleEditModel(model)} 
-                  className="bg-yellow-500 text-white font-semibold py-1 px-3 rounded mr-2 text-sm transition-all duration-200 hover:opacity-90"
+                  className="mr-2 px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200 hover:opacity-90"
+                  style={{
+                    backgroundColor: "var(--warning-color)",
+                    color: "var(--text-on-brand)",
+                    borderRadius: "var(--rounded-md)"
+                  }}
                 >
                   Edit
                 </button>
                 <button 
                   onClick={() => handleDeleteModel(model.id)} 
-                  className="bg-red-500 text-white font-semibold py-1 px-3 rounded text-sm transition-all duration-200 hover:opacity-90"
+                  className="px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200 hover:opacity-90"
+                  style={{
+                    backgroundColor: "var(--error-color)",
+                    color: "var(--text-on-brand)",
+                    borderRadius: "var(--rounded-md)"
+                  }}
                 >
                   Delete
                 </button>
