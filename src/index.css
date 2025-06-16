@@ -84,6 +84,32 @@ button:hover {
     scrollbar-width: thin;
     scrollbar-color: #c1c1c1 #f1f1f1;
   }
+
+  /* Standard transition utilities for consistent hover animations */
+  .transition-standard {
+    transition: all 0.2s ease-in-out;
+  }
+
+  .transition-hover-opacity {
+    transition: opacity 0.2s ease-in-out;
+  }
+
+  .transition-hover-bg {
+    transition: background-color 0.2s ease-in-out;
+  }
+
+  /* Hover states for consistent UI */
+  .hover-opacity-90:hover {
+    opacity: 0.9;
+  }
+
+  .hover-opacity-80:hover {
+    opacity: 0.8;
+  }
+
+  .hover-opacity-70:hover {
+    opacity: 0.7;
+  }
 }
 
 :root {
