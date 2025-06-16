@@ -41,7 +41,7 @@ const ModelList = ({ brandId, seriesId, models }) => {
         <p className="text-gray-600 mb-4">No models found for this series. Start by adding a new model.</p>
         <button 
           onClick={handleAddModel} 
-          className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded shadow transition duration-150 ease-in-out"
+          className="bg-green-500 text-white font-semibold py-2 px-4 rounded shadow transition-all duration-200 hover:opacity-90"
         >
           Add New Model
         </button>
@@ -63,7 +63,7 @@ const ModelList = ({ brandId, seriesId, models }) => {
       <div className="flex justify-end mb-4">
         <button 
           onClick={handleAddModel} 
-          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded shadow transition duration-150 ease-in-out"
+          className="bg-blue-500 text-white font-semibold py-2 px-4 rounded shadow transition-all duration-200 hover:opacity-90"
         >
           Add New Model
         </button>
@@ -92,13 +92,13 @@ const ModelList = ({ brandId, seriesId, models }) => {
               <td className="py-3 px-4">
                 <button 
                   onClick={() => handleEditModel(model)} 
-                  className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-3 rounded mr-2 text-sm transition duration-150 ease-in-out"
+                  className="bg-yellow-500 text-white font-semibold py-1 px-3 rounded mr-2 text-sm transition-all duration-200 hover:opacity-90"
                 >
                   Edit
                 </button>
                 <button 
                   onClick={() => handleDeleteModel(model.id)} 
-                  className="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-3 rounded text-sm transition duration-150 ease-in-out"
+                  className="bg-red-500 text-white font-semibold py-1 px-3 rounded text-sm transition-all duration-200 hover:opacity-90"
                 >
                   Delete
                 </button>

@@ -100,10 +100,9 @@ const FaqFormModal = ({ open, onClose, faqToEdit }) => {
             style={{ color: "var(--text-primary)" }}
           >
             {faqToEdit ? 'Edit FAQ' : 'Add New FAQ'}
-          </h2>
-          <button
+          </h2>          <button
             onClick={onClose}
-            className="p-2 rounded-md transition-colors hover:bg-gray-50"
+            className="p-2 rounded-md transition-all duration-200 hover:opacity-70"
             disabled={isLoading}
             style={{ color: "var(--text-secondary)" }}
           >
@@ -188,7 +187,7 @@ const FaqFormModal = ({ open, onClose, faqToEdit }) => {
               type="button" 
               onClick={onClose} 
               disabled={isLoading}
-              className="px-4 py-2.5 text-sm font-medium rounded-md border transition-all duration-200 hover:bg-gray-50 disabled:opacity-50"
+              className="px-4 py-2.5 text-sm font-medium rounded-md border transition-all duration-200 hover:opacity-80 disabled:opacity-50"
               style={{
                 backgroundColor: "var(--bg-primary)",
                 color: "var(--text-primary)",

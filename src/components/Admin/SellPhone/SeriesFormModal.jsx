@@ -118,9 +118,8 @@ const SeriesFormModal = ({ open, onClose, seriesToEdit, brandId }) => {
           >
             {seriesToEdit ? 'Edit Series' : 'Add New Series'}
           </h2>
-          <button
-            onClick={handleClose}
-            className="p-2 rounded-md transition-colors hover:bg-gray-50"
+          <button            onClick={handleClose}
+            className="p-2 rounded-md transition-all duration-200 hover:opacity-70"
             disabled={isLoading}
             style={{ color: "var(--text-secondary)" }}
           >
@@ -205,7 +204,7 @@ const SeriesFormModal = ({ open, onClose, seriesToEdit, brandId }) => {
             <button
               type="button"
               onClick={handleClose}
-              className="px-4 py-2.5 text-sm font-medium rounded-md border transition-all duration-200 hover:bg-gray-50 disabled:opacity-50"
+              className="px-4 py-2.5 text-sm font-medium rounded-md border transition-all duration-200 hover:opacity-80 disabled:opacity-50"
               style={{
                 backgroundColor: "var(--bg-primary)",
                 color: "var(--text-primary)",

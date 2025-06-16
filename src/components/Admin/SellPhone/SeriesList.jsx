@@ -50,7 +50,7 @@ const SeriesList = ({ brandId, series, onSelectSeries, selectedSeriesId }) => {
           </h3>
           <button
             onClick={handleAddSeries}
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center"
+            className="bg-green-500 text-white font-bold py-2 px-4 rounded flex items-center transition-all duration-200 hover:opacity-90"
           >
             <FaPlus className="mr-2" /> Add New Series
           </button>
@@ -69,7 +69,7 @@ const SeriesList = ({ brandId, series, onSelectSeries, selectedSeriesId }) => {
         </h3>
         <button
           onClick={handleAddSeries}
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center"
+          className="bg-green-500 text-white font-bold py-2 px-4 rounded flex items-center transition-all duration-200 hover:opacity-90"
         >
           <FaPlus className="mr-2" /> Add Series
         </button>
@@ -79,7 +79,7 @@ const SeriesList = ({ brandId, series, onSelectSeries, selectedSeriesId }) => {
         series.map((seriesItem) => (
           <div
             key={seriesItem.id}
-            className="mb-2 border rounded-md hover:bg-gray-100 p-2 flex justify-between items-center"
+            className="mb-2 border rounded-md p-2 flex justify-between items-center transition-all duration-200 hover:bg-gray-50"
           >
             <span onClick={() => onSelectSeries(seriesItem.id)} className="cursor-pointer flex-grow">
               {seriesItem.name}
@@ -90,7 +90,7 @@ const SeriesList = ({ brandId, series, onSelectSeries, selectedSeriesId }) => {
                   e.stopPropagation();
                   handleEditSeries(seriesItem, e);
                 }}
-                className="mr-2 text-blue-500 hover:text-blue-700 p-1"
+                className="mr-2 text-blue-500 p-1 transition-all duration-200 hover:opacity-70"
                 aria-label="edit"
               >
                 <FaEdit />
@@ -100,7 +100,7 @@ const SeriesList = ({ brandId, series, onSelectSeries, selectedSeriesId }) => {
                   e.stopPropagation();
                   handleDeleteSeries(seriesItem.id, e);
                 }}
-                className="text-red-500 hover:text-red-700 p-1"
+                className="text-red-500 p-1 transition-all duration-200 hover:opacity-70"
                 aria-label="delete"
               >
                 <FaTrash />

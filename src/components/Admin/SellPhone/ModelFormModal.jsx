@@ -183,10 +183,9 @@ const ModelFormModal = ({ open, onClose, brandId, seriesId, modelToEdit }) => {
               style={{ color: "var(--text-primary)" }}
             >
               {modelToEdit ? 'Edit Model' : 'Add New Model'}
-            </h2>
-            <button 
+            </h2>            <button 
               onClick={onClose} 
-              className="p-2 rounded-md transition-colors hover:bg-gray-50"
+              className="p-2 rounded-md transition-all duration-200 hover:opacity-70"
               style={{ color: "var(--text-secondary)" }}
             >
               <FiX className="w-5 h-5" />
@@ -400,14 +399,26 @@ const ModelFormModal = ({ open, onClose, brandId, seriesId, modelToEdit }) => {
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md border border-gray-300 transition duration-150 ease-in-out disabled:opacity-50"
+              className="px-6 py-2 text-sm font-medium rounded-md border transition-all duration-200 hover:opacity-80 disabled:opacity-50"
+              style={{
+                backgroundColor: "var(--bg-primary)",
+                color: "var(--text-primary)",
+                borderColor: "var(--border-primary)",
+                borderRadius: "var(--rounded-md)"
+              }}
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="px-6 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out disabled:opacity-50"
+              className="px-6 py-2 text-sm font-medium rounded-md transition-all duration-200 hover:opacity-90 disabled:opacity-50 flex items-center space-x-2"
+              style={{
+                backgroundColor: "var(--brand-primary)",
+                color: "var(--text-on-brand)",
+                borderRadius: "var(--rounded-md)",
+                boxShadow: "var(--shadow-small)"
+              }}
             >
               {isLoading ? (modelToEdit ? 'Updating...' : 'Adding...') : (modelToEdit ? 'Update Model' : 'Add Model')}            </button>
           </div>

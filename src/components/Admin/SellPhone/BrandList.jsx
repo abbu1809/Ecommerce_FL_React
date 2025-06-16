@@ -47,7 +47,7 @@ const BrandList = ({ brands, onSelectBrand, selectedBrandId }) => {
           <h2 className="text-2xl font-semibold">Brands</h2>
           <button
             onClick={handleAddBrand}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center"
+            className="bg-blue-500 text-white font-bold py-2 px-4 rounded flex items-center transition-all duration-200 hover:opacity-90"
           >
             <FaPlus className="mr-2" /> Add Brand
           </button>
@@ -66,16 +66,15 @@ const BrandList = ({ brands, onSelectBrand, selectedBrandId }) => {
         <h2 className="text-2xl font-semibold">Brands</h2>
         <button
           onClick={handleAddBrand}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center"
+          className="bg-blue-500 text-white font-bold py-2 px-4 rounded flex items-center transition-all duration-200 hover:opacity-90"
         >
           <FaPlus className="mr-2" /> Add Brand
         </button>
       </div>
       {brands.map((brand) => (
         <div
-          key={brand.id}
-          className={`mb-2 border rounded-md hover:bg-gray-100 p-2 flex justify-between items-center cursor-pointer ${
-            selectedBrandId === brand.id ? 'bg-blue-50 border-blue-300' : ''
+          key={brand.id}          className={`mb-2 border rounded-md p-2 flex justify-between items-center cursor-pointer transition-all duration-200 hover:opacity-90 ${
+            selectedBrandId === brand.id ? 'bg-blue-50 border-blue-300' : 'hover:bg-gray-50'
           }`}
           onClick={() => onSelectBrand(brand.id)}
         >
@@ -91,14 +90,14 @@ const BrandList = ({ brands, onSelectBrand, selectedBrandId }) => {
           <div onClick={(e) => e.stopPropagation()}>
             <button
               onClick={(e) => handleEditBrand(brand, e)}
-              className="mr-2 text-blue-500 hover:text-blue-700 p-1"
+              className="mr-2 text-blue-500 p-1 transition-all duration-200 hover:opacity-70"
               aria-label="edit"
             >
               <FaEdit />
             </button>
             <button
               onClick={(e) => handleDeleteBrand(brand.id, e)}
-              className="text-red-500 hover:text-red-700 p-1"
+              className="text-red-500 p-1 transition-all duration-200 hover:opacity-70"
               aria-label="delete"
             >
               <FaTrash />

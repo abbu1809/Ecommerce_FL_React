@@ -123,9 +123,8 @@ const BrandFormModal = ({ brandToEdit, onClose, open }) => {
             style={{ color: "var(--text-primary)" }}
           >
             {brandToEdit ? 'Edit Brand' : 'Add New Brand'}
-          </h2>          <button
-            onClick={handleClose}
-            className="p-2 rounded-md transition-colors hover:bg-gray-50"
+          </h2>          <button            onClick={handleClose}
+            className="p-2 rounded-md transition-all duration-200 hover:opacity-70"
             disabled={isLoading}
             style={{ color: "var(--text-secondary)" }}
           >
@@ -248,7 +247,7 @@ const BrandFormModal = ({ brandToEdit, onClose, open }) => {
               type="button" 
               onClick={handleClose} 
               disabled={isLoading}
-              className="px-4 py-2.5 text-sm font-medium rounded-md border transition-all duration-200 hover:bg-gray-50 disabled:opacity-50"
+              className="px-4 py-2.5 text-sm font-medium rounded-md border transition-all duration-200 hover:opacity-80 disabled:opacity-50"
               style={{
                 backgroundColor: "var(--bg-primary)",
                 color: "var(--text-primary)",
