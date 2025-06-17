@@ -51,8 +51,8 @@ export const usePageContentStore = create((set) => ({
   // Check if a page exists
   checkPageExists: async (pagePath) => {
     try {
-      const response = await api.head(
-        `/content/pages/${pagePath.replace(/^\//, "")}/`
+      const response = await adminApi.head(
+        `/admin/content/pages/${pagePath.replace(/^\//, "")}/`
       );
       return response.status === 200;
     } catch {
