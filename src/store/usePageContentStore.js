@@ -1,11 +1,27 @@
 import { create } from "zustand";
-import api from "../services/api";
+import api, { adminApi } from "../services/api";
 
 export const usePageContentStore = create((set) => ({
   // State
   content: null,
   loading: false,
   error: null,
+  pages: [], // Store list of available custom pages
+
+  // Fetch all available custom pages
+  fetchAvailablePages: async () => {
+    try {
+      // Use the public endpoint instead of admin endpoint
+      const response = await adminApi.get("/admin/content/pages/");
+      if (response.status === 200) {
+        set({ pages: response.data.pages || [] });
+        return response.data.pages;
+      }
+    } catch (error) {
+      console.error("Error fetching available pages:", error);
+      return [];
+    }
+  },
 
   // Fetch page content from the API
   fetchPageContent: async (pagePath) => {
@@ -29,6 +45,18 @@ export const usePageContentStore = create((set) => ({
         error: error.response?.data?.error || "Failed to fetch page content",
         loading: false,
       });
+    }
+  },
+
+  // Check if a page exists
+  checkPageExists: async (pagePath) => {
+    try {
+      const response = await api.head(
+        `/content/pages/${pagePath.replace(/^\//, "")}/`
+      );
+      return response.status === 200;
+    } catch {
+      return false;
     }
   },
 

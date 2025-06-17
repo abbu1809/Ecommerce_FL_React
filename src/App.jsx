@@ -24,6 +24,7 @@ import Contact from "./pages/Contact";
 import TrackOrder from "./pages/TrackOrder";
 import BulkOrder from "./pages/BulkOrder";
 import OurStores from "./pages/OurStores";
+import DynamicPage from "./pages/DynamicPage";
 import {
   TermsConditions,
   CancellationRefundPolicy,
@@ -99,6 +100,12 @@ const App = () => {
       // Import dynamically to avoid circular dependencies
       const { useProductStore } = await import("./store/useProduct");
       useProductStore.getState().fetchProducts();
+
+      // Initialize page content store - fetch available pages
+      const { usePageContentStore } = await import(
+        "./store/usePageContentStore"
+      );
+      usePageContentStore.getState().fetchAvailablePages();
     };
 
     initializeStore();
@@ -203,7 +210,7 @@ const App = () => {
           <Route path="/order-tracking" element={<OrderTracking />} />
           <Route path="/order-tracking/:id" element={<OrderTrackingDetail />} />
           <Route path="/search" element={<SearchResults />} />
-
+          <Route path="/dynamic-page" element={<DynamicPage />} />
           {/* Footer Pages */}
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
@@ -213,7 +220,7 @@ const App = () => {
           <Route
             path="/cancellation-refund-policy"
             element={<CancellationRefundPolicy />}
-          />
+          />{" "}
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route
             path="/shipping-delivery-policy"
@@ -221,10 +228,12 @@ const App = () => {
           />
           <Route path="/our-stores" element={<OurStores />} />
           <Route path="/warranty-policy" element={<WarrantyPolicy />} />
-
           {/* Account Routes */}
           <Route path="/profile" element={<Account />} />
           <Route path="/profile/:section" element={<Account />} />
+          {/* Dynamic Content Pages - Custom pages created by admin */}
+          {/* This must be placed after all other specific routes to avoid conflicts */}
+          <Route path="/:pagePath" element={<DynamicPage />} />
         </Route>
         {/* Admin Routes */}
         <Route

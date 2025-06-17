@@ -24,7 +24,7 @@ import Logo from "./ui/Logo";
 import useFooter from "../hooks/useFooter";
 
 const Footer = () => {
-  const { footerData, loading } = useFooter();
+  const { footerData, loading, customPages } = useFooter();
 
   // Show simplified footer while loading
   if (loading) {
@@ -50,6 +50,12 @@ const Footer = () => {
     FaLinkedinIn: <FaLinkedinIn />,
     FaWhatsapp: <FaWhatsapp />,
   };
+  // Convert custom pages to link format
+  const customPageLinks = customPages.map((page) => ({
+    name: page.title,
+    path: `/${page.path}`,
+    isCustom: true,
+  }));
 
   // Fallback data in case API data is loading or unavailable
   const quickLinks = footerData?.quick_links?.filter(
@@ -67,23 +73,38 @@ const Footer = () => {
     { name: "Bulk Orders", path: ROUTES.BULK_ORDER },
   ];
 
-  const policyLinks = footerData?.policy_links?.filter(
-    (link) => link.enabled
-  ) || [
-    { name: "Terms & Conditions", path: "/terms-conditions" },
-    {
-      name: "Cancellation & Refund Policy",
-      path: "/cancellation-refund-policy",
-    },
-    { name: "Privacy Policy", path: "/privacy-policy" },
-    { name: "Shipping & Delivery Policy", path: "/shipping-delivery-policy" },
+  // Include both standard policy links and any custom pages that might be policies
+  const policyLinks = [
+    ...(footerData?.policy_links?.filter((link) => link.enabled) || [
+      { name: "Terms & Conditions", path: "/terms-conditions" },
+      {
+        name: "Cancellation & Refund Policy",
+        path: "/cancellation-refund-policy",
+      },
+      { name: "Privacy Policy", path: "/privacy-policy" },
+      { name: "Shipping & Delivery Policy", path: "/shipping-delivery-policy" },
+    ]),
+    ...customPageLinks.filter(
+      (page) =>
+        page.name.toLowerCase().includes("policy") ||
+        page.name.toLowerCase().includes("terms")
+    ),
   ];
 
-  const knowMoreLinks = footerData?.know_more_links?.filter(
-    (link) => link.enabled
-  ) || [
-    { name: "Our Stores", path: "/our-stores" },
-    { name: "Service Center", url: "https://www.poorvika.com/service-center" },
+  // Include additional custom pages in the know more section
+  const knowMoreLinks = [
+    ...(footerData?.know_more_links?.filter((link) => link.enabled) || [
+      { name: "Our Stores", path: "/our-stores" },
+      {
+        name: "Service Center",
+        url: "https://www.poorvika.com/service-center",
+      },
+    ]),
+    ...customPageLinks.filter(
+      (page) =>
+        !page.name.toLowerCase().includes("policy") &&
+        !page.name.toLowerCase().includes("terms")
+    ),
   ];
 
   const socialLinks = footerData?.social_links
@@ -99,13 +120,22 @@ const Footer = () => {
     { icon: <FaYoutube />, url: "https://youtube.com", label: "YouTube" },
     { icon: <FaLinkedinIn />, url: "https://linkedin.com", label: "LinkedIn" },
   ];
-
-  const footerPolicyLinks = footerData?.footer_policy_links?.filter(
-    (link) => link.enabled
-  ) || [
-    { name: "Privacy Policy", path: "/privacy-policy" },
-    { name: "Terms of Use", path: "/terms-conditions" },
-    { name: "Warranty Policy", path: "/warranty-policy" },
+  // Include both standard footer policy links and any custom pages that might be legal documents
+  const footerPolicyLinks = [
+    ...(footerData?.footer_policy_links?.filter((link) => link.enabled) || [
+      { name: "Privacy Policy", path: "/privacy-policy" },
+      { name: "Terms of Use", path: "/terms-conditions" },
+      { name: "Warranty Policy", path: "/warranty-policy" },
+    ]),
+    ...customPageLinks
+      .filter(
+        (page) =>
+          page.name.toLowerCase().includes("policy") ||
+          page.name.toLowerCase().includes("terms") ||
+          page.name.toLowerCase().includes("privacy") ||
+          page.name.toLowerCase().includes("legal")
+      )
+      .slice(0, 3), // Limit to 3 additional policy links to avoid making the footer too large
   ];
 
   return (
@@ -268,10 +298,10 @@ const Footer = () => {
                   className="absolute bottom-0 left-0 h-0.5 w-3/4"
                   style={{ backgroundColor: "var(--brand-primary)" }}
                 />
-              </h3>
+              </h3>{" "}
               <ul className="space-y-3">
                 {policyLinks.map((link) => (
-                  <li key={link.name}>
+                  <li key={link.name || link.path}>
                     <Link
                       to={link.path}
                       className="text-sm transition-colors duration-300 hover:text-white"
@@ -282,7 +312,7 @@ const Footer = () => {
                   </li>
                 ))}
               </ul>
-            </div>
+            </div>{" "}
             {/* Know More */}
             <div className="space-y-4">
               <h3
@@ -297,7 +327,7 @@ const Footer = () => {
               </h3>
               <ul className="space-y-3">
                 {knowMoreLinks.map((link) => (
-                  <li key={link.name}>
+                  <li key={link.name || link.path}>
                     {link.path ? (
                       <Link
                         to={link.path}
@@ -321,6 +351,34 @@ const Footer = () => {
                 ))}
               </ul>
             </div>
+            {/* Custom Pages - Only show if there are custom pages available */}
+            {customPages && customPages.length > 0 && (
+              <div className="space-y-4">
+                <h3
+                  className="font-semibold text-lg relative inline-block pb-2"
+                  style={{ color: "var(--text-on-dark-bg)" }}
+                >
+                  Pages
+                  <span
+                    className="absolute bottom-0 left-0 h-0.5 w-3/4"
+                    style={{ backgroundColor: "var(--brand-primary)" }}
+                  />
+                </h3>
+                <ul className="space-y-3">
+                  {customPages.slice(0, 5).map((page) => (
+                    <li key={page.path}>
+                      <Link
+                        to={`/${page.path}`}
+                        className="text-sm transition-colors duration-300 hover:text-white"
+                        style={{ color: "var(--text-on-dark-bg)" }}
+                      >
+                        {page.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             {/* Contact Us */}
             {footerData?.contact_info?.enabled && (
               <div className="space-y-4">
@@ -462,11 +520,11 @@ const Footer = () => {
                   </a>
                 ))}
               </div>
-            </div>
+            </div>{" "}
             {/* Policy links - centered below social */}
             <div className="flex flex-wrap justify-center gap-4">
               {footerPolicyLinks.map((link, index) => (
-                <React.Fragment key={link.name}>
+                <React.Fragment key={link.name || link.path}>
                   <Link to={link.path} className="text-xs hover:underline">
                     {link.name}
                   </Link>

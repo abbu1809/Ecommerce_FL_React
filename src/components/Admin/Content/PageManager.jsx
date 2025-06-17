@@ -1,35 +1,16 @@
-import {
-  useEffect,
-  useState,
-  useRef,
-  forwardRef,
-  useImperativeHandle,
-} from "react";
-import "../../../utils/reactDomPolyfill"; // Import polyfill first
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import { useEffect, useState, useRef } from "react";
+// Using CKEditor - completely free and open source editor
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import toast from "react-hot-toast";
 import Button from "../../ui/Button";
 import { useAdminPageContentStore } from "../../../store/Admin/useAdminPageContentStore";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 
-// Custom Quill wrapper to fix findDOMNode issues in React 18+
-const QuillWrapper = forwardRef((props, ref) => {
-  const editorRef = useRef(null);
+// Add some styles for CKEditor
+import "./PageManager.css";
 
-  // Expose the editor methods via ref
-  useImperativeHandle(ref, () => ({
-    getEditor: () => editorRef.current?.getEditor(),
-    focus: () => editorRef.current?.focus(),
-    blur: () => editorRef.current?.blur(),
-  }));
-
-  return (
-    <div className="quill-wrapper">
-      <ReactQuill ref={editorRef} {...props} />
-    </div>
-  );
-});
+// No wrapper needed for TinyMCE
 
 const PageManager = () => {
   const [selectedPage, setSelectedPage] = useState(null);
@@ -39,7 +20,7 @@ const PageManager = () => {
     title: "",
     path: "",
   });
-  const quillRef = useRef(null);
+  const editorRef = useRef(null);
 
   const {
     pages,
@@ -150,42 +131,9 @@ const PageManager = () => {
     }
   };
 
-  // Quill editor modules/formats
-  const modules = {
-    toolbar: [
-      [{ header: [1, 2, 3, 4, 5, 6, false] }],
-      ["bold", "italic", "underline", "strike"],
-      [{ list: "ordered" }, { list: "bullet" }],
-      [{ indent: "-1" }, { indent: "+1" }],
-      [{ align: [] }],
-      [{ color: [] }, { background: [] }],
-      ["link", "image", "video"],
-      ["blockquote", "code-block"],
-      ["clean"],
-    ],
-  };
-
-  const formats = [
-    "header",
-    "bold",
-    "italic",
-    "underline",
-    "strike",
-    "list",
-    "bullet",
-    "indent",
-    "link",
-    "image",
-    "video",
-    "align",
-    "color",
-    "background",
-    "blockquote",
-    "code-block",
-  ];
   useEffect(() => {
     // Simple initialization effect for when the page changes
-    if (selectedPage && !previewMode && quillRef.current) {
+    if (selectedPage && !previewMode) {
       // Force a delayed focus to ensure the editor is fully initialized
       const timeoutId = setTimeout(() => {
         // Update content if needed
@@ -316,17 +264,39 @@ const PageManager = () => {
                   />
                 </div>
               ) : (
-                <div className="quill-editor-container">
-                  <QuillWrapper
+                <div className="editor-container">
+                  <CKEditor
+                    editor={ClassicEditor}
                     key={selectedPage?.path || "editor"}
-                    ref={quillRef}
-                    theme="snow"
-                    value={content || ""}
-                    onChange={setContent}
-                    modules={modules}
-                    formats={formats}
-                    className="bg-white h-96 mb-20"
-                    placeholder="Enter content here..."
+                    data={content || ""}
+                    onReady={(editor) => {
+                      editorRef.current = editor;
+                    }}
+                    onChange={(event, editor) => {
+                      const data = editor.getData();
+                      setContent(data);
+                    }}
+                    config={{
+                      height: "500px",
+                      toolbar: [
+                        "heading",
+                        "|",
+                        "bold",
+                        "italic",
+                        "link",
+                        "bulletedList",
+                        "numberedList",
+                        "|",
+                        "outdent",
+                        "indent",
+                        "|",
+                        "blockQuote",
+                        "insertTable",
+                        "mediaEmbed",
+                        "undo",
+                        "redo",
+                      ],
+                    }}
                   />
                 </div>
               )}

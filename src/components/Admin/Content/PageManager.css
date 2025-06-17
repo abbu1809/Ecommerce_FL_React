@@ -1,0 +1,44 @@
+/* CKEditor styling */
+.editor-container {
+  margin-bottom: 2rem;
+}
+
+.editor-container .ck-editor__editable {
+  min-height: 400px;
+  max-height: 600px;
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 0 0 4px 4px;
+  padding: 0.5rem;
+}
+
+.editor-container .ck-toolbar {
+  border: 1px solid #ddd !important;
+  border-radius: 4px 4px 0 0 !important;
+}
+
+/* Preview mode styling */
+.preview-mode {
+  padding: 1rem;
+  min-height: 400px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+}
+
+.preview-mode img {
+  max-width: 100%;
+  height: auto;
+}
+
+.preview-mode table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.preview-mode table td,
+.preview-mode table th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
