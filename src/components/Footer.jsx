@@ -352,7 +352,7 @@ const Footer = () => {
               </ul>
             </div>
             {/* Custom Pages - Only show if there are custom pages available */}
-            {customPages && customPages.length > 0 && (
+            {/* {customPages && customPages.length > 0 && (
               <div className="space-y-4">
                 <h3
                   className="font-semibold text-lg relative inline-block pb-2"
@@ -378,7 +378,7 @@ const Footer = () => {
                   ))}
                 </ul>
               </div>
-            )}
+            )} */}
             {/* Contact Us */}
             {footerData?.contact_info?.enabled && (
               <div className="space-y-4">

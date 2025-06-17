@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ROUTES } from "../utils/constants";
+import { usePageContentStore } from "../store/usePageContentStore";
 import {
   FaBuilding,
   FaAward,
@@ -15,6 +16,17 @@ const About = () => {
     { label: "Home", link: ROUTES.HOME },
     { label: "About", link: ROUTES.ABOUT },
   ];
+
+  const { content, loading, fetchPageContent, clearContent } =
+    usePageContentStore();
+
+  useEffect(() => {
+    fetchPageContent("about");
+
+    return () => {
+      clearContent();
+    };
+  }, [fetchPageContent, clearContent]);
 
   return (
     <div className="bg-white">
@@ -40,7 +52,6 @@ const About = () => {
           </div>
         </div>
       </div>
-
       {/* Hero Section */}
       <section className="py-16 bg-gradient-to-r from-blue-50 to-indigo-50">
         <div className="container mx-auto px-4">
@@ -59,31 +70,43 @@ const About = () => {
             </p>
           </div>
         </div>
-      </section>
-
+      </section>{" "}
       {/* Our Story */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold mb-6">Our Story</h2>
-              <p className="text-gray-700 mb-4">
-                Founded in 2010, we began as a small mobile phone shop with a
-                vision to make technology accessible to everyone. Over the
-                years, we've grown to become one of the most trusted electronics
-                retailers in the region.
-              </p>
-              <p className="text-gray-700 mb-4">
-                Our journey has been defined by a commitment to quality,
-                innovation, and customer satisfaction. We carefully select each
-                product in our inventory to ensure it meets our high standards
-                of performance and reliability.
-              </p>
-              <p className="text-gray-700">
-                Today, we continue to expand our offerings while maintaining the
-                personalized service that has been the cornerstone of our
-                success.
-              </p>
+              {loading ? (
+                <div className="flex justify-center items-center py-16">
+                  <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
+                </div>
+              ) : content ? (
+                <div
+                  className="prose max-w-none"
+                  dangerouslySetInnerHTML={{ __html: content }}
+                ></div>
+              ) : (
+                <>
+                  <h2 className="text-3xl font-bold mb-6">Our Story</h2>
+                  <p className="text-gray-700 mb-4">
+                    Founded in 2010, we began as a small mobile phone shop with
+                    a vision to make technology accessible to everyone. Over the
+                    years, we've grown to become one of the most trusted
+                    electronics retailers in the region.
+                  </p>
+                  <p className="text-gray-700 mb-4">
+                    Our journey has been defined by a commitment to quality,
+                    innovation, and customer satisfaction. We carefully select
+                    each product in our inventory to ensure it meets our high
+                    standards of performance and reliability.
+                  </p>
+                  <p className="text-gray-700">
+                    Today, we continue to expand our offerings while maintaining
+                    the personalized service that has been the cornerstone of
+                    our success.
+                  </p>
+                </>
+              )}
             </div>
             <div className="rounded-lg overflow-hidden shadow-lg">
               <img
@@ -95,7 +118,6 @@ const About = () => {
           </div>
         </div>
       </section>
-
       {/* Why Choose Us */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
@@ -135,7 +157,6 @@ const About = () => {
           </div>
         </div>
       </section>
-
       {/* Our Vision & Mission */}
       <section className="py-16">
         <div className="container mx-auto px-4">
@@ -169,7 +190,6 @@ const About = () => {
           </div>
         </div>
       </section>
-
       {/* Call to Action */}
       <section className="py-16 bg-gradient-to-r from-indigo-500 to-blue-600 text-white">
         <div className="container mx-auto px-4 text-center">

@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ROUTES } from "../utils/constants";
+import { usePageContentStore } from "../store/usePageContentStore";
 import { FiPhone, FiMail, FiMapPin, FiClock, FiSend } from "react-icons/fi";
 import { toast } from "react-hot-toast";
 
@@ -13,6 +14,21 @@ const Contact = () => {
     message: "",
   });
   const [loading, setLoading] = useState(false);
+
+  const {
+    content,
+    loading: contentLoading,
+    fetchPageContent,
+    clearContent,
+  } = usePageContentStore();
+
+  useEffect(() => {
+    fetchPageContent("contact");
+
+    return () => {
+      clearContent();
+    };
+  }, [fetchPageContent, clearContent]);
 
   const breadcrumbs = [
     { label: "Home", link: ROUTES.HOME },
@@ -88,26 +104,37 @@ const Contact = () => {
             ))}
           </div>
         </div>
-      </div>
-
+      </div>{" "}
       {/* Hero Section */}
       <section className="py-16 bg-gradient-to-r from-blue-50 to-indigo-50">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h1
-              className="text-4xl md:text-5xl font-bold mb-6"
-              style={{ color: "var(--brand-primary)" }}
-            >
-              Contact Us
-            </h1>
-            <p className="text-lg text-gray-700 mb-8">
-              Have questions or need assistance? We're here to help! Our team is
-              ready to provide you with the support you need.
-            </p>
+            {contentLoading ? (
+              <div className="flex justify-center items-center py-16">
+                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
+              </div>
+            ) : content ? (
+              <div
+                className="prose max-w-none mx-auto"
+                dangerouslySetInnerHTML={{ __html: content }}
+              ></div>
+            ) : (
+              <>
+                <h1
+                  className="text-4xl md:text-5xl font-bold mb-6"
+                  style={{ color: "var(--brand-primary)" }}
+                >
+                  Contact Us
+                </h1>
+                <p className="text-lg text-gray-700 mb-8">
+                  Have questions or need assistance? We're here to help! Our
+                  team is ready to provide you with the support you need.
+                </p>
+              </>
+            )}
           </div>
         </div>
       </section>
-
       {/* Contact Info Cards */}
       <section className="py-12">
         <div className="container mx-auto px-4">
@@ -137,7 +164,6 @@ const Contact = () => {
           </div>
         </div>
       </section>
-
       {/* Contact Form and Map Section */}
       <section className="py-12 bg-gray-50">
         <div className="container mx-auto px-4">
@@ -272,7 +298,6 @@ const Contact = () => {
           </div>
         </div>
       </section>
-
       {/* FAQ Section */}
       <section className="py-16">
         <div className="container mx-auto px-4">

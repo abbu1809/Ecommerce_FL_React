@@ -28,8 +28,8 @@ export const usePageContentStore = create((set) => ({
     set({ loading: true, error: null, content: null });
     try {
       // Use the public endpoint to get page content
-      const response = await api.get(
-        `/content/pages/${pagePath.replace(/^\//, "")}/`
+      const response = await adminApi.get(
+        `/admin/content/pages/${pagePath.replace(/^\//, "")}/`
       );
 
       if (response.status === 200) {

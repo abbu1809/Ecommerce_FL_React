@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ROUTES } from "../utils/constants";
+import { usePageContentStore } from "../store/usePageContentStore";
 import {
   FiPackage,
   FiUsers,
@@ -27,8 +28,22 @@ const BulkOrder = () => {
   const [products, setProducts] = useState([
     { id: 1, name: "", model: "", quantity: "", remarks: "" },
   ]);
-
   const [loading, setLoading] = useState(false);
+
+  const {
+    content,
+    loading: contentLoading,
+    fetchPageContent,
+    clearContent,
+  } = usePageContentStore();
+
+  useEffect(() => {
+    fetchPageContent("bulk-order");
+
+    return () => {
+      clearContent();
+    };
+  }, [fetchPageContent, clearContent]);
 
   const breadcrumbs = [
     { label: "Home", link: ROUTES.HOME },
@@ -144,28 +159,42 @@ const BulkOrder = () => {
       <section className="py-12 bg-gradient-to-r from-blue-50 to-indigo-50">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <div className="flex justify-center mb-6">
-              <div
-                className="w-16 h-16 rounded-full flex items-center justify-center"
-                style={{
-                  backgroundColor: "var(--brand-primary)",
-                  color: "white",
-                }}
-              >
-                <FiUsers className="text-2xl" />
+            {" "}
+            {contentLoading ? (
+              <div className="flex justify-center items-center py-16">
+                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
               </div>
-            </div>
-            <h1
-              className="text-3xl md:text-4xl font-bold mb-4"
-              style={{ color: "var(--brand-primary)" }}
-            >
-              Bulk Orders
-            </h1>
-            <p className="text-lg text-gray-700 mb-8">
-              Get special pricing and dedicated support for your business or
-              large quantity orders. Fill out the form below and our team will
-              get in touch with you.
-            </p>
+            ) : content ? (
+              <div
+                className="prose max-w-none mx-auto"
+                dangerouslySetInnerHTML={{ __html: content }}
+              ></div>
+            ) : (
+              <>
+                <div className="flex justify-center mb-6">
+                  <div
+                    className="w-16 h-16 rounded-full flex items-center justify-center"
+                    style={{
+                      backgroundColor: "var(--brand-primary)",
+                      color: "white",
+                    }}
+                  >
+                    <FiUsers className="text-2xl" />
+                  </div>
+                </div>
+                <h1
+                  className="text-3xl md:text-4xl font-bold mb-4"
+                  style={{ color: "var(--brand-primary)" }}
+                >
+                  Bulk Orders
+                </h1>
+                <p className="text-lg text-gray-700 mb-8">
+                  Get special pricing and dedicated support for your business or
+                  large quantity orders. Fill out the form below and our team
+                  will get in touch with you.
+                </p>
+              </>
+            )}
           </div>
         </div>
       </section>

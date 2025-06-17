@@ -155,12 +155,6 @@ const PageManager = () => {
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-medium text-lg">Website Pages</h3>
-              <button
-                onClick={() => setShowAddPageModal(true)}
-                className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
-              >
-                <FiPlus /> Add Page
-              </button>
             </div>
 
             <div className="mb-6">
