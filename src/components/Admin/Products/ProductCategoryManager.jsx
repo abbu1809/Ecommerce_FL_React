@@ -405,7 +405,7 @@ const ProductCategoryManager = ({ onClose }) => {
             }}
           >
             Close
-          </button>{" "}
+          </button>
         </div>
       </div>
 

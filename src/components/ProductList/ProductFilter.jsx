@@ -735,7 +735,7 @@ const ProductFilter = ({
                 style={{ color: "var(--text-secondary)" }}
               />
             )}
-          </div>{" "}
+          </div>
           {openSections.brands && (
             <div className="px-4 pb-4 space-y-2">
               {filteredBrands.map((brand) => (
@@ -759,7 +759,7 @@ const ProductFilter = ({
               ))}
             </div>
           )}
-        </div>{" "}
+        </div>
         {/* Category Filter - Only show when no specific category is selected */}
         {!currentCategory && (
           <div
@@ -917,7 +917,7 @@ const ProductFilter = ({
               ))}
             </div>
           )}
-        </div>{" "}
+        </div>
         {/* Colors */}
         <div
           className="border-b"
@@ -969,7 +969,7 @@ const ProductFilter = ({
               ))}
             </div>
           )}
-        </div>{" "}
+        </div>
         {/* Dynamic Attribute Filters */}
         {validOptionKeys.map(
           (attributeKey) =>

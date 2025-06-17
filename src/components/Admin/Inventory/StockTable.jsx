@@ -232,7 +232,6 @@ const StockTable = ({ categoryFilter, stockFilter, searchQuery }) => {
           className="divide-y"
           style={{ borderColor: "var(--border-primary)" }}
         >
-          {" "}
           {filteredProducts
             .filter((product) => product && product.id) // Filter out null/undefined products
             .map((product) => {
@@ -286,7 +285,7 @@ const StockTable = ({ categoryFilter, stockFilter, searchQuery }) => {
                     >
                       {productSKU}
                     </div>
-                  </td>{" "}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     {editingId === product.id ? (
                       <div className="flex items-center justify-center">
@@ -391,7 +390,7 @@ const StockTable = ({ categoryFilter, stockFilter, searchQuery }) => {
                         {stockStatus.text}
                       </span>
                     </div>
-                  </td>{" "}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div
                       className="text-sm font-medium"
@@ -470,7 +469,7 @@ const StockTable = ({ categoryFilter, stockFilter, searchQuery }) => {
             }}
             disabled
           >
-            Next{" "}
+            Next
           </button>
         </div>
       </div>

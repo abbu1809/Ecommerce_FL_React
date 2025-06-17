@@ -68,7 +68,6 @@ const DeliveryCard = ({ delivery, onAccept }) => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 mt-3">
-            {" "}
             <div className="flex items-start">
               <FiMapPin
                 className="mt-1 mr-2 flex-shrink-0"
@@ -153,7 +152,6 @@ const DeliveryCard = ({ delivery, onAccept }) => {
       </div>
 
       <div className="flex md:flex-col justify-between items-end mt-4 md:mt-0 md:ml-4">
-        {" "}
         <div
           className="px-3 py-1 rounded-full text-xs font-medium"
           style={{
@@ -174,7 +172,7 @@ const DeliveryCard = ({ delivery, onAccept }) => {
             : delivery.status === "failed"
             ? "Failed"
             : delivery.status || "Pending"}
-        </div>{" "}
+        </div>
         <button
           onClick={() => onAccept(delivery.id)}
           className="flex items-center mt-4 font-medium text-sm hover:underline transition-colors"

@@ -145,14 +145,14 @@ const Wishlist = () => {
                             style={{ color: "var(--text-primary)" }}
                           >
                             {item.name}
-                          </Link>{" "}
+                          </Link>
                           <p
                             className="font-bold mt-1 text-lg"
                             style={{ color: "var(--brand-primary)" }}
                           >
                             ₹{item.price ? item.price.toLocaleString() : "N/A"}
                           </p>
-                        </div>{" "}
+                        </div>
                         <button
                           onClick={() => handleRemoveFromWishlist(item.item_id)}
                           className="p-2 rounded-full transition-colors hover:bg-gray-100"
@@ -161,7 +161,7 @@ const Wishlist = () => {
                         >
                           <FiTrash2 className="h-5 w-5" />
                         </button>
-                      </div>{" "}
+                      </div>
                       <div className="mt-4">
                         {item.stock !== 0 ? (
                           <p
@@ -187,7 +187,7 @@ const Wishlist = () => {
                             ></span>
                             Out of Stock
                           </p>
-                        )}{" "}
+                        )}
                         <Button
                           fullWidth={true}
                           onClick={() => handleAddToCart(item)}

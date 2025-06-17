@@ -14,6 +14,7 @@ import ProductQuantitySelector from "../components/Product/ProductQuantitySelect
 import ProductActions from "../components/Product/ProductActions";
 import ProductTabs from "../components/Product/ProductTabs";
 import ProductVariantSelector from "../components/Product/ProductVariantSelector";
+import RelatedProducts from "../components/Product/RelatedProducts";
 
 const Product = () => {
   const { id } = useParams();
@@ -21,8 +22,14 @@ const Product = () => {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
   const [selectedVariant, setSelectedVariant] = useState(null);
-  const { currentProduct, loading, error, fetchProduct, clearCurrentProduct } =
-    useProductStore();
+  const {
+    currentProduct,
+    loading,
+    error,
+    fetchProduct,
+    clearCurrentProduct,
+    getProductsByCategory,
+  } = useProductStore();
   const { addItem: addToCartStore } = useCartStore();
   const { addItem: addToWishlistStore } = useWishlistStore();
   const { user } = useAuthStore();
@@ -335,7 +342,7 @@ const Product = () => {
 
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 p-6">
-            {/* Product Images - Left Column on Desktop */}{" "}
+            {/* Product Images - Left Column on Desktop */}
             <div className="lg:col-span-2">
               <ProductImageGallery
                 images={normalizedProduct.images}
@@ -343,7 +350,7 @@ const Product = () => {
                 activeImage={activeImage}
                 setActiveImage={setActiveImage}
               />
-            </div>{" "}
+            </div>
             {/* Product Details - Right Column on Desktop */}
             <div className="lg:col-span-3 flex flex-col">
               <ProductInfo
@@ -359,9 +366,8 @@ const Product = () => {
                     onVariantChange={handleVariantChange}
                   />
                 </div>
-              )}{" "}
+              )}
               <div className="border-t border-gray-200 py-4">
-                {" "}
                 <ProductQuantitySelector
                   quantity={quantity}
                   setQuantity={setQuantity}
@@ -377,13 +383,21 @@ const Product = () => {
                 />
               </div>
             </div>
-          </div>{" "}
+          </div>
           {/* Product Details Tabs */}
           <ProductTabs
             product={normalizedProduct}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
           />
+          {/* Related Products Section */}
+          {normalizedProduct.category && (
+            <RelatedProducts
+              products={getProductsByCategory(normalizedProduct.category)}
+              currentProductId={normalizedProduct.id}
+              currentCategory={normalizedProduct.category}
+            />
+          )}
         </div>
       </div>
     </div>

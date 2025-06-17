@@ -114,7 +114,7 @@ const ProductCard = ({ product }) => {
             alt={product.name}
             className="max-h-48 w-auto object-contain transform transition-transform duration-300 group-hover:scale-110"
           />
-        </div>{" "}
+        </div>
         {displayPrice < originalPrice && (
           <span
             className="absolute top-3 left-3 text-xs font-medium px-2.5 py-1 rounded-md"
@@ -153,7 +153,7 @@ const ProductCard = ({ product }) => {
               >
                 {product.rating}
               </span>
-            </div>{" "}
+            </div>
             <div className="flex items-center mb-3">
               <p
                 className="font-bold text-lg"
@@ -170,7 +170,7 @@ const ProductCard = ({ product }) => {
                 </p>
               )}
             </div>
-          </div>{" "}
+          </div>
           <button
             onClick={handleWishlistToggle}
             className="flex items-center justify-center h-8 w-8 rounded-full transition-colors"
@@ -185,7 +185,7 @@ const ProductCard = ({ product }) => {
               className={`text-lg ${isWishlisted ? "fill-current" : ""}`}
             />
           </button>
-        </div>{" "}
+        </div>
         <div className="mt-3">
           <Button
             onClick={handleAddToCart}

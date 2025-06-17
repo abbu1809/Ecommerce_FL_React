@@ -111,7 +111,7 @@ const AdminOrders = () => {
             Export Orders
           </button>
         </div>
-      </div>{" "}
+      </div>
       {/* Order status summary */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
         {Object.entries({
@@ -182,7 +182,7 @@ const AdminOrders = () => {
           </div>
         </div>
       </div>
-      {/* Order table - now full width */}{" "}
+      {/* Order table - now full width */}
       <div className="w-full">
         <OrderTable
           onSelectOrder={handleSelectOrder}

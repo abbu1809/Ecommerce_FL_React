@@ -542,7 +542,7 @@ const OrderTrackingDetail = () => {
           >
             <FiArrowLeft className="mr-2" />
             <span className="font-medium">Back to Orders</span>
-          </Link>{" "}
+          </Link>
           <div
             className="bg-white rounded-xl shadow-lg overflow-hidden mb-6 animate-fadeIn"
             style={{
@@ -587,7 +587,7 @@ const OrderTrackingDetail = () => {
                         style={{ color: "var(--text-primary)" }}
                       >
                         Order #{displayOrder.id || displayOrder.order_id}
-                      </h1>{" "}
+                      </h1>
                       <div className="flex items-center space-x-3">
                         <div
                           className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold shadow-sm"
@@ -694,7 +694,7 @@ const OrderTrackingDetail = () => {
                   </div>
                 </div>
               </div>
-            </div>{" "}
+            </div>
             {/* Enhanced shipping info cards */}
             <div className="p-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Enhanced Shipping address card */}
@@ -818,7 +818,7 @@ const OrderTrackingDetail = () => {
                   >
                     <FiClock className="mr-1" size={12} />
                     <span>
-                      Assigned on{" "}
+                      Assigned on
                       {new Date(displayOrder.assigned_at).toLocaleDateString(
                         "en-IN"
                       )}
@@ -895,7 +895,7 @@ const OrderTrackingDetail = () => {
                       >
                         <FiCheckCircle className="mr-1" size={12} />
                         <span>
-                          Paid on{" "}
+                          Paid on
                           {displayOrder.paymentDetails.captured_at_formatted}
                         </span>
                       </div>
@@ -903,7 +903,7 @@ const OrderTrackingDetail = () => {
                   </div>
                 </div>
               )}
-            </div>{" "}
+            </div>
             {/* Order Items Preview (if available) */}
             {displayOrder.orderItems && displayOrder.orderItems.length > 0 && (
               <div className="px-8 pb-6">
@@ -1019,7 +1019,7 @@ const OrderTrackingDetail = () => {
                 </div>
               </div>
             )}
-          </div>{" "}
+          </div>
           {/* Invoice Download Section */}
           {displayOrder.invoice && displayOrder.invoice.invoice_pdf_url && (
             <div
@@ -1092,7 +1092,7 @@ const OrderTrackingDetail = () => {
                 </div>
               </div>
             </div>
-          )}{" "}
+          )}
           {/* Order Items Section - Show only when delivered */}
           {(displayOrder.status === "Delivered" ||
             displayOrder.delivery_status === "Delivered") &&
@@ -1126,7 +1126,6 @@ const OrderTrackingDetail = () => {
                       }}
                     >
                       <div className="flex items-center space-x-4">
-                        {" "}
                         {item.image || item.image_url ? (
                           <img
                             src={item.image || item.image_url}
@@ -1182,7 +1181,6 @@ const OrderTrackingDetail = () => {
                             className="text-lg font-bold"
                             style={{ color: "var(--brand-primary)" }}
                           >
-                            {" "}
                             ₹
                             {(
                               item.price ||
@@ -1192,7 +1190,7 @@ const OrderTrackingDetail = () => {
                               0
                             ).toLocaleString()}
                           </div>
-                        </div>{" "}
+                        </div>
                         {/* Review button for delivered items */}
                         {(() => {
                           const productId = item.product_id || item.id;
@@ -1410,7 +1408,7 @@ const OrderTrackingDetail = () => {
                       style={{ color: "var(--text-primary)" }}
                     >
                       Review Title *
-                    </label>{" "}
+                    </label>
                     <input
                       type="text"
                       value={reviewTitle}
@@ -1439,7 +1437,7 @@ const OrderTrackingDetail = () => {
                       style={{ color: "var(--text-primary)" }}
                     >
                       Your Review
-                    </label>{" "}
+                    </label>
                     <textarea
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
@@ -1495,7 +1493,7 @@ const OrderTrackingDetail = () => {
                       }}
                     >
                       Cancel
-                    </button>{" "}
+                    </button>
                     <button
                       type="submit"
                       disabled={
@@ -1690,7 +1688,6 @@ const OrderTrackingDetail = () => {
               animationDelay: "200ms",
             }}
           >
-            {" "}
             <h2
               className="text-xl font-bold mb-6"
               style={{ color: "var(--text-primary)" }}

@@ -132,7 +132,7 @@ const AdminUsers = () => {
             Export Users
           </button>
         </div>
-      </div>{" "}
+      </div>
       {/* User stats cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {stats.map((stat, index) => (
@@ -201,7 +201,7 @@ const AdminUsers = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-      </div>{" "}
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <UserTable

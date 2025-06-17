@@ -115,7 +115,7 @@ const ReviewDetailModal = ({ isOpen, onClose, review }) => {
                 <FiX className="inline-block mr-1" /> Reject
               </button>
             </>
-          )}{" "}
+          )}
           <button
             onClick={handleToggleFlag}
             className="px-4 py-2 rounded text-sm font-medium"
@@ -149,7 +149,6 @@ const ReviewDetailModal = ({ isOpen, onClose, review }) => {
       }
     >
       <div className="p-4">
-        {" "}
         {/* Product and Review Info */}
         <div className="flex items-start mb-6">
           <div
@@ -194,7 +193,6 @@ const ReviewDetailModal = ({ isOpen, onClose, review }) => {
             borderLeft: `3px solid var(--brand-primary)`,
           }}
         >
-          {" "}
           <h4
             className="text-md font-semibold mb-2"
             style={{ color: "var(--text-primary)" }}
@@ -229,7 +227,6 @@ const ReviewDetailModal = ({ isOpen, onClose, review }) => {
             Reviewer Information
           </h4>
           <div className="grid grid-cols-2 gap-4">
-            {" "}
             <div>
               <div
                 className="text-xs mb-1"
@@ -310,7 +307,7 @@ const ReviewDetailModal = ({ isOpen, onClose, review }) => {
                     review?.status?.slice(1)}
                 </span>
               </div>
-            </div>{" "}
+            </div>
             <div>
               <div
                 className="text-xs mb-1"
@@ -327,7 +324,7 @@ const ReviewDetailModal = ({ isOpen, onClose, review }) => {
                       color: "var(--error-color)",
                     }}
                   >
-                    Yes ({review.reported_count}{" "}
+                    Yes ({review.reported_count}
                     {review.reported_count === 1 ? "report" : "reports"})
                   </span>
                 ) : (

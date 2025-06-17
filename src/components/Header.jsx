@@ -495,9 +495,8 @@ const Header = () => {
     setShowSuggestions(false);
     setSearchQuery("");
   };
-
   return (
-    <header className="relative z-20">
+    <header className="sticky top-0 z-50">
       {/* Top header with elevated design */}
       <div
         className="shadow-xl relative"
@@ -507,7 +506,6 @@ const Header = () => {
             "linear-gradient(to right, var(--brand-primary), var(--brand-primary-hover))",
         }}
       >
-        {" "}
         <div className="container mx-auto px-2 sm:px-3">
           <div className="flex items-center justify-between py-4">
             <button
@@ -527,7 +525,7 @@ const Header = () => {
                 />
               )}
             </button>
-            {/* Logo with enhanced animation */}{" "}
+            {/* Logo with enhanced animation */}
             <Link
               to={ROUTES.HOME}
               className="flex items-center transform hover:scale-105 transition duration-300 ease-in-out"
@@ -652,7 +650,7 @@ const Header = () => {
                     className="text-xl relative z-10"
                     style={{ color: "var(--text-on-brand)" }}
                   />
-                </div>{" "}
+                </div>
                 <div className="text-xs mt-1">
                   <p
                     className="text-white/80 text-center"
@@ -706,7 +704,6 @@ const Header = () => {
                 to={ROUTES.ORDERS}
                 className="hidden sm:flex flex-col items-center transition-all duration-300 hover:translate-y-[-2px] group"
               >
-                {" "}
                 <div className="relative">
                   <div className="absolute -inset-1.5 bg-white/10 rounded-full blur-md group-hover:bg-white/20 transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
                   <FiCalendar
@@ -749,7 +746,7 @@ const Header = () => {
                 >
                   ₹ {totalAmount.toFixed(2)}
                 </p>
-              </Link>{" "}
+              </Link>
               <Link
                 to={isAuthenticated ? "/profile" : ROUTES.LOGIN}
                 className="flex flex-col items-center transition-all duration-300 hover:translate-y-[-2px] group"
@@ -773,7 +770,7 @@ const Header = () => {
             </div>
           </div>
         </div>
-      </div>{" "}
+      </div>
       {/* Mobile search bar - only visible on small screens */}
       <div
         className="md:hidden px-2 py-3"
@@ -876,7 +873,7 @@ const Header = () => {
             </div>
           )}
         </div>
-      </div>{" "}
+      </div>
       {/* Mega Menu Navigation */}
       <nav
         className="bg-white shadow-md relative"
@@ -886,7 +883,6 @@ const Header = () => {
           zIndex: 40,
         }}
       >
-        {" "}
         <div className="container mx-auto px-2 sm:px-3 relative">
           <ul
             className="hidden lg:flex items-center justify-between py-3.5"
@@ -949,7 +945,7 @@ const Header = () => {
                 ></span>
               </Link>
             </li>
-          </ul>{" "}
+          </ul>
           {/* Shared Mega Dropdown Menu - Always Centered */}
           {activeDropdown && (
             <div

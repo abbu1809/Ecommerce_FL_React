@@ -252,7 +252,7 @@ const OrderTable = ({ onSelectOrder, statusFilter, searchQuery }) => {
                       >
                         {formatDate(order.created_at)}
                       </div>
-                    </td>{" "}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <CustomerName userId={order.user_id} />
                     </td>
@@ -264,7 +264,7 @@ const OrderTable = ({ onSelectOrder, statusFilter, searchQuery }) => {
                         {order.order_items?.reduce(
                           (total, item) => total + (item.quantity || 0),
                           0
-                        ) || 0}{" "}
+                        ) || 0}
                         items
                       </div>
                       {order.order_items?.length > 0 && (

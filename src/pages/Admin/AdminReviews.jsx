@@ -357,7 +357,7 @@ const AdminReviews = () => {
             >
               {reviewStats.flagged}
             </span>
-          </button>{" "}
+          </button>
         </div>
       </div>
 

@@ -112,7 +112,7 @@ const DeliveryLayout = ({ children, hideMenu }) => {
             borderRadius: "var(--rounded-lg)",
           }}
         >
-          {children || <Outlet />}{" "}
+          {children || <Outlet />}
           {/* Use children if provided, otherwise use Outlet for nested routes */}
         </div>
       </main>

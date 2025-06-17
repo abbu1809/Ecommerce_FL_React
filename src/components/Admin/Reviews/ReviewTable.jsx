@@ -315,7 +315,6 @@ const ReviewTable = ({ activeTab = "all" }) => {
             className="divide-y"
             style={{ borderColor: "var(--border-primary)" }}
           >
-            {" "}
             {filteredReviews.map((review) => (
               <tr
                 key={review.id}
@@ -386,7 +385,7 @@ const ReviewTable = ({ activeTab = "all" }) => {
                 {/* Rating */}
                 <td className="px-6 py-4 whitespace-nowrap">
                   {renderRating(review.rating)}
-                </td>{" "}
+                </td>
                 {/* Review */}
                 <td className="px-6 py-4">
                   <div
@@ -410,14 +409,14 @@ const ReviewTable = ({ activeTab = "all" }) => {
                       style={{ color: "var(--brand-primary)" }}
                     >
                       {review.helpful_users?.length || 0}
-                    </span>{" "}
+                    </span>
                     found helpful
                   </div>
                 </td>
                 {/* Status */}
                 <td className="px-6 py-4 whitespace-nowrap">
                   {renderStatusBadge(review.status)}
-                </td>{" "}
+                </td>
                 {/* Date */}
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div
@@ -451,10 +450,9 @@ const ReviewTable = ({ activeTab = "all" }) => {
                       onClick={() => openDetailModal(review)}
                     >
                       <FiEye size={16} />
-                    </button>{" "}
+                    </button>
                     {review.status === "pending" && (
                       <>
-                        {" "}
                         <button
                           onClick={() => {
                             showConfirm({
@@ -575,7 +573,6 @@ const ReviewTable = ({ activeTab = "all" }) => {
           className="px-6 py-3 flex items-center justify-between border-t"
           style={{ borderColor: "var(--border-primary)" }}
         >
-          {" "}
           <div className="text-sm" style={{ color: "var(--text-secondary)" }}>
             Showing {filteredReviews.length} of {reviews.list.length} reviews
           </div>
@@ -596,7 +593,7 @@ const ReviewTable = ({ activeTab = "all" }) => {
                 {page}
               </button>
             ))}
-          </div>{" "}
+          </div>
         </div>
       </div>
 

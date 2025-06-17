@@ -105,7 +105,7 @@ const ViewProductModal = ({ product, onClose, onEdit }) => {
                     style={{ color: "var(--text-secondary)" }}
                     className="text-sm"
                   >
-                    Category:{" "}
+                    Category:
                     <span className="font-medium">{product.category}</span>
                   </span>
                 </div>
@@ -211,7 +211,7 @@ const ViewProductModal = ({ product, onClose, onEdit }) => {
                     ))}
                   </ul>
                 </div>
-              )}{" "}
+              )}
               {/* Specifications */}
               {product.specifications &&
                 Object.keys(product.specifications).length > 0 && (
@@ -269,7 +269,7 @@ const ViewProductModal = ({ product, onClose, onEdit }) => {
                       )}
                     </div>
                   </div>
-                )}{" "}
+                )}
               {/* Valid Options / Variants */}
               {product.valid_options && product.valid_options.length > 0 && (
                 <div>
@@ -370,7 +370,7 @@ const ViewProductModal = ({ product, onClose, onEdit }) => {
                               </p>
                             </div>
                           )}
-                        </div>{" "}
+                        </div>
                         {/* Custom key-value pairs */}
                         {option.custom_keys &&
                           option.custom_values &&

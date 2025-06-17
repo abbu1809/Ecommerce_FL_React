@@ -238,7 +238,7 @@ const ProfileInfo = () => {
         >
           {isEditing ? "Cancel" : "Edit Profile"}
         </button>
-      </div>{" "}
+      </div>
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">
           {error}
@@ -395,7 +395,7 @@ const ProfileInfo = () => {
                 </p>
               )}
             </div>
-          </div>{" "}
+          </div>
           {isEditing && (
             <div className="space-y-4">
               <div className="mb-4">
@@ -526,7 +526,7 @@ const ProfileInfo = () => {
               </div>
             </div>
           )}
-        </div>{" "}
+        </div>
         {isEditing && (
           <div className="mt-8 flex justify-end gap-3">
             <button

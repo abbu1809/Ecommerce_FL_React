@@ -108,7 +108,6 @@ const OrderTrackingTimeline = ({ timeline, currentStatus }) => {
                 animationFillMode: "both",
               }}
             >
-              {" "}
               {/* Timeline dot */}
               <div
                 className="flex items-center justify-center h-10 w-10 rounded-full z-10 transition-all duration-300"
@@ -153,14 +152,14 @@ const OrderTrackingTimeline = ({ timeline, currentStatus }) => {
                     }}
                   >
                     {step.status}
-                  </div>{" "}
+                  </div>
                   {step.date ? (
                     <div
                       className="text-xs mt-1 sm:mt-0 sm:ml-3 sm:pl-3 sm:border-l"
                       style={{ borderColor: "var(--border-primary)" }}
                     >
                       <span style={{ color: "var(--text-secondary)" }}>
-                        {new Date(step.date).toLocaleDateString()} at{" "}
+                        {new Date(step.date).toLocaleDateString()} at
                         {new Date(step.date).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -189,7 +188,7 @@ const OrderTrackingTimeline = ({ timeline, currentStatus }) => {
                   >
                     Current Status
                   </div>
-                )}{" "}
+                )}
                 {/* Pending message for future statuses */}
                 {isPending && (
                   <div

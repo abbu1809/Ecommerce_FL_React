@@ -495,7 +495,7 @@ const OrderDetail = ({ order }) => {
                 className="text-sm mt-1"
                 style={{ color: "var(--text-secondary)" }}
               >
-                <strong>Status:</strong>{" "}
+                <strong>Status:</strong>
                 {order.payment_details.status.charAt(0).toUpperCase() +
                   order.payment_details.status.slice(1)}
               </p>
@@ -505,7 +505,7 @@ const OrderDetail = ({ order }) => {
                 className="text-sm mt-1"
                 style={{ color: "var(--text-secondary)" }}
               >
-                <strong>Captured:</strong>{" "}
+                <strong>Captured:</strong>
                 {formatDate(order.payment_details.captured_at)}
               </p>
             )}
@@ -678,7 +678,7 @@ const OrderDetail = ({ order }) => {
               }}
             >
               <p className="text-sm" style={{ color: "var(--text-primary)" }}>
-                <strong>Tracking Number:</strong>{" "}
+                <strong>Tracking Number:</strong>
                 {order.tracking_info.tracking_number}
               </p>
               {order.tracking_info.carrier && (

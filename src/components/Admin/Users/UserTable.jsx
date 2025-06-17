@@ -165,7 +165,6 @@ const UserTable = ({ onSelectUser, filterView, searchQuery }) => {
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        {" "}
                         <div
                           className="h-10 w-10 rounded-full overflow-hidden bg-gray-100 border flex-shrink-0"
                           style={{ borderColor: "var(--border-primary)" }}
@@ -199,7 +198,7 @@ const UserTable = ({ onSelectUser, filterView, searchQuery }) => {
                             className="text-xs"
                             style={{ color: "var(--text-secondary)" }}
                           >
-                            Joined{" "}
+                            Joined
                             {new Date(user?.created_at).toLocaleDateString() ||
                               "N/A"}
                           </div>
@@ -213,10 +212,10 @@ const UserTable = ({ onSelectUser, filterView, searchQuery }) => {
                       >
                         {user?.email}
                       </div>
-                    </td>{" "}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <RoleBadge role={user?.role || "customer"} />
-                    </td>{" "}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <StatusBadge
                         status={
@@ -252,7 +251,7 @@ const UserTable = ({ onSelectUser, filterView, searchQuery }) => {
                           onClick={() => onSelectUser(user)}
                         >
                           <FiEye size={18} />
-                        </button>{" "}
+                        </button>
                         <button
                           className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
                           style={{

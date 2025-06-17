@@ -66,7 +66,7 @@ const ProductInfo = ({ product, selectedVariant }) => {
         >
           {product.rating} ({reviews} ratings)
         </span>
-      </div>{" "}
+      </div>
       {/* Price section with modern styling */}
       <div
         className="p-4 rounded-lg"

@@ -134,7 +134,6 @@ const OrderStatusList = ({ orders }) => {
 
   return (
     <>
-      {" "}
       <div className="space-y-4">
         {orders.map((order) => {
           const latestStatus = getLatestStatus(order);
@@ -203,10 +202,8 @@ const OrderStatusList = ({ orders }) => {
                         style={{ color: "var(--text-secondary)" }}
                       >
                         <span className="hidden sm:inline mx-2">•</span>
-                        Placed:{" "}
-                        {new Date(
-                          order.created_at
-                        ).toLocaleDateString()} at{" "}
+                        Placed:
+                        {new Date(order.created_at).toLocaleDateString()} at
                         {new Date(order.created_at).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -215,18 +212,18 @@ const OrderStatusList = ({ orders }) => {
                     </div>
                     <div className="mt-2 flex flex-wrap gap-4 text-sm">
                       <div style={{ color: "var(--text-secondary)" }}>
-                        <span className="font-medium">Amount:</span>{" "}
+                        <span className="font-medium">Amount:</span>
                         <span className="text-green-600 font-semibold">
                           {formatCurrency(order.total_amount, order.currency)}
                         </span>
                       </div>
                       <div style={{ color: "var(--text-secondary)" }}>
-                        <span className="font-medium">Items:</span>{" "}
+                        <span className="font-medium">Items:</span>
                         {order.item_count}
                       </div>
                     </div>
                   </div>
-                </div>{" "}
+                </div>
                 <div className="flex items-center gap-2">
                   {latestStatus === "pending_payment" && (
                     <button
@@ -272,7 +269,7 @@ const OrderStatusList = ({ orders }) => {
             </div>
           );
         })}
-      </div>{" "}
+      </div>
       {/* Order Detail Modal */}
       <OrderDetailModal
         isOpen={!!selectedOrderId}

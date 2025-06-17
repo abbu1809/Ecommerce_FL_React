@@ -144,7 +144,7 @@ const AdminInventory = () => {
           >
             <FiDownload className="mr-2" size={16} />
             Export CSV
-          </button>{" "}
+          </button>
         </div>
       </div>
       {/* Inventory Statistics */}
@@ -316,7 +316,7 @@ const AdminInventory = () => {
             </select>
           </div>
         </div>
-      </div>{" "}
+      </div>
       <StockTable
         products={paginatedProducts}
         categoryFilter={categoryFilter}

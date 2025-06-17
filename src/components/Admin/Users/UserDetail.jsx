@@ -90,9 +90,7 @@ const UserDetail = ({ user }) => {
         className="p-6 border-b"
         style={{ borderColor: "var(--border-primary)" }}
       >
-        {" "}
         <div className="flex items-center">
-          {" "}
           <div
             className="h-16 w-16 rounded-full overflow-hidden bg-gray-100 border-2 flex-shrink-0"
             style={{ borderColor: "var(--border-primary)" }}
@@ -124,7 +122,7 @@ const UserDetail = ({ user }) => {
             </h2>
             <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
               {currentUser?.email}
-            </p>{" "}
+            </p>
             <div className="mt-2 flex space-x-2">
               {getRoleBadge(currentUser?.role || "customer")}
               {getStatusBadge(
@@ -155,7 +153,6 @@ const UserDetail = ({ user }) => {
               borderRadius: "var(--rounded-md)",
             }}
           >
-            {" "}
             <div className="p-3 flex justify-between">
               <span
                 className="text-sm"
@@ -230,7 +227,7 @@ const UserDetail = ({ user }) => {
             </div>
           </div>
         </div>
-      </div>{" "}
+      </div>
       <div
         className="p-4 border-t flex justify-end space-x-3"
         style={{
@@ -238,7 +235,6 @@ const UserDetail = ({ user }) => {
           borderColor: "var(--border-primary)",
         }}
       >
-        {" "}
         {currentUser?.is_banned ? (
           <Button
             variant="primary"

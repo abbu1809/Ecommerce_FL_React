@@ -115,7 +115,238 @@ export const useAdminStore = create(
         });
       }
       return product;
-    }, // Dashboard actions
+    },
+
+    // Footer management actions
+    footer: {
+      config: null,
+      loading: false,
+      error: null,
+    },
+
+    fetchFooterConfig: async () => {
+      set((state) => ({
+        footer: { ...state.footer, loading: true, error: null },
+      }));
+
+      try {
+        const response = await fetch("/api/admin/footer/");
+        const data = await response.json();
+
+        if (response.ok) {
+          set((state) => ({
+            footer: {
+              ...state.footer,
+              config: data.footer_config,
+              loading: false,
+            },
+          }));
+          return { success: true, data: data.footer_config };
+        } else {
+          set((state) => ({
+            footer: {
+              ...state.footer,
+              error: data.error || "Failed to fetch footer configuration",
+              loading: false,
+            },
+          }));
+          return { success: false, error: data.error };
+        }
+      } catch (error) {
+        const errorMessage = "Network error occurred";
+        set((state) => ({
+          footer: {
+            ...state.footer,
+            error: errorMessage,
+            loading: false,
+          },
+        }));
+        return { success: false, error: errorMessage };
+      }
+    },
+
+    updateFooterConfig: async (footerConfig) => {
+      set((state) => ({
+        footer: { ...state.footer, loading: true, error: null },
+      }));
+
+      try {
+        const token = localStorage.getItem("adminToken");
+        const response = await fetch("/api/admin/footer/update/", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ footer_config: footerConfig }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          set((state) => ({
+            footer: {
+              ...state.footer,
+              config: footerConfig,
+              loading: false,
+            },
+          }));
+          return { success: true };
+        } else {
+          set((state) => ({
+            footer: {
+              ...state.footer,
+              error: data.error || "Failed to update footer configuration",
+              loading: false,
+            },
+          }));
+          return { success: false, error: data.error };
+        }
+      } catch (error) {
+        const errorMessage = "Network error occurred";
+        set((state) => ({
+          footer: {
+            ...state.footer,
+            error: errorMessage,
+            loading: false,
+          },
+        }));
+        return { success: false, error: errorMessage };
+      }
+    },
+
+    addFooterLink: async (section, linkData) => {
+      try {
+        const token = localStorage.getItem("adminToken");
+        const response = await fetch("/api/admin/footer/links/add/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ section, ...linkData }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Refresh footer config
+          await get().fetchFooterConfig();
+          return { success: true };
+        } else {
+          return { success: false, error: data.error || "Failed to add link" };
+        }
+      } catch (error) {
+        return { success: false, error: "Network error occurred" };
+      }
+    },
+
+    deleteFooterLink: async (section, linkIndex) => {
+      try {
+        const token = localStorage.getItem("adminToken");
+        const response = await fetch(
+          `/api/admin/footer/links/${section}/${linkIndex}/delete/`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          // Refresh footer config
+          await get().fetchFooterConfig();
+          return { success: true };
+        } else {
+          const data = await response.json();
+          return {
+            success: false,
+            error: data.error || "Failed to delete link",
+          };
+        }
+      } catch (error) {
+        return { success: false, error: "Network error occurred" };
+      }
+    },
+
+    updateSocialLink: async (linkIndex, linkData) => {
+      try {
+        const token = localStorage.getItem("adminToken");
+        const response = await fetch(
+          `/api/admin/footer/social-links/${linkIndex}/`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(linkData),
+          }
+        );
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Refresh footer config
+          await get().fetchFooterConfig();
+          return { success: true };
+        } else {
+          return {
+            success: false,
+            error: data.error || "Failed to update social link",
+          };
+        }
+      } catch (error) {
+        return { success: false, error: "Network error occurred" };
+      }
+    },
+
+    toggleFooterSection: async (section, enabled) => {
+      try {
+        const token = localStorage.getItem("adminToken");
+        const response = await fetch(
+          `/api/admin/footer/sections/${section}/toggle/`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ enabled }),
+          }
+        );
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Update local state
+          set((state) => ({
+            footer: {
+              ...state.footer,
+              config: {
+                ...state.footer.config,
+                [section]: {
+                  ...state.footer.config[section],
+                  enabled,
+                },
+              },
+            },
+          }));
+          return { success: true };
+        } else {
+          return {
+            success: false,
+            error: data.error || "Failed to toggle section",
+          };
+        }
+      } catch (error) {
+        return { success: false, error: "Network error occurred" };
+      }
+    },
+
+    // ...existing code...
+    // Dashboard actions
     fetchDashboardData: async () => {
       set((state) => ({ dashboard: { ...state.dashboard, loading: true } }));
 

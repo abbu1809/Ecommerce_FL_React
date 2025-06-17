@@ -42,7 +42,6 @@ const OrderStatusPage = () => {
               className="p-6 border-b"
               style={{ borderColor: "var(--border-primary)" }}
             >
-              {" "}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
                   <div
@@ -99,7 +98,7 @@ const OrderStatusPage = () => {
                   tracking information.
                 </span>
               </div>
-            </div>{" "}
+            </div>
             <div className="p-6">
               {isLoading ? (
                 <div className="text-center py-12">

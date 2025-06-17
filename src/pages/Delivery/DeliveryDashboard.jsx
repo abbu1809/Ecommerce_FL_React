@@ -324,7 +324,7 @@ const DeliveryDashboard = () => {
             style={{ color: "var(--text-secondary)" }}
           >
             {delivery.time}
-          </p>{" "}
+          </p>
           {delivery.reason && (
             <p
               className="text-xs mt-1 text-right"
@@ -407,7 +407,7 @@ const DeliveryDashboard = () => {
                 </p>
               </div>
             </div>
-          </div>{" "}
+          </div>
           <div>
             <div
               className="flex items-center text-xs mb-2"
@@ -660,7 +660,7 @@ const DeliveryDashboard = () => {
                       View All
                       <FiChevronRight size={14} className="ml-0.5" />
                     </Link>
-                  </div>{" "}
+                  </div>
                   <div className="space-y-3">
                     {upcomingDeliveries.length > 0 ? (
                       <>
@@ -794,7 +794,7 @@ const DeliveryDashboard = () => {
                       View History
                       <FiChevronRight size={14} className="ml-0.5" />
                     </Link>
-                  </div>{" "}
+                  </div>
                   <div className="space-y-3">
                     {recentDeliveries.length > 0 ? (
                       <>
@@ -924,7 +924,6 @@ const DeliveryDashboard = () => {
                   </h2>
 
                   <div className="space-y-3">
-                    {" "}
                     <Link
                       to="/delivery/assignments"
                       className="p-3 rounded-lg transition-all duration-200 hover:shadow-sm flex justify-between items-center"
@@ -945,7 +944,7 @@ const DeliveryDashboard = () => {
                         </span>
                       </div>
                       <FiChevronRight />
-                    </Link>{" "}
+                    </Link>
                     <Link
                       to="/delivery/history"
                       className="p-3 rounded-lg transition-all duration-200 hover:shadow-sm flex justify-between items-center"
@@ -966,7 +965,7 @@ const DeliveryDashboard = () => {
                         </span>
                       </div>
                       <FiChevronRight />
-                    </Link>{" "}
+                    </Link>
                     <Link
                       to="/delivery/status-update"
                       className="p-3 rounded-lg transition-all duration-200 hover:shadow-sm flex justify-between items-center"
@@ -993,7 +992,7 @@ const DeliveryDashboard = () => {
               </div>
             </div>
           </>
-        )}{" "}
+        )}
         {/* Modal is declared at the bottom of the component */}
       </div>
       {/* Status Update Modal */}

@@ -19,6 +19,18 @@ import OrderStatus from "./pages/OrderStatus";
 import OrderTracking from "./pages/OrderTracking";
 import OrderTrackingDetail from "./pages/OrderTrackingDetail";
 import Account from "./pages/Account";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import TrackOrder from "./pages/TrackOrder";
+import BulkOrder from "./pages/BulkOrder";
+import OurStores from "./pages/OurStores";
+import {
+  TermsConditions,
+  CancellationRefundPolicy,
+  PrivacyPolicy,
+  ShippingDeliveryPolicy,
+  WarrantyPolicy,
+} from "./pages/Policy";
 import { useAuthStore } from "./store/useAuth";
 import { useAdminAuthStore } from "./store/Admin/useAdminAuth";
 import Header from "./components/Header";
@@ -190,12 +202,30 @@ const App = () => {
           <Route path="/orders" element={<OrderStatus />} />
           <Route path="/order-tracking" element={<OrderTracking />} />
           <Route path="/order-tracking/:id" element={<OrderTrackingDetail />} />
-          <Route path="/search" element={<SearchResults />} />{" "}
-          {/* New search route */}
+          <Route path="/search" element={<SearchResults />} />
+
+          {/* Footer Pages */}
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/track-order" element={<TrackOrder />} />
+          <Route path="/bulk-order" element={<BulkOrder />} />
+          <Route path="/terms-conditions" element={<TermsConditions />} />
+          <Route
+            path="/cancellation-refund-policy"
+            element={<CancellationRefundPolicy />}
+          />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route
+            path="/shipping-delivery-policy"
+            element={<ShippingDeliveryPolicy />}
+          />
+          <Route path="/our-stores" element={<OurStores />} />
+          <Route path="/warranty-policy" element={<WarrantyPolicy />} />
+
           {/* Account Routes */}
           <Route path="/profile" element={<Account />} />
           <Route path="/profile/:section" element={<Account />} />
-        </Route>{" "}
+        </Route>
         {/* Admin Routes */}
         <Route
           path="/admin/login"
@@ -216,9 +246,8 @@ const App = () => {
               <Navigate to="/admin/dashboard" />
             )
           }
-        />{" "}
+        />
         <Route element={<AdminLayout />}>
-          {" "}
           <Route
             path="/admin/dashboard"
             element={
@@ -278,7 +307,7 @@ const App = () => {
                 <Navigate to="/admin/login" />
               )
             }
-          />{" "}
+          />
           <Route
             path="/admin/content"
             element={

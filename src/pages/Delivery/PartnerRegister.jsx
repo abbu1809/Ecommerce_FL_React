@@ -215,7 +215,7 @@ const PartnerRegister = () => {
 
         <div className="text-center mt-6">
           <p style={{ color: "var(--text-secondary)" }} className="text-sm">
-            Already have an account?{" "}
+            Already have an account?
             <Link
               to="/delivery/login"
               className="font-medium hover:underline"

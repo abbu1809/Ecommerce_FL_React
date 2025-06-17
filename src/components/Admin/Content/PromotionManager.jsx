@@ -644,7 +644,7 @@ const PromotionManager = () => {
                 </td>
                 <td className="py-3 px-4">
                   <p className="text-sm">
-                    {new Date(promotion.startDate).toLocaleDateString()} -{" "}
+                    {new Date(promotion.startDate).toLocaleDateString()} -
                     {new Date(promotion.endDate).toLocaleDateString()}
                   </p>
                   {isExpired(promotion.endDate) && (

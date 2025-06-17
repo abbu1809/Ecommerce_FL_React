@@ -241,7 +241,7 @@ const ReviewModal = ({ isOpen, onClose, product }) => {
                 {rating} out of 5 stars
               </p>
             )}
-          </div>{" "}
+          </div>
           {/* Comment */}
           <div className="mb-6">
             <label

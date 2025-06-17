@@ -162,7 +162,6 @@ const SearchResults = () => {
         </div>
 
         <div className="flex flex-col md:flex-row justify-between items-start gap-6">
-          {" "}
           <ProductFilter
             showFilters={showFilters}
             setShowFilters={setShowFilters}

@@ -230,7 +230,7 @@ const ReviewList = ({
                   className="text-sm"
                   style={{ color: "var(--text-secondary)" }}
                 >
-                  Based on {reviews.length}{" "}
+                  Based on {reviews.length}
                   {reviews.length === 1 ? "review" : "reviews"}
                 </span>
               </div>
@@ -245,7 +245,7 @@ const ReviewList = ({
                     className="text-xs font-medium mr-2"
                     style={{ color: "var(--text-secondary)" }}
                   >
-                    {dist.rating}{" "}
+                    {dist.rating}
                     <FiStar className="inline-block ml-1" size={12} />
                   </span>
                 </div>
@@ -326,7 +326,7 @@ const ReviewList = ({
             </button>
           </div>
         </div>
-      )}{" "}
+      )}
       {/* Review filters */}
       {showFilters && reviews.length > 0 && (
         <div
@@ -413,7 +413,7 @@ const ReviewList = ({
                     {review.title || "Review"}
                   </p>
                   <div className="flex items-center mt-1">
-                    <ReviewRatings rating={review.rating} readOnly={true} />{" "}
+                    <ReviewRatings rating={review.rating} readOnly={true} />
                     <span
                       className="ml-2 text-xs"
                       style={{ color: "var(--text-secondary)" }}
@@ -466,7 +466,7 @@ const ReviewList = ({
                   >
                     {review.user || "Anonymous"}
                   </span>
-                </div>{" "}
+                </div>
                 <div className="flex items-center space-x-3">
                   <button
                     onClick={() => handleHelpful(review.id)}

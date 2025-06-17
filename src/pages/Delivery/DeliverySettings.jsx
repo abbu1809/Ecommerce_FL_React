@@ -254,7 +254,7 @@ const DeliverySettings = () => {
           >
             {isEditing ? "Cancel" : "Edit Profile"}
           </button>
-        </div>{" "}
+        </div>
         <div className="space-y-8">
           {/* Profile Information */}
           <div
@@ -538,7 +538,7 @@ const DeliverySettings = () => {
                     icon={<FiSave />}
                   >
                     Update Password
-                  </Button>{" "}
+                  </Button>
                 </div>
               </form>
             </div>

@@ -472,7 +472,6 @@ const Orders = () => {
 
                             {/* Order Details */}
                             <div className="space-y-1">
-                              {" "}
                               {/* Date */}
                               <div
                                 className="flex items-center text-sm"
@@ -509,7 +508,7 @@ const Orders = () => {
                                   style={{ color: "var(--text-secondary)" }}
                                 >
                                   <FiTruck className="mr-2" size={14} />
-                                  Expected by{" "}
+                                  Expected by
                                   {formatDate(order.estimated_delivery)}
                                 </div>
                               )}

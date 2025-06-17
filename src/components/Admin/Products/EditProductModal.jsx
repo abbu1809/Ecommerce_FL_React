@@ -838,7 +838,7 @@ const EditProductModal = ({ product, onClose, onSave }) => {
                       </button>
                     </div>
                   )
-                )}{" "}
+                )}
               </div>
 
               {/* Attributes */}
@@ -1044,7 +1044,7 @@ const EditProductModal = ({ product, onClose, onSave }) => {
                         min="0"
                         step="1"
                       />
-                    </div>{" "}
+                    </div>
                     <div className="mt-2">
                       {option.custom_keys &&
                         option.custom_keys.map((key, keyIndex) => (
@@ -1158,7 +1158,7 @@ const EditProductModal = ({ product, onClose, onSave }) => {
                         <FiX size={12} />
                       </button>
                     </div>
-                  ))}{" "}
+                  ))}
                   {formData.images.length < 5 && (
                     <div
                       className="aspect-square border rounded-md flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors relative"

@@ -180,7 +180,6 @@ const ProductVariantSelector = ({
             {getDisplayName(key)}:
           </h4>
           <div className="flex flex-wrap gap-2">
-            {" "}
             {values.map((value) => {
               const isSelected = variantSelections[key] === value;
 

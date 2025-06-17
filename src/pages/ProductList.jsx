@@ -301,7 +301,6 @@ const ProductList = () => {
         </div>
 
         <div className="flex flex-col md:flex-row justify-between items-start gap-6">
-          {" "}
           <ProductFilter
             showFilters={showFilters}
             setShowFilters={setShowFilters}
@@ -333,7 +332,7 @@ const ProductList = () => {
           {/* Product Grid */}
           <div className="w-full md:w-3/4">
             {/* Results Header */}
-            <ProductSorting sortBy={sortBy} setSortBy={setSortBy} />{" "}
+            <ProductSorting sortBy={sortBy} setSortBy={setSortBy} />
             {/* Products Grid */}
             <ProductGrid products={paginatedProducts} loading={loading} />
             {/* Pagination */}

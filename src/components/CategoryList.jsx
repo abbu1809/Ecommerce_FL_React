@@ -93,7 +93,7 @@ const CategoryList = () => {
         >
           Discover our wide range of products by browsing through popular
           categories
-        </p>{" "}
+        </p>
       </div>
       {/* Slider container with navigation */}
       <div
@@ -134,7 +134,7 @@ const CategoryList = () => {
           <MdKeyboardArrowRight
             className="w-6 h-6"
             style={{ color: "var(--brand-primary)" }}
-          />{" "}
+          />
         </button>
         {/* Carousel container */}
         <div
@@ -171,7 +171,7 @@ const CategoryList = () => {
                   width: "280px",
                 }}
               >
-                {/* Image container */}{" "}
+                {/* Image container */}
                 <div
                   className="flex items-center justify-center mb-3 relative overflow-hidden transition-all duration-300 hover:shadow-lg"
                   style={{

@@ -60,7 +60,7 @@ const ProductTabs = ({ product, activeTab, setActiveTab }) => {
           icon={<FiMessageSquare />}
           label={`Reviews (${reviews})`}
         />
-      </div>{" "}
+      </div>
       {/* Tab content with animated transitions */}
       <div className="p-6 bg-white min-h-[400px] max-h-[600px] overflow-y-auto custom-scrollbar">
         {activeTab === "description" && (

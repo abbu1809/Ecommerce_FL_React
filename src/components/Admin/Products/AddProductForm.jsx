@@ -735,7 +735,7 @@ const AddProductForm = ({ onClose, onSave }) => {
                       </button>
                     </div>
                   )
-                )}{" "}
+                )}
               </div>
               {/* Attributes */}
               <div>
@@ -998,7 +998,9 @@ const AddProductForm = ({ onClose, onSave }) => {
                               }
                               className="p-2 text-red-500 hover:text-red-700"
                             >
-                              <span className="text-sm">Remove Valid Option</span>
+                              <span className="text-sm">
+                                Remove Valid Option
+                              </span>
                               <FiTrash2 />
                             </button>
                           </div>
@@ -1015,7 +1017,7 @@ const AddProductForm = ({ onClose, onSave }) => {
                     </button>
                   </div>
                 ))}
-              </div>{" "}
+              </div>
               {/* Images */}
               {/* Images */}
               <div>
@@ -1052,7 +1054,7 @@ const AddProductForm = ({ onClose, onSave }) => {
                         <FiX size={12} />
                       </button>
                     </div>
-                  ))}{" "}
+                  ))}
                   {formData.images.length < 5 && (
                     <div
                       className="aspect-square border rounded-md flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors"

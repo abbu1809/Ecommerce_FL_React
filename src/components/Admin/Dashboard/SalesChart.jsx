@@ -72,7 +72,7 @@ const SalesChart = () => {
             Export
           </button>
         </div>
-      </div>{" "}
+      </div>
       <div className="h-64 flex items-center justify-center mb-4">
         {/* Placeholder for chart with real data visualization */}
         <div className="text-center w-full">
@@ -134,7 +134,7 @@ const SalesChart = () => {
             Monthly sales overview ({salesData?.length || 0} months)
           </p>
         </div>
-      </div>{" "}
+      </div>
       <div
         className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t"
         style={{ borderColor: "var(--border-primary)" }}

@@ -196,7 +196,7 @@ const Login = () => {
               or continue with
             </span>
           </div>
-        </div>{" "}
+        </div>
         <div className="flex justify-center mb-6">
           <button
             type="button"

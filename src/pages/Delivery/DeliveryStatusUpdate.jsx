@@ -614,7 +614,7 @@ const DeliveryStatusUpdate = () => {
                 >
                   {delivery.orderId}
                 </span>
-              </div>{" "}
+              </div>
             </div>
             <div
               className="mt-4 md:mt-0 px-3 py-1 rounded-full text-xs font-semibold"
@@ -759,7 +759,6 @@ const DeliveryStatusUpdate = () => {
                   className="pt-4 border-t"
                   style={{ borderColor: "var(--border-primary)" }}
                 >
-                  {" "}
                   <h3
                     className="text-sm font-medium mb-2"
                     style={{ color: "var(--text-secondary)" }}
@@ -914,7 +913,7 @@ const DeliveryStatusUpdate = () => {
                       {delivery.deliveryInstructions}
                     </p>
                   </div>
-                )}{" "}
+                )}
               </div>
             </div>
           </div>

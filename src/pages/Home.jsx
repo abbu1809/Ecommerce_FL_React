@@ -36,7 +36,6 @@ const Home = () => {
       style={{ backgroundColor: "var(--bg-secondary)" }}
       className="min-h-screen"
     >
-      {" "}
       {/* Hero Banner */}
       <HeroBanner />
       {/* Categories Section */}
@@ -60,7 +59,6 @@ const Home = () => {
         className="py-12"
       >
         <div className="container">
-          {" "}
           <h2
             style={{ color: "var(--text-primary)" }}
             className="text-2xl md:text-3xl font-bold mb-6"
@@ -92,7 +90,7 @@ const Home = () => {
             >
               Explore our complete collection
             </p>
-          </div>{" "}
+          </div>
           {/* Products Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {paginatedProducts.map((product) => (
@@ -131,7 +129,7 @@ const Home = () => {
                   stock: product.stock || 0,
                 }}
               />
-            ))}{" "}
+            ))}
           </div>
           {/* Pagination */}
           {totalProducts > 0 && (

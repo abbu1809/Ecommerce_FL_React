@@ -532,7 +532,7 @@ const DeliveryHistory = () => {
                 : "Your completed deliveries will appear here once you've made some deliveries."}
             </p>
           </div>
-        )}{" "}
+        )}
       </div>
 
       {/* Status Modal */}

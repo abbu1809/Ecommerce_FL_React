@@ -200,7 +200,7 @@ const CategoryManager = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Image
-              </label>{" "}
+              </label>
               <div className="flex">
                 <input
                   type="text"
@@ -345,7 +345,7 @@ const CategoryManager = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Image
-              </label>{" "}
+              </label>
               <div className="flex">
                 <input
                   type="text"

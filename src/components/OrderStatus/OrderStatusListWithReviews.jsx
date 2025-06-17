@@ -224,13 +224,13 @@ const OrderStatusListWithReviews = ({ orders }) => {
                         >
                           {getStatusDisplay(latestStatus)}
                         </span>
-                      </div>{" "}
+                      </div>
                       <div
                         className="text-xs"
                         style={{ color: "var(--text-secondary)" }}
                       >
                         <span className="hidden sm:inline mx-2">•</span>
-                        Placed:{" "}
+                        Placed:
                         {(() => {
                           const dateTime = formatDateTime(order.created_at);
                           return `${dateTime.date} at ${dateTime.time}`;
@@ -239,13 +239,13 @@ const OrderStatusListWithReviews = ({ orders }) => {
                     </div>
                     <div className="mt-2 flex flex-wrap gap-4 text-sm">
                       <div style={{ color: "var(--text-secondary)" }}>
-                        <span className="font-medium">Amount:</span>{" "}
+                        <span className="font-medium">Amount:</span>
                         <span className="text-green-600 font-semibold">
                           {formatCurrency(order.total_amount, order.currency)}
                         </span>
                       </div>
                       <div style={{ color: "var(--text-secondary)" }}>
-                        <span className="font-medium">Items:</span>{" "}
+                        <span className="font-medium">Items:</span>
                         {order.item_count}
                       </div>
                     </div>

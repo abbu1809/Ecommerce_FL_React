@@ -171,7 +171,7 @@ const BannerManager = ({ positionOptions }) => {
         </div>
       )}
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-800">Manage Banners</h2>{" "}
+        <h2 className="text-lg font-semibold text-gray-800">Manage Banners</h2>
         <Button
           variant="primary"
           onClick={() => {
@@ -186,7 +186,7 @@ const BannerManager = ({ positionOptions }) => {
         >
           {showAddForm ? "Cancel" : "Add New Banner"}
         </Button>
-      </div>{" "}
+      </div>
       {showAddForm && (
         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
           <h3 className="font-medium">Add New Banner</h3>
@@ -216,7 +216,7 @@ const BannerManager = ({ positionOptions }) => {
                   setNewBanner({ ...newBanner, subtitle: e.target.value })
                 }
               />
-            </div>{" "}
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Image Upload
@@ -346,7 +346,7 @@ const BannerManager = ({ positionOptions }) => {
             </Button>
           </div>
         </div>
-      )}{" "}
+      )}
       {editingBanner && (
         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
           <h3 className="font-medium">Edit Banner</h3>
@@ -379,7 +379,7 @@ const BannerManager = ({ positionOptions }) => {
                   })
                 }
               />
-            </div>{" "}
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Image Upload
@@ -515,7 +515,7 @@ const BannerManager = ({ positionOptions }) => {
                 <span className="text-sm text-gray-700">Active</span>
               </label>
             </div>
-          </div>{" "}
+          </div>
           <div className="flex justify-end space-x-3">
             <Button variant="secondary" onClick={resetEditBannerForm}>
               Cancel
@@ -546,7 +546,7 @@ const BannerManager = ({ positionOptions }) => {
                     alt={banner.title}
                     className="h-24 w-48 object-cover rounded"
                   />
-                </td>{" "}
+                </td>
                 <td className="py-3 px-4">
                   <h3 className="font-medium">{banner.title}</h3>
                   {banner.subtitle && (
@@ -601,7 +601,7 @@ const BannerManager = ({ positionOptions }) => {
                       onClick={() => handleToggleActive(banner.id)}
                     >
                       {banner.active ? "Deactivate" : "Activate"}
-                    </Button>{" "}
+                    </Button>
                     <Button
                       variant="danger"
                       size="sm"
@@ -615,7 +615,7 @@ const BannerManager = ({ positionOptions }) => {
             ))}
           </tbody>
         </table>
-      </div>{" "}
+      </div>
       {banners.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           <p>No banners found. Add your first banner!</p>

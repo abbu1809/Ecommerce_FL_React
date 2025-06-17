@@ -246,7 +246,7 @@ const DeliveryStatusModal = ({
                   className="text-sm"
                   style={{ color: "var(--text-secondary)" }}
                 >
-                  Order ID: {delivery.orderId} • Customer:{" "}
+                  Order ID: {delivery.orderId} • Customer:
                   {delivery.customer?.name}
                 </p>
               </div>
@@ -258,13 +258,12 @@ const DeliveryStatusModal = ({
             >
               <FiX size={20} />
             </button>
-          </div>{" "}
+          </div>
           {/* Content */}
           <div className="px-6 py-4 max-h-[70vh] overflow-y-auto">
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">
-                  {" "}
                   {/* Status Update Form */}
                   <div
                     className="rounded-lg p-4 mb-4"
@@ -275,7 +274,7 @@ const DeliveryStatusModal = ({
                       style={{ color: "var(--text-primary)" }}
                     >
                       <FiPackage className="mr-2" /> Update Status
-                    </h4>{" "}
+                    </h4>
                     {/* Status Selection */}
                     <div className="mb-4">
                       <label
@@ -328,7 +327,7 @@ const DeliveryStatusModal = ({
                             </span>
                           </button>
                         ))}
-                      </div>{" "}
+                      </div>
                     </div>
                     {/* Custom Status Field (when "Other" is selected) */}
                     {newStatus === "other" && (
@@ -397,9 +396,9 @@ const DeliveryStatusModal = ({
                           style={{ color: "var(--text-secondary)" }}
                         >
                           Please collect the OTP from the customer upon delivery
-                        </p>{" "}
+                        </p>
                       </div>
-                    )}{" "}
+                    )}
                     {/* Carrier field */}
                     {(newStatus === "shipped" ||
                       newStatus === "out_for_delivery") && (
@@ -556,7 +555,7 @@ const DeliveryStatusModal = ({
                               )}
                           </span>
                         </div>
-                      )}{" "}
+                      )}
                       <p
                         className="mt-1 text-xs"
                         style={{ color: "var(--text-secondary)" }}
@@ -739,7 +738,7 @@ const DeliveryStatusModal = ({
                             ? "Returning"
                             : delivery.status}
                         </span>
-                      </div>{" "}
+                      </div>
                       {/* Customer Information */}
                       <div>
                         <h5
@@ -777,8 +776,8 @@ const DeliveryStatusModal = ({
                           >
                             {delivery.delivery_address.street_address}
                             <br />
-                            {delivery.delivery_address.city},{" "}
-                            {delivery.delivery_address.state}{" "}
+                            {delivery.delivery_address.city},
+                            {delivery.delivery_address.state}
                             {delivery.delivery_address.postal_code}
                           </p>
                         ) : delivery.customer?.address ? (
@@ -916,7 +915,7 @@ const DeliveryStatusModal = ({
                             </p>
                           )}
                         </div>
-                      </div>{" "}
+                      </div>
                       {/* Estimated Delivery */}
                       <div>
                         <h5
@@ -955,7 +954,7 @@ const DeliveryStatusModal = ({
                                 minute: "2-digit",
                               })
                             : ""}
-                        </p>{" "}
+                        </p>
                       </div>
                       {/* Payment Information */}
                       <div className="mt-3">

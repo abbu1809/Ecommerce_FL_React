@@ -125,7 +125,6 @@ const HeroBanner = () => {
               transition={slideTransition}
               className="absolute inset-0"
             >
-              {" "}
               {/* High-quality image with subtle zoom effect */}
               <img
                 src={images[currentIndex].image}
@@ -135,11 +134,10 @@ const HeroBanner = () => {
                   backgroundColor: images[currentIndex].backgroundColor,
                 }}
                 loading="eager"
-              />{" "}
+              />
               {/* Content overlay without dark background */}
               <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-14">
                 <div className="max-w-lg relative">
-                  {" "}
                   {/* Animated badge */}
                   {images[currentIndex].tag && (
                     <motion.span
@@ -207,7 +205,6 @@ const HeroBanner = () => {
                     transition={{ delay: 0.8, duration: 0.6 }}
                     className="flex flex-wrap gap-4"
                   >
-                    {" "}
                     <Button
                       variant="primary"
                       fullWidth={false}
@@ -242,7 +239,7 @@ const HeroBanner = () => {
                         </svg>
                       </span>
                       <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 transform -skew-x-30 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out"></span>
-                    </Button>{" "}
+                    </Button>
                     {images[currentIndex].link && (
                       <Button
                         variant="outline"
@@ -322,7 +319,7 @@ const HeroBanner = () => {
                 />
               </svg>
             </motion.button>
-          </div>{" "}
+          </div>
           {/* Slide indicators */}
           <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
             {images.map((_, index) => (

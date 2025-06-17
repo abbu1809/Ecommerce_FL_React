@@ -2,6 +2,8 @@ import { useState } from "react";
 import BannerManager from "../../components/Admin/Content/BannerManager";
 import LogoManager from "../../components/Admin/Content/LogoManager";
 import CategoryManager from "../../components/Admin/Content/CategoryManager";
+import FooterManager from "../../components/Admin/Content/FooterManager";
+import PageManager from "../../components/Admin/Content/PageManager";
 import { bannerPositionOptions } from "../../constants/bannerOptions";
 
 const AdminContent = () => {
@@ -14,7 +16,7 @@ const AdminContent = () => {
       </div>
 
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <div className="flex border-b">
+        <div className="flex border-b overflow-x-auto">
           <button
             className={`px-6 py-3 font-medium ${
               activeTab === "logo"
@@ -45,14 +47,35 @@ const AdminContent = () => {
           >
             Categories
           </button>
+          <button
+            className={`px-6 py-3 font-medium ${
+              activeTab === "footer"
+                ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+            onClick={() => setActiveTab("footer")}
+          >
+            Footer
+          </button>
+          <button
+            className={`px-6 py-3 font-medium ${
+              activeTab === "pages"
+                ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+            onClick={() => setActiveTab("pages")}
+          >
+            Pages
+          </button>
         </div>
-
         <div className="p-6">
           {activeTab === "banners" && (
             <BannerManager positionOptions={bannerPositionOptions} />
           )}
           {activeTab === "logo" && <LogoManager />}
           {activeTab === "categories" && <CategoryManager />}
+          {activeTab === "footer" && <FooterManager />}
+          {activeTab === "pages" && <PageManager />}
         </div>
       </div>
     </div>

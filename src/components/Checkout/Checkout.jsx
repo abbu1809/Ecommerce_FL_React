@@ -219,7 +219,6 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
               className="lg:col-span-2 space-y-6 md:space-y-8"
               style={{ animation: "slideInLeft 0.6s ease-out" }}
             >
-              {" "}
               {/* Enhanced Order Summary */}
               <div
                 className="group rounded-2xl p-8 border-2 border-transparent transition-all duration-500 hover:border-opacity-30 hover:shadow-xl transform hover:-translate-y-1"
@@ -254,7 +253,7 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
                       className="text-sm"
                       style={{ color: "var(--text-secondary)" }}
                     >
-                      {orderItems.length} item{orderItems.length > 1 ? "s" : ""}{" "}
+                      {orderItems.length} item{orderItems.length > 1 ? "s" : ""}
                       in your order
                     </p>
                   </div>
@@ -385,7 +384,7 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
                     </div>
                   </div>
                 </div>
-              </div>{" "}
+              </div>
               {/* Enhanced Address Selection */}
               <div
                 className="group rounded-2xl p-8 border-2 border-transparent transition-all duration-500 hover:border-opacity-30 hover:shadow-xl transform hover:-translate-y-1"
@@ -542,7 +541,7 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
                                 className="text-base leading-relaxed"
                                 style={{ color: "var(--text-secondary)" }}
                               >
-                                {address.address}, {address.city},{" "}
+                                {address.address}, {address.city},
                                 {address.state} - {address.pincode}
                               </p>
                             </div>
@@ -609,7 +608,7 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
                   </div>
                 )}
               </div>
-            </div>{" "}
+            </div>
             {/* Right Column - Payment & Order */}
             <div className="lg:col-span-1">
               <div
@@ -716,7 +715,7 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
                       </span>
                     </div>
                   </div>
-                </div>{" "}
+                </div>
                 {/* Place Order Button */}
                 <Button
                   onClick={handlePlaceOrder}
@@ -741,7 +740,7 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
                   {isProcessingPayment
                     ? "Processing Payment..."
                     : `Place Order`}
-                </Button>{" "}
+                </Button>
                 {/* Continue Shopping Button */}
                 <button
                   onClick={onClose}

@@ -89,7 +89,7 @@ const ProductImageGallery = ({
           }}
         >
           {isVideo(allMedia[activeImage]) ? <FiPlay /> : <FiZoomIn />}
-        </button>{" "}
+        </button>
         {/* Navigation buttons */}
         {allMedia.length > 1 && (
           <>
@@ -121,7 +121,7 @@ const ProductImageGallery = ({
             </button>
           </>
         )}
-      </div>{" "}
+      </div>
       {/* Thumbnail grid */}
       <div className="grid grid-cols-5 gap-2">
         {allMedia.map((item, index) => (

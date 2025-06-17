@@ -26,6 +26,12 @@ export const ROUTES = {
   CONTACT: "/contact",
   TRACK_ORDER: "/track-order",
   BULK_ORDER: "/bulk-order",
+  TERMS_CONDITIONS: "/terms-conditions",
+  CANCELLATION_REFUND_POLICY: "/cancellation-refund-policy",
+  PRIVACY_POLICY: "/privacy-policy",
+  SHIPPING_DELIVERY_POLICY: "/shipping-delivery-policy",
+  OUR_STORES: "/our-stores",
+  WARRANTY_POLICY: "/warranty-policy",
 };
 
 // UI Constants

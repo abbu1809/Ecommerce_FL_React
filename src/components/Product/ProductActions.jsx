@@ -28,7 +28,6 @@ const ProductActions = ({ addToCart, addToWishlist, price }) => {
         className="p-4 rounded-lg mb-2"
         style={{ backgroundColor: "var(--bg-accent-light)" }}
       >
-        {" "}
         <div className="flex justify-between items-center mb-2">
           <span style={{ color: "var(--text-secondary)" }}>Price:</span>
           <span style={{ color: "var(--text-primary)" }}>
@@ -85,7 +84,7 @@ const ProductActions = ({ addToCart, addToWishlist, price }) => {
         >
           <FiHeart className="mr-2" />
           Add to Wishlist
-        </Button>{" "}
+        </Button>
       </div>
 
       {/* Divider */}

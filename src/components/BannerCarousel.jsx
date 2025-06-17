@@ -108,11 +108,10 @@ const BannerCarousel = () => {
             transition: "width 5s linear",
           }}
         ></div>
-      </div>{" "}
+      </div>
       {/* Slider with Framer Motion */}
       <div className="relative w-full h-full overflow-hidden">
         <AnimatePresence initial={false} custom={direction}>
-          {" "}
           <motion.div
             key={page}
             custom={direction}
@@ -123,7 +122,6 @@ const BannerCarousel = () => {
             transition={slideTransition}
             className="absolute inset-0 w-full"
           >
-            {" "}
             {/* High-quality image with subtle zoom effect */}
             <motion.img
               src={banners[currentIndex].image}
@@ -139,7 +137,7 @@ const BannerCarousel = () => {
               loading="eager"
             />
             {/* Banner content overlay */}
-            
+
             {/* Decorative elements */}
             <motion.div
               className="absolute top-0 right-0 w-64 h-64 opacity-20 rotate-45 translate-x-20 -translate-y-20"

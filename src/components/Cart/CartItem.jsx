@@ -30,7 +30,7 @@ const CartItem = ({ item, updateQuantity, removeItem }) => {
               style={{ color: "var(--text-primary)" }}
             >
               {item.name}
-            </Link>{" "}
+            </Link>
             <span
               className="text-sm block mt-1"
               style={{ color: "var(--text-secondary)" }}
@@ -42,7 +42,6 @@ const CartItem = ({ item, updateQuantity, removeItem }) => {
       </td>
       <td className="py-6 px-4">
         <div className="flex items-center justify-center">
-          {" "}
           <button
             onClick={() => updateQuantity(item.item_id, -1)}
             className="flex items-center justify-center w-8 h-8 rounded-md focus:outline-none transition-all duration-200"
@@ -72,7 +71,7 @@ const CartItem = ({ item, updateQuantity, removeItem }) => {
             <FiPlus size={16} />
           </button>
         </div>
-      </td>{" "}
+      </td>
       <td
         className="py-6 px-4 text-right text-lg font-semibold"
         style={{ color: "var(--brand-primary)" }}
@@ -80,7 +79,6 @@ const CartItem = ({ item, updateQuantity, removeItem }) => {
         ₹{((item.price || 0) * item.quantity).toLocaleString()}
       </td>
       <td className="py-6 px-4 text-center">
-        {" "}
         <button
           onClick={() => removeItem(item.item_id)}
           className="p-2.5 rounded-full hover:bg-red-50 transition-all duration-200 focus:outline-none"

@@ -56,7 +56,7 @@ const LowStockNotification = ({ products }) => {
             <p>
               {products.length} product{products.length > 1 ? "s" : ""} running
               low on stock:
-            </p>{" "}
+            </p>
             <ul className="mt-2 space-y-1">
               {products.slice(0, 3).map((product) => {
                 const stockStatus = getProductStockStatus(product);
@@ -81,7 +81,7 @@ const LowStockNotification = ({ products }) => {
                       <div className="text-xs ml-2 space-y-0.5">
                         {stockStatus.outOfStockVariants.map((variant, idx) => (
                           <div key={`out-${idx}`} style={{ color: "#DC2626" }}>
-                            •{" "}
+                            •
                             {variant.colors ||
                               variant.storage ||
                               variant.ram ||
@@ -91,7 +91,7 @@ const LowStockNotification = ({ products }) => {
                         ))}
                         {stockStatus.lowStockVariants.map((variant, idx) => (
                           <div key={`low-${idx}`} style={{ color: "#D97706" }}>
-                            •{" "}
+                            •
                             {variant.colors ||
                               variant.storage ||
                               variant.ram ||

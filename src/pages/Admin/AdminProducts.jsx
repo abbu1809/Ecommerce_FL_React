@@ -254,7 +254,7 @@ const AdminProducts = () => {
             Clear Filters
           </button>
         </div>
-      </div>{" "}
+      </div>
       <ProductTable
         products={paginatedProducts}
         onViewProduct={handleViewProduct}

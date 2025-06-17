@@ -290,7 +290,7 @@ const OrderTracking = () => {
                 >
                   We'll update this page as your order progresses.
                 </p>
-              </div>{" "}
+              </div>
               <OrderTrackingTimeline
                 timeline={order.timeline}
                 currentStatus={order.status}
@@ -377,7 +377,7 @@ const OrderTracking = () => {
                               >
                                 ₹{item.price.toLocaleString()}
                               </div>
-                            </div>{" "}
+                            </div>
                             {/* Review button for delivered items */}
                             {item.hasReviewed ||
                             reviewedProducts.has(item.productId || item.id) ? (
@@ -404,7 +404,7 @@ const OrderTracking = () => {
                             )}
                           </div>
                         </div>
-                      ))}{" "}
+                      ))}
                     </div>
                   </div>
                 )}

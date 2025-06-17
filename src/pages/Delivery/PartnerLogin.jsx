@@ -187,7 +187,7 @@ const PartnerLogin = () => {
 
         <div className="text-center mt-6">
           <p style={{ color: "var(--text-secondary)" }} className="text-sm">
-            Don't have a partner account?{" "}
+            Don't have a partner account?
             <Link
               to="/delivery/register"
               className="font-medium hover:underline"

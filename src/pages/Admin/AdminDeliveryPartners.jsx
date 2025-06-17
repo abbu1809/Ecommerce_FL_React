@@ -94,7 +94,7 @@ const AdminDeliveryPartners = () => {
   return (
     <div className="animate-fadeIn">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Delivery Partners</h1>{" "}
+        <h1 className="text-2xl font-bold text-gray-800">Delivery Partners</h1>
         <button
           onClick={() => {
             toast.promise(fetchDeliveryPartners(), {
@@ -228,7 +228,6 @@ const AdminDeliveryPartners = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {" "}
                 {filteredPartners.length > 0 ? (
                   paginatedPartners.map((partner) => (
                     <tr key={partner.partner_id} className="hover:bg-gray-50">
@@ -267,7 +266,7 @@ const AdminDeliveryPartners = () => {
                           >
                             Verify
                           </button>
-                        )}{" "}
+                        )}
                         <button
                           className="text-gray-600 hover:text-gray-900"
                           onClick={() => openDetailsModal(partner)}
@@ -287,7 +286,7 @@ const AdminDeliveryPartners = () => {
                       No delivery partners found.
                     </td>
                   </tr>
-                )}{" "}
+                )}
               </tbody>
             </table>
           </div>
@@ -331,10 +330,10 @@ const AdminDeliveryPartners = () => {
                         className="text-sm leading-relaxed"
                         style={{ color: "var(--text-secondary)" }}
                       >
-                        Are you sure you want to verify{" "}
+                        Are you sure you want to verify
                         <span className="font-semibold">
                           {selectedPartner.name}
-                        </span>{" "}
+                        </span>
                         as a delivery partner?
                       </p>
                     </div>
@@ -360,7 +359,7 @@ const AdminDeliveryPartners = () => {
                       Verify Partner
                     </button>
                   </div>
-                </div>{" "}
+                </div>
               </div>
             </div>
           )}

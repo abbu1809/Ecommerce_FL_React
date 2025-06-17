@@ -245,7 +245,7 @@ const AdminOrdersTest = () => {
         <p>Loading: {orders.loading ? "Yes" : "No"}</p>
         {orders.list.length > 0 && (
           <p>
-            Total Items in First Order:{" "}
+            Total Items in First Order:
             {orders.list[0].order_items?.reduce(
               (total, item) => total + (item.quantity || 0),
               0
@@ -285,7 +285,7 @@ const AdminOrdersTest = () => {
         <h3>⚠️ Important Notes:</h3>
         <ul>
           <li>
-            Make sure your Django backend is running on{" "}
+            Make sure your Django backend is running on
             <code>http://127.0.0.1:8000</code>
           </li>
           <li>

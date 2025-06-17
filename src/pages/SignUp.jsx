@@ -324,7 +324,7 @@ const SignUp = () => {
           className="text-sm text-center mt-6"
           style={{ color: "var(--text-secondary)" }}
         >
-          Already have an account?{" "}
+          Already have an account?
           <Link
             to="/login"
             className="font-medium hover:underline transition-colors duration-200"
@@ -345,8 +345,8 @@ const SignUp = () => {
             style={{ color: "var(--brand-primary)" }}
           >
             Terms of Service
-          </Link>{" "}
-          &{" "}
+          </Link>
+          &
           <Link
             to="/privacy"
             className="hover:underline"

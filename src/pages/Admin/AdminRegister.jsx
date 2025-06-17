@@ -123,7 +123,7 @@ const AdminRegister = () => {
           </Button>
         </div>
         <div className="text-sm text-center mt-4">
-          Already have an admin account?{" "}
+          Already have an admin account?
           <Link
             to="/admin/login"
             className="font-medium text-teal-600 hover:text-teal-500 transition-colors duration-200"

@@ -359,7 +359,7 @@ const AddressList = () => {
                   </span>
                 </label>
               </div>
-            </div>{" "}
+            </div>
             <div className="mt-6 flex justify-end gap-3">
               <button
                 type="button"
@@ -474,14 +474,14 @@ const AddressList = () => {
                     <div style={{ color: "var(--text-primary)" }}>
                       <p>{address.address || address.street_address}</p>
                       <p>
-                        {address.city}, {address.state} -{" "}
+                        {address.city}, {address.state} -
                         {address.pincode || address.postal_code}
                       </p>
                       <p className="mt-1">
                         Phone: {address.phone || address.phone_number}
                       </p>
                     </div>
-                  </div>{" "}
+                  </div>
                   <div className="flex justify-between items-center mt-4">
                     {!(address.isDefault || address.is_default) && (
                       <button
@@ -525,7 +525,7 @@ const AddressList = () => {
                 </div>
               ))}
             </div>
-          )}{" "}
+          )}
         </div>
       )}
 

@@ -102,7 +102,6 @@ const OrderDetailModal = ({ isOpen, onClose, orderId }) => {
       }}
       onClick={handleBackdropClick}
     >
-      {" "}
       <div
         className="w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-lg shadow-xl transform transition-all"
         style={{
@@ -137,7 +136,7 @@ const OrderDetailModal = ({ isOpen, onClose, orderId }) => {
                 Order #{orderId}
               </p>
             </div>
-          </div>{" "}
+          </div>
           <button
             onClick={onClose}
             className="p-2 rounded-md hover:bg-gray-100 transition-colors"
@@ -145,7 +144,7 @@ const OrderDetailModal = ({ isOpen, onClose, orderId }) => {
           >
             <FiX size={20} />
           </button>
-        </div>{" "}
+        </div>
         {/* Content */}
         <div className="overflow-y-auto max-h-[calc(90vh-80px)] p-6">
           {isLoading ? (
@@ -248,7 +247,7 @@ const OrderDetailModal = ({ isOpen, onClose, orderId }) => {
                       {orderDetails.item_count} item(s)
                     </p>
                   </div>
-                </div>{" "}
+                </div>
               </div>
 
               {/* Invoice Download Section */}
@@ -284,7 +283,7 @@ const OrderDetailModal = ({ isOpen, onClose, orderId }) => {
                             Download your order invoice
                           </p>
                         </div>
-                      </div>{" "}
+                      </div>
                       <a
                         href={orderDetails.invoice.invoice_pdf_url}
                         download={`Invoice_${orderDetails.invoice.invoice_id}.pdf`}
@@ -383,8 +382,8 @@ const OrderDetailModal = ({ isOpen, onClose, orderId }) => {
                         {orderDetails.shipping_address.street_address}
                       </p>
                       <p style={{ color: "var(--text-secondary)" }}>
-                        {orderDetails.shipping_address.city},{" "}
-                        {orderDetails.shipping_address.state}{" "}
+                        {orderDetails.shipping_address.city},
+                        {orderDetails.shipping_address.state}
                         {orderDetails.shipping_address.postal_code}
                       </p>
                     </div>
