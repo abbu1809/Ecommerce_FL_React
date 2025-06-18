@@ -1,0 +1,43 @@
+name: React Frontend CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm install --legacy-peer-deps
+      
+    - name: Build application
+      run: npm run build
+      
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.8.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+        
+    - name: Add host key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+        
+    - name: Deploy to server
+      run: |
+        scp -r dist/* ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/root/deploy/Ecommerce_FL_React/dist/
+        ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'sudo cp -r /root/deploy/Ecommerce_FL_React/dist/* /var/www/my-react-app/ && sudo systemctl restart nginx'
