@@ -1,7 +1,10 @@
 import React from "react";
 import { FiBell, FiToggleLeft, FiToggleRight } from "react-icons/fi";
+import useThemeStore from "../../store/useTheme";
 
 const AccountSettings = () => {
+  const { theme, isDarkMode, setTheme } = useThemeStore();
+  
   const [settings, setSettings] = React.useState({
     emailNotifications: true,
     smsNotifications: false,
@@ -10,7 +13,6 @@ const AccountSettings = () => {
     promotions: false,
     newArrivals: true,
     priceDrops: true,
-    darkMode: false,
     twoFactorAuth: false,
   });
 
@@ -286,6 +288,88 @@ const AccountSettings = () => {
                   <FiToggleLeft style={{ color: "var(--text-secondary)" }} />
                 )}
               </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Appearance Settings */}
+        <div>
+          <h3
+            className="text-lg font-medium mb-4"
+            style={{ color: "var(--text-primary)" }}
+          >
+            Appearance
+          </h3>
+
+          <div className="space-y-4 pl-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4
+                  className="font-medium"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  Theme Mode
+                </h4>
+                <p
+                  className="text-sm"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  Choose between light, dark, or system theme
+                </p>
+                <p
+                  className="text-xs mt-1"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  Current: {theme === 'system' ? 'Auto (System)' : theme.charAt(0).toUpperCase() + theme.slice(1)}
+                </p>
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => setTheme('light')}
+                  className={`px-3 py-1 rounded text-xs font-medium transition-all duration-200 ${
+                    theme === 'light' 
+                      ? 'shadow-sm' 
+                      : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                  style={{
+                    backgroundColor: theme === 'light' ? 'var(--brand-primary)' : 'transparent',
+                    color: theme === 'light' ? 'var(--text-on-brand)' : 'var(--text-primary)',
+                    border: `1px solid ${theme === 'light' ? 'var(--brand-primary)' : 'var(--border-primary)'}`,
+                  }}
+                >
+                  Light
+                </button>
+                <button
+                  onClick={() => setTheme('dark')}
+                  className={`px-3 py-1 rounded text-xs font-medium transition-all duration-200 ${
+                    theme === 'dark' 
+                      ? 'shadow-sm' 
+                      : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                  style={{
+                    backgroundColor: theme === 'dark' ? 'var(--brand-primary)' : 'transparent',
+                    color: theme === 'dark' ? 'var(--text-on-brand)' : 'var(--text-primary)',
+                    border: `1px solid ${theme === 'dark' ? 'var(--brand-primary)' : 'var(--border-primary)'}`,
+                  }}
+                >
+                  Dark
+                </button>
+                <button
+                  onClick={() => setTheme('system')}
+                  className={`px-3 py-1 rounded text-xs font-medium transition-all duration-200 ${
+                    theme === 'system' 
+                      ? 'shadow-sm' 
+                      : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                  style={{
+                    backgroundColor: theme === 'system' ? 'var(--brand-primary)' : 'transparent',
+                    color: theme === 'system' ? 'var(--text-on-brand)' : 'var(--text-primary)',
+                    border: `1px solid ${theme === 'system' ? 'var(--brand-primary)' : 'var(--border-primary)'}`,
+                  }}
+                >
+                  Auto
+                </button>
+              </div>
             </div>
           </div>
         </div>

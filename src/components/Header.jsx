@@ -11,6 +11,7 @@ import {
 } from "react-icons/fi";
 import { ROUTES } from "../utils/constants";
 import Logo from "./ui/Logo";
+import ThemeToggle from "./ui/ThemeToggle";
 import { useAuthStore } from "../store/useAuth";
 import { useCartStore } from "../store/useCart";
 import { useWishlistStore } from "../store/useWishlist";
@@ -767,6 +768,11 @@ const Header = () => {
                   </p>
                 </div>
               </Link>
+              
+              {/* Theme Toggle */}
+              <div className="flex flex-col items-center justify-center">
+                <ThemeToggle />
+              </div>
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -34,6 +34,7 @@ import {
 } from "./pages/Policy";
 import { useAuthStore } from "./store/useAuth";
 import { useAdminAuthStore } from "./store/Admin/useAdminAuth";
+import useThemeStore from "./store/useTheme";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import AdminLayout from "./components/Admin/AdminLayout";
@@ -87,10 +88,14 @@ const App = () => {
   const { isAuthenticated, checkAuthStatus } = useAuthStore();
   const { isAuthenticated: isAdminAuthenticated, checkAdminAuthStatus } =
     useAdminAuthStore();
+  const { initializeTheme } = useThemeStore();
 
   // Initialize products and authentication
   React.useEffect(() => {
     const initializeStore = async () => {
+      // Initialize theme first
+      initializeTheme();
+      
       // Initialize authentication state from localStorage
       checkAuthStatus();
 
@@ -110,6 +115,11 @@ const App = () => {
 
     initializeStore();
   }, [checkAuthStatus, checkAdminAuthStatus]);
+
+  // Initialize theme
+  useEffect(() => {
+    initializeTheme();
+  }, [initializeTheme]);
 
   return (
     <BrowserRouter>
