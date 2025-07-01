@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-/* Smooth transitions for theme changes */
 *,
 *::before,
 *::after {
@@ -11,12 +10,11 @@
     box-shadow 0.3s ease;
 }
 
-/* Disable transitions during theme initialization */
 .no-transitions * {
   transition: none !important;
 }
 
-/* Root variables for light mode */
+
 :root {
   --bg-primary: #ffffff;
   --bg-secondary: #f8fafc;
@@ -40,7 +38,6 @@
   --text-on-brand-muted: rgba(255, 255, 255, 0.8);
 }
 
-/* Dark mode variables */
 .dark {
   --bg-primary: #0f172a;
   --bg-secondary: #1e293b;
@@ -64,13 +61,11 @@
   --text-on-brand-muted: rgba(255, 255, 255, 0.8);
 }
 
-/* Ensure body follows the theme */
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
 }
 
-/* Base styles with theme support */
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
@@ -87,10 +82,10 @@ button:hover {
   }
 
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; 
+    scrollbar-width: none; 
   }
-  /* Add line clamp utilities */
+  
   .line-clamp-2 {
     overflow: hidden;
     display: -webkit-box;
@@ -106,7 +101,7 @@ button:hover {
     -webkit-line-clamp: 3;
     line-clamp: 3;
   }
-  /* Add animation utilities */
+  
   .animate-fadeIn {
     animation: fadeIn 0.4s ease-in-out;
   }
@@ -137,7 +132,7 @@ button:hover {
     }
   }
 
-  /* Custom scrollbar for tab content */
+
   .custom-scrollbar::-webkit-scrollbar {
     width: 8px;
   }
@@ -156,13 +151,13 @@ button:hover {
     background: #a8a8a8;
   }
 
-  /* Firefox */
+
   .custom-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: #c1c1c1 #f1f1f1;
   }
 
-  /* Standard transition utilities for consistent hover animations */
+ 
   .transition-standard {
     transition: all 0.2s ease-in-out;
   }
@@ -175,7 +170,7 @@ button:hover {
     transition: background-color 0.2s ease-in-out;
   }
 
-  /* Hover states for consistent UI */
+
   .hover-opacity-90:hover {
     opacity: 0.9;
   }
@@ -190,84 +185,181 @@ button:hover {
 }
 
 :root {
-  /* Existing general-purpose color variables */
-  --primary-color: #4f46e5; /* Indigo - General purpose primary */
-  --secondary-color: #f59e0b; /* Orange - General purpose secondary, also used as brand color */
-  --success-color: #10b981; /* Green */
-  --error-color: #ef4444; /* Red */
-  --warning-color: #f59e0b; /* Orange */
-  --info-color: #3b82f6; /* Blue */
+  
+  --primary-color: #4f46e5; 
+  --secondary-color: #f59e0b; 
+  --success-color: #10b981; 
+  --error-color: #ef4444; 
+  --warning-color: #f59e0b; 
+  --info-color: #3b82f6; 
 
-  /* Theme-specific variables for Ecommerce_FL_React design */
+  
+  --brand-primary: #f59e0b; 
+  --brand-primary-hover: #d97706; 
+  --brand-secondary: #4f46e5; 
 
-  /* Brand Colors */
-  /* Used for primary actions, headers, and prominent UI elements. */
-  --brand-primary: #f59e0b; /* Main brand color (e.g., Tailwind orange-500) */
-  --brand-primary-hover: #d97706; /* Darker shade for hover states (e.g., Tailwind orange-600) */
-  --brand-secondary: #4f46e5; /* Secondary brand color (e.g., Tailwind indigo-600) */
-
-  /* Text Colors */
-  /* Defines colors for text content across the application. */
-  --text-on-brand: #ffffff; /* Text on primary brand backgrounds (e.g., white text on orange button) */
+  --text-on-brand: #ffffff; 
   --text-on-brand-muted: rgba(
     255,
     255,
     255,
     0.8
-  ); /* Muted text on brand backgrounds */
-  --text-primary: #1f2937; /* Default text color for body and headings (e.g., Tailwind gray-800) */
-  --text-secondary: #6b7280; /* Lighter text for subheadings, descriptions (e.g., Tailwind gray-500) */
+  ); 
+  --text-primary: #1f2937; 
+  --text-secondary: #6b7280; 
   --text-accent: var(
     --brand-primary
-  ); /* Accent text, often using the brand color (e.g., text-orange-500) */
-  --text-on-dark-bg: #d1d5db; /* Text for dark backgrounds like footers (e.g., Tailwind gray-300) */
-  --text-on-light-bg: #1f2937; /* Text for light backgrounds (e.g., Tailwind gray-800) */
-  --text-error: var(--error-color); /* Text color for error messages */
-  --text-success: var(--success-color); /* Text color for success messages */
+  ); 
+  --text-on-dark-bg: #d1d5db; 
+  --text-on-light-bg: #1f2937; 
+  --text-error: var(--error-color); 
+  --text-success: var(--success-color); 
+  
 
-  /* Background Colors */
-  /* Defines background colors for different sections and components. */
-  --bg-primary: #ffffff; /* Primary background for pages and cards (e.g., Tailwind white) */
-  --bg-secondary: #f9fafb; /* Secondary, slightly off-white background (e.g., Tailwind gray-50) */
-  --bg-accent-light: #fff7ed; /* Light accent background (e.g., Tailwind orange-100) */
-  --bg-dark: #1f2937; /* Dark background for sections like footers (e.g., Tailwind gray-800) */
+  --bg-primary: #ffffff; 
+  --bg-secondary: #f9fafb; 
+  --bg-accent-light: #fff7ed; 
+  --bg-dark: #1f2937; 
   --bg-overlay: rgba(
     0,
     0,
     0,
     0.5
-  ); /* Overlay background for modals or dropdowns */
+  ); 
+  
+  --border-primary: #e5e7eb;
+  --border-secondary: #d1d5db; 
+  --border-dark: #374151; 
+  --border-accent: var(--brand-primary); 
 
-  /* Border & Separator Colors */
-  /* Defines colors for borders and visual separators. */
-  --border-primary: #e5e7eb; /* Default border color (e.g., Tailwind gray-300) */
-  --border-secondary: #d1d5db; /* Secondary border color (e.g., Tailwind gray-400) */
-  --border-dark: #374151; /* Border color for dark backgrounds (e.g., Tailwind gray-700) */
-  --border-accent: var(--brand-primary); /* Accent border color */
-
-  /* Shadow Styles */
-  /* Defines box shadows for depth and elevation. */
-  --shadow-small: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* e.g., Tailwind shadow-sm */
+  
+  --shadow-small: 0 1px 2px 0 rgba(0, 0, 0, 0.05); 
   --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06); /* e.g., Tailwind shadow-md */
+    0 2px 4px -1px rgba(0, 0, 0, 0.06); 
   --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05); /* e.g., Tailwind shadow-lg */
+    0 4px 6px -2px rgba(0, 0, 0, 0.05); 
 
-  /* Border Radius */
-  /* Defines corner rounding for elements. */
-  --rounded-sm: 0.125rem; /* 2px */
-  --rounded-md: 0.375rem; /* 6px */
-  --rounded-lg: 0.5rem; /* 8px */
-  --rounded-xl: 0.75rem; /* 12px */
-  --rounded-full: 9999px; /* For circular elements */
+  
+  --rounded-sm: 0.125rem; 
+  --rounded-md: 0.375rem; 
+  --rounded-xl: 0.75rem; 
+  --rounded-full: 9999px; 
 
-  /* Font Families */
+  
   --font-primary: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  /* --font-secondary: "YourCustomFont", sans-serif; */ /* Example for a secondary font */
+  
 }
 
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+/* Admin Notification Bar Styles */
+.notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #dc2626;
+  color: white;
+  border-radius: 50%;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  animation: pulse 2s infinite;
+}
+
+.notification-dropdown {
+  transform: translateY(-8px);
+  opacity: 0;
+  animation: slideDown 0.2s ease-out forwards;
+}
+
+@keyframes slideDown {
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.notification-item {
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.notification-item:hover {
+  border-left-color: var(--brand-primary);
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.notification-item.unread {
+  border-left-color: var(--brand-primary);
+  background-color: rgba(59, 130, 246, 0.03);
+}
+
+.notification-priority-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.notification-button {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.notification-button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-small);
+}
+
+.notification-button.active {
+  background-color: var(--brand-primary) !important;
+  color: white !important;
+}
+
+/* Live indicator animation */
+.live-indicator {
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+/* Notification dropdown scrollbar */
+.notification-dropdown-content {
+  scrollbar-width: thin;
+  scrollbar-color: var(--brand-primary) transparent;
+}
+
+.notification-dropdown-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notification-dropdown-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.notification-dropdown-content::-webkit-scrollbar-thumb {
+  background-color: var(--brand-primary);
+  border-radius: 3px;
+  opacity: 0.7;
+}
+
+.notification-dropdown-content::-webkit-scrollbar-thumb:hover {
+  opacity: 1;
 }

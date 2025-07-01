@@ -15,6 +15,7 @@ import {
   FiTruck,
   FiSmartphone,
 } from "react-icons/fi";
+import NotificationBar from "./NotificationBar";
 
 const AdminLayout = () => {
   const location = useLocation();
@@ -179,19 +180,25 @@ const AdminLayout = () => {
       </aside>
 
       {/* Main Content */}
-      <main
-        className="flex-1 overflow-y-auto p-6 bg-bg-secondary animate-fadeIn"
-        style={{ backgroundColor: "var(--bg-secondary)" }}
-      >
+      <main className="flex-1 flex flex-col overflow-hidden">
+        {/* Sticky Notification Bar */}
+        <NotificationBar />
+        
+        {/* Main Content Area */}
         <div
-          className="bg-bg-primary p-6 rounded-lg shadow-md mb-6"
-          style={{
-            backgroundColor: "var(--bg-primary)",
-            boxShadow: "var(--shadow-medium)",
-            borderRadius: "var(--rounded-lg)",
-          }}
+          className="flex-1 overflow-y-auto p-6 bg-bg-secondary animate-fadeIn"
+          style={{ backgroundColor: "var(--bg-secondary)" }}
         >
-          <Outlet /> {/* Nested routes will render here */}
+          <div
+            className="bg-bg-primary p-6 rounded-lg shadow-md mb-6"
+            style={{
+              backgroundColor: "var(--bg-primary)",
+              boxShadow: "var(--shadow-medium)",
+              borderRadius: "var(--rounded-lg)",
+            }}
+          >
+            <Outlet /> {/* Nested routes will render here */}
+          </div>
         </div>
       </main>
     </div>

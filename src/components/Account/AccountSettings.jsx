@@ -292,7 +292,7 @@ const AccountSettings = () => {
           </div>
         </div>
 
-        {/* Appearance Settings */}
+        
         <div>
           <h3
             className="text-lg font-medium mb-4"

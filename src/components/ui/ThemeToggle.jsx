@@ -14,13 +14,13 @@ const ThemeToggle = () => {
     { value: 'system', icon: FiMonitor, label: 'System' }
   ];
 
-  // Get current theme icon
+  
   const getCurrentIcon = () => {
     const currentTheme = themes.find(t => t.value === theme);
     return currentTheme ? currentTheme.icon : FiSun;
   };
 
-  // Close dropdown when clicking outside
+  
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -41,7 +41,7 @@ const ThemeToggle = () => {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Main Theme Toggle Button */}
+      
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
@@ -54,11 +54,11 @@ const ThemeToggle = () => {
         title="Change theme"
       >
         <motion.div
-          key={theme} // Add key to reset animation when theme changes
+          key={theme} 
           initial={{ 
             scale: 0.8, 
             opacity: 0,
-            rotate: theme === 'light' ? 180 : 0 // Only rotate for sun icon
+            rotate: theme === 'light' ? 180 : 0 
           }}
           animate={{ 
             scale: 1, 
@@ -74,7 +74,7 @@ const ThemeToggle = () => {
         />
       </motion.button>
 
-      {/* Dropdown Menu */}
+      
       <AnimatePresence>
         {isOpen && (
           <motion.div

@@ -35,6 +35,7 @@ import {
 import { useAuthStore } from "./store/useAuth";
 import { useAdminAuthStore } from "./store/Admin/useAdminAuth";
 import useThemeStore from "./store/useTheme";
+import { loadCustomColors } from "./utils/colorUtils";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import AdminLayout from "./components/Admin/AdminLayout";
@@ -95,6 +96,9 @@ const App = () => {
     const initializeStore = async () => {
       // Initialize theme first
       initializeTheme();
+      
+      // Load custom colors if saved
+      loadCustomColors();
       
       // Initialize authentication state from localStorage
       checkAuthStatus();
@@ -246,6 +250,12 @@ const App = () => {
           <Route path="/:pagePath" element={<DynamicPage />} />
         </Route>
         {/* Admin Routes */}
+        <Route
+          path="/admin"
+          element={
+            <Navigate to={isAdminAuthenticated ? "/admin/dashboard" : "/admin/login"} />
+          }
+        />
         <Route
           path="/admin/login"
           element={
