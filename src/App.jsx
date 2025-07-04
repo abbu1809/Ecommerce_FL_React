@@ -64,6 +64,7 @@ import {
   AdminDeliveryPartners,
 } from "./pages/Admin";
 import AdminSellPhone from "./pages/Admin/AdminSellPhone";
+import FirebaseSetup from "./components/FirebaseSetup";
 
 // Layout component that will be used across all pages
 const Layout = () => {
@@ -142,6 +143,12 @@ const App = () => {
         <Route
           path="/login"
           element={!isAuthenticated ? <Login /> : <Navigate to="/" />}
+        />
+        
+        {/* Firebase Setup Route (Development) */}
+        <Route 
+          path="/firebase-setup" 
+          element={<FirebaseSetup />} 
         />
         {/* Delivery Partner Routes - keeping these outside the main Layout */}
         <Route path="/delivery">

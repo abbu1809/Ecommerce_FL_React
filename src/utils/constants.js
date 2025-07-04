@@ -1,7 +1,7 @@
 // API Constants
-export const API_URL = "http://69.62.72.199/api/api";
+//export const API_URL = "http://69.62.72.199/api/api";
 // API Constants
-// export const API_URL = "http://127.0.0.1:8000/api";
+export const API_URL = "http://127.0.0.1:8000/api";
 
 // Local Storage Keys
 export const TOKEN_KEY = "anand_mobiles_token";

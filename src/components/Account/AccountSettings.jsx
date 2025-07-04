@@ -3,7 +3,7 @@ import { FiBell, FiToggleLeft, FiToggleRight } from "react-icons/fi";
 import useThemeStore from "../../store/useTheme";
 
 const AccountSettings = () => {
-  const { theme, isDarkMode, setTheme } = useThemeStore();
+  const { theme, /*isDarkMode,*/ setTheme } = useThemeStore();
   
   const [settings, setSettings] = React.useState({
     emailNotifications: true,
