@@ -39,7 +39,7 @@ const ProductList = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Transform products from store to match the expected format
   const transformedProducts = (products || []).map((product) => ({

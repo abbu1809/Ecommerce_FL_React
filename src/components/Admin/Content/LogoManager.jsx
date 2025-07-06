@@ -14,7 +14,7 @@ const LogoManager = () => {
     fetchLogo().catch(() => {
       toast.error("Failed to fetch current logo");
     });
-  }, [fetchLogo]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Show error toast when error occurs
   useEffect(() => {

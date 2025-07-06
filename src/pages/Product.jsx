@@ -57,7 +57,7 @@ const Product = () => {
     return () => {
       clearCurrentProduct();
     };
-  }, [id, fetchProduct, clearCurrentProduct]);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Initialize selected variant when product loads
   useEffect(() => {

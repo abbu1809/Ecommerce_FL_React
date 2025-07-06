@@ -144,9 +144,9 @@ const SignUp = () => {
       const userData = {
         email: formData.email,
         password: formData.password,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        phone: formData.phone,
+        first_name: formData.firstName,    // Backend expects first_name
+        last_name: formData.lastName,      // Backend expects last_name
+        phone_number: formData.phone,      // Backend expects phone_number
       };
       const response = await signup(userData);
       console.log("Signup successful:", response);

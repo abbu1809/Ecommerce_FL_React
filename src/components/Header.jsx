@@ -25,9 +25,11 @@ const Header = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const desktopSuggestionsRef = useRef(null);
   const mobileSuggestionsRef = useRef(null);
+  const cartWishlistInitialized = useRef(false);
   const { isAuthenticated } = useAuthStore();
   const { itemCount: cartItemCount, totalAmount, fetchCart } = useCartStore();
   const { items: wishlistItems, fetchWishlist } = useWishlistStore();
+  const productsInitialized = useRef(false);
   const { searchProducts, fetchProducts } = useProductStore();
   const [location, setLocation] = useState({
     city: "Bhopal",
@@ -366,8 +368,11 @@ const Header = () => {
 
   // Fetch products to get categories when component mounts
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    if (!productsInitialized.current) {
+      productsInitialized.current = true;
+      fetchProducts();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Close suggestions when clicking outside
   useEffect(() => {
@@ -403,15 +408,19 @@ const Header = () => {
     // Limit to 5 suggestions
     setSearchSuggestions(results.slice(0, 5));
     setShowSuggestions(true);
-  }, [searchQuery, searchProducts]);
+  }, [searchQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch cart and wishlist data when component mounts or authentication state changes
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !cartWishlistInitialized.current) {
+      cartWishlistInitialized.current = true;
       fetchCart();
       fetchWishlist();
+    } else if (!isAuthenticated) {
+      // Reset the initialization flag when user logs out
+      cartWishlistInitialized.current = false;
     }
-  }, [isAuthenticated, fetchCart, fetchWishlist]);
+  }, [isAuthenticated]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     const getUserLocation = () => {
       if (navigator.geolocation) {

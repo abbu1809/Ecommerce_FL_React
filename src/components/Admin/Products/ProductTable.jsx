@@ -52,7 +52,7 @@ const ProductTable = ({ onViewProduct, onEditProduct }) => {
 
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Function to open delete confirmation modal
   const openDeleteModal = (product) => {

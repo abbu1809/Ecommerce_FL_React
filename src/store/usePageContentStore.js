@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import api, { adminApi } from "../services/api";
 
-export const usePageContentStore = create((set) => ({
+export const usePageContentStore = create((set, get) => ({
   // State
   content: null,
   loading: false,
@@ -10,6 +10,12 @@ export const usePageContentStore = create((set) => ({
 
   // Fetch all available custom pages
   fetchAvailablePages: async () => {
+    const currentState = get();
+    // Prevent duplicate fetches
+    if (currentState.pages.length > 0) {
+      return currentState.pages;
+    }
+    
     try {
       // Use the public endpoint instead of admin endpoint
       const response = await adminApi.get("/admin/content/pages/");

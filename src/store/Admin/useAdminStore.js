@@ -760,10 +760,7 @@ export const useAdminStore = create(
 
       try {
         // This is a placeholder - you'll need to add the actual API endpoint for updating products
-        const response = await adminApi.post("/admin/update_product", {
-          product_id: productId,
-          ...productData,
-        });
+        const response = await adminApi.put(`/admin/products/edit/${productId}/`, productData);
 
         if (response.data.success) {
           // Update the product in the list
@@ -805,7 +802,7 @@ export const useAdminStore = create(
 
       try {
         // This is a placeholder - you'll need to add the actual API endpoint for adding products
-        const response = await adminApi.post("/admin/add_product", productData);
+        const response = await adminApi.post("/admin/products/add/", productData);
 
         if (response.data.success) {
           // Add the new product to the list
@@ -838,9 +835,9 @@ export const useAdminStore = create(
       }));
 
       try {
-        // This is a placeholder - you'll need to add the actual API endpoint for deleting products
+        // Delete product via API
         const response = await adminApi.delete(
-          `/admin/delete_product/${productId}`
+          `/admin/delete-product/${productId}/`
         );
 
         if (response.data.success) {
@@ -940,22 +937,19 @@ export const useAdminStore = create(
       }
     },
 
-    updateUserRole: async (userId, role) => {
+    // User ban functionality (role update not available in backend) 
+    banUser: async (userId) => {
       set((state) => ({
         users: { ...state.users, loading: true, error: null },
       }));
 
       try {
-        // This is a placeholder - you'll need to add the actual API endpoint for updating user role
-        const response = await adminApi.post("/admin/update_user_role", {
-          user_id: userId,
-          role: role,
-        });
+        const response = await adminApi.post(`/admin/users/ban/${userId}/`);
 
         if (response.data.success) {
           set((state) => {
             const updatedList = state.users.list.map((user) =>
-              user.id === userId ? { ...user, role } : user
+              user.id === userId ? { ...user, is_banned: true } : user
             );
 
             return {
@@ -973,7 +967,7 @@ export const useAdminStore = create(
           users: {
             ...state.users,
             loading: false,
-            error: error.response?.data?.error || "Failed to update user role",
+            error: error.response?.data?.error || "Failed to ban user",
           },
         }));
       }
@@ -1126,7 +1120,7 @@ export const useAdminStore = create(
       }
     },
 
-    assignDeliveryPartner: async (orderId, partnerId) => {
+    assignDeliveryPartner: async (userId, orderId, partnerId) => {
       set((state) => ({
         deliveryPartners: {
           ...state.deliveryPartners,
@@ -1138,9 +1132,8 @@ export const useAdminStore = create(
       try {
         // API call to assign a delivery partner to an order
         const response = await adminApi.post(
-          "/admin/assign_delivery_partner/",
+          `/admin/users/${userId}/orders/${orderId}/assign-partner/`,
           {
-            order_id: orderId,
             partner_id: partnerId,
           }
         );

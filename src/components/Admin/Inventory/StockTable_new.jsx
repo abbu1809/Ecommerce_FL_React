@@ -22,7 +22,7 @@ const StockTable = ({ categoryFilter, stockFilter, searchQuery }) => {
     if (products.list.length === 0) {
       fetchProducts();
     }
-  }, [fetchProducts, products.list.length]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Get filtered products based on current filters
   const filteredProducts = getFilteredInventory(

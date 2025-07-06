@@ -61,7 +61,7 @@ const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
       console.log("Razorpay SDK is available:", !!window.Razorpay);
       fetchAddresses();
     }
-  }, [isOpen, isAuthenticated, fetchAddresses]);
+  }, [isOpen, isAuthenticated]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (addresses.length > 0 && !selectedAddressId) {

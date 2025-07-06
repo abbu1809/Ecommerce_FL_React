@@ -85,7 +85,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     fetchDashboardData();
     fetchAnalytics();
-  }, [fetchDashboardData, fetchAnalytics]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleRefresh = () => {
     fetchDashboardData();

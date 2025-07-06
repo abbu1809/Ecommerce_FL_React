@@ -26,7 +26,9 @@ const ProductReviews = ({ productId, product }) => {
     if (reviews.length === 0) {
       fetchReviews();
     }
-  }, [reviews.length, fetchReviews]); // Reviews are now written from order history, so no form needed here
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  
+  // Reviews are now written from order history, so no form needed here
 
   // Handle adding a new review (for the existing local review system)
   const handleAddReview = (reviewData) => {

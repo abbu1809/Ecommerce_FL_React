@@ -37,6 +37,12 @@ export const useBannerStore = create(
 
     // Fetch public banners (no auth required)
     fetchPublicBanners: async () => {
+      const currentState = get();
+      // Prevent duplicate fetches
+      if (currentState.loading || currentState.banners.length > 0) {
+        return currentState.banners;
+      }
+      
       set({ loading: true, error: null });
       try {
         const response = await adminApi.get("/admin/banners/public/");

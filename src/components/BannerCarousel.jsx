@@ -34,13 +34,9 @@ const fallbackImages = [
 ];
 
 const BannerCarousel = () => {
-  const { fetchPublicBanners, getCarouselBanners } = useBannerStore();
+  const { getCarouselBanners } = useBannerStore();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [[page, direction], setPage] = useState([0, 0]);
-  // Fetch banners on mount
-  useEffect(() => {
-    fetchPublicBanners();
-  }, [fetchPublicBanners]);
 
   // Get carousel banners from store or use fallback
   const carouselBanners = getCarouselBanners();

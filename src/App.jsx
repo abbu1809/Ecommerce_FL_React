@@ -119,12 +119,12 @@ const App = () => {
     };
 
     initializeStore();
-  }, [checkAuthStatus, checkAdminAuthStatus]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Initialize theme
   useEffect(() => {
     initializeTheme();
-  }, [initializeTheme]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <BrowserRouter>

@@ -74,7 +74,7 @@ const OrderTrackingDetail = () => {
       }
     };
     fetchOrderDetails();
-  }, [orderId, getOrderById]);
+  }, [orderId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   console.log("Order fetched successfully:", currentOrder); //  // Handle opening review card for a specific product
   const handleWriteReview = (product) => {

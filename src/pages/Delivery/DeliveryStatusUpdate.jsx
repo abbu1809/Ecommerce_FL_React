@@ -56,7 +56,7 @@ const DeliveryStatusUpdate = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [fetchAssignedDeliveries]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     // Transform the API response to match our component's data structure
     const formattedDeliveries = assignedDeliveries?.map((delivery) => ({

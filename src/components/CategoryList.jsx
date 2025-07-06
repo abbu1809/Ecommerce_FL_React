@@ -26,7 +26,7 @@ const CategoryList = () => {
 
   useEffect(() => {
     fetchCategories();
-  }, [fetchCategories]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     // Use backend categories or prop categories and sort them by order
     if (categories && categories.length > 0) {

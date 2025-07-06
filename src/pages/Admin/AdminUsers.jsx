@@ -27,7 +27,7 @@ const AdminUsers = () => {
   // Fetch users on component mount
   useEffect(() => {
     fetchUsers();
-  }, [fetchUsers]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Filter users based on view and search query
   const filteredUsers = userList.filter((user) => {

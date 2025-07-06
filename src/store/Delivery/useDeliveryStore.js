@@ -19,7 +19,7 @@ export const useDeliveryStore = create(
       try {
         // Use the deliveryService.partnerRegister method from deliveryApi.js
         const response = await deliveryApi.post(
-          "/delivery/register/",
+          "/partners/register/",
           partnerData
         );
 

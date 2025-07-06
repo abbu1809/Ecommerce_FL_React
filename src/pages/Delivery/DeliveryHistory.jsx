@@ -134,7 +134,7 @@ const DeliveryHistory = () => {
     };
 
     getDeliveryHistory();
-  }, [fetchDeliveryHistory, formatAddress]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Helper function to transform status from API format to display format
   const transformStatus = (status) => {

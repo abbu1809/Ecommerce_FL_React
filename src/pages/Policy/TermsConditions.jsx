@@ -18,7 +18,7 @@ const TermsConditions = () => {
     return () => {
       clearContent();
     };
-  }, [fetchPageContent, clearContent]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="bg-white">

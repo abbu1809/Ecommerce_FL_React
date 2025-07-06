@@ -75,7 +75,7 @@ const FooterManager = () => {
       .catch(() => {
         toast.error("Failed to fetch footer configuration");
       });
-  }, [fetchFooterConfig]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Initialize footerData when footerConfig changes
   useEffect(() => {

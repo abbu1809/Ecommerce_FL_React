@@ -26,7 +26,7 @@ const AdminOrders = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, [fetchOrders]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Filter orders based on status and search query
   const filteredOrders = orders.list.filter((order) => {

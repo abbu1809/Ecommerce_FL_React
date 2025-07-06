@@ -39,26 +39,26 @@ deliveryApi.interceptors.response.use(
 const deliveryService = {
   // Auth endpoints
   register: (userData) => {
-    return deliveryApi.post("/delivery/register/", userData);
+    return deliveryApi.post("/partners/register/", userData);
   },
 
   login: (credentials) => {
-    return deliveryApi.post("/delivery/login/", credentials);
+    return deliveryApi.post("/partners/login/", credentials);
   },
 
   // Delivery management endpoints
   getAssignedDeliveries: () => {
-    return deliveryApi.get("/delivery/deliveries/assigned/");
+    return deliveryApi.get("/partners/deliveries/assigned/");
   },
 
   updateDeliveryStatus: (orderId, status) => {
-    return deliveryApi.patch(`/delivery/deliveries/update_status/${orderId}/`, {
+    return deliveryApi.patch(`/partners/deliveries/update_status/${orderId}/`, {
       status,
     });
   },
 
   getDeliveryHistory: () => {
-    return deliveryApi.get("/delivery/deliveries/history/");
+    return deliveryApi.get("/partners/deliveries/history/");
   },
   // Admin endpoints for managing delivery partners
   getAllPartners: () => {
@@ -66,7 +66,7 @@ const deliveryService = {
   },
 
   verifyPartner: (partnerId) => {
-    return deliveryApi.patch(`/delivery/verify/${partnerId}/`);
+    return deliveryApi.patch(`/partners/verify/${partnerId}/`);
   },
 
   assignDeliveryPartner: (orderId, partnerId) => {
@@ -78,11 +78,11 @@ const deliveryService = {
 
   // Partner authentication
   partnerRegister: (partnerData) => {
-    return deliveryApi.post("/delivery/register/", partnerData);
+    return deliveryApi.post("/partners/register/", partnerData);
   },
 
   partnerLogin: (credentials) => {
-    return deliveryApi.post("/delivery/login/", credentials);
+    return deliveryApi.post("/partners/login/", credentials);
   },
 };
 

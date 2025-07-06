@@ -24,7 +24,7 @@ const AdminInventory = () => {
     if (products.list.length === 0) {
       fetchProducts();
     }
-  }, [fetchProducts, products.list.length]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   // Get low stock products and inventory stats
   const lowStockProducts = getLowStockProducts();
   const inventoryStats = getInventoryStats();

@@ -43,7 +43,7 @@ const ProfileInfo = () => {
         // Error already handled by store
       });
     }
-  }, [fetchUserProfile, user?.uid]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Update form data when user data changes
   React.useEffect(() => {

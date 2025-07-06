@@ -1,13 +1,18 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useLogoStore } from "../../store/Admin/useLogoStore";
 
 const Logo = ({ size = "medium", linkWrapper = true, titleColor }) => {
-  const { logo, fetchLogo } = useLogoStore();
+  const { logo, loading, fetchLogo } = useLogoStore();
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
-    fetchLogo();
-  }, [fetchLogo]);
+    // Only fetch logo if it hasn't been loaded yet and we're not already loading
+    if (!logo && !loading && !hasInitialized.current) {
+      hasInitialized.current = true;
+      fetchLogo();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const sizes = {
     small: "h-8 w-auto",

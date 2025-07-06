@@ -43,7 +43,7 @@ const DeliverySettings = () => {
     fetchPartnerProfile().catch(() => {
       // Error already handled by store
     });
-  }, [fetchPartnerProfile]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Update form data when partner data changes
   useEffect(() => {

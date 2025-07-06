@@ -22,8 +22,10 @@ const Wishlist = () => {
 
   useEffect(() => {
     // Load wishlist data when component mounts
-    fetchWishlist();
-  }, [fetchWishlist, isAuthenticated]);
+    if (isAuthenticated) {
+      fetchWishlist();
+    }
+  }, [isAuthenticated]); // eslint-disable-line react-hooks/exhaustive-deps
   const handleRemoveFromWishlist = async (itemId) => {
     const success = await removeItem(itemId);
     if (success) {

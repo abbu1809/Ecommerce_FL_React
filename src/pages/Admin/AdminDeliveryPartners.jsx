@@ -37,7 +37,7 @@ const AdminDeliveryPartners = () => {
       toast.error("Failed to load delivery partners");
       console.error("Error fetching delivery partners:", error);
     });
-  }, [fetchDeliveryPartners]); // We're handling verification directly in confirmVerify now
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const openVerifyModal = (partner) => {
     setSelectedPartner(partner);
     setShowModal(true);

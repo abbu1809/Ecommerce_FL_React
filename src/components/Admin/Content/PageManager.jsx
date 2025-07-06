@@ -46,7 +46,7 @@ const PageManager = () => {
     return () => {
       clearContent();
     };
-  }, [selectedPage, fetchPageContent, clearContent]);
+  }, [selectedPage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Show error toast when error occurs
   useEffect(() => {

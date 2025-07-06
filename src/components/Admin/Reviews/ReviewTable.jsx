@@ -59,7 +59,7 @@ const ReviewTable = ({ activeTab = "all" }) => {
       setFlaggedFilter(false);
       setStatusFilter("all");
     }
-  }, [reviews.list.length, fetchReviews, activeTab]);
+  }, [activeTab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState("all"); // all, approved, pending, rejected

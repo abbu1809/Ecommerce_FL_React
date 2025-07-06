@@ -34,7 +34,7 @@ const AdminProducts = () => {
   // Fetch products on component mount
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Apply filters and sorting whenever the filter criteria change
   useEffect(() => {

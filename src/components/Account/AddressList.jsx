@@ -41,7 +41,7 @@ const AddressList = () => {
   // Fetch addresses on component mount
   React.useEffect(() => {
     fetchAddresses();
-  }, [fetchAddresses]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Clear errors when component unmounts
   React.useEffect(() => {

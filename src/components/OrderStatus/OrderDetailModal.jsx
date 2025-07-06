@@ -47,7 +47,7 @@ const OrderDetailModal = ({ isOpen, onClose, orderId }) => {
       };
       fetchOrderDetails();
     }
-  }, [isOpen, orderId, getOrderById]);
+  }, [isOpen, orderId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   console.log("Modal render - isOpen:", isOpen, "orderId:", orderId); // Debug log
 

@@ -16,6 +16,12 @@ export const useProductStore = create((set, get) => ({
 
   // Fetch all products
   fetchProducts: async () => {
+    const currentState = get();
+    // Prevent duplicate fetches
+    if (currentState.loading || currentState.products.length > 0) {
+      return currentState.products;
+    }
+    
     set({ loading: true });
 
     try {

@@ -38,7 +38,7 @@ const BannerManager = ({ positionOptions }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   useEffect(() => {
     fetchBanners();
-  }, [fetchBanners]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // File handling functions
   const handleNewBannerImageChange = (e) => {

@@ -28,7 +28,7 @@ const Contact = () => {
     return () => {
       clearContent();
     };
-  }, [fetchPageContent, clearContent]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const breadcrumbs = [
     { label: "Home", link: ROUTES.HOME },

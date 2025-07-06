@@ -14,9 +14,12 @@ const Home = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const PRODUCTS_PER_PAGE = 10;
   useEffect(() => {
-    fetchProducts();
+    // Only fetch if we don't have products already
+    if (products.length === 0) {
+      fetchProducts();
+    }
     fetchPublicBanners(); // Fetch banners for the page
-  }, [fetchProducts, fetchPublicBanners]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Pagination calculations
   const totalProducts = products?.length || 0;

@@ -24,7 +24,9 @@ const AdminReviews = () => {
     if (reviews.list.length === 0) {
       fetchReviews();
     }
-  }, [reviews.list.length, fetchReviews]); // Calculate review statistics
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  
+  // Calculate review statistics
   const approvedReviews = reviews.list.filter(
     (review) => review.status === "approved"
   );

@@ -10,7 +10,7 @@ const OrderStatusPage = () => {
   useEffect(() => {
     // Fetch orders when the component mounts
     fetchOrders();
-  }, [fetchOrders]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   console.log("OrderStatusPage rendered", orders);
 

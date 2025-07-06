@@ -50,7 +50,7 @@ const DynamicPage = () => {
     return () => {
       clearContent();
     };
-  }, [pagePath, fetchPageContent, clearContent, checkPageExists]);
+  }, [pagePath]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Redirect to home if page not found
   useEffect(() => {

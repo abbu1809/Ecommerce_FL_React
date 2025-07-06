@@ -25,7 +25,7 @@ const CategoryManager = () => {
 
   useEffect(() => {
     fetchCategories();
-  }, [fetchCategories]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle image upload
   const handleImageUpload = async (e) => {

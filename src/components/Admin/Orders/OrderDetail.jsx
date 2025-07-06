@@ -58,14 +58,14 @@ const OrderDetail = ({ order }) => {
           setLoadingCustomer(false);
         });
     }
-  }, [order?.user_id, getCachedUser]);
+  }, [order?.user_id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     // Fetch delivery partners when component mounts or when assign modal opens
     if (showAssignModal && deliveryPartners.list.length === 0) {
       fetchDeliveryPartners();
     }
-  }, [showAssignModal, deliveryPartners.list.length, fetchDeliveryPartners]);
+  }, [showAssignModal]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleEditSave = async () => {
     try {

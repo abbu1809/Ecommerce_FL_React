@@ -242,7 +242,7 @@ export const useAuthStore = create((set) => ({
 
           if (!userData) {
             // If user data not in localStorage, fetch from API
-            const response = await api.get("/users/profile");
+            const response = await api.get("/users/profile/");
             userData = {
               uid: response.data.user_id || response.data.uid,
               email: response.data.email,

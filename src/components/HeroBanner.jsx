@@ -33,14 +33,10 @@ const fallbackImages = [
 ];
 
 const HeroBanner = () => {
-  const { fetchPublicBanners, getHeroBanners } = useBannerStore();
+  const { getHeroBanners } = useBannerStore();
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [[page, direction], setPage] = useState([0, 0]);
-  // Fetch banners on mount
-  useEffect(() => {
-    fetchPublicBanners();
-  }, [fetchPublicBanners]);
 
   // Get hero banners from store or use fallback
   const heroBanners = getHeroBanners();

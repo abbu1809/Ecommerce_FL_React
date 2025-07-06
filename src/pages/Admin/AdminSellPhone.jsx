@@ -65,7 +65,7 @@ const AdminSellPhone = () => {
     } else if (activeTab === "faqs") {
       fetchFaq();
     }
-  }, [activeTab, fetchCatalogs, fetchInquiries, fetchFaq]);
+  }, [activeTab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const getBrandsArray = () => {
     if (!catalogs.data || typeof catalogs.data !== 'object') {

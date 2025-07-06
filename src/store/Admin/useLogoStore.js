@@ -3,7 +3,7 @@ import { devtools } from "zustand/middleware";
 import { adminApi } from "../../services/api";
 
 export const useLogoStore = create(
-  devtools((set) => ({
+  devtools((set, get) => ({
     // State
     logo: null,
     loading: false,
@@ -16,6 +16,12 @@ export const useLogoStore = create(
 
     // Fetch logo
     fetchLogo: async () => {
+      const currentState = get();
+      // Prevent duplicate fetches
+      if (currentState.loading || currentState.logo) {
+        return currentState.logo;
+      }
+      
       set({ loading: true, error: null });
       try {
         const response = await adminApi.get("/admin/content/logo");

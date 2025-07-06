@@ -181,7 +181,7 @@ const DeliveryDashboard = () => {
     };
 
     fetchDashboardData();
-  }, [fetchAssignedDeliveries, fetchDeliveryHistory, processDeliveryData]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Function to get color based on status
   const getStatusColor = useCallback((status) => {

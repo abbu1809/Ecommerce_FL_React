@@ -22,8 +22,10 @@ const Cart = () => {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   useEffect(() => {
     // Load cart data when component mounts or auth state changes
-    fetchCart();
-  }, [fetchCart, isAuthenticated]);
+    if (isAuthenticated) {
+      fetchCart();
+    }
+  }, [isAuthenticated]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Listen for successful payment and refetch cart
   useEffect(() => {
@@ -35,7 +37,7 @@ const Cart = () => {
         console.log("Cart data refetched after successful payment");
       }, 500);
     }
-  }, [paymentSuccessful, fetchCart]);
+  }, [paymentSuccessful]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Calculate cart totals
   const subtotal = totalAmount;
