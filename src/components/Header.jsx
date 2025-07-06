@@ -17,6 +17,7 @@ import { useCartStore } from "../store/useCart";
 import { useWishlistStore } from "../store/useWishlist";
 import { Link, useNavigate } from "react-router-dom";
 import { useProductStore } from "../store/useProduct";
+import { useBannerStore } from "../store/Admin/useBannerStore";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const Header = () => {
   const { items: wishlistItems, fetchWishlist } = useWishlistStore();
   const productsInitialized = useRef(false);
   const { searchProducts, fetchProducts } = useProductStore();
+  const { getDropdownBanners } = useBannerStore();
   const [location, setLocation] = useState({
     city: "Bhopal",
     loading: false,
@@ -39,7 +41,6 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
-  const [dropdownTimeout, setDropdownTimeout] = useState(null);
 
   // Enhanced mega menu structure based on your product data
   const megaMenuCategories = [
@@ -47,6 +48,20 @@ const Header = () => {
       id: 1,
       name: "Mobiles & Accessories",
       path: "/products/smartphones",
+      banners: [
+        {
+          image: "/mobile1.png",
+          title: "Latest iPhones",
+          subtitle: "Up to 25% OFF",
+          link: "/products/smartphones?brand=Apple"
+        },
+        {
+          image: "/accessories.png",
+          title: "Mobile Accessories",
+          subtitle: "Starting ₹99",
+          link: "/products/accessories"
+        }
+      ],
       subcategories: [
         {
           title: "Mobiles",
@@ -161,6 +176,20 @@ const Header = () => {
       id: 2,
       name: "Computers & Tablets",
       path: "/products/laptops",
+      banners: [
+        {
+          image: "/laptops.png",
+          title: "Gaming Laptops",
+          subtitle: "Up to 30% OFF",
+          link: "/products/laptops?type=gaming"
+        },
+        {
+          image: "/tablets1.png",
+          title: "Premium Tablets",
+          subtitle: "Starting ₹15,999",
+          link: "/products/tablets"
+        }
+      ],
       subcategories: [
         {
           title: "Laptops",
@@ -241,6 +270,20 @@ const Header = () => {
       id: 3,
       name: "TV & Audio",
       path: "/products/televisions",
+      banners: [
+        {
+          image: "/tv1.png",
+          title: "Smart TVs",
+          subtitle: "Up to 40% OFF",
+          link: "/products/televisions"
+        },
+        {
+          image: "/accessories.png",
+          title: "Audio Devices",
+          subtitle: "Premium Sound",
+          link: "/products/audio"
+        }
+      ],
       subcategories: [
         {
           title: "Smart TVs",
@@ -327,6 +370,20 @@ const Header = () => {
       id: 4,
       name: "Smart Technology",
       path: "/products/smartwatches",
+      banners: [
+        {
+          image: "/accessories.png",
+          title: "Smart Watches",
+          subtitle: "Latest Collection",
+          link: "/products/smartwatches"
+        },
+        {
+          image: "/mobile1.png",
+          title: "Wireless Earbuds",
+          subtitle: "Premium Audio",
+          link: "/products/earbuds"
+        }
+      ],
       subcategories: [
         {
           title: "Wearables",
@@ -350,20 +407,13 @@ const Header = () => {
     },
   ];
 
-  // Handle dropdown interactions
-  const handleDropdownEnter = (categoryId) => {
-    if (dropdownTimeout) {
-      clearTimeout(dropdownTimeout);
-      setDropdownTimeout(null);
+  // Handle dropdown interactions - Changed from hover to click
+  const handleDropdownClick = (categoryId) => {
+    if (activeDropdown === categoryId) {
+      setActiveDropdown(null); // Close if same dropdown is clicked
+    } else {
+      setActiveDropdown(categoryId); // Open new dropdown
     }
-    setActiveDropdown(categoryId);
-  };
-
-  const handleDropdownLeave = () => {
-    const timeout = setTimeout(() => {
-      setActiveDropdown(null);
-    }, 200);
-    setDropdownTimeout(timeout);
   };
 
   // Fetch products to get categories when component mounts
@@ -387,6 +437,11 @@ const Header = () => {
 
       if (isClickOutsideDesktop && isClickOutsideMobile) {
         setShowSuggestions(false);
+      }
+
+      // Close dropdown if clicking outside
+      if (!event.target.closest('.dropdown-container')) {
+        setActiveDropdown(null);
       }
     };
 
@@ -906,13 +961,11 @@ const Header = () => {
             {megaMenuCategories?.map((category) => (
               <li
                 key={category.id}
-                className="whitespace-nowrap px-3 relative"
+                className="whitespace-nowrap px-3 relative dropdown-container"
                 style={{ position: "relative" }}
-                onMouseEnter={() => handleDropdownEnter(category.id)}
-                onMouseLeave={handleDropdownLeave}
               >
-                <Link
-                  to={category.path}
+                <button
+                  onClick={() => handleDropdownClick(category.id)}
                   className="text-sm font-medium transition-all duration-300 relative group py-1.5 px-2 hover:text-brand-primary flex items-center"
                   style={{
                     color: "var(--text-primary)",
@@ -920,7 +973,9 @@ const Header = () => {
                 >
                   <span className="relative z-10">{category.name}</span>
                   <svg
-                    className="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180"
+                    className={`w-4 h-4 ml-1 transition-transform duration-200 ${
+                      activeDropdown === category.id ? "rotate-180" : ""
+                    }`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -938,7 +993,7 @@ const Header = () => {
                       backgroundColor: "var(--brand-primary)",
                     }}
                   ></span>
-                </Link>
+                </button>
               </li>
             ))}
 
@@ -964,7 +1019,7 @@ const Header = () => {
           {/* Shared Mega Dropdown Menu - Always Centered */}
           {activeDropdown && (
             <div
-              className="absolute bg-white shadow-2xl border-t-2"
+              className="absolute bg-white shadow-2xl border-t-2 dropdown-container"
               style={{
                 backgroundColor: "var(--bg-primary)",
                 borderTopColor: "var(--brand-primary)",
@@ -977,8 +1032,6 @@ const Header = () => {
                 marginLeft: "calc(-50vw + 50%)",
                 marginTop: "4px",
               }}
-              onMouseEnter={() => handleDropdownEnter(activeDropdown)}
-              onMouseLeave={handleDropdownLeave}
             >
               <div className="px-8 py-8">
                 {(() => {
@@ -989,8 +1042,9 @@ const Header = () => {
 
                   return (
                     <>
-                      <div className="grid grid-cols-3 gap-8 p-8">
-                        {activeCategory.subcategories.map(
+                      <div className="grid grid-cols-4 gap-8 p-8">
+                        {/* First 3 columns for subcategories */}
+                        {activeCategory.subcategories.slice(0, 3).map(
                           (subcategory, index) => (
                             <div key={index} className="space-y-4">
                               <h3
@@ -1018,6 +1072,74 @@ const Header = () => {
                             </div>
                           )
                         )}
+                        
+                        {/* 4th column for promotional banners */}
+                        <div className="space-y-4">
+                          <h3
+                            className="font-semibold text-lg pb-2 border-b"
+                            style={{
+                              color: "var(--brand-primary)",
+                              borderBottomColor: "var(--border-primary)",
+                            }}
+                          >
+                            Special Offers
+                          </h3>
+                          
+                          {/* Render category-specific banners */}
+                          {(() => {
+                            // Get admin-managed banners for this category
+                            const adminBanners = getDropdownBanners(activeCategory.name);
+                            const banners = adminBanners.length > 0 ? adminBanners : activeCategory.banners;
+                            
+                            return banners?.map((banner, bannerIndex) => (
+                              <Link
+                                key={bannerIndex}
+                                to={banner.link || banner.buttonLink || activeCategory.path}
+                                className="block relative rounded-lg overflow-hidden group cursor-pointer"
+                              >
+                                <img
+                                  src={banner.image || banner.imageUrl}
+                                  alt={banner.title}
+                                  className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                <div className="absolute bottom-2 left-2 text-white">
+                                  <p className="text-xs font-medium">{banner.subtitle || banner.description}</p>
+                                  <p className="text-sm font-bold">{banner.title}</p>
+                                </div>
+                              </Link>
+                            ));
+                          })() || (
+                            // Fallback banners if no admin banners and no category banners
+                            <>
+                              <div className="relative rounded-lg overflow-hidden group cursor-pointer">
+                                <img
+                                  src="/mobile1.png"
+                                  alt="Special Offer"
+                                  className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                <div className="absolute bottom-2 left-2 text-white">
+                                  <p className="text-xs font-medium">Up to 50% OFF</p>
+                                  <p className="text-sm font-bold">Best Deals</p>
+                                </div>
+                              </div>
+                              
+                              <div className="relative rounded-lg overflow-hidden group cursor-pointer">
+                                <img
+                                  src="/laptops.png"
+                                  alt="Special Offer"
+                                  className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                <div className="absolute bottom-2 left-2 text-white">
+                                  <p className="text-xs font-medium">New Arrivals</p>
+                                  <p className="text-sm font-bold">Premium Quality</p>
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
                       </div>
 
                       {/* Featured Products Section */}

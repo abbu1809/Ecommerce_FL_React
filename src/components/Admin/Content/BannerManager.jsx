@@ -3,6 +3,7 @@ import Button from "../../ui/Button";
 import { useBannerStore } from "../../../store/Admin/useBannerStore";
 import ConfirmModal from "../../ui/ConfirmModal";
 import toast from "react-hot-toast";
+import { navigationCategories } from "../../../constants/bannerOptions";
 
 const BannerManager = ({ positionOptions }) => {
   const {
@@ -26,6 +27,7 @@ const BannerManager = ({ positionOptions }) => {
     image: "",
     link: "",
     position: "hero",
+    category: "", // For dropdown banners
     tag: "",
     cta: "",
     backgroundColor: "#ffffff",
@@ -69,6 +71,7 @@ const BannerManager = ({ positionOptions }) => {
       image: "",
       link: "",
       position: "hero",
+      category: "", // For dropdown banners
       tag: "",
       cta: "",
       backgroundColor: "#ffffff",
@@ -269,6 +272,31 @@ const BannerManager = ({ positionOptions }) => {
                 ))}
               </select>
             </div>
+            
+            {/* Category field - only show for dropdown position */}
+            {newBanner.position === "dropdown" && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Category
+                </label>
+                <select
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                  value={newBanner.category}
+                  onChange={(e) =>
+                    setNewBanner({ ...newBanner, category: e.target.value })
+                  }
+                  required
+                >
+                  <option value="">Select a category</option>
+                  {navigationCategories.map((category) => (
+                    <option key={category.value} value={category.value}>
+                      {category.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Tag
@@ -439,6 +467,31 @@ const BannerManager = ({ positionOptions }) => {
                 ))}
               </select>
             </div>
+            
+            {/* Category field - only show for dropdown position */}
+            {editingBanner.position === "dropdown" && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Category
+                </label>
+                <select
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                  value={editingBanner.category || ""}
+                  onChange={(e) =>
+                    setEditingBanner({ ...editingBanner, category: e.target.value })
+                  }
+                  required
+                >
+                  <option value="">Select a category</option>
+                  {navigationCategories.map((category) => (
+                    <option key={category.value} value={category.value}>
+                      {category.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Tag
@@ -533,6 +586,7 @@ const BannerManager = ({ positionOptions }) => {
               <th className="py-3 px-4 text-left">Banner</th>
               <th className="py-3 px-4 text-left">Details</th>
               <th className="py-3 px-4 text-left">Position</th>
+              <th className="py-3 px-4 text-left">Category</th>
               <th className="py-3 px-4 text-center">Status</th>
               <th className="py-3 px-4 text-right">Actions</th>
             </tr>
@@ -574,6 +628,15 @@ const BannerManager = ({ positionOptions }) => {
                 <td className="py-3 px-4">
                   {positionOptions.find((p) => p.value === banner.position)
                     ?.label || banner.position}
+                </td>
+                <td className="py-3 px-4">
+                  {banner.position === "dropdown" ? (
+                    <span className="text-sm text-gray-600">
+                      {banner.category || "No category"}
+                    </span>
+                  ) : (
+                    <span className="text-sm text-gray-400">N/A</span>
+                  )}
                 </td>
                 <td className="py-3 px-4 text-center">
                   <span

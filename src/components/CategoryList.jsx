@@ -66,35 +66,7 @@ const CategoryList = () => {
   };
 
   return (
-    <div className="py-14">
-      <div className="relative mb-14 flex flex-col items-center">
-        <span
-          className="text-sm font-medium tracking-wide uppercase mb-2"
-          style={{ color: "var(--brand-primary)" }}
-        >
-          Find What You Need
-        </span>
-        <h2
-          style={{ color: "var(--text-primary)" }}
-          className="text-3xl font-bold text-center mb-3 relative z-10"
-        >
-          Shop by Category
-        </h2>
-        <div
-          className="h-1.5 w-28 rounded-full mb-4"
-          style={{
-            background:
-              "linear-gradient(to right, var(--brand-primary), var(--brand-primary-hover))",
-          }}
-        />
-        <p
-          className="text-center max-w-md text-base"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          Discover our wide range of products by browsing through popular
-          categories
-        </p>
-      </div>
+    <div className="py-6">
       {/* Slider container with navigation */}
       <div
         className="relative px-2"

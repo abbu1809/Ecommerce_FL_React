@@ -47,12 +47,52 @@ const Home = () => {
         className="py-12"
       >
         <div className="container mx-auto px-4">
+          <div className="mb-8">
+            <h2
+              className="text-3xl font-bold mb-3 text-left"
+              style={{ color: "var(--text-primary)" }}
+            >
+              Shop by Category
+            </h2>
+            <div
+              className="h-1 w-24 rounded-full"
+              style={{
+                backgroundColor: "var(--brand-primary)",
+              }}
+            ></div>
+            <p
+              className="mt-4 text-lg text-left"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              Discover our wide range of products
+            </p>
+          </div>
           <CategoryList categories={categories} />
         </div>
       </section>
       {/* Featured Products Section */}
       <section className="py-12">
         <div className="container mx-auto px-4">
+          <div className="mb-8">
+            <h2
+              className="text-3xl font-bold mb-3 text-left"
+              style={{ color: "var(--text-primary)" }}
+            >
+              Featured Products
+            </h2>
+            <div
+              className="h-1 w-24 rounded-full"
+              style={{
+                backgroundColor: "var(--brand-primary)",
+              }}
+            ></div>
+            <p
+              className="mt-4 text-lg text-left"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              Handpicked products just for you
+            </p>
+          </div>
           <FeaturedProductList products={featuredProducts} />
         </div>
       </section>
@@ -61,34 +101,48 @@ const Home = () => {
         style={{ backgroundColor: "var(--bg-primary)" }}
         className="py-12"
       >
-        <div className="container">
-          <h2
-            style={{ color: "var(--text-primary)" }}
-            className="text-2xl md:text-3xl font-bold mb-6"
-          >
-            Special Offers
-          </h2>
+        <div className="container mx-auto px-4">
+          <div className="mb-8">
+            <h2
+              style={{ color: "var(--text-primary)" }}
+              className="text-3xl font-bold mb-3 text-left"
+            >
+              Special Offers
+            </h2>
+            <div
+              className="h-1 w-24 rounded-full"
+              style={{
+                backgroundColor: "var(--brand-primary)",
+              }}
+            ></div>
+            <p
+              className="mt-4 text-lg text-left"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              Don't miss out on these amazing deals
+            </p>
+          </div>
           <BannerCarousel />
         </div>
       </section>
       {/* Our Products Section with Pagination */}
       <section className="py-12">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
+          <div className="mb-12">
             <h2
-              className="text-3xl font-bold mb-3"
+              className="text-3xl font-bold mb-3 text-left"
               style={{ color: "var(--text-primary)" }}
             >
               Our Products
             </h2>
             <div
-              className="h-1 w-24 mx-auto rounded-full"
+              className="h-1 w-24 rounded-full"
               style={{
                 backgroundColor: "var(--brand-primary)",
               }}
             ></div>
             <p
-              className="mt-4 text-lg"
+              className="mt-4 text-lg text-left"
               style={{ color: "var(--text-secondary)" }}
             >
               Explore our complete collection

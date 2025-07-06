@@ -100,13 +100,16 @@ const HeroBanner = () => {
 
   return (
     <section className="relative overflow-hidden">
-      <div className="container">
+      <div className="container mx-auto px-4">
         <div
-          className="relative overflow-hidden transform hover:scale-[1.01] transition-all duration-700 ease-in-out animate-fadeIn"
+          className="relative overflow-hidden rounded-xl transform hover:scale-[1.01] transition-all duration-700 ease-in-out animate-fadeIn"
           style={{
             boxShadow:
               "var(--shadow-large), 0 15px 30px -10px rgba(245, 158, 11, 0.2)",
-            height: "500px",
+            height: "clamp(250px, 40vh, 500px)", // More responsive height for mobile
+            width: "100%",
+            maxHeight: "500px",
+            minHeight: "250px",
           }}
         >
           {/* Slider with Framer Motion */}
@@ -121,19 +124,21 @@ const HeroBanner = () => {
               transition={slideTransition}
               className="absolute inset-0"
             >
-              {/* High-quality image with subtle zoom effect */}
+              {/* High-quality image with responsive sizing and better fit */}
               <img
                 src={images[currentIndex].image}
                 alt={images[currentIndex].title}
                 className="w-full h-full object-cover object-center"
                 style={{
                   backgroundColor: images[currentIndex].backgroundColor,
+                  objectFit: "cover", // Ensure proper fitting
+                  objectPosition: "center center",
                 }}
                 loading="eager"
               />
-              {/* Content overlay without dark background */}
-              <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-14">
-                <div className="max-w-lg relative">
+              {/* Content overlay with responsive padding */}
+              <div className="absolute inset-0 flex flex-col justify-center px-4 sm:px-6 md:px-8 lg:px-14">
+                <div className="max-w-lg lg:max-w-xl relative">
                   {/* Animated badge */}
                   {images[currentIndex].tag && (
                     <motion.span
@@ -150,12 +155,12 @@ const HeroBanner = () => {
                       {images[currentIndex].tag}
                     </motion.span>
                   )}
-                  {/* Animated headline with text reveal effect */}
+                  {/* Responsive animated headline */}
                   <motion.h1
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4, duration: 0.6 }}
-                    className="text-3xl sm:text-5xl md:text-6xl font-bold mb-4 leading-tight drop-shadow-lg"
+                    className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-2 sm:mb-4 leading-tight drop-shadow-lg"
                     style={{
                       color: "var(--text-on-brand)",
                       textShadow: "0 2px 10px rgba(0,0,0,0.4)",
@@ -164,13 +169,13 @@ const HeroBanner = () => {
                   >
                     {images[currentIndex].title}
                   </motion.h1>
-                  {/* Animated subtitle */}
+                  {/* Responsive animated subtitle */}
                   {images[currentIndex].subtitle && (
                     <motion.p
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.6, duration: 0.6 }}
-                      className="text-lg sm:text-xl md:text-2xl mb-8 leading-relaxed max-w-xl"
+                      className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl mb-4 sm:mb-6 md:mb-8 leading-relaxed max-w-xl"
                       style={{
                         color: "var(--text-on-brand-muted)",
                         textShadow: "0 1px 3px rgba(0,0,0,0.3)",
@@ -179,13 +184,13 @@ const HeroBanner = () => {
                       {images[currentIndex].subtitle}
                     </motion.p>
                   )}
-                  {/* Description if available */}
+                  {/* Responsive description */}
                   {images[currentIndex].description && (
                     <motion.p
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.7, duration: 0.6 }}
-                      className="text-base mb-8 leading-relaxed max-w-xl"
+                      className="text-sm sm:text-base mb-4 sm:mb-6 md:mb-8 leading-relaxed max-w-xl"
                       style={{
                         color: "var(--text-on-brand-muted)",
                         textShadow: "0 1px 3px rgba(0,0,0,0.3)",
@@ -194,12 +199,12 @@ const HeroBanner = () => {
                       {images[currentIndex].description}
                     </motion.p>
                   )}
-                  {/* Animated buttons with improved effects */}
+                  {/* Responsive animated buttons */}
                   <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.8, duration: 0.6 }}
-                    className="flex flex-wrap gap-4"
+                    className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4"
                   >
                     <Button
                       variant="primary"
@@ -208,16 +213,16 @@ const HeroBanner = () => {
                       onClick={() =>
                         handleButtonClick(images[currentIndex].link)
                       }
-                      className="transition-all duration-500 hover:translate-y-[-4px] hover:shadow-xl relative overflow-hidden group"
-                      style={{
-                        backgroundColor: "var(--brand-primary)",
-                        color: "var(--text-on-brand)",
-                        boxShadow: "0 10px 25px -5px rgba(245, 158, 11, 0.5)",
-                        borderRadius: "var(--rounded-md)",
-                        padding: "0.85rem 2rem",
-                      }}
-                    >
-                      <span className="relative z-10 text-base font-semibold flex items-center gap-2">
+                      className="transition-all duration-500 hover:translate-y-[-4px] hover:shadow-xl relative overflow-hidden group"                        style={{
+                          backgroundColor: "var(--brand-primary)",
+                          color: "var(--text-on-brand)",
+                          boxShadow: "0 10px 25px -5px rgba(245, 158, 11, 0.5)",
+                          borderRadius: "var(--rounded-md)",
+                          padding: "0.75rem 1.5rem",
+                          fontSize: "0.875rem",
+                        }}
+                      >
+                        <span className="relative z-10 text-sm sm:text-base font-semibold flex items-center gap-2">
                         {images[currentIndex].cta || "Shop Now"}
                         <svg
                           className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300"
@@ -244,17 +249,17 @@ const HeroBanner = () => {
                         onClick={() =>
                           handleButtonClick(images[currentIndex].link)
                         }
-                        className="transition-all duration-500 hover:translate-y-[-4px] hover:shadow-xl relative overflow-hidden group"
-                        style={{
-                          backgroundColor: "rgba(255, 255, 255, 0.12)",
-                          borderColor: "rgba(255, 255, 255, 0.4)",
-                          color: "var(--text-on-brand)",
-                          borderRadius: "var(--rounded-md)",
-                          padding: "0.85rem 2rem",
-                          boxShadow: "0 8px 20px rgba(0, 0, 0, 0.15)",
-                        }}
-                      >
-                        <span className="relative z-10 text-base font-semibold">
+                        className="transition-all duration-500 hover:translate-y-[-4px] hover:shadow-xl relative overflow-hidden group"                          style={{
+                            backgroundColor: "rgba(255, 255, 255, 0.12)",
+                            borderColor: "rgba(255, 255, 255, 0.4)",
+                            color: "var(--text-on-brand)",
+                            borderRadius: "var(--rounded-md)",
+                            padding: "0.75rem 1.5rem",
+                            fontSize: "0.875rem",
+                            boxShadow: "0 8px 20px rgba(0, 0, 0, 0.15)",
+                          }}
+                        >
+                          <span className="relative z-10 text-sm sm:text-base font-semibold">
                           Learn More
                         </span>
                         <span className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>

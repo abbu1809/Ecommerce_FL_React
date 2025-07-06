@@ -208,6 +208,20 @@ export const useBannerStore = create(
       return carouselBanners;
     },
 
+    // Get dropdown banners by category
+    getDropdownBanners: (categoryName) => {
+      const { banners } = get();
+      return banners
+        .filter(
+          (banner) => 
+            banner.position === "dropdown" && 
+            banner.active && 
+            banner.category === categoryName
+        )
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+        .slice(0, 2); // Limit to 2 banners per dropdown
+    },
+
     // Clear error
     clearError: () => set({ error: null }),
   }))
