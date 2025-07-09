@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Button from "./ui/Button";
 import { useBannerStore } from "../store/Admin/useBannerStore";
 
@@ -199,37 +199,30 @@ const HeroBanner = () => {
                       {images[currentIndex].description}
                     </motion.p>
                   )}
-                  {/* Responsive animated buttons */}
+                  {/* Clickable overlay for entire banner */}
                   <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.8, duration: 0.6 }}
                     className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4"
                   >
-                    <Button
-                      variant="primary"
-                      fullWidth={false}
-                      size="lg"
-                      onClick={() =>
-                        handleButtonClick(images[currentIndex].link)
-                      }
-                      className="transition-all duration-500 hover:translate-y-[-4px] hover:shadow-xl relative overflow-hidden group"                        style={{
-                          backgroundColor: "var(--brand-primary)",
-                          color: "var(--text-on-brand)",
-                          boxShadow: "0 10px 25px -5px rgba(245, 158, 11, 0.5)",
-                          borderRadius: "var(--rounded-md)",
-                          padding: "0.75rem 1.5rem",
-                          fontSize: "0.875rem",
-                        }}
-                      >
-                        <span className="relative z-10 text-sm sm:text-base font-semibold flex items-center gap-2">
+                    <motion.button
+                      onClick={() => handleButtonClick(images[currentIndex].link)}
+                      className="group relative overflow-hidden px-6 py-3 rounded-lg font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+                      style={{
+                        backgroundColor: "var(--brand-primary)",
+                        boxShadow: "0 10px 25px -5px rgba(245, 158, 11, 0.5)",
+                      }}
+                      whileHover={{ y: -4 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <span className="relative z-10 flex items-center gap-2">
                         {images[currentIndex].cta || "Shop Now"}
                         <svg
                           className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
                             strokeLinecap="round"
@@ -239,32 +232,8 @@ const HeroBanner = () => {
                           />
                         </svg>
                       </span>
-                      <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 transform -skew-x-30 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out"></span>
-                    </Button>
-                    {images[currentIndex].link && (
-                      <Button
-                        variant="outline"
-                        fullWidth={false}
-                        size="lg"
-                        onClick={() =>
-                          handleButtonClick(images[currentIndex].link)
-                        }
-                        className="transition-all duration-500 hover:translate-y-[-4px] hover:shadow-xl relative overflow-hidden group"                          style={{
-                            backgroundColor: "rgba(255, 255, 255, 0.12)",
-                            borderColor: "rgba(255, 255, 255, 0.4)",
-                            color: "var(--text-on-brand)",
-                            borderRadius: "var(--rounded-md)",
-                            padding: "0.75rem 1.5rem",
-                            fontSize: "0.875rem",
-                            boxShadow: "0 8px 20px rgba(0, 0, 0, 0.15)",
-                          }}
-                        >
-                          <span className="relative z-10 text-sm sm:text-base font-semibold">
-                          Learn More
-                        </span>
-                        <span className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
-                      </Button>
-                    )}
+                      <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 transform -skew-x-30 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></span>
+                    </motion.button>
                   </motion.div>
                 </div>
               </div>

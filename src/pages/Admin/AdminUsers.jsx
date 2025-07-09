@@ -89,6 +89,67 @@ const AdminUsers = () => {
     },
   ];
 
+  // Export users to CSV
+  const exportUsersToCSV = () => {
+    try {
+      const csvHeaders = [
+        "User ID",
+        "Full Name",
+        "Email",
+        "Phone",
+        "Join Date",
+        "Status",
+        "Total Orders",
+        "Total Spent",
+      ];
+
+      const csvData = users.list.map((user) => [
+        user.id || "",
+        user.name || `${user.first_name || ""} ${user.last_name || ""}`.trim(),
+        user.email || "",
+        user.phone || "",
+        user.date_joined ? new Date(user.date_joined).toLocaleDateString() : "",
+        user.is_active ? "Active" : "Inactive",
+        user.total_orders || 0,
+        `₹${user.total_spent || 0}`,
+      ]);
+
+      // Create CSV content
+      const csvContent = [
+        csvHeaders.join(","),
+        ...csvData.map((row) =>
+          row
+            .map((field) =>
+              typeof field === "string" && (field.includes(",") || field.includes('"'))
+                ? `"${field.replace(/"/g, '""')}"`
+                : field
+            )
+            .join(",")
+        ),
+      ].join("\n");
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const fileName = `users-export-${new Date()
+        .toISOString()
+        .split("T")[0]}.csv`;
+
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", fileName);
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      console.error("Error exporting users:", error);
+      alert("Failed to export users. Please try again.");
+    }
+  };
+
   return (
     <div>
       <div className="flex flex-wrap justify-between items-center mb-6">
@@ -127,6 +188,7 @@ const AdminUsers = () => {
               borderColor: "var(--border-primary)",
               borderRadius: "var(--rounded-md)",
             }}
+            onClick={exportUsersToCSV}
           >
             <FiDownload className="mr-2" size={16} />
             Export Users

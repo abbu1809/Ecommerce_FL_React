@@ -90,7 +90,7 @@ const Home = () => {
               className="mt-4 text-lg text-left"
               style={{ color: "var(--text-secondary)" }}
             >
-              Handpicked products just for you
+              Discover our best-selling items handpicked for you
             </p>
           </div>
           <FeaturedProductList products={featuredProducts} />

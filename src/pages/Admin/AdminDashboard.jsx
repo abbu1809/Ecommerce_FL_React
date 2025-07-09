@@ -94,6 +94,64 @@ const AdminDashboard = () => {
 
   const isLoading = loading || enhancedLoading;
 
+  // Export dashboard data to CSV
+  const exportDashboardToCSV = () => {
+    try {
+      const csvHeaders = [
+        'Metric',
+        'Value',
+        'Change',
+        'Period'
+      ];
+
+      const csvData = [
+        ['Total Revenue', `₹${stats.totalRevenue?.toLocaleString() || 0}`, stats.revenueChange || 'N/A', selectedDateRange],
+        ['Total Orders', stats.totalOrders || 0, stats.ordersChange || 'N/A', selectedDateRange],
+        ['New Customers', stats.newCustomers || 0, stats.customersChange || 'N/A', selectedDateRange],
+        ['Pending Orders', stats.pendingOrders || 0, 'N/A', selectedDateRange],
+        ['Low Stock Items', stats.lowStockItems || 0, 'N/A', selectedDateRange],
+      ];
+
+      // Add analytics data if available
+      if (analytics?.businessMetrics) {
+        csvData.push(['', '', '', '']); // Empty row
+        csvData.push(['Business Analytics', '', '', '']);
+        csvData.push(['Total Revenue (Analytics)', `₹${analytics.businessMetrics.totalRevenue?.toLocaleString() || 0}`, analytics.businessMetrics.totalRevenueChange || 'N/A', selectedDateRange]);
+        csvData.push(['Average Order Value', `₹${analytics.businessMetrics.averageOrderValue?.toLocaleString() || 0}`, analytics.businessMetrics.averageOrderValueChange || 'N/A', selectedDateRange]);
+      }
+
+      // Create CSV content
+      const csvContent = [
+        csvHeaders.join(','),
+        ...csvData.map(row => 
+          row.map(field => 
+            typeof field === 'string' && (field.includes(',') || field.includes('"')) 
+              ? `"${field.replace(/"/g, '""')}"` 
+              : field
+          ).join(',')
+        )
+      ].join('\n');
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const fileName = `dashboard-report-${selectedDateRange}-${new Date().toISOString().split('T')[0]}.csv`;
+      
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', fileName);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      console.error('Error exporting dashboard data:', error);
+      alert('Failed to export dashboard data. Please try again.');
+    }
+  };
+
   // Render different views
   const renderContent = () => {
     switch (activeView) {
@@ -258,6 +316,7 @@ const AdminDashboard = () => {
             size="sm"
             fullWidth={false}
             icon={<FiDownload size={16} />}
+            onClick={exportDashboardToCSV}
           >
             Export
           </Button>

@@ -59,6 +59,66 @@ const AdminOrders = () => {
     setCurrentPage(1);
   }, [statusFilter, searchQuery]);
 
+  // Helper function to export orders to CSV
+  const exportOrdersToCSV = () => {
+    try {
+      const csvHeaders = [
+        'Order ID',
+        'Customer Name',
+        'Email',
+        'Phone',
+        'Total Amount',
+        'Status',
+        'Order Date',
+        'Payment Method',
+        'Items Count'
+      ];
+
+      const csvData = orders.list.map(order => [
+        order.order_id || '',
+        order.customer_name || order.user_name || '',
+        order.customer_email || order.user_email || '',
+        order.customer_phone || order.phone || '',
+        `₹${order.total_amount || 0}`,
+        order.status || '',
+        order.created_at ? new Date(order.created_at).toLocaleDateString() : '',
+        order.payment_method || 'N/A',
+        order.item_count || order.order_items?.length || 0
+      ]);
+
+      // Create CSV content
+      const csvContent = [
+        csvHeaders.join(','),
+        ...csvData.map(row => 
+          row.map(field => 
+            // Escape commas and quotes in field values
+            typeof field === 'string' && (field.includes(',') || field.includes('"')) 
+              ? `"${field.replace(/"/g, '""')}"` 
+              : field
+          ).join(',')
+        )
+      ].join('\n');
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const fileName = `orders-export-${new Date().toISOString().split('T')[0]}.csv`;
+      
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', fileName);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      console.error('Error exporting orders:', error);
+      alert('Failed to export orders. Please try again.');
+    }
+  };
+
   const handleSelectOrder = (order) => {
     setSelectedOrder(order);
     setShowOrderDetailModal(true);
@@ -99,7 +159,8 @@ const AdminOrders = () => {
           </Button>
 
           <button
-            className="flex items-center px-4 py-2 rounded-md text-sm font-medium border"
+            onClick={exportOrdersToCSV}
+            className="flex items-center px-4 py-2 rounded-md text-sm font-medium border hover:bg-gray-50 transition-colors"
             style={{
               backgroundColor: "var(--bg-primary)",
               color: "var(--text-primary)",

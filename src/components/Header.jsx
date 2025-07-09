@@ -416,6 +416,25 @@ const Header = () => {
     }
   };
 
+  // Optional: Handle dropdown mouse enter/leave for enhanced UX
+  const handleDropdownEnter = (categoryId) => {
+    // Keep dropdown open on mouse enter (prevents accidental closes)
+    if (activeDropdown === categoryId) {
+      // Optional: You can add any hover enhancement logic here
+    }
+  };
+
+  const handleDropdownLeave = () => {
+    // Optional: Add a slight delay before closing to prevent flickering
+    // For now, we'll keep it simple since we're using click-based dropdowns
+    // You can uncomment the timeout below if you want delayed closing
+    // setTimeout(() => {
+    //   if (activeDropdown) {
+    //     setActiveDropdown(null);
+    //   }
+    // }, 200);
+  };
+
   // Fetch products to get categories when component mounts
   useEffect(() => {
     if (!productsInitialized.current) {
@@ -1016,7 +1035,7 @@ const Header = () => {
               </Link>
             </li>
           </ul>
-          {/* Shared Mega Dropdown Menu - Always Centered */}
+          {/* Compact Mega Dropdown Menu */}
           {activeDropdown && (
             <div
               className="absolute bg-white shadow-2xl border-t-2 dropdown-container"
@@ -1026,14 +1045,19 @@ const Header = () => {
                 boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)",
                 zIndex: 9999,
                 top: "100%",
-                left: "0",
-                right: "0",
-                width: "100vw",
-                marginLeft: "calc(-50vw + 50%)",
-                marginTop: "4px",
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: "75vw",
+                maxWidth: "900px",
+                maxHeight: "50vh",
+                marginTop: "2px",
+                borderRadius: "0 0 8px 8px",
+                overflow: "hidden",
               }}
+              onMouseEnter={() => handleDropdownEnter(activeDropdown)}
+              onMouseLeave={handleDropdownLeave}
             >
-              <div className="px-8 py-8">
+              <div className="px-4 py-3">
                 {(() => {
                   const activeCategory = megaMenuCategories.find(
                     (cat) => cat.id === activeDropdown
@@ -1042,13 +1066,13 @@ const Header = () => {
 
                   return (
                     <>
-                      <div className="grid grid-cols-4 gap-8 p-8">
-                        {/* First 3 columns for subcategories */}
-                        {activeCategory.subcategories.slice(0, 3).map(
+                      <div className="grid grid-cols-5 gap-3">
+                        {/* First 4 columns for subcategories - more compact */}
+                        {activeCategory.subcategories.slice(0, 4).map(
                           (subcategory, index) => (
-                            <div key={index} className="space-y-4">
+                            <div key={index} className="space-y-1.5">
                               <h3
-                                className="font-semibold text-lg pb-2 border-b"
+                                className="font-semibold text-xs pb-1 border-b"
                                 style={{
                                   color: "var(--brand-primary)",
                                   borderBottomColor: "var(--border-primary)",
@@ -1056,13 +1080,14 @@ const Header = () => {
                               >
                                 {subcategory.title}
                               </h3>
-                              <ul className="space-y-2">
-                                {subcategory.items.map((item, itemIndex) => (
+                              <ul className="space-y-0.5">
+                                {subcategory.items.slice(0, 5).map((item, itemIndex) => (
                                   <li key={itemIndex}>
                                     <Link
                                       to={item.path}
-                                      className="text-sm text-gray-600 hover:text-brand-primary transition-colors duration-200 block py-1"
+                                      className="text-xs text-gray-600 hover:text-brand-primary transition-colors duration-200 block py-0.5 leading-tight"
                                       style={{ color: "var(--text-secondary)" }}
+                                      onClick={() => setActiveDropdown(null)}
                                     >
                                       {item.name}
                                     </Link>
@@ -1073,10 +1098,10 @@ const Header = () => {
                           )
                         )}
                         
-                        {/* 4th column for promotional banners */}
-                        <div className="space-y-4">
+                        {/* 5th column for vertical promotional banners - Poorvika style */}
+                        <div className="space-y-2 min-w-[180px]">
                           <h3
-                            className="font-semibold text-lg pb-2 border-b"
+                            className="font-semibold text-sm pb-2 border-b"
                             style={{
                               color: "var(--brand-primary)",
                               borderBottomColor: "var(--border-primary)",
@@ -1085,88 +1110,106 @@ const Header = () => {
                             Special Offers
                           </h3>
                           
-                          {/* Render category-specific banners */}
+                          {/* Render category-specific vertical banners - Poorvika style */}
                           {(() => {
                             // Get admin-managed banners for this category
                             const adminBanners = getDropdownBanners(activeCategory.name);
                             const banners = adminBanners.length > 0 ? adminBanners : activeCategory.banners;
                             
-                            return banners?.map((banner, bannerIndex) => (
+                            return banners?.slice(0, 2).map((banner, bannerIndex) => (
                               <Link
                                 key={bannerIndex}
                                 to={banner.link || banner.buttonLink || activeCategory.path}
-                                className="block relative rounded-lg overflow-hidden group cursor-pointer"
+                                className="block relative rounded-lg overflow-hidden group cursor-pointer shadow-sm hover:shadow-md transition-all duration-300"
+                                onClick={() => setActiveDropdown(null)}
                               >
-                                <img
-                                  src={banner.image || banner.imageUrl}
-                                  alt={banner.title}
-                                  className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                                <div className="absolute bottom-2 left-2 text-white">
-                                  <p className="text-xs font-medium">{banner.subtitle || banner.description}</p>
-                                  <p className="text-sm font-bold">{banner.title}</p>
+                                <div className="aspect-[4/5] w-full bg-gradient-to-br from-blue-50 to-purple-50">
+                                  <img
+                                    src={banner.image || banner.imageUrl}
+                                    alt={banner.title}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    onError={(e) => {
+                                      e.target.style.display = 'none';
+                                      e.target.nextSibling.style.display = 'flex';
+                                    }}
+                                  />
+                                  {/* Fallback gradient background */}
+                                  <div className="hidden w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 items-center justify-center">
+                                    <span className="text-white font-bold text-lg">
+                                      {banner.title?.charAt(0) || 'A'}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                                <div className="absolute bottom-2 left-2 right-2 text-white">
+                                  <p className="text-sm font-bold leading-tight mb-1 drop-shadow-sm">
+                                    {banner.title}
+                                  </p>
+                                  <p className="text-xs opacity-95 leading-tight drop-shadow-sm">
+                                    {banner.subtitle || banner.description}
+                                  </p>
+                                  {(banner.buttonText || banner.cta) && (
+                                    <div className="mt-2">
+                                      <span className="inline-block px-2 py-1 bg-white/20 backdrop-blur-sm rounded text-xs font-medium">
+                                        {banner.buttonText || banner.cta}
+                                      </span>
+                                    </div>
+                                  )}
                                 </div>
                               </Link>
                             ));
                           })() || (
-                            // Fallback banners if no admin banners and no category banners
+                            // Fallback vertical banners with improved Poorvika-style design
                             <>
-                              <div className="relative rounded-lg overflow-hidden group cursor-pointer">
-                                <img
-                                  src="/mobile1.png"
-                                  alt="Special Offer"
-                                  className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                                <div className="absolute bottom-2 left-2 text-white">
-                                  <p className="text-xs font-medium">Up to 50% OFF</p>
-                                  <p className="text-sm font-bold">Best Deals</p>
+                              <Link
+                                to="/products/mobiles"
+                                className="block relative rounded-lg overflow-hidden group cursor-pointer shadow-sm hover:shadow-md transition-all duration-300"
+                                onClick={() => setActiveDropdown(null)}
+                              >
+                                <div className="aspect-[4/5] w-full">
+                                  <img
+                                    src="/mobile1.png"
+                                    alt="Mobile Offers"
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                  />
                                 </div>
-                              </div>
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                                <div className="absolute bottom-2 left-2 right-2 text-white">
+                                  <p className="text-sm font-bold leading-tight mb-1 drop-shadow-sm">Latest iPhones</p>
+                                  <p className="text-xs opacity-95 leading-tight drop-shadow-sm">Up to 25% OFF</p>
+                                  <div className="mt-2">
+                                    <span className="inline-block px-2 py-1 bg-white/20 backdrop-blur-sm rounded text-xs font-medium">
+                                      Shop Now
+                                    </span>
+                                  </div>
+                                </div>
+                              </Link>
                               
-                              <div className="relative rounded-lg overflow-hidden group cursor-pointer">
-                                <img
-                                  src="/laptops.png"
-                                  alt="Special Offer"
-                                  className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                                <div className="absolute bottom-2 left-2 text-white">
-                                  <p className="text-xs font-medium">New Arrivals</p>
-                                  <p className="text-sm font-bold">Premium Quality</p>
+                              <Link
+                                to="/products/accessories"
+                                className="block relative rounded-lg overflow-hidden group cursor-pointer shadow-sm hover:shadow-md transition-all duration-300"
+                                onClick={() => setActiveDropdown(null)}
+                              >
+                                <div className="aspect-[4/5] w-full">
+                                  <img
+                                    src="/accessories.png"
+                                    alt="Accessories"
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                  />
                                 </div>
-                              </div>
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                                <div className="absolute bottom-2 left-2 right-2 text-white">
+                                  <p className="text-sm font-bold leading-tight mb-1 drop-shadow-sm">Mobile Accessories</p>
+                                  <p className="text-xs opacity-95 leading-tight drop-shadow-sm">Starting ₹99</p>
+                                  <div className="mt-2">
+                                    <span className="inline-block px-2 py-1 bg-white/20 backdrop-blur-sm rounded text-xs font-medium">
+                                      Explore
+                                    </span>
+                                  </div>
+                                </div>
+                              </Link>
                             </>
                           )}
-                        </div>
-                      </div>
-
-                      {/* Featured Products Section */}
-                      <div
-                        className="border-t p-6"
-                        style={{ borderTopColor: "var(--border-primary)" }}
-                      >
-                        <div className="flex items-center justify-between mb-4">
-                          <h4
-                            className="font-semibold text-base"
-                            style={{ color: "var(--text-primary)" }}
-                          >
-                            Featured Products
-                          </h4>
-                          <Link
-                            to={activeCategory.path}
-                            className="text-sm font-medium hover:underline"
-                            style={{ color: "var(--brand-primary)" }}
-                          >
-                            View All →
-                          </Link>
-                        </div>
-                        <div className="grid grid-cols-4 gap-4">
-                          {/* Featured products will be displayed here based on category */}
-                          <div className="text-center text-sm text-gray-500">
-                            Featured products for {activeCategory.name}
-                          </div>
                         </div>
                       </div>
                     </>

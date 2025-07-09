@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Button from "../../ui/Button";
+import ImageCropper from "../../ui/ImageCropper";
 import { useBannerStore } from "../../../store/Admin/useBannerStore";
 import ConfirmModal from "../../ui/ConfirmModal";
 import toast from "react-hot-toast";
@@ -38,6 +39,8 @@ const BannerManager = ({ positionOptions }) => {
   const [editBannerImageFile, setEditBannerImageFile] = useState(null);
   const [editBannerImagePreview, setEditBannerImagePreview] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showImageCropper, setShowImageCropper] = useState(false);
+  const [cropperMode, setCropperMode] = useState('new'); // 'new' or 'edit'
   useEffect(() => {
     fetchBanners();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -160,6 +163,65 @@ const BannerManager = ({ positionOptions }) => {
       setDeleteLoading(false);
     }
   };
+
+  // Image cropper functions
+  const openImageCropper = (mode) => {
+    setCropperMode(mode);
+    setShowImageCropper(true);
+  };
+
+  const handleCroppedImageSelect = (croppedImageData) => {
+    if (cropperMode === 'new') {
+      setNewBannerImageFile(croppedImageData.file);
+      setNewBannerImagePreview(croppedImageData.dataUrl);
+    } else {
+      setEditBannerImageFile(croppedImageData.file);
+      setEditBannerImagePreview(croppedImageData.dataUrl);
+    }
+    setShowImageCropper(false);
+  };
+
+  // Helper functions for banner dimensions and cropping guidance
+  const getTargetDimensions = (position) => {
+    switch (position) {
+      case 'hero':
+        return { width: 1200, height: 400, description: 'Hero banners (wide format)' };
+      case 'dropdown':
+        return { width: 300, height: 200, description: 'Navigation dropdown banners (vertical format)' };
+      case 'sidebar':
+        return { width: 350, height: 500, description: 'Sidebar promotional banners' };
+      case 'footer':
+        return { width: 600, height: 200, description: 'Footer promotional banners' };
+      default:
+        return { width: 800, height: 400, description: 'General promotional banners' };
+    }
+  };
+
+  const getCropPresets = (position) => {
+    const dimensions = getTargetDimensions(position);
+    return {
+      aspectRatio: dimensions.width / dimensions.height,
+      recommendedSize: `${dimensions.width}x${dimensions.height}px`,
+      description: dimensions.description
+    };
+  };
+
+  // Get aspect ratio based on banner position
+  const getAspectRatio = (position) => {
+    switch (position) {
+      case 'hero':
+        return 3; // Wide 3:1 ratio for hero banners
+      case 'dropdown':
+        return 1.5; // 3:2 ratio for dropdown banners (more vertical)
+      case 'sidebar':
+        return 0.7; // Tall 7:10 ratio for sidebar
+      case 'footer':
+        return 3; // Wide for footer
+      default:
+        return 2; // Default 2:1 ratio
+    }
+  };
+
   return (
     <div className="space-y-6">
       {loading && (
@@ -222,24 +284,50 @@ const BannerManager = ({ positionOptions }) => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Image Upload
+                Banner Image
               </label>
-              <input
-                type="file"
-                accept="image/*"
-                className="w-full p-2 border border-gray-300 rounded-md"
-                onChange={handleNewBannerImageChange}
-                required
-              />
-              {newBannerImagePreview && (
-                <div className="mt-2">
-                  <img
-                    src={newBannerImagePreview}
-                    alt="Preview"
-                    className="h-24 w-48 object-cover rounded border"
-                  />
-                </div>
-              )}
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => openImageCropper('new')}
+                  className="w-full p-3 border-2 border-dashed border-gray-300 rounded-md hover:border-gray-400 transition-colors text-center"
+                >
+                  <div className="flex flex-col items-center space-y-2">
+                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    <span className="text-sm text-gray-600">
+                      {newBannerImagePreview ? 'Change Image (with cropping)' : 'Upload & Crop Image'}
+                    </span>
+                  </div>
+                </button>
+                {newBannerImagePreview && (
+                  <div className="relative">
+                    <img
+                      src={newBannerImagePreview}
+                      alt="Banner Preview"
+                      className={`w-full object-cover rounded border ${
+                        newBanner.position === 'dropdown' ? 'h-32' : 'h-24'
+                      }`}
+                      style={{
+                        aspectRatio: getAspectRatio(newBanner.position)
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNewBannerImageFile(null);
+                        setNewBannerImagePreview(null);
+                      }}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -579,68 +667,88 @@ const BannerManager = ({ positionOptions }) => {
           </div>
         </div>
       )}
-      <div className="overflow-x-auto">
-        <table className="w-full whitespace-nowrap">
+      <div className="overflow-x-auto bg-white rounded-lg shadow">
+        <table className="w-full min-w-full">
           <thead className="bg-gray-100 text-gray-700 text-sm">
             <tr>
-              <th className="py-3 px-4 text-left">Banner</th>
-              <th className="py-3 px-4 text-left">Details</th>
-              <th className="py-3 px-4 text-left">Position</th>
-              <th className="py-3 px-4 text-left">Category</th>
-              <th className="py-3 px-4 text-center">Status</th>
-              <th className="py-3 px-4 text-right">Actions</th>
+              <th className="py-3 px-4 text-left w-24">Banner</th>
+              <th className="py-3 px-4 text-left min-w-0 w-2/5">Details</th>
+              <th className="py-3 px-4 text-left w-24">Position</th>
+              <th className="py-3 px-4 text-left w-20">Category</th>
+              <th className="py-3 px-4 text-center w-20">Status</th>
+              <th className="py-3 px-4 text-right w-32">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
             {banners.map((banner) => (
               <tr key={banner.id} className="hover:bg-gray-50">
-                <td className="py-3 px-4">
-                  <img
-                    src={banner.image}
-                    alt={banner.title}
-                    className="h-24 w-48 object-cover rounded"
-                  />
+                <td className="py-3 px-4 w-24">
+                  <div className="flex-shrink-0">
+                    <img
+                      src={banner.image}
+                      alt={banner.title}
+                      className="h-16 w-20 object-cover rounded border"
+                      onError={(e) => {
+                        e.target.src = '/public/logo.jpg'; // Fallback image
+                        e.target.alt = 'Image not found';
+                      }}
+                    />
+                  </div>
                 </td>
-                <td className="py-3 px-4">
-                  <h3 className="font-medium">{banner.title}</h3>
-                  {banner.subtitle && (
-                    <p className="text-sm text-gray-600">{banner.subtitle}</p>
-                  )}
-                  <p className="text-sm text-gray-500 line-clamp-2">
-                    {banner.description}
-                  </p>
-                  {banner.link && (
-                    <a
-                      href={banner.link}
-                      className="text-xs text-blue-500 hover:underline"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {banner.link}
-                    </a>
-                  )}
-                  {banner.tag && (
-                    <span className="inline-block mt-1 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
-                      {banner.tag}
-                    </span>
-                  )}
+                <td className="py-3 px-4 min-w-0 max-w-0 w-2/5">
+                  <div className="space-y-1">
+                    <h3 className="font-medium text-sm truncate" title={banner.title}>
+                      {banner.title}
+                    </h3>
+                    {banner.subtitle && (
+                      <p className="text-xs text-gray-600 truncate" title={banner.subtitle}>
+                        {banner.subtitle}
+                      </p>
+                    )}
+                    {banner.description && (
+                      <p className="text-xs text-gray-500 truncate" title={banner.description}>
+                        {banner.description}
+                      </p>
+                    )}
+                    {banner.link && (
+                      <div className="flex items-center space-x-1">
+                        <span className="text-xs text-gray-400">Link:</span>
+                        <a
+                          href={banner.link}
+                          className="text-xs text-blue-500 hover:underline truncate max-w-32"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={banner.link}
+                        >
+                          {banner.link.length > 25 ? `${banner.link.substring(0, 25)}...` : banner.link}
+                        </a>
+                      </div>
+                    )}
+                    {banner.tag && (
+                      <span className="inline-block px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded truncate max-w-24">
+                        {banner.tag.length > 12 ? `${banner.tag.substring(0, 12)}...` : banner.tag}
+                      </span>
+                    )}
+                  </div>
                 </td>
-                <td className="py-3 px-4">
-                  {positionOptions.find((p) => p.value === banner.position)
-                    ?.label || banner.position}
+                <td className="py-3 px-4 w-24">
+                  <span className="text-sm whitespace-nowrap">
+                    {positionOptions.find((p) => p.value === banner.position)
+                      ?.label || banner.position}
+                  </span>
                 </td>
-                <td className="py-3 px-4">
+                <td className="py-3 px-4 w-20">
                   {banner.position === "dropdown" ? (
-                    <span className="text-sm text-gray-600">
+                    <span className="text-xs text-gray-600 truncate" title={banner.category}>
                       {banner.category || "No category"}
                     </span>
                   ) : (
-                    <span className="text-sm text-gray-400">N/A</span>
+                    <span className="text-xs text-gray-400">N/A</span>
                   )}
                 </td>
-                <td className="py-3 px-4 text-center">
+                <td className="py-3 px-4 text-center w-20">
                   <span
-                    className={`px-2 py-1 text-xs font-semibold rounded ${
+                    className={`px-2 py-1 text-xs font-semibold rounded whitespace-nowrap ${
                       banner.active
                         ? "bg-green-100 text-green-800"
                         : "bg-gray-100 text-gray-800"
@@ -649,12 +757,14 @@ const BannerManager = ({ positionOptions }) => {
                     {banner.active ? "Active" : "Inactive"}
                   </span>
                 </td>
-                <td className="py-3 px-4 text-right">
-                  <div className="flex justify-end space-x-2">
+                <td className="py-3 px-4 text-right w-32">
+                  <div className="flex justify-end space-x-1">
                     <Button
                       variant="secondary"
                       size="sm"
                       onClick={() => handleEditBanner(banner)}
+                      title="Edit banner"
+                      className="text-xs px-2 py-1"
                     >
                       Edit
                     </Button>
@@ -662,15 +772,19 @@ const BannerManager = ({ positionOptions }) => {
                       variant={banner.active ? "danger" : "primary"}
                       size="sm"
                       onClick={() => handleToggleActive(banner.id)}
+                      title={banner.active ? "Deactivate banner" : "Activate banner"}
+                      className="text-xs px-2 py-1"
                     >
-                      {banner.active ? "Deactivate" : "Activate"}
+                      {banner.active ? "Off" : "On"}
                     </Button>
                     <Button
                       variant="danger"
                       size="sm"
                       onClick={() => handleDeleteBanner(banner)}
+                      title="Delete banner"
+                      className="text-xs px-2 py-1"
                     >
-                      Delete
+                      Del
                     </Button>
                   </div>
                 </td>
@@ -700,6 +814,16 @@ const BannerManager = ({ positionOptions }) => {
         type="danger"
         isLoading={deleteLoading}
       />
+      {/* Image Cropper Modal */}
+      {showImageCropper && (
+        <ImageCropper
+          onImageSelect={handleCroppedImageSelect}
+          onCancel={() => setShowImageCropper(false)}
+          targetDimensions={getTargetDimensions(cropperMode === 'new' ? newBanner.position : editingBanner.position)}
+          cropPresets={getCropPresets(cropperMode === 'new' ? newBanner.position : editingBanner.position)}
+          showDimensionGuide={true}
+        />
+      )}
     </div>
   );
 };
