@@ -51,39 +51,41 @@ const Footer = () => {
     FaWhatsapp: <FaWhatsapp />,
   };
   // Convert custom pages to link format
-  const customPageLinks = customPages.map((page) => ({
+  const customPageLinks = Array.isArray(customPages) ? customPages.map((page) => ({
     name: page.title,
     path: `/${page.path}`,
     isCustom: true,
-  }));
+  })) : [];
 
   // Fallback data in case API data is loading or unavailable
-  const quickLinks = footerData?.quick_links?.filter(
-    (link) => link.enabled
-  ) || [
+  const quickLinks = (Array.isArray(footerData?.quick_links)
+    ? footerData.quick_links.filter((link) => link.enabled)
+    : []) || [
     { name: "Home", path: ROUTES.HOME },
     { name: "About", path: ROUTES.ABOUT },
     { name: "Contact", path: ROUTES.CONTACT },
   ];
 
-  const customerServiceLinks = footerData?.customer_service_links?.filter(
-    (link) => link.enabled
-  ) || [
+  const customerServiceLinks = (Array.isArray(footerData?.customer_service_links)
+    ? footerData.customer_service_links.filter((link) => link.enabled)
+    : []) || [
     { name: "Track Your Order", path: ROUTES.TRACK_ORDER },
     { name: "Bulk Orders", path: ROUTES.BULK_ORDER },
   ];
 
   // Include both standard policy links and any custom pages that might be policies
   const policyLinks = [
-    ...(footerData?.policy_links?.filter((link) => link.enabled) || [
-      { name: "Terms & Conditions", path: "/terms-conditions" },
-      {
-        name: "Cancellation & Refund Policy",
-        path: "/cancellation-refund-policy",
-      },
-      { name: "Privacy Policy", path: "/privacy-policy" },
-      { name: "Shipping & Delivery Policy", path: "/shipping-delivery-policy" },
-    ]),
+    ...(Array.isArray(footerData?.policy_links)
+      ? footerData.policy_links.filter((link) => link.enabled)
+      : [
+          { name: "Terms & Conditions", path: "/terms-conditions" },
+          {
+            name: "Cancellation & Refund Policy",
+            path: "/cancellation-refund-policy",
+          },
+          { name: "Privacy Policy", path: "/privacy-policy" },
+          { name: "Shipping & Delivery Policy", path: "/shipping-delivery-policy" },
+        ]),
     ...customPageLinks.filter(
       (page) =>
         page.name.toLowerCase().includes("policy") ||
@@ -93,13 +95,15 @@ const Footer = () => {
 
   // Include additional custom pages in the know more section
   const knowMoreLinks = [
-    ...(footerData?.know_more_links?.filter((link) => link.enabled) || [
-      { name: "Our Stores", path: "/our-stores" },
-      {
-        name: "Service Center",
-        url: "https://www.poorvika.com/service-center",
-      },
-    ]),
+    ...(Array.isArray(footerData?.know_more_links)
+      ? footerData.know_more_links.filter((link) => link.enabled)
+      : [
+          { name: "Our Stores", path: "/our-stores" },
+          {
+            name: "Service Center",
+            url: "https://www.poorvika.com/service-center",
+          },
+        ]),
     ...customPageLinks.filter(
       (page) =>
         !page.name.toLowerCase().includes("policy") &&
@@ -107,13 +111,15 @@ const Footer = () => {
     ),
   ];
 
-  const socialLinks = footerData?.social_links
-    ?.filter((link) => link.enabled)
-    ?.map((link) => ({
-      icon: socialIconMapping[link.icon] || <FaFacebookF />,
-      url: link.url,
-      label: link.name,
-    })) || [
+  const socialLinks = (Array.isArray(footerData?.social_links) 
+    ? footerData.social_links
+        .filter((link) => link.enabled)
+        .map((link) => ({
+          icon: socialIconMapping[link.icon] || <FaFacebookF />,
+          url: link.url,
+          label: link.name,
+        }))
+    : []) || [
     { icon: <FaFacebookF />, url: "https://facebook.com", label: "Facebook" },
     { icon: <FaTwitter />, url: "https://twitter.com", label: "Twitter" },
     { icon: <FaInstagram />, url: "https://instagram.com", label: "Instagram" },
@@ -122,11 +128,13 @@ const Footer = () => {
   ];
   // Include both standard footer policy links and any custom pages that might be legal documents
   const footerPolicyLinks = [
-    ...(footerData?.footer_policy_links?.filter((link) => link.enabled) || [
-      { name: "Privacy Policy", path: "/privacy-policy" },
-      { name: "Terms of Use", path: "/terms-conditions" },
-      { name: "Warranty Policy", path: "/warranty-policy" },
-    ]),
+    ...(Array.isArray(footerData?.footer_policy_links)
+      ? footerData.footer_policy_links.filter((link) => link.enabled)
+      : [
+          { name: "Privacy Policy", path: "/privacy-policy" },
+          { name: "Terms of Use", path: "/terms-conditions" },
+          { name: "Warranty Policy", path: "/warranty-policy" },
+        ]),
     ...customPageLinks
       .filter(
         (page) =>

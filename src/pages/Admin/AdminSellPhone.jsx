@@ -3,6 +3,7 @@ import useAdminSellPhone from "../../store/Admin/useAdminSellPhone";
 import Pagination from "../../components/common/Pagination";
 import Button from "../../components/ui/Button";
 import { FaEdit, FaTrash, FaPlus, FaEye, FaArrowLeft } from "react-icons/fa";
+import { toast } from "react-hot-toast";
 
 // Import SellPhone components
 import BrandList from "../../components/Admin/SellPhone/BrandList";
@@ -248,6 +249,39 @@ const AdminSellPhone = () => {
   const handleDeleteModel = async (modelId) => {
     if (window.confirm('Are you sure you want to delete this model?')) {
       await deleteModel(selectedSeriesId, modelId);
+    }
+  };
+
+  // Enhanced inquiry action handlers
+  const [loadingInquiries, setLoadingInquiries] = useState({});
+  
+  const handleInquiryAction = async (inquiryId, action, status = null) => {
+    setLoadingInquiries(prev => ({ ...prev, [inquiryId]: action }));
+    
+    try {
+      let result;
+      if (action === 'delete') {
+        result = await deleteInquiry(inquiryId);
+      } else if (action === 'updateStatus' && status) {
+        result = await updateInquiryStatus(inquiryId, status);
+      }
+      
+      if (result.success) {
+        toast.success(result.message || `Inquiry ${action === 'delete' ? 'deleted' : 'updated'} successfully`);
+        // Refresh inquiries list
+        await fetchInquiries();
+      } else {
+        toast.error(result.error || `Failed to ${action} inquiry`);
+      }
+    } catch (error) {
+      console.error(`Error ${action} inquiry:`, error);
+      toast.error(`Failed to ${action} inquiry`);
+    } finally {
+      setLoadingInquiries(prev => {
+        const updated = { ...prev };
+        delete updated[inquiryId];
+        return updated;
+      });
     }
   };
 
@@ -685,24 +719,27 @@ const AdminSellPhone = () => {
                       {inquiry.status === "pending" && (
                         <>
                           <button
-                            onClick={() => updateInquiryStatus(inquiry.id, "approved")}
-                            className="text-green-600 hover:text-green-900 mr-3"
+                            onClick={() => handleInquiryAction(inquiry.id, 'updateStatus', 'approved')}
+                            disabled={loadingInquiries[inquiry.id]}
+                            className="text-green-600 hover:text-green-900 mr-3 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            Approve
+                            {loadingInquiries[inquiry.id] === 'updateStatus' ? 'Processing...' : 'Approve'}
                           </button>
                           <button
-                            onClick={() => updateInquiryStatus(inquiry.id, "rejected")}
-                            className="text-red-600 hover:text-red-900 mr-3"
+                            onClick={() => handleInquiryAction(inquiry.id, 'updateStatus', 'rejected')}
+                            disabled={loadingInquiries[inquiry.id]}
+                            className="text-red-600 hover:text-red-900 mr-3 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            Reject
+                            {loadingInquiries[inquiry.id] === 'updateStatus' ? 'Processing...' : 'Reject'}
                           </button>
                         </>
                       )}
                       <button
-                        onClick={() => deleteInquiry(inquiry.id)}
-                        className="text-gray-600 hover:text-gray-900"
+                        onClick={() => handleInquiryAction(inquiry.id, 'delete')}
+                        disabled={loadingInquiries[inquiry.id]}
+                        className="text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Delete
+                        {loadingInquiries[inquiry.id] === 'delete' ? 'Deleting...' : 'Delete'}
                       </button>
                     </td>
                   </tr>

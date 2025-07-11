@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   FiShoppingCart, 
   FiPackage, 
@@ -13,8 +14,12 @@ import {
 import useNotificationStore from '../../store/Admin/useNotificationStore';
 
 const NotificationBar = () => {
+  const navigate = useNavigate();
   const {
     notifications,
+    loading,
+    error,
+    lastUpdated,
     isOrdersDropdownOpen,
     isStockDropdownOpen,
     isReviewsDropdownOpen,
@@ -24,10 +29,24 @@ const NotificationBar = () => {
     closeAllDropdowns,
     markAsRead,
     markAllAsRead,
-    getUnreadCount
+    getUnreadCount,
+    fetchNotifications,
+    refreshNotifications
   } = useNotificationStore();
 
   const dropdownRef = useRef(null);
+
+  // Fetch notifications on component mount
+  useEffect(() => {
+    fetchNotifications();
+    
+    // Set up auto-refresh every 30 seconds
+    const interval = setInterval(() => {
+      refreshNotifications();
+    }, 30000);
+    
+    return () => clearInterval(interval);
+  }, [fetchNotifications, refreshNotifications]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -69,6 +88,43 @@ const NotificationBar = () => {
     }
   };
 
+  // Navigation functions for "View All" buttons
+  const handleViewAllOrders = () => {
+    closeAllDropdowns();
+    navigate('/admin/orders');
+  };
+
+  const handleViewAllInventory = () => {
+    closeAllDropdowns();
+    navigate('/admin/inventory');
+  };
+
+  const handleViewAllReviews = () => {
+    closeAllDropdowns();
+    navigate('/admin/reviews');
+  };
+
+  // Handle notification click to navigate to specific items
+  const handleNotificationClick = (notification, category) => {
+    closeAllDropdowns();
+    markAsRead(category, notification.id);
+    
+    // Navigate based on notification type
+    switch (category) {
+      case 'orders':
+        navigate(`/admin/orders?search=${notification.order_id || ''}`);
+        break;
+      case 'stock':
+        navigate(`/admin/inventory?search=${notification.product || ''}`);
+        break;
+      case 'reviews':
+        navigate(`/admin/reviews?search=${notification.product || ''}`);
+        break;
+      default:
+        break;
+    }
+  };
+
   // Notification button component
   const NotificationButton = ({ icon, count, isOpen, onClick, label }) => (
     <button
@@ -96,7 +152,7 @@ const NotificationBar = () => {
   );
 
   // Dropdown component
-  const NotificationDropdown = ({ notifications, category, isOpen, onMarkAsRead, onMarkAllAsRead }) => {
+  const NotificationDropdown = ({ notifications, category, isOpen, onMarkAsRead, onMarkAllAsRead, onViewAll }) => {
     if (!isOpen) return null;
 
     return (
@@ -145,7 +201,7 @@ const NotificationBar = () => {
                   borderColor: 'var(--border-light)',
                   backgroundColor: !notification.read ? 'rgba(59, 130, 246, 0.05)' : 'transparent'
                 }}
-                onClick={() => onMarkAsRead(category, notification.id)}
+                onClick={() => handleNotificationClick(notification, category)}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -239,7 +295,8 @@ const NotificationBar = () => {
             }}
           >
             <button
-              className="w-full text-sm text-center py-1 rounded transition-colors"
+              onClick={onViewAll}
+              className="w-full text-sm text-center py-1 rounded transition-colors hover:underline"
               style={{ color: 'var(--brand-primary)' }}
             >
               View all {category}
@@ -317,6 +374,7 @@ const NotificationBar = () => {
         isOpen={isOrdersDropdownOpen}
         onMarkAsRead={markAsRead}
         onMarkAllAsRead={markAllAsRead}
+        onViewAll={handleViewAllOrders}
       />
       
       <NotificationDropdown 
@@ -325,6 +383,7 @@ const NotificationBar = () => {
         isOpen={isStockDropdownOpen}
         onMarkAsRead={markAsRead}
         onMarkAllAsRead={markAllAsRead}
+        onViewAll={handleViewAllInventory}
       />
       
       <NotificationDropdown 
@@ -333,6 +392,7 @@ const NotificationBar = () => {
         isOpen={isReviewsDropdownOpen}
         onMarkAsRead={markAsRead}
         onMarkAllAsRead={markAllAsRead}
+        onViewAll={handleViewAllReviews}
       />
     </div>
   );

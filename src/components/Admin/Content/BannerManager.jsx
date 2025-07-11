@@ -286,6 +286,23 @@ const BannerManager = ({ positionOptions }) => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Banner Image
               </label>
+              
+              {/* Dimension guidance */}
+              <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <div className="flex items-center space-x-2 text-sm">
+                  <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="font-medium text-blue-700">
+                    Recommended dimensions: {getCropPresets(newBanner.position).recommendedSize}
+                  </span>
+                </div>
+                <p className="text-xs text-blue-600 mt-1">
+                  {getCropPresets(newBanner.position).description} • 
+                  Aspect ratio: {getCropPresets(newBanner.position).aspectRatio.toFixed(2)}:1
+                </p>
+              </div>
+              
               <div className="space-y-2">
                 <button
                   type="button"
@@ -298,6 +315,9 @@ const BannerManager = ({ positionOptions }) => {
                     </svg>
                     <span className="text-sm text-gray-600">
                       {newBannerImagePreview ? 'Change Image (with cropping)' : 'Upload & Crop Image'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      Click to upload and automatically crop to {getCropPresets(newBanner.position).recommendedSize}
                     </span>
                   </div>
                 </button>

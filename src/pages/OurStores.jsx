@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ROUTES } from "../utils/constants";
 import {
@@ -8,141 +8,50 @@ import {
   FiMail,
   FiArrowRight,
 } from "react-icons/fi";
+import { toast } from "react-hot-toast";
 
 const OurStores = () => {
   const [selectedCity, setSelectedCity] = useState("all");
+  const [stores, setStores] = useState([]);
+  const [cities, setCities] = useState(["all"]);
+  const [loading, setLoading] = useState(true);
 
   const breadcrumbs = [
     { label: "Home", link: ROUTES.HOME },
     { label: "Our Stores", link: ROUTES.OUR_STORES },
   ];
 
-  // Mock data for stores
-  const cities = [
-    "all",
-    "delhi",
-    "mumbai",
-    "bangalore",
-    "chennai",
-    "hyderabad",
-    "kolkata",
-  ];
+  // Fetch stores from backend
+  useEffect(() => {
+    const fetchStores = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/stores/`);
+        if (response.ok) {
+          const data = await response.json();
+          setStores(data.stores || []);
+          
+          // Extract unique cities from stores
+          const uniqueCities = ["all", ...new Set(data.stores?.map(store => store.city.toLowerCase()) || [])];
+          setCities(uniqueCities);
+        } else {
+          console.error("Failed to fetch stores");
+          toast.error("Failed to load store information");
+        }
+      } catch (error) {
+        console.error("Error fetching stores:", error);
+        toast.error("Unable to load stores. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const stores = [
-    {
-      id: 1,
-      name: "Delhi Central",
-      city: "delhi",
-      address: "123 Connaught Place, New Delhi - 110001",
-      contact: "+91 98765 43210",
-      email: "delhi.central@yourdomain.com",
-      hours: "10:00 AM - 9:00 PM, All days",
-      image:
-        "https://images.unsplash.com/photo-1604754742629-3e0498a8211f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      mapLink: "https://goo.gl/maps/123",
-    },
-    {
-      id: 2,
-      name: "Delhi South",
-      city: "delhi",
-      address: "456 Greater Kailash, New Delhi - 110048",
-      contact: "+91 99876 54321",
-      email: "delhi.south@yourdomain.com",
-      hours: "10:00 AM - 9:00 PM, All days",
-      image:
-        "https://images.unsplash.com/photo-1534723328310-e82dad3ee43f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      mapLink: "https://goo.gl/maps/456",
-    },
-    {
-      id: 3,
-      name: "Mumbai Downtown",
-      city: "mumbai",
-      address: "789 Nariman Point, Mumbai - 400021",
-      contact: "+91 88765 43210",
-      email: "mumbai.downtown@yourdomain.com",
-      hours: "10:00 AM - 9:00 PM, All days",
-      image:
-        "https://images.unsplash.com/photo-1598550476439-6847785fcea6?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      mapLink: "https://goo.gl/maps/789",
-    },
-    {
-      id: 4,
-      name: "Mumbai Suburban",
-      city: "mumbai",
-      address: "101 Andheri West, Mumbai - 400053",
-      contact: "+91 77654 32109",
-      email: "mumbai.suburban@yourdomain.com",
-      hours: "10:00 AM - 9:00 PM, All days",
-      image:
-        "https://images.unsplash.com/photo-1593604572577-1c6c44fa246c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      mapLink: "https://goo.gl/maps/101",
-    },
-    {
-      id: 5,
-      name: "Bangalore Tech Park",
-      city: "bangalore",
-      address: "202 Whitefield, Bangalore - 560066",
-      contact: "+91 66543 21098",
-      email: "bangalore.tech@yourdomain.com",
-      hours: "10:00 AM - 9:00 PM, All days",
-      image:
-        "https://images.unsplash.com/photo-1605365070248-299a182a2ca6?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      mapLink: "https://goo.gl/maps/202",
-    },
-    {
-      id: 6,
-      name: "Bangalore Central",
-      city: "bangalore",
-      address: "303 MG Road, Bangalore - 560001",
-      contact: "+91 55432 10987",
-      email: "bangalore.central@yourdomain.com",
-      hours: "10:00 AM - 9:00 PM, All days",
-      image:
-        "https://images.unsplash.com/photo-1497366858526-0766cadbe8fa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      mapLink: "https://goo.gl/maps/303",
-    },
-    {
-      id: 7,
-      name: "Chennai Marina",
-      city: "chennai",
-      address: "404 Anna Salai, Chennai - 600002",
-      contact: "+91 44321 09876",
-      email: "chennai.marina@yourdomain.com",
-      hours: "10:00 AM - 9:00 PM, All days",
-      image:
-        "https://images.unsplash.com/photo-1594389723490-61a5acd5cd9c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      mapLink: "https://goo.gl/maps/404",
-    },
-    {
-      id: 8,
-      name: "Hyderabad Hitech",
-      city: "hyderabad",
-      address: "505 HITEC City, Hyderabad - 500081",
-      contact: "+91 33210 98765",
-      email: "hyderabad.hitech@yourdomain.com",
-      hours: "10:00 AM - 9:00 PM, All days",
-      image:
-        "https://images.unsplash.com/photo-1595359850564-0526976274e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      mapLink: "https://goo.gl/maps/505",
-    },
-    {
-      id: 9,
-      name: "Kolkata Park Street",
-      city: "kolkata",
-      address: "606 Park Street, Kolkata - 700016",
-      contact: "+91 22109 87654",
-      email: "kolkata.park@yourdomain.com",
-      hours: "10:00 AM - 9:00 PM, All days",
-      image:
-        "https://images.unsplash.com/photo-1596568469214-6df73918e6e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      mapLink: "https://goo.gl/maps/606",
-    },
-  ];
+    fetchStores();
+  }, []);
 
   const filteredStores =
     selectedCity === "all"
       ? stores
-      : stores.filter((store) => store.city === selectedCity);
+      : stores.filter((store) => store.city.toLowerCase() === selectedCity);
 
   return (
     <div className="bg-white">

@@ -42,7 +42,7 @@ const Header = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
 
-  // Enhanced mega menu structure based on your product data
+  // Enhanced mega menu structure matching Poorvika's comprehensive layout
   const megaMenuCategories = [
     {
       id: 1,
@@ -53,121 +53,62 @@ const Header = () => {
           image: "/mobile1.png",
           title: "Latest iPhones",
           subtitle: "Up to 25% OFF",
+          buttonText: "Shop Now",
           link: "/products/smartphones?brand=Apple"
         },
         {
           image: "/accessories.png",
           title: "Mobile Accessories",
           subtitle: "Starting ₹99",
+          buttonText: "Explore",
           link: "/products/accessories"
         }
       ],
       subcategories: [
         {
-          title: "Mobiles",
+          title: "Smartphones",
           items: [
-            {
-              name: "iPhone",
-              path: "/products/smartphones?brand=Apple",
-              brands: ["Apple"],
-            },
-            {
-              name: "Samsung Galaxy",
-              path: "/products/smartphones?brand=Samsung",
-              brands: ["Samsung"],
-            },
-            {
-              name: "Xiaomi",
-              path: "/products/smartphones?brand=MI",
-              brands: ["MI"],
-            },
-            {
-              name: "OnePlus",
-              path: "/products/smartphones?brand=Oneplus",
-              brands: ["Oneplus"],
-            },
-            {
-              name: "Oppo",
-              path: "/products/smartphones?brand=Oppo",
-              brands: ["Oppo"],
-            },
-            {
-              name: "Vivo",
-              path: "/products/smartphones?brand=Vivo",
-              brands: ["Vivo"],
-            },
-            {
-              name: "Nothing",
-              path: "/products/smartphones?brand=Nothing",
-              brands: ["Nothing"],
-            },
-            {
-              name: "Motorola",
-              path: "/products/smartphones?brand=Motorola",
-              brands: ["Motorola"],
-            },
-            {
-              name: "Nokia",
-              path: "/products/smartphones?brand=Nokia",
-              brands: ["Nokia"],
-            },
-            {
-              name: "Lava",
-              path: "/products/smartphones?brand=Lava",
-              brands: ["Lava"],
-            },
-            {
-              name: "iQOO",
-              path: "/products/smartphones?brand=iQOO",
-              brands: ["iQOO"],
-            },
+            { name: "Apple iPhone", path: "/products/smartphones?brand=Apple", hot: true },
+            { name: "Samsung Galaxy", path: "/products/smartphones?brand=Samsung", popular: true },
+            { name: "Xiaomi Redmi", path: "/products/smartphones?brand=MI" },
+            { name: "OnePlus", path: "/products/smartphones?brand=Oneplus" },
+            { name: "Oppo", path: "/products/smartphones?brand=Oppo" },
+            { name: "Vivo", path: "/products/smartphones?brand=Vivo" },
+            { name: "Nothing Phone", path: "/products/smartphones?brand=Nothing", new: true },
+            { name: "Motorola", path: "/products/smartphones?brand=Motorola" },
           ],
         },
         {
-          title: "Mobile Accessories",
+          title: "Mobile Accessories", 
           items: [
-            { name: "Chargers", path: "/products/accessories?type=chargers" },
-            {
-              name: "Power Banks",
-              path: "/products/accessories?type=powerbanks",
-            },
-            {
-              name: "Cases & Covers",
-              path: "/products/accessories?type=cases",
-            },
-            {
-              name: "Screen Protectors",
-              path: "/products/accessories?type=screen-protectors",
-            },
-            {
-              name: "Mobile Holders",
-              path: "/products/accessories?type=holders",
-            },
-            {
-              name: "Cables & Connectors",
-              path: "/products/accessories?type=cables",
-            },
-            {
-              name: "Memory Cards",
-              path: "/products/accessories?type=memory-cards",
-            },
+            { name: "Cases & Covers", path: "/products/accessories?type=cases", popular: true },
+            { name: "Screen Protectors", path: "/products/accessories?type=screen-guards" },
+            { name: "Chargers & Cables", path: "/products/accessories?type=chargers" },
+            { name: "Power Banks", path: "/products/accessories?type=powerbanks" },
+            { name: "Mobile Holders", path: "/products/accessories?type=holders" },
+            { name: "Headphones", path: "/products/accessories?type=headphones" },
+            { name: "Memory Cards", path: "/products/accessories?type=memory" },
+            { name: "Bluetooth Speakers", path: "/products/accessories?type=speakers" },
           ],
         },
         {
-          title: "Accessories Brands",
+          title: "By Price Range",
           items: [
-            { name: "Ambrane", path: "/products/accessories?brand=Ambrane" },
-            { name: "HapiPola", path: "/products/accessories?brand=HapiPola" },
-            {
-              name: "Cool Touch",
-              path: "/products/accessories?brand=Cool Touch",
-            },
-            { name: "Fitfit", path: "/products/accessories?brand=Fitfit" },
-            { name: "New Case", path: "/products/accessories?brand=New Case" },
-            {
-              name: "Smart Touch",
-              path: "/products/accessories?brand=Smart Touch",
-            },
+            { name: "Under ₹15,000", path: "/products/smartphones?price_max=15000" },
+            { name: "₹15,000 - ₹25,000", path: "/products/smartphones?price_min=15000&price_max=25000" },
+            { name: "₹25,000 - ₹50,000", path: "/products/smartphones?price_min=25000&price_max=50000" },
+            { name: "Above ₹50,000", path: "/products/smartphones?price_min=50000", premium: true },
+          ],
+        },
+        {
+          title: "Popular Brands",
+          items: [
+            { name: "Apple Store", path: "/products/smartphones?brand=Apple", premium: true },
+            { name: "Samsung", path: "/products/smartphones?brand=Samsung" },
+            { name: "Xiaomi", path: "/products/smartphones?brand=MI" },
+            { name: "OnePlus", path: "/products/smartphones?brand=Oneplus" },
+            { name: "Realme", path: "/products/smartphones?brand=Realme" },
+            { name: "iQOO", path: "/products/smartphones?brand=iQOO", hot: true },
           ],
         },
       ],
@@ -181,12 +122,14 @@ const Header = () => {
           image: "/laptops.png",
           title: "Gaming Laptops",
           subtitle: "Up to 30% OFF",
+          buttonText: "Shop Now",
           link: "/products/laptops?type=gaming"
         },
         {
           image: "/tablets1.png",
-          title: "Premium Tablets",
+          title: "Premium Tablets", 
           subtitle: "Starting ₹15,999",
+          buttonText: "Explore",
           link: "/products/tablets"
         }
       ],
@@ -194,74 +137,46 @@ const Header = () => {
         {
           title: "Laptops",
           items: [
-            {
-              name: "Samsung Laptops",
-              path: "/products/laptops?brand=Samsung",
-              brands: ["Samsung"],
-            },
-            {
-              name: "HP Laptops",
-              path: "/products/laptops?brand=HP",
-              brands: ["HP"],
-            },
-            { name: "Gaming Laptops", path: "/products/laptops?type=gaming" },
-            {
-              name: "Business Laptops",
-              path: "/products/laptops?type=business",
-            },
-            { name: "2-in-1 Laptops", path: "/products/laptops?type=2-in-1" },
+            { name: "MacBooks", path: "/products/laptops?brand=Apple", premium: true },
+            { name: "Gaming Laptops", path: "/products/laptops?type=gaming", hot: true },
+            { name: "Business Laptops", path: "/products/laptops?type=business" },
+            { name: "Student Laptops", path: "/products/laptops?type=student" },
+            { name: "2-in-1 Laptops", path: "/products/laptops?type=convertible" },
+            { name: "Ultrabooks", path: "/products/laptops?type=ultrabook" },
+            { name: "Workstations", path: "/products/laptops?type=workstation" },
           ],
         },
         {
-          title: "Tablets",
+          title: "Tablets & iPads",
           items: [
-            {
-              name: "Samsung Galaxy Tab",
-              path: "/products/tablets?brand=Samsung",
-              brands: ["Samsung"],
-            },
-            {
-              name: "Xiaomi Pad",
-              path: "/products/tablets?brand=MI",
-              brands: ["MI"],
-            },
-            {
-              name: "OnePlus Pad",
-              path: "/products/tablets?brand=Oneplus",
-              brands: ["Oneplus"],
-            },
-            {
-              name: "Motorola Tab",
-              path: "/products/tablets?brand=Motorola",
-              brands: ["Motorola"],
-            },
-            {
-              name: "Redmi Pad",
-              path: "/products/tablets?brand=MI",
-              brands: ["MI"],
-            },
+            { name: "Apple iPad", path: "/products/tablets?brand=Apple", premium: true },
+            { name: "Samsung Galaxy Tab", path: "/products/tablets?brand=Samsung", popular: true },
+            { name: "Xiaomi Pad", path: "/products/tablets?brand=MI" },
+            { name: "OnePlus Pad", path: "/products/tablets?brand=Oneplus", new: true },
+            { name: "Realme Pad", path: "/products/tablets?brand=Realme" },
+            { name: "Lenovo Tab", path: "/products/tablets?brand=Lenovo" },
           ],
         },
         {
-          title: "Laptop Accessories",
+          title: "Computer Accessories",
           items: [
-            {
-              name: "Laptop Bags",
-              path: "/products/accessories?type=laptop-bags",
-            },
-            {
-              name: "Laptop Stands",
-              path: "/products/accessories?type=laptop-stands",
-            },
-            {
-              name: "Cooling Pads",
-              path: "/products/accessories?type=cooling-pads",
-            },
-            {
-              name: "Wireless Mouse",
-              path: "/products/accessories?type=mouse",
-            },
-            { name: "Keyboards", path: "/products/accessories?type=keyboards" },
+            { name: "Wireless Mouse", path: "/products/accessories?type=mouse" },
+            { name: "Mechanical Keyboards", path: "/products/accessories?type=keyboards", popular: true },
+            { name: "Laptop Bags", path: "/products/accessories?type=bags" },
+            { name: "Laptop Stands", path: "/products/accessories?type=stands" },
+            { name: "Webcams", path: "/products/accessories?type=webcams" },
+            { name: "USB Hubs", path: "/products/accessories?type=hubs" },
+          ],
+        },
+        {
+          title: "By Brand",
+          items: [
+            { name: "Apple", path: "/products/laptops?brand=Apple", premium: true },
+            { name: "HP", path: "/products/laptops?brand=HP" },
+            { name: "Dell", path: "/products/laptops?brand=Dell" },
+            { name: "Lenovo", path: "/products/laptops?brand=Lenovo" },
+            { name: "Asus", path: "/products/laptops?brand=Asus" },
+            { name: "Acer", path: "/products/laptops?brand=Acer" },
           ],
         },
       ],
@@ -407,12 +322,22 @@ const Header = () => {
     },
   ];
 
-  // Handle dropdown interactions - Changed from hover to click
+  // Enhanced dropdown interactions with keyboard support
   const handleDropdownClick = (categoryId) => {
     if (activeDropdown === categoryId) {
       setActiveDropdown(null); // Close if same dropdown is clicked
     } else {
       setActiveDropdown(categoryId); // Open new dropdown
+    }
+  };
+
+  // Enhanced keyboard navigation support
+  const handleDropdownKeyDown = (event, categoryId) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleDropdownClick(categoryId);
+    } else if (event.key === 'Escape') {
+      setActiveDropdown(null);
     }
   };
 
@@ -443,7 +368,7 @@ const Header = () => {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Close suggestions when clicking outside
+  // Enhanced close suggestions and dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       const isClickOutsideDesktop =
@@ -458,15 +383,26 @@ const Header = () => {
         setShowSuggestions(false);
       }
 
-      // Close dropdown if clicking outside
-      if (!event.target.closest('.dropdown-container')) {
+      // Enhanced dropdown closing with better targeting
+      if (!event.target.closest('.dropdown-container') && !event.target.closest('[aria-haspopup="true"]')) {
         setActiveDropdown(null);
       }
     };
 
+    const handleKeyDown = (event) => {
+      // Close dropdown on Escape key
+      if (event.key === 'Escape') {
+        setActiveDropdown(null);
+        setShowSuggestions(false);
+      }
+    };
+
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
@@ -985,29 +921,34 @@ const Header = () => {
               >
                 <button
                   onClick={() => handleDropdownClick(category.id)}
-                  className="text-sm font-medium transition-all duration-300 relative group py-1.5 px-2 hover:text-brand-primary flex items-center"
+                  onKeyDown={(e) => handleDropdownKeyDown(e, category.id)}
+                  className="text-sm font-semibold transition-all duration-300 relative group py-2 px-3 hover:text-orange-600 flex items-center rounded-lg hover:bg-gradient-to-r hover:from-orange-50 hover:to-red-50 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
                   style={{
                     color: "var(--text-primary)",
                   }}
+                  aria-expanded={activeDropdown === category.id}
+                  aria-haspopup="true"
+                  aria-label={`${category.name} menu`}
                 >
                   <span className="relative z-10">{category.name}</span>
                   <svg
-                    className={`w-4 h-4 ml-1 transition-transform duration-200 ${
+                    className={`w-4 h-4 ml-2 transition-transform duration-300 ${
                       activeDropdown === category.id ? "rotate-180" : ""
                     }`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
+                    aria-hidden="true"
                   >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth={2}
+                      strokeWidth={2.5}
                       d="M19 9l-7 7-7-7"
                     />
                   </svg>
                   <span
-                    className="absolute bottom-0 left-0 w-0 h-0.5 bg-brand-primary transition-all duration-300 group-hover:w-full rounded-full"
+                    className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-1 bg-gradient-to-r from-orange-500 to-red-500 transition-all duration-300 group-hover:w-3/4 rounded-full shadow-lg"
                     style={{
                       backgroundColor: "var(--brand-primary)",
                     }}
@@ -1020,14 +961,14 @@ const Header = () => {
             <li className="whitespace-nowrap px-3">
               <Link
                 to="/products"
-                className="text-sm font-medium transition-all duration-300 relative group py-1.5 px-2 hover:text-brand-primary"
+                className="text-sm font-semibold transition-all duration-300 relative group py-2 px-3 hover:text-orange-600 rounded-lg hover:bg-gradient-to-r hover:from-orange-50 hover:to-red-50 transform hover:scale-105"
                 style={{
                   color: "var(--text-primary)",
                 }}
               >
                 <span className="relative z-10">Browse All</span>
                 <span
-                  className="absolute bottom-0 left-0 w-0 h-0.5 bg-brand-primary transition-all duration-300 group-hover:w-full rounded-full"
+                  className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-1 bg-gradient-to-r from-orange-500 to-red-500 transition-all duration-300 group-hover:w-3/4 rounded-full shadow-lg"
                   style={{
                     backgroundColor: "var(--brand-primary)",
                   }}
@@ -1035,29 +976,29 @@ const Header = () => {
               </Link>
             </li>
           </ul>
-          {/* Compact Mega Dropdown Menu */}
+          {/* Premium Poorvika-Style Mega Dropdown Menu - Ultra-Modern Enhanced UI */}
           {activeDropdown && (
             <div
-              className="absolute bg-white shadow-2xl border-t-2 dropdown-container"
+              className="absolute bg-white shadow-lg border-t-2"
               style={{
-                backgroundColor: "var(--bg-primary)",
+                backgroundColor: "#ffffff",
                 borderTopColor: "var(--brand-primary)",
+                borderTopWidth: "2px",
                 boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)",
                 zIndex: 9999,
                 top: "100%",
                 left: "50%",
                 transform: "translateX(-50%)",
-                width: "75vw",
-                maxWidth: "900px",
-                maxHeight: "50vh",
-                marginTop: "2px",
+                width: "90vw",
+                maxWidth: "1200px",
+                marginTop: "-1px",
                 borderRadius: "0 0 8px 8px",
-                overflow: "hidden",
+                border: "1px solid #e5e7eb",
               }}
               onMouseEnter={() => handleDropdownEnter(activeDropdown)}
               onMouseLeave={handleDropdownLeave}
             >
-              <div className="px-4 py-3">
+              <div className="px-8 py-6">
                 {(() => {
                   const activeCategory = megaMenuCategories.find(
                     (cat) => cat.id === activeDropdown
@@ -1066,27 +1007,57 @@ const Header = () => {
 
                   return (
                     <>
-                      <div className="grid grid-cols-5 gap-3">
-                        {/* First 4 columns for subcategories - more compact */}
-                        {activeCategory.subcategories.slice(0, 4).map(
-                          (subcategory, index) => (
-                            <div key={index} className="space-y-1.5">
-                              <h3
-                                className="font-semibold text-xs pb-1 border-b"
-                                style={{
-                                  color: "var(--brand-primary)",
-                                  borderBottomColor: "var(--border-primary)",
+                      {/* Simple category header like Poorvika */}
+                      <div className="mb-6 pb-4" style={{ borderBottom: "1px solid var(--border-primary)" }}>
+                        <div className="flex items-center justify-between">
+                          <h2 
+                            className="text-xl font-semibold"
+                            style={{ color: "var(--text-primary)" }}
+                          >
+                            {activeCategory.name}
+                          </h2>
+                          <Link
+                            to={activeCategory.path}
+                            className="hover:opacity-80 text-sm font-medium transition-opacity"
+                            style={{ color: "var(--brand-primary)" }}
+                            onClick={() => setActiveDropdown(null)}
+                          >
+                            View All →
+                          </Link>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-12 gap-6 h-full min-h-[340px]">
+                        {/* Left side - Categories like Poorvika (8 columns) */}
+                        <div className="col-span-8 grid grid-cols-3 gap-6">
+                          {activeCategory.subcategories.map((subcategory, index) => (
+                            <div key={index} className="space-y-3">
+                              <h3 
+                                className="font-semibold text-sm mb-3 pb-2"
+                                style={{ 
+                                  color: "var(--text-primary)",
+                                  borderBottom: "1px solid var(--border-primary)"
                                 }}
                               >
                                 {subcategory.title}
                               </h3>
-                              <ul className="space-y-0.5">
-                                {subcategory.items.slice(0, 5).map((item, itemIndex) => (
+                              <ul className="space-y-1">
+                                {subcategory.items.map((item, itemIndex) => (
                                   <li key={itemIndex}>
                                     <Link
                                       to={item.path}
-                                      className="text-xs text-gray-600 hover:text-brand-primary transition-colors duration-200 block py-0.5 leading-tight"
-                                      style={{ color: "var(--text-secondary)" }}
+                                      className="text-sm transition-colors block py-1 rounded px-2"
+                                      style={{ 
+                                        color: "var(--text-secondary)"
+                                      }}
+                                      onMouseEnter={(e) => {
+                                        e.target.style.color = 'var(--brand-primary)';
+                                        e.target.style.backgroundColor = 'var(--bg-secondary)';
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        e.target.style.color = 'var(--text-secondary)';
+                                        e.target.style.backgroundColor = '';
+                                      }}
                                       onClick={() => setActiveDropdown(null)}
                                     >
                                       {item.name}
@@ -1095,121 +1066,79 @@ const Header = () => {
                                 ))}
                               </ul>
                             </div>
-                          )
-                        )}
+                          ))}
+                        </div>
                         
-                        {/* 5th column for vertical promotional banners - Poorvika style */}
-                        <div className="space-y-2 min-w-[180px]">
-                          <h3
-                            className="font-semibold text-sm pb-2 border-b"
-                            style={{
-                              color: "var(--brand-primary)",
-                              borderBottomColor: "var(--border-primary)",
-                            }}
-                          >
-                            Special Offers
-                          </h3>
-                          
-                          {/* Render category-specific vertical banners - Poorvika style */}
+                        {/* Right side - Two banners stacked vertically like Poorvika (4 columns) */}
+                        <div className="col-span-4 pl-6" style={{ borderLeft: "1px solid var(--border-primary)" }}>
                           {(() => {
                             // Get admin-managed banners for this category
                             const adminBanners = getDropdownBanners(activeCategory.name);
                             const banners = adminBanners.length > 0 ? adminBanners : activeCategory.banners;
                             
-                            return banners?.slice(0, 2).map((banner, bannerIndex) => (
-                              <Link
-                                key={bannerIndex}
-                                to={banner.link || banner.buttonLink || activeCategory.path}
-                                className="block relative rounded-lg overflow-hidden group cursor-pointer shadow-sm hover:shadow-md transition-all duration-300"
-                                onClick={() => setActiveDropdown(null)}
-                              >
-                                <div className="aspect-[4/5] w-full bg-gradient-to-br from-blue-50 to-purple-50">
-                                  <img
-                                    src={banner.image || banner.imageUrl}
-                                    alt={banner.title}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                    onError={(e) => {
-                                      e.target.style.display = 'none';
-                                      e.target.nextSibling.style.display = 'flex';
-                                    }}
-                                  />
-                                  {/* Fallback gradient background */}
-                                  <div className="hidden w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 items-center justify-center">
-                                    <span className="text-white font-bold text-lg">
-                                      {banner.title?.charAt(0) || 'A'}
-                                    </span>
-                                  </div>
+                            if (!banners || banners.length === 0) {
+                              return (
+                                <div className="text-center py-8" style={{ color: "var(--text-secondary)" }}>
+                                  <p className="text-sm">No promotions available</p>
                                 </div>
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                                <div className="absolute bottom-2 left-2 right-2 text-white">
-                                  <p className="text-sm font-bold leading-tight mb-1 drop-shadow-sm">
-                                    {banner.title}
-                                  </p>
-                                  <p className="text-xs opacity-95 leading-tight drop-shadow-sm">
-                                    {banner.subtitle || banner.description}
-                                  </p>
-                                  {(banner.buttonText || banner.cta) && (
-                                    <div className="mt-2">
-                                      <span className="inline-block px-2 py-1 bg-white/20 backdrop-blur-sm rounded text-xs font-medium">
-                                        {banner.buttonText || banner.cta}
-                                      </span>
+                              );
+                            }
+                            
+                            return (
+                              <div className="space-y-3">
+                                {/* Two banners stacked vertically like Poorvika */}
+                                {banners.slice(0, 2).map((banner, bannerIndex) => (
+                                  <Link
+                                    key={bannerIndex}
+                                    to={banner.link || banner.buttonLink || activeCategory.path}
+                                    className="block relative rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+                                    onClick={() => setActiveDropdown(null)}
+                                  >
+                                    <div className="aspect-[16/9] w-full bg-gradient-to-br from-orange-500 to-red-500 relative">
+                                      <img
+                                        src={banner.image || banner.imageUrl}
+                                        alt={banner.title}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                          e.target.style.display = 'none';
+                                        }}
+                                      />
+                                      {/* Enhanced fallback with banner-like design */}
+                                      <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white">
+                                        <div className="text-center p-4">
+                                          <div className="text-lg font-bold mb-2">
+                                            {banner.title || 'Smart TVs'}
+                                          </div>
+                                          <div className="text-sm opacity-90 mb-3">
+                                            {banner.subtitle || 'Up to 40% OFF'}
+                                          </div>
+                                          <div className="inline-block px-3 py-1 bg-white/20 rounded-full text-xs font-medium">
+                                            {banner.buttonText || 'Shop Now'}
+                                          </div>
+                                        </div>
+                                      </div>
                                     </div>
-                                  )}
-                                </div>
-                              </Link>
-                            ));
-                          })() || (
-                            // Fallback vertical banners with improved Poorvika-style design
-                            <>
-                              <Link
-                                to="/products/mobiles"
-                                className="block relative rounded-lg overflow-hidden group cursor-pointer shadow-sm hover:shadow-md transition-all duration-300"
-                                onClick={() => setActiveDropdown(null)}
-                              >
-                                <div className="aspect-[4/5] w-full">
-                                  <img
-                                    src="/mobile1.png"
-                                    alt="Mobile Offers"
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                  />
-                                </div>
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                                <div className="absolute bottom-2 left-2 right-2 text-white">
-                                  <p className="text-sm font-bold leading-tight mb-1 drop-shadow-sm">Latest iPhones</p>
-                                  <p className="text-xs opacity-95 leading-tight drop-shadow-sm">Up to 25% OFF</p>
-                                  <div className="mt-2">
-                                    <span className="inline-block px-2 py-1 bg-white/20 backdrop-blur-sm rounded text-xs font-medium">
-                                      Shop Now
-                                    </span>
-                                  </div>
-                                </div>
-                              </Link>
-                              
-                              <Link
-                                to="/products/accessories"
-                                className="block relative rounded-lg overflow-hidden group cursor-pointer shadow-sm hover:shadow-md transition-all duration-300"
-                                onClick={() => setActiveDropdown(null)}
-                              >
-                                <div className="aspect-[4/5] w-full">
-                                  <img
-                                    src="/accessories.png"
-                                    alt="Accessories"
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                  />
-                                </div>
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                                <div className="absolute bottom-2 left-2 right-2 text-white">
-                                  <p className="text-sm font-bold leading-tight mb-1 drop-shadow-sm">Mobile Accessories</p>
-                                  <p className="text-xs opacity-95 leading-tight drop-shadow-sm">Starting ₹99</p>
-                                  <div className="mt-2">
-                                    <span className="inline-block px-2 py-1 bg-white/20 backdrop-blur-sm rounded text-xs font-medium">
-                                      Explore
-                                    </span>
-                                  </div>
-                                </div>
-                              </Link>
-                            </>
-                          )}
+                                    {/* Enhanced overlay with better text layout */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end">
+                                      <div className="p-4 text-white w-full">
+                                        <h4 className="font-bold text-base mb-1">
+                                          {banner.title || 'Smart TVs'}
+                                        </h4>
+                                        <p className="text-sm opacity-90 mb-2">
+                                          {banner.subtitle || 'Up to 40% OFF'}
+                                        </p>
+                                        {(banner.buttonText || banner.cta) && (
+                                          <div className="inline-block px-3 py-1 bg-white/20 rounded-full text-xs font-medium">
+                                            {banner.buttonText || banner.cta || 'Shop Now'}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </Link>
+                                ))}
+                              </div>
+                            );
+                          })()}
                         </div>
                       </div>
                     </>

@@ -22,59 +22,38 @@ const TrackOrder = () => {
     { label: "Track Order", link: ROUTES.TRACK_ORDER },
   ];
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // Mock API call - replace with actual tracking API
-    setTimeout(() => {
-      // Mock response data
-      if (orderId && email) {
-        setOrderResult({
-          orderId: orderId,
-          date: "2023-08-15",
-          status: "In Transit",
-          estimatedDelivery: "2023-08-20",
-          items: [
-            { id: 1, name: "iPhone 14 Pro", quantity: 1, price: 119900 },
-            { id: 2, name: "iPhone 14 Pro Case", quantity: 1, price: 2499 },
-          ],
-          trackingNumber: "IND12345678910",
-          trackingHistory: [
-            {
-              date: "2023-08-15",
-              time: "10:30 AM",
-              status: "Order Placed",
-              location: "Online",
-            },
-            {
-              date: "2023-08-16",
-              time: "09:15 AM",
-              status: "Order Processed",
-              location: "Delhi Warehouse",
-            },
-            {
-              date: "2023-08-17",
-              time: "02:45 PM",
-              status: "Shipped",
-              location: "Delhi Hub",
-            },
-            {
-              date: "2023-08-18",
-              time: "11:20 AM",
-              status: "In Transit",
-              location: "Mumbai Distribution Center",
-            },
-          ],
-        });
+    try {
+      // Make actual API call to track order
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/orders/track/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          order_id: orderId,
+          email: email
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setOrderResult(data);
       } else {
-        toast.error(
-          "Order not found. Please check your order ID and email address."
-        );
+        const errorData = await response.json();
+        toast.error(errorData.error || "Order not found. Please check your order ID and email address.");
         setOrderResult(null);
       }
+    } catch (error) {
+      console.error("Error tracking order:", error);
+      toast.error("Unable to track order. Please try again later.");
+      setOrderResult(null);
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   const clearSearch = () => {

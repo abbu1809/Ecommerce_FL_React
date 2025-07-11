@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import useAdminSellPhoneStore from '../../../store/Admin/useAdminSellPhone';
 import PropTypes from 'prop-types';
 import { FiX, FiLoader } from 'react-icons/fi';
+import FileUpload from '../common/FileUpload';
+import { adminApi } from '../../../services/api';
+import { toast } from 'react-hot-toast';
 
 const BrandFormModal = ({ brandToEdit, onClose, open }) => {
   const { addBrand, updateBrand } = useAdminSellPhoneStore();
@@ -9,6 +12,8 @@ const BrandFormModal = ({ brandToEdit, onClose, open }) => {
     id: '',
     logo_url: ''
   });
+  const [selectedLogoFile, setSelectedLogoFile] = useState(null);
+  const [uploadMethod, setUploadMethod] = useState('file'); // 'file' or 'url'
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -18,12 +23,15 @@ const BrandFormModal = ({ brandToEdit, onClose, open }) => {
         id: brandToEdit.id || '',
         logo_url: brandToEdit.logo_url || ''
       });
+      setUploadMethod(brandToEdit.logo_url ? 'url' : 'file');
     } else {
       setFormData({
         id: '',
         logo_url: ''
       });
+      setUploadMethod('file');
     }
+    setSelectedLogoFile(null);
     setErrors({});
   }, [brandToEdit, open]);
 
@@ -36,8 +44,14 @@ const BrandFormModal = ({ brandToEdit, onClose, open }) => {
       newErrors.id = 'Brand ID must contain only lowercase letters, numbers, hyphens, and underscores';
     }
     
-    if (formData.logo_url && !isValidUrl(formData.logo_url)) {
-      newErrors.logo_url = 'Please enter a valid URL';
+    if (uploadMethod === 'url') {
+      if (formData.logo_url && !isValidUrl(formData.logo_url)) {
+        newErrors.logo_url = 'Please enter a valid URL';
+      }
+    } else if (uploadMethod === 'file') {
+      if (!selectedLogoFile && !brandToEdit?.logo_url) {
+        newErrors.logo_file = 'Please select a logo file';
+      }
     }
     
     setErrors(newErrors);
@@ -79,20 +93,49 @@ const BrandFormModal = ({ brandToEdit, onClose, open }) => {
     setIsLoading(true);
     
     try {
+      let logoUrl = formData.logo_url;
+      
+      // Upload file if file method is selected and file is provided
+      if (uploadMethod === 'file' && selectedLogoFile) {
+        const uploadFormData = new FormData();
+        uploadFormData.append('image', selectedLogoFile);
+        uploadFormData.append('type', 'brand_logo');
+        
+        const uploadResponse = await adminApi.post('/admin/upload-image/', uploadFormData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        
+        if (uploadResponse.data.image_url) {
+          logoUrl = uploadResponse.data.image_url;
+        }
+      }
+      
+      const brandData = {
+        ...formData,
+        logo_url: logoUrl
+      };
+      
       if (brandToEdit) {
-        await updateBrand(brandToEdit.id, formData);
+        await updateBrand(brandToEdit.id, brandData);
+        toast.success('Brand updated successfully');
       } else {
-        await addBrand(formData);
+        await addBrand(brandData);
+        toast.success('Brand added successfully');
       }
       onClose();
     } catch (error) {
       console.error("Form submission error:", error);
+      toast.error(error.response?.data?.error || 'Failed to save brand');
     }
     setIsLoading(false);
   };
 
   const handleClose = () => {
     setFormData({ id: '', logo_url: '' });
+    setSelectedLogoFile(null);
+    setUploadMethod('file');
     setErrors({});
     onClose();
   };
@@ -175,41 +218,99 @@ const BrandFormModal = ({ brandToEdit, onClose, open }) => {
               </p>
             )}
           </div>          
-          {/* Logo URL */}
+          {/* Logo Upload Method Selection */}
           <div className="space-y-2">
-            <label 
-              htmlFor="logo_url" 
-              className="block text-sm font-medium"
-              style={{ color: "var(--text-primary)" }}
-            >
-              Logo URL
+            <label className="block text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+              Logo Upload Method
             </label>
-            <input 
-              type="url" 
-              id="logo_url"
-              name="logo_url"
-              value={formData.logo_url} 
-              onChange={handleChange}
-              placeholder="https://example.com/logo.png"
-              className="w-full px-3 py-2.5 border rounded-md text-sm focus:outline-none focus:ring-2 transition-all duration-200"
-              style={{
-                backgroundColor: "var(--bg-primary)",
-                color: "var(--text-primary)",
-                borderColor: errors.logo_url ? "var(--error-color)" : "var(--border-primary)",
-                borderRadius: "var(--rounded-md)"
+            <div className="flex space-x-4">
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  value="file"
+                  checked={uploadMethod === 'file'}
+                  onChange={(e) => setUploadMethod(e.target.value)}
+                  className="mr-2"
+                  disabled={isLoading}
+                />
+                <span className="text-sm" style={{ color: "var(--text-primary)" }}>
+                  Upload File
+                </span>
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  value="url"
+                  checked={uploadMethod === 'url'}
+                  onChange={(e) => setUploadMethod(e.target.value)}
+                  className="mr-2"
+                  disabled={isLoading}
+                />
+                <span className="text-sm" style={{ color: "var(--text-primary)" }}>
+                  Enter URL
+                </span>
+              </label>
+            </div>
+          </div>
+
+          {/* File Upload */}
+          {uploadMethod === 'file' && (
+            <FileUpload
+              label="Brand Logo"
+              accept="image/*"
+              maxSize={2 * 1024 * 1024} // 2MB
+              dimensions={{
+                width: 200,
+                height: 200,
+                aspectRatio: '1:1'
               }}
+              onFileSelect={setSelectedLogoFile}
+              currentImage={brandToEdit?.logo_url}
+              error={errors.logo_file}
+              helperText="Upload a brand logo. Square images work best."
               disabled={isLoading}
             />
-            {errors.logo_url && (
-              <p 
-                className="text-sm"
-                style={{ color: "var(--error-color)" }}
+          )}
+
+          {/* Logo URL */}
+          {uploadMethod === 'url' && (
+            <div className="space-y-2">
+              <label 
+                htmlFor="logo_url" 
+                className="block text-sm font-medium"
+                style={{ color: "var(--text-primary)" }}
               >
-                {errors.logo_url}
-              </p>
-            )}
-          </div>          {/* Logo Preview */}
-          {formData.logo_url && (
+                Logo URL
+              </label>
+              <input 
+                type="url" 
+                id="logo_url"
+                name="logo_url"
+                value={formData.logo_url} 
+                onChange={handleChange}
+                placeholder="https://example.com/logo.png"
+                className="w-full px-3 py-2.5 border rounded-md text-sm focus:outline-none focus:ring-2 transition-all duration-200"
+                style={{
+                  backgroundColor: "var(--bg-primary)",
+                  color: "var(--text-primary)",
+                  borderColor: errors.logo_url ? "var(--error-color)" : "var(--border-primary)",
+                  borderRadius: "var(--rounded-md)"
+                }}
+                disabled={isLoading}
+              />
+              {errors.logo_url && (
+                <p 
+                  className="text-sm"
+                  style={{ color: "var(--error-color)" }}
+                >
+                  {errors.logo_url}
+                </p>
+              )}
+            </div>
+          )}
+          
+          {/* Logo Preview */}
+          {((uploadMethod === 'url' && formData.logo_url) || brandToEdit?.logo_url) && (
             <div className="space-y-2">
               <label 
                 className="block text-sm font-medium"
