@@ -138,56 +138,73 @@ const CategoryList = () => {
               <Link
                 key={category.id}
                 to={`${category.redirect_url}`}
-                className="flex-shrink-0 flex flex-col items-center transition-transform duration-300 hover:-translate-y-1"
+                className="flex-shrink-0 flex flex-col items-center transition-transform duration-300 hover:-translate-y-2 group"
                 style={{
-                  width: "280px",
+                  width: "300px",
                 }}
               >
-                {/* Image container */}
+                {/* Enhanced Image container with premium card styling */}
                 <div
-                  className="flex items-center justify-center mb-3 relative overflow-hidden transition-all duration-300 hover:shadow-lg"
+                  className="flex items-center justify-center mb-6 relative overflow-hidden transition-all duration-500 hover:shadow-2xl bg-white rounded-3xl border group-hover:border-orange-300 group-hover:bg-gradient-to-br group-hover:from-orange-50 group-hover:to-red-50 group-hover:scale-105"
                   style={{
-                    width: "110px",
-                    height: "110px",
-                    borderRadius: "8px",
-                    padding: "5px",
-                    backgroundColor: "transparent",
+                    width: "160px",
+                    height: "160px", 
+                    padding: "16px",
+                    border: "3px solid var(--border-primary)",
+                    boxShadow: "0 8px 25px rgba(0,0,0,0.12), 0 4px 10px rgba(0,0,0,0.08)",
+                    background: "linear-gradient(135deg, #ffffff 0%, #fafafa 100%)",
                   }}
                 >
                   {category.image_url ? (
-                    <img
-                      src={category.image_url}
-                      alt={category.name}
-                      className="w-full h-full object-contain transition-transform duration-300 hover:scale-110"
-                      style={{
-                        maxWidth: "100%",
-                        maxHeight: "100%",
-                        backgroundColor: "transparent",
-                      }}
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.style.display = "none";
-                        if (e.target.nextSibling) {
-                          e.target.nextSibling.style.display = "block";
-                        }
-                      }}
-                    />
+                    <>
+                      <img
+                        src={category.image_url}
+                        alt={category.name}
+                        className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3"
+                        style={{
+                          maxWidth: "100%",
+                          maxHeight: "100%",
+                          backgroundColor: "transparent",
+                          filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.1))",
+                        }}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.style.display = "none";
+                          if (e.target.nextSibling) {
+                            e.target.nextSibling.style.display = "flex";
+                          }
+                        }}
+                      />
+                      {/* Overlay gradient effect */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-orange-100/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-3xl"></div>
+                    </>
                   ) : (
                     <div
-                      className="w-full h-full flex items-center justify-center transition-transform duration-300 hover:scale-110"
-                      style={{ color: "var(--brand-primary)" }}
+                      className="w-full h-full flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-3"
+                      style={{ 
+                        color: "var(--brand-primary)",
+                        background: "linear-gradient(135deg, var(--brand-primary) 0%, #ff8a65 100%)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundClip: "text",
+                      }}
                     >
                       {categoryIcons[category.name] || (
-                        <RiArrowRightSLine className="w-14 h-14" />
+                        <RiArrowRightSLine className="w-16 h-16" style={{ color: "var(--brand-primary)" }} />
                       )}
                     </div>
                   )}
                 </div>
-                {/* Category name */}
+                {/* Enhanced Category name with premium styling */}
                 <h3
-                  className="text-sm font-medium text-center transition-colors duration-300 hover:text-brand-primary"
+                  className="text-center transition-all duration-500 group-hover:text-orange-600 group-hover:scale-105 px-3 py-2 rounded-xl font-bold bg-gradient-to-r from-white to-gray-50 group-hover:from-orange-50 group-hover:to-red-50 shadow-sm group-hover:shadow-md"
                   style={{
                     color: "var(--text-primary)",
+                    lineHeight: "1.4",
+                    fontSize: "15px",
+                    fontWeight: "700",
+                    letterSpacing: "0.3px",
+                    textShadow: "0 1px 2px rgba(0,0,0,0.1)",
                   }}
                 >
                   {category.name}

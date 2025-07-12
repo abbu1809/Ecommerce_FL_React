@@ -5,6 +5,7 @@ import CategoryManager from "../../components/Admin/Content/CategoryManager";
 import FooterManager from "../../components/Admin/Content/FooterManager";
 import PageManager from "../../components/Admin/Content/PageManager";
 import ColorManager from "../../components/Admin/Content/ColorManager";
+import HomepageSectionManager from "../../components/Admin/Content/HomepageSectionManager";
 import { bannerPositionOptions } from "../../constants/bannerOptions";
 
 const AdminContent = () => {
@@ -78,6 +79,16 @@ const AdminContent = () => {
           >
             Theme Colors
           </button>
+          <button
+            className={`px-6 py-3 font-medium ${
+              activeTab === "homepage"
+                ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+            onClick={() => setActiveTab("homepage")}
+          >
+            Homepage Sections
+          </button>
         </div>
         <div className="p-6">
           {activeTab === "banners" && (
@@ -88,6 +99,7 @@ const AdminContent = () => {
           {activeTab === "footer" && <FooterManager />}
           {activeTab === "pages" && <PageManager />}
           {activeTab === "colors" && <ColorManager />}
+          {activeTab === "homepage" && <HomepageSectionManager />}
         </div>
       </div>
     </div>
