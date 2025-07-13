@@ -5,6 +5,7 @@ import HeroBanner from "../components/HeroBanner";
 import BestSellingSection from "../components/ProductSections/BestSellingSection";
 import NewReleasesSection from "../components/ProductSections/NewReleasesSection";
 import StaticPromoBanners from "../components/ProductSections/StaticPromoBanners";
+import BrandsSection from "../components/ProductSections/BrandsSection";
 import { useEffect, useState } from "react";
 import { useProductStore } from "../store/useProduct";
 import { useBannerStore } from "../store/Admin/useBannerStore";
@@ -18,17 +19,41 @@ const Home = () => {
   const { fetchPublicBanners } = useBannerStore();
   const { sections, fetchSections, loading: sectionsLoading } = useHomepageSectionStore();
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
   const PRODUCTS_PER_PAGE = 10;
+  
   useEffect(() => {
-    // Only fetch if we don't have products already
-    if (products.length === 0) {
-      fetchProducts();
-    }
-    fetchPublicBanners(); // Fetch banners for the page
-    // Fetch enabled homepage sections using public endpoint with fallback
-    fetchSections(true, true).catch(error => {
-      console.log('Homepage sections fetch failed, will use fallback rendering');
-    });
+    const initializeHomePage = async () => {
+      try {
+        console.log('Initializing homepage...');
+        setIsLoading(true);
+        
+        // Only fetch if we don't have products already
+        if (products.length === 0) {
+          console.log('Fetching products...');
+          await fetchProducts();
+        }
+        
+        console.log('Fetching public banners...');
+        await fetchPublicBanners(); // Fetch banners for the page
+        
+        // Fetch enabled homepage sections using public endpoint with fallback
+        console.log('Fetching homepage sections...');
+        try {
+          await fetchSections(true, true);
+        } catch (error) {
+          console.log('Homepage sections fetch failed, will use fallback rendering:', error.message);
+        }
+        
+        console.log('Homepage initialization completed');
+      } catch (error) {
+        console.error('Homepage initialization error:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeHomePage();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Pagination calculations
@@ -286,10 +311,18 @@ const Home = () => {
       style={{ backgroundColor: "var(--bg-secondary)" }}
       className="min-h-screen"
     >
-      {sectionsLoading ? (
+      {(sectionsLoading || isLoading) ? (
         // Loading state for homepage sections
         <div className="flex justify-center items-center py-20">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <div className="ml-4">
+            <h3 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+              Loading homepage...
+            </h3>
+            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              Please wait while we load the content
+            </p>
+          </div>
         </div>
       ) : enabledSections.length > 0 ? (
         // Render admin-configured sections
@@ -365,6 +398,9 @@ const Home = () => {
 
           {/* Static Promotional Banners */}
           <StaticPromoBanners />
+
+          {/* Brands Section */}
+          <BrandsSection />
 
           {/* Promotional Banners */}
           <section

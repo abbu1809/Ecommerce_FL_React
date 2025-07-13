@@ -1,0 +1,336 @@
+/* Theme Variables CSS */
+:root {
+  /* Default Light Theme Variables */
+  --color-primary: #FF6B35;
+  --color-primary-hover: #E55A2B;
+  --color-primary-light: #FFF3F0;
+  --color-secondary: #6B7280;
+  --color-accent: #8B5CF6;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+  
+  --color-background: #FFFFFF;
+  --color-background-secondary: #F9FAFB;
+  --color-background-tertiary: #F3F4F6;
+  
+  --color-text-primary: #111827;
+  --color-text-secondary: #6B7280;
+  --color-text-tertiary: #9CA3AF;
+  --color-text-inverse: #FFFFFF;
+  
+  --color-border: #E5E7EB;
+  --color-border-secondary: #D1D5DB;
+  --color-border-hover: #9CA3AF;
+  
+  --color-navbar-bg: #FFFFFF;
+  --color-navbar-text: #111827;
+  --color-footer-bg: #1F2937;
+  --color-footer-text: #F9FAFB;
+  --color-card-bg: #FFFFFF;
+  --color-modal-bg: #FFFFFF;
+  
+  --gradient-primary: linear-gradient(135deg, #FF6B35 0%, #E55A2B 100%);
+  --gradient-secondary: linear-gradient(135deg, #6B7280 0%, #4B5563 100%);
+  --gradient-hero: linear-gradient(135deg, #FF6B35 0%, #E55A2B 50%, #D53E22 100%);
+}
+
+/* Dark Theme Variables */
+[data-theme="dark"] {
+  --color-primary: #FF6B35;
+  --color-primary-hover: #E55A2B;
+  --color-primary-light: #2D1B16;
+  --color-secondary: #9CA3AF;
+  --color-accent: #A855F7;
+  --color-success: #34D399;
+  --color-warning: #FBBF24;
+  --color-error: #F87171;
+  --color-info: #60A5FA;
+  
+  --color-background: #111827;
+  --color-background-secondary: #1F2937;
+  --color-background-tertiary: #374151;
+  
+  --color-text-primary: #F9FAFB;
+  --color-text-secondary: #D1D5DB;
+  --color-text-tertiary: #9CA3AF;
+  --color-text-inverse: #111827;
+  
+  --color-border: #374151;
+  --color-border-secondary: #4B5563;
+  --color-border-hover: #6B7280;
+  
+  --color-navbar-bg: #1F2937;
+  --color-navbar-text: #F9FAFB;
+  --color-footer-bg: #111827;
+  --color-footer-text: #F9FAFB;
+  --color-card-bg: #1F2937;
+  --color-modal-bg: #1F2937;
+  
+  --gradient-primary: linear-gradient(135deg, #FF6B35 0%, #E55A2B 100%);
+  --gradient-secondary: linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%);
+  --gradient-hero: linear-gradient(135deg, #FF6B35 0%, #E55A2B 50%, #D53E22 100%);
+}
+
+/* Theme Utility Classes */
+.bg-theme-primary {
+  background-color: var(--color-primary);
+}
+
+.bg-theme-primary-hover:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.bg-theme-primary-light {
+  background-color: var(--color-primary-light);
+}
+
+.bg-theme-secondary {
+  background-color: var(--color-secondary);
+}
+
+.bg-theme-background {
+  background-color: var(--color-background);
+}
+
+.bg-theme-background-secondary {
+  background-color: var(--color-background-secondary);
+}
+
+.bg-theme-background-tertiary {
+  background-color: var(--color-background-tertiary);
+}
+
+.bg-theme-card {
+  background-color: var(--color-card-bg);
+}
+
+.bg-theme-navbar {
+  background-color: var(--color-navbar-bg);
+}
+
+.bg-theme-footer {
+  background-color: var(--color-footer-bg);
+}
+
+.text-theme-primary {
+  color: var(--color-primary);
+}
+
+.text-theme-secondary {
+  color: var(--color-secondary);
+}
+
+.text-theme-text-primary {
+  color: var(--color-text-primary);
+}
+
+.text-theme-text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.text-theme-text-tertiary {
+  color: var(--color-text-tertiary);
+}
+
+.text-theme-navbar {
+  color: var(--color-navbar-text);
+}
+
+.text-theme-footer {
+  color: var(--color-footer-text);
+}
+
+.border-theme {
+  border-color: var(--color-border);
+}
+
+.border-theme-secondary {
+  border-color: var(--color-border-secondary);
+}
+
+.border-theme-hover:hover {
+  border-color: var(--color-border-hover);
+}
+
+.gradient-theme-primary {
+  background: var(--gradient-primary);
+}
+
+.gradient-theme-secondary {
+  background: var(--gradient-secondary);
+}
+
+.gradient-theme-hero {
+  background: var(--gradient-hero);
+}
+
+/* Button Theme Classes */
+.btn-theme-primary {
+  background-color: var(--color-primary);
+  color: var(--color-text-inverse);
+  border: 1px solid var(--color-primary);
+  transition: all 0.2s ease;
+}
+
+.btn-theme-primary:hover {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+.btn-theme-secondary {
+  background-color: var(--color-secondary);
+  color: var(--color-text-inverse);
+  border: 1px solid var(--color-secondary);
+  transition: all 0.2s ease;
+}
+
+.btn-theme-outline {
+  background-color: transparent;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  transition: all 0.2s ease;
+}
+
+.btn-theme-outline:hover {
+  background-color: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+/* Card Theme Classes */
+.card-theme {
+  background-color: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+/* Input Theme Classes */
+.input-theme {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  transition: all 0.2s ease;
+}
+
+.input-theme:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+/* Modal Theme Classes */
+.modal-theme {
+  background-color: var(--color-modal-bg);
+  color: var(--color-text-primary);
+}
+
+/* Navigation Theme Classes */
+.nav-theme {
+  background-color: var(--color-navbar-bg);
+  color: var(--color-navbar-text);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.nav-theme .nav-link {
+  color: var(--color-navbar-text);
+  transition: color 0.2s ease;
+}
+
+.nav-theme .nav-link:hover {
+  color: var(--color-primary);
+}
+
+/* Footer Theme Classes */
+.footer-theme {
+  background-color: var(--color-footer-bg);
+  color: var(--color-footer-text);
+}
+
+.footer-theme a {
+  color: var(--color-footer-text);
+  transition: color 0.2s ease;
+}
+
+.footer-theme a:hover {
+  color: var(--color-primary);
+}
+
+/* Dropdown/Mega Menu Theme Classes */
+.dropdown-theme {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-theme .dropdown-item {
+  color: var(--color-text-primary);
+  transition: all 0.2s ease;
+}
+
+.dropdown-theme .dropdown-item:hover {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+/* Notification Theme Classes */
+.notification-success {
+  background-color: var(--color-success);
+  color: white;
+}
+
+.notification-error {
+  background-color: var(--color-error);
+  color: white;
+}
+
+.notification-warning {
+  background-color: var(--color-warning);
+  color: white;
+}
+
+.notification-info {
+  background-color: var(--color-info);
+  color: white;
+}
+
+/* Responsive Theme Adjustments */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Smooth theme transitions */
+* {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease;
+}
+
+/* Theme-specific scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-secondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-hover);
+}
+
+/* Print styles */
+@media print {
+  * {
+    background: white !important;
+    color: black !important;
+  }
+}

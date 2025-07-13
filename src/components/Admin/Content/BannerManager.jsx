@@ -46,15 +46,15 @@ const BannerManager = ({ positionOptions }) => {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // File handling functions
-  const handleNewBannerImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setNewBannerImageFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => setNewBannerImagePreview(e.target.result);
-      reader.readAsDataURL(file);
-    }
-  };
+  // const handleNewBannerImageChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     setNewBannerImageFile(file);
+  //     const reader = new FileReader();
+  //     reader.onload = (e) => setNewBannerImagePreview(e.target.result);
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
 
   const handleEditBannerImageChange = (e) => {
     const file = e.target.files[0];
@@ -253,7 +253,13 @@ const BannerManager = ({ positionOptions }) => {
         </Button>
       </div>
       {showAddForm && (
-        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+        <div 
+          className="p-4 rounded-lg border space-y-4"
+          style={{
+            backgroundColor: "var(--bg-secondary)",
+            borderColor: "var(--border-primary)"
+          }}
+        >
           <h3 className="font-medium">Add New Banner</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -484,7 +490,13 @@ const BannerManager = ({ positionOptions }) => {
         </div>
       )}
       {editingBanner && (
-        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+        <div 
+          className="p-4 rounded-lg border space-y-4"
+          style={{
+            backgroundColor: "var(--bg-secondary)",
+            borderColor: "var(--border-primary)"
+          }}
+        >
           <h3 className="font-medium">Edit Banner</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>

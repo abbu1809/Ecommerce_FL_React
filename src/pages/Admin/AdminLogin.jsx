@@ -10,8 +10,8 @@ const AdminLogin = () => {
   // Using admin-specific auth logic
   const { adminLogin, devModeLogin, testServerConnection, error, clearError, isLoading } = useAdminAuthStore();
   const [formData, setFormData] = useState({
-    username: "", // Changed from email to username as per useAdminAuth.js
-    password: "",
+    username: import.meta.env.DEV ? "admin" : "", // Pre-fill in development
+    password: import.meta.env.DEV ? "admin123" : "", // Pre-fill in development
   });
 
   const [formErrors, setFormErrors] = useState({});
@@ -79,7 +79,7 @@ const AdminLogin = () => {
       </div>
       
       {/* Development Mode Toggle */}
-      {process.env.NODE_ENV === 'development' && (
+      {import.meta.env.DEV && (
         <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
           <div className="flex items-center justify-between">
             <span className="text-sm text-yellow-800 dark:text-yellow-200">Development Mode</span>
@@ -184,7 +184,7 @@ const AdminLogin = () => {
                   <li>Check if the backend server is running</li>
                   <li>Verify the API URL in constants.js</li>
                   <li>Contact your system administrator</li>
-                  {process.env.NODE_ENV === 'development' && (
+                  {import.meta.env.DEV && (
                     <li>Try enabling Development Mode above</li>
                   )}
                 </ul>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { FiFilter, FiChevronDown, FiChevronUp, FiX } from "react-icons/fi";
 import Button from "../ui/Button";
+import ProductService from "../../services/productService";
 
 const ProductFilter = ({
   showFilters,

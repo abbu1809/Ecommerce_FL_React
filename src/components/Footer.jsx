@@ -50,33 +50,35 @@ const Footer = () => {
     FaLinkedinIn: <FaLinkedinIn />,
     FaWhatsapp: <FaWhatsapp />,
   };
-  // Convert custom pages to link format
-  const customPageLinks = Array.isArray(customPages) ? customPages.map((page) => ({
-    name: page.title,
-    path: `/${page.path}`,
-    isCustom: true,
-  })) : [];
+  // Convert custom pages to link format with safety check
+  const customPageLinks = (Array.isArray(customPages) && customPages.length > 0) 
+    ? customPages.map((page) => ({
+        name: page.title,
+        path: `/${page.path}`,
+        isCustom: true,
+      })) 
+    : [];
 
-  // Fallback data in case API data is loading or unavailable
-  const quickLinks = (Array.isArray(footerData?.quick_links)
-    ? footerData.quick_links.filter((link) => link.enabled)
-    : []) || [
-    { name: "Home", path: ROUTES.HOME },
-    { name: "About", path: ROUTES.ABOUT },
-    { name: "Contact", path: ROUTES.CONTACT },
-  ];
+  // Fallback data in case API data is loading or unavailable with safety checks
+  const quickLinks = (footerData && Array.isArray(footerData.quick_links)
+    ? footerData.quick_links.filter((link) => link && link.enabled)
+    : [
+        { name: "Home", path: ROUTES.HOME },
+        { name: "About", path: ROUTES.ABOUT },
+        { name: "Contact", path: ROUTES.CONTACT },
+      ]);
 
-  const customerServiceLinks = (Array.isArray(footerData?.customer_service_links)
-    ? footerData.customer_service_links.filter((link) => link.enabled)
-    : []) || [
-    { name: "Track Your Order", path: ROUTES.TRACK_ORDER },
-    { name: "Bulk Orders", path: ROUTES.BULK_ORDER },
-  ];
+  const customerServiceLinks = (footerData && Array.isArray(footerData.customer_service_links)
+    ? footerData.customer_service_links.filter((link) => link && link.enabled)
+    : [
+        { name: "Track Your Order", path: ROUTES.TRACK_ORDER },
+        { name: "Bulk Orders", path: ROUTES.BULK_ORDER },
+      ]);
 
   // Include both standard policy links and any custom pages that might be policies
   const policyLinks = [
-    ...(Array.isArray(footerData?.policy_links)
-      ? footerData.policy_links.filter((link) => link.enabled)
+    ...(footerData && Array.isArray(footerData.policy_links)
+      ? footerData.policy_links.filter((link) => link && link.enabled)
       : [
           { name: "Terms & Conditions", path: "/terms-conditions" },
           {
@@ -88,15 +90,17 @@ const Footer = () => {
         ]),
     ...customPageLinks.filter(
       (page) =>
-        page.name.toLowerCase().includes("policy") ||
-        page.name.toLowerCase().includes("terms")
+        page && page.name && (
+          page.name.toLowerCase().includes("policy") ||
+          page.name.toLowerCase().includes("terms")
+        )
     ),
   ];
 
   // Include additional custom pages in the know more section
   const knowMoreLinks = [
-    ...(Array.isArray(footerData?.know_more_links)
-      ? footerData.know_more_links.filter((link) => link.enabled)
+    ...(footerData && Array.isArray(footerData.know_more_links)
+      ? footerData.know_more_links.filter((link) => link && link.enabled)
       : [
           { name: "Our Stores", path: "/our-stores" },
           {
@@ -106,30 +110,33 @@ const Footer = () => {
         ]),
     ...customPageLinks.filter(
       (page) =>
-        !page.name.toLowerCase().includes("policy") &&
-        !page.name.toLowerCase().includes("terms")
+        page && page.name && (
+          !page.name.toLowerCase().includes("policy") &&
+          !page.name.toLowerCase().includes("terms")
+        )
     ),
   ];
 
-  const socialLinks = (Array.isArray(footerData?.social_links) 
+  const socialLinks = (footerData && Array.isArray(footerData.social_links) 
     ? footerData.social_links
-        .filter((link) => link.enabled)
+        .filter((link) => link && link.enabled)
         .map((link) => ({
           icon: socialIconMapping[link.icon] || <FaFacebookF />,
           url: link.url,
           label: link.name,
         }))
-    : []) || [
-    { icon: <FaFacebookF />, url: "https://facebook.com", label: "Facebook" },
-    { icon: <FaTwitter />, url: "https://twitter.com", label: "Twitter" },
-    { icon: <FaInstagram />, url: "https://instagram.com", label: "Instagram" },
-    { icon: <FaYoutube />, url: "https://youtube.com", label: "YouTube" },
-    { icon: <FaLinkedinIn />, url: "https://linkedin.com", label: "LinkedIn" },
-  ];
+    : [
+        { icon: <FaFacebookF />, url: "https://facebook.com", label: "Facebook" },
+        { icon: <FaTwitter />, url: "https://twitter.com", label: "Twitter" },
+        { icon: <FaInstagram />, url: "https://instagram.com", label: "Instagram" },
+        { icon: <FaYoutube />, url: "https://youtube.com", label: "YouTube" },
+        { icon: <FaLinkedinIn />, url: "https://linkedin.com", label: "LinkedIn" },
+      ]);
+      
   // Include both standard footer policy links and any custom pages that might be legal documents
   const footerPolicyLinks = [
-    ...(Array.isArray(footerData?.footer_policy_links)
-      ? footerData.footer_policy_links.filter((link) => link.enabled)
+    ...(footerData && Array.isArray(footerData.footer_policy_links)
+      ? footerData.footer_policy_links.filter((link) => link && link.enabled)
       : [
           { name: "Privacy Policy", path: "/privacy-policy" },
           { name: "Terms of Use", path: "/terms-conditions" },
@@ -138,11 +145,13 @@ const Footer = () => {
     ...customPageLinks
       .filter(
         (page) =>
-          page.name.toLowerCase().includes("policy") ||
-          page.name.toLowerCase().includes("terms") ||
-          page.name.toLowerCase().includes("privacy") ||
-          page.name.toLowerCase().includes("legal")
-      )
+          page && page.name && (
+            page.name.toLowerCase().includes("policy") ||
+            page.name.toLowerCase().includes("terms") ||
+            page.name.toLowerCase().includes("privacy") ||
+            page.name.toLowerCase().includes("legal")
+          )
+        )
       .slice(0, 3), // Limit to 3 additional policy links to avoid making the footer too large
   ];
 

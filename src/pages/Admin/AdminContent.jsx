@@ -5,6 +5,7 @@ import CategoryManager from "../../components/Admin/Content/CategoryManager";
 import FooterManager from "../../components/Admin/Content/FooterManager";
 import PageManager from "../../components/Admin/Content/PageManager";
 import ColorManager from "../../components/Admin/Content/ColorManager";
+import ThemeManager from "../../components/Admin/Content/SimpleThemeManager";
 import HomepageSectionManager from "../../components/Admin/Content/HomepageSectionManager";
 import { bannerPositionOptions } from "../../constants/bannerOptions";
 
@@ -14,77 +15,126 @@ const AdminContent = () => {
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">Content Management</h1>
+        <h1 
+          className="text-2xl font-bold" 
+          style={{ color: "var(--text-primary)" }}
+        >
+          Content Management
+        </h1>
       </div>
 
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <div className="flex border-b overflow-x-auto">
+      <div 
+        className="shadow-md rounded-lg overflow-hidden"
+        style={{ 
+          backgroundColor: "var(--bg-primary)",
+          boxShadow: "var(--shadow-medium)" 
+        }}
+      >
+        <div 
+          className="flex border-b overflow-x-auto"
+          style={{ borderColor: "var(--border-primary)" }}
+        >
           <button
-            className={`px-6 py-3 font-medium ${
+            className={`px-6 py-3 font-medium transition-all duration-200 ${
               activeTab === "logo"
-                ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50"
-                : "text-gray-500 hover:text-gray-700"
+                ? "border-b-2"
+                : "hover:opacity-75"
             }`}
+            style={{
+              color: activeTab === "logo" ? "var(--brand-primary)" : "var(--text-secondary)",
+              borderBottomColor: activeTab === "logo" ? "var(--brand-primary)" : "transparent",
+              backgroundColor: activeTab === "logo" ? "var(--bg-accent-light)" : "transparent",
+            }}
             onClick={() => setActiveTab("logo")}
           >
             Logo
           </button>
           <button
-            className={`px-6 py-3 font-medium ${
+            className={`px-6 py-3 font-medium transition-all duration-200 ${
               activeTab === "banners"
-                ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50"
-                : "text-gray-500 hover:text-gray-700"
+                ? "border-b-2"
+                : "hover:opacity-75"
             }`}
+            style={{
+              color: activeTab === "banners" ? "var(--brand-primary)" : "var(--text-secondary)",
+              borderBottomColor: activeTab === "banners" ? "var(--brand-primary)" : "transparent",
+              backgroundColor: activeTab === "banners" ? "var(--bg-accent-light)" : "transparent",
+            }}
             onClick={() => setActiveTab("banners")}
           >
             Banners
           </button>
           <button
-            className={`px-6 py-3 font-medium ${
+            className={`px-6 py-3 font-medium transition-all duration-200 ${
               activeTab === "categories"
-                ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50"
-                : "text-gray-500 hover:text-gray-700"
+                ? "border-b-2"
+                : "hover:opacity-75"
             }`}
+            style={{
+              color: activeTab === "categories" ? "var(--brand-primary)" : "var(--text-secondary)",
+              borderBottomColor: activeTab === "categories" ? "var(--brand-primary)" : "transparent",
+              backgroundColor: activeTab === "categories" ? "var(--bg-accent-light)" : "transparent",
+            }}
             onClick={() => setActiveTab("categories")}
           >
             Categories
           </button>
           <button
-            className={`px-6 py-3 font-medium ${
+            className={`px-6 py-3 font-medium transition-all duration-200 ${
               activeTab === "footer"
-                ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50"
-                : "text-gray-500 hover:text-gray-700"
+                ? "border-b-2"
+                : "hover:opacity-75"
             }`}
+            style={{
+              color: activeTab === "footer" ? "var(--brand-primary)" : "var(--text-secondary)",
+              borderBottomColor: activeTab === "footer" ? "var(--brand-primary)" : "transparent",
+              backgroundColor: activeTab === "footer" ? "var(--bg-accent-light)" : "transparent",
+            }}
             onClick={() => setActiveTab("footer")}
           >
             Footer
           </button>
           <button
-            className={`px-6 py-3 font-medium ${
+            className={`px-6 py-3 font-medium transition-all duration-200 ${
               activeTab === "pages"
-                ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50"
-                : "text-gray-500 hover:text-gray-700"
+                ? "border-b-2"
+                : "hover:opacity-75"
             }`}
+            style={{
+              color: activeTab === "pages" ? "var(--brand-primary)" : "var(--text-secondary)",
+              borderBottomColor: activeTab === "pages" ? "var(--brand-primary)" : "transparent",
+              backgroundColor: activeTab === "pages" ? "var(--bg-accent-light)" : "transparent",
+            }}
             onClick={() => setActiveTab("pages")}
           >
             Pages
           </button>
           <button
-            className={`px-6 py-3 font-medium ${
-              activeTab === "colors"
-                ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50"
-                : "text-gray-500 hover:text-gray-700"
+            className={`px-6 py-3 font-medium transition-all duration-200 ${
+              activeTab === "theme"
+                ? "border-b-2"
+                : "hover:opacity-75"
             }`}
-            onClick={() => setActiveTab("colors")}
+            style={{
+              color: activeTab === "theme" ? "var(--brand-primary)" : "var(--text-secondary)",
+              borderBottomColor: activeTab === "theme" ? "var(--brand-primary)" : "transparent",
+              backgroundColor: activeTab === "theme" ? "var(--bg-accent-light)" : "transparent",
+            }}
+            onClick={() => setActiveTab("theme")}
           >
-            Theme Colors
+            Theme & Colors
           </button>
           <button
-            className={`px-6 py-3 font-medium ${
+            className={`px-6 py-3 font-medium transition-all duration-200 ${
               activeTab === "homepage"
-                ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50"
-                : "text-gray-500 hover:text-gray-700"
+                ? "border-b-2"
+                : "hover:opacity-75"
             }`}
+            style={{
+              color: activeTab === "homepage" ? "var(--brand-primary)" : "var(--text-secondary)",
+              borderBottomColor: activeTab === "homepage" ? "var(--brand-primary)" : "transparent",
+              backgroundColor: activeTab === "homepage" ? "var(--bg-accent-light)" : "transparent",
+            }}
             onClick={() => setActiveTab("homepage")}
           >
             Homepage Sections
@@ -98,7 +148,7 @@ const AdminContent = () => {
           {activeTab === "categories" && <CategoryManager />}
           {activeTab === "footer" && <FooterManager />}
           {activeTab === "pages" && <PageManager />}
-          {activeTab === "colors" && <ColorManager />}
+          {activeTab === "theme" && <ThemeManager />}
           {activeTab === "homepage" && <HomepageSectionManager />}
         </div>
       </div>

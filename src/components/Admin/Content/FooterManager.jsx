@@ -357,7 +357,13 @@ const FooterManager = () => {
         </div>
       </div>
       {/* Company Information */}{" "}
-      <div className="bg-white p-4 rounded-lg border border-gray-200">
+      <div 
+        className="p-4 rounded-lg border"
+        style={{
+          backgroundColor: "var(--bg-primary)",
+          borderColor: "var(--border-primary)"
+        }}
+      >
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-medium">Company Information</h3>
           <button
@@ -408,7 +414,13 @@ const FooterManager = () => {
         </div>
       </div>
       {/* Contact Information */}{" "}
-      <div className="bg-white p-4 rounded-lg border border-gray-200">
+      <div 
+        className="p-4 rounded-lg border"
+        style={{
+          backgroundColor: "var(--bg-primary)",
+          borderColor: "var(--border-primary)"
+        }}
+      >
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-medium">Contact Information</h3>
           <button
@@ -481,7 +493,13 @@ const FooterManager = () => {
         </div>
       </div>
       {/* WhatsApp Settings */}{" "}
-      <div className="bg-white p-4 rounded-lg border border-gray-200">
+      <div 
+        className="p-4 rounded-lg border"
+        style={{
+          backgroundColor: "var(--bg-primary)",
+          borderColor: "var(--border-primary)"
+        }}
+      >
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-medium">WhatsApp Settings</h3>
           <button
@@ -530,7 +548,13 @@ const FooterManager = () => {
         </div>
       </div>
       {/* Copyright Settings */}{" "}
-      <div className="bg-white p-4 rounded-lg border border-gray-200">
+      <div 
+        className="p-4 rounded-lg border"
+        style={{
+          backgroundColor: "var(--bg-primary)",
+          borderColor: "var(--border-primary)"
+        }}
+      >
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-medium">Copyright Settings</h3>
           <button
@@ -594,7 +618,17 @@ const FooterManager = () => {
       </div>
       {/* Link Sections */}
       {Object.entries(sectionTitles).map(([sectionKey, title]) => {
-        const links = footerConfig?.[sectionKey] || [];
+        // Safely get links with better error handling
+        const rawLinks = footerConfig?.[sectionKey];
+        let links = [];
+        
+        if (Array.isArray(rawLinks)) {
+          links = rawLinks;
+        } else if (rawLinks && typeof rawLinks === 'object') {
+          // If it's an object with links property
+          links = Array.isArray(rawLinks.links) ? rawLinks.links : [];
+        }
+        
         return (
           <div
             key={sectionKey}

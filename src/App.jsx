@@ -7,6 +7,7 @@ import {
   Outlet,
 } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import SimpleThemeProvider from "./components/SimpleThemeProvider";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
@@ -65,6 +66,7 @@ import {
 } from "./pages/Admin";
 import AdminSellPhone from "./pages/Admin/AdminSellPhone";
 import FirebaseSetup from "./components/FirebaseSetup";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 // Layout component that will be used across all pages
 const Layout = () => {
@@ -95,27 +97,41 @@ const App = () => {
   // Initialize products and authentication
   React.useEffect(() => {
     const initializeStore = async () => {
-      // Initialize theme first
-      initializeTheme();
-      
-      // Load custom colors if saved
-      loadCustomColors();
-      
-      // Initialize authentication state from localStorage
-      checkAuthStatus();
+      try {
+        // Initialize theme first
+        initializeTheme();
+        
+        // Load theme from backend and apply (with better error handling)
+        try {
+          const themeService = await import('./services/themeService');
+          await themeService.default.loadAndApplyTheme();
+          console.log('Theme loaded successfully from backend');
+        } catch (error) {
+          console.log('Theme service failed, loading custom colors from localStorage:', error.message);
+          // Fallback to localStorage custom colors
+          loadCustomColors();
+        }
+        
+        // Initialize authentication state from localStorage
+        checkAuthStatus();
 
-      // Initialize admin authentication state from localStorage
-      checkAdminAuthStatus();
+        // Initialize admin authentication state from localStorage
+        checkAdminAuthStatus();
 
-      // Import dynamically to avoid circular dependencies
-      const { useProductStore } = await import("./store/useProduct");
-      useProductStore.getState().fetchProducts();
+        // Import dynamically to avoid circular dependencies
+        const { useProductStore } = await import("./store/useProduct");
+        await useProductStore.getState().fetchProducts();
 
-      // Initialize page content store - fetch available pages
-      const { usePageContentStore } = await import(
-        "./store/usePageContentStore"
-      );
-      usePageContentStore.getState().fetchAvailablePages();
+        // Initialize page content store - fetch available pages
+        const { usePageContentStore } = await import(
+          "./store/usePageContentStore"
+        );
+        await usePageContentStore.getState().fetchAvailablePages();
+        
+        console.log('App initialization completed successfully');
+      } catch (error) {
+        console.error('App initialization failed:', error);
+      }
     };
 
     initializeStore();
@@ -127,14 +143,16 @@ const App = () => {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <BrowserRouter>
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 3000,
-        }}
-      />
-      <Routes>
+    <ErrorBoundary>
+      <SimpleThemeProvider>
+        <BrowserRouter>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 3000,
+            }}
+          />
+          <Routes>
         {/* Auth Routes */}
         <Route
           path="/signup"
@@ -387,6 +405,8 @@ const App = () => {
         </Route>
       </Routes>
     </BrowserRouter>
+    </SimpleThemeProvider>
+    </ErrorBoundary>
   );
 };
 

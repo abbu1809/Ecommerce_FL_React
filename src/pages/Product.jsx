@@ -15,6 +15,7 @@ import ProductActions from "../components/Product/ProductActions";
 import ProductTabs from "../components/Product/ProductTabs";
 import ProductVariantSelector from "../components/Product/ProductVariantSelector";
 import RelatedProducts from "../components/Product/RelatedProducts";
+import FrequentlyBoughtTogether from "../components/Product/FrequentlyBoughtTogether";
 
 const Product = () => {
   const { id } = useParams();
@@ -390,6 +391,13 @@ const Product = () => {
             activeTab={activeTab}
             setActiveTab={setActiveTab}
           />
+          
+          {/* Frequently Bought Together Section */}
+          <FrequentlyBoughtTogether 
+            mainProduct={normalizedProduct}
+            category={normalizedProduct.category}
+          />
+          
           {/* Related Products Section */}
           {normalizedProduct.category && (
             <RelatedProducts

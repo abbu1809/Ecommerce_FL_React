@@ -64,10 +64,16 @@ const ReviewModal = ({ isOpen, onClose, product }) => {
     const reviewData = {
       rating: rating,
       comment: comment.trim(),
-      // Additional context for order-based reviews
+      // Enhanced verification for buyer-only reviews
       verified_purchase: true,
       order_id: product.orderId,
       purchase_date: product.orderDate,
+      user_id: user?.id,
+      purchase_verification: {
+        order_status: product.orderStatus || 'delivered',
+        delivery_date: product.deliveryDate,
+        payment_status: product.paymentStatus || 'completed'
+      }
     };
 
     // Use productId if available, otherwise fallback to id
@@ -186,7 +192,35 @@ const ReviewModal = ({ isOpen, onClose, product }) => {
                 >
                   Verified Purchase
                 </span>
+                {product.orderDate && (
+                  <span className="text-xs mx-2" style={{ color: "var(--text-muted)" }}>
+                    •
+                  </span>
+                )}
+                {product.orderDate && (
+                  <span
+                    className="text-xs"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    Purchased on {new Date(product.orderDate).toLocaleDateString()}
+                  </span>
+                )}
               </div>
+              {product.orderStatus && (
+                <div className="mt-2">
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full ${
+                      product.orderStatus === 'delivered' 
+                        ? 'bg-green-100 text-green-700'
+                        : product.orderStatus === 'shipped'
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-gray-100 text-gray-700'
+                    }`}
+                  >
+                    Order {product.orderStatus}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>

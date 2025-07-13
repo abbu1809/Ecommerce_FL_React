@@ -14,13 +14,19 @@ export const loadCustomColors = () => {
 };
 
 export const applyColorsToDocument = (colors) => {
-  const root = document.documentElement;
-  if (colors.primary) root.style.setProperty('--brand-primary', colors.primary);
-  if (colors.secondary) root.style.setProperty('--brand-secondary', colors.secondary);
-  if (colors.success) root.style.setProperty('--success-color', colors.success);
-  if (colors.error) root.style.setProperty('--error-color', colors.error);
-  if (colors.warning) root.style.setProperty('--warning-color', colors.warning);
-  if (colors.info) root.style.setProperty('--accent-color', colors.info);
+  try {
+    const root = document.documentElement;
+    if (colors.primary) root.style.setProperty('--brand-primary', colors.primary);
+    if (colors.secondary) root.style.setProperty('--brand-secondary', colors.secondary);
+    if (colors.success) root.style.setProperty('--success-color', colors.success);
+    if (colors.error) root.style.setProperty('--error-color', colors.error);
+    if (colors.warning) root.style.setProperty('--warning-color', colors.warning);
+    if (colors.info) root.style.setProperty('--accent-color', colors.info);
+    
+    console.log('Colors applied to document:', colors);
+  } catch (error) {
+    console.error('Error applying colors to document:', error);
+  }
 };
 
 export const getDefaultColors = () => ({
