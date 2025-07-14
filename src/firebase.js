@@ -4,13 +4,13 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDsPZsRwk4uFh7r-IN8NCzAca_mxPe67OE",
-  authDomain: "anandmobiles-daa8b.firebaseapp.com",
-  projectId: "anandmobiles-daa8b",
-  storageBucket: "anandmobiles-daa8b.firebasestorage.app",
-  messagingSenderId: "403268549781",
-  appId: "1:403268549781:web:4aa820dddb7db1fa076f9c",
-  measurementId: "G-PQSMJKJFFS",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 

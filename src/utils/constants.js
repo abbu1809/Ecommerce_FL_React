@@ -1,7 +1,8 @@
-// API Constants
-//export const API_URL = "http://69.62.72.199/api/api";
-// API Constants
-export const API_URL = "http://127.0.0.1:8000/api";
+// API Constants - Use environment variables
+export const API_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api";
+
+// Razorpay Configuration
+export const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID;
 
 // Local Storage Keys
 export const TOKEN_KEY = "anand_mobiles_token";
