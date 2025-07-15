@@ -16,6 +16,7 @@ import {
   FiSmartphone,
 } from "react-icons/fi";
 import NotificationBar from "./NotificationBar";
+import ThemeToggle from "../ui/ThemeToggle";
 
 const AdminLayout = () => {
   const location = useLocation();
@@ -113,18 +114,24 @@ const AdminLayout = () => {
             )}
           </div>
 
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className={`p-1 rounded-md hover:bg-gray-700 transition-colors duration-150 ${
-              collapsed ? "mx-auto mt-2" : ""
-            }`}
-          >
-            {collapsed ? (
-              <FiChevronRight size={24} />
-            ) : (
-              <FiChevronLeft size={24} />
-            )}
-          </button>
+          <div className={`flex items-center gap-2 ${collapsed ? "flex-col" : ""}`}>
+            {/* Theme Toggle */}
+            <div className={collapsed ? "mb-2" : ""}>
+              <ThemeToggle />
+            </div>
+            
+            {/* Collapse Button */}
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              className={`p-1 rounded-md hover:bg-gray-700 transition-colors duration-150`}
+            >
+              {collapsed ? (
+                <FiChevronRight size={24} />
+              ) : (
+                <FiChevronLeft size={24} />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Navigation */}

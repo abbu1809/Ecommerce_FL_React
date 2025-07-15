@@ -15,11 +15,13 @@
   transition: none !important;
 }
 
-
 :root {
   --bg-primary: #ffffff;
   --bg-secondary: #f8fafc;
   --bg-tertiary: #f1f5f9;
+  --bg-primary-rgb: 255, 255, 255;
+  --bg-secondary-rgb: 248, 250, 252;
+  --bg-tertiary-rgb: 241, 245, 249;
   --text-primary: #1e293b;
   --text-secondary: #64748b;
   --text-muted: #94a3b8;
@@ -43,6 +45,9 @@
   --bg-primary: #0f172a;
   --bg-secondary: #1e293b;
   --bg-tertiary: #334155;
+  --bg-primary-rgb: 15, 23, 42;
+  --bg-secondary-rgb: 30, 41, 59;
+  --bg-tertiary-rgb: 51, 65, 85;
   --text-primary: #f1f5f9;
   --text-secondary: #cbd5e1;
   --text-muted: #94a3b8;
@@ -65,16 +70,238 @@
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-body {
+/* Global theme fixes - ensure all elements respect theme variables */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Fix for any hardcoded colors that might not be themed */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+}
+
+p, span, div {
+  color: inherit;
+}
+
+/* Ensure buttons and interactive elements respect theme */
+button {
+  color: inherit;
+  border-color: var(--border-primary);
+}
+
+/* Fix for form elements */
+input, textarea, select {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  border-color: var(--border-primary);
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--brand-primary);
+  outline-color: var(--brand-primary);
+}
+
+/* Ensure modals and dropdowns follow theme */
+[role="dialog"], [role="menu"], [role="listbox"] {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border-color: var(--border-primary);
 }
 
 button:hover {
   cursor: pointer;
+}
+
+/* Theme utility classes for consistent theming */
+.theme-bg-primary {
+  background-color: var(--bg-primary) !important;
+}
+
+.theme-bg-secondary {
+  background-color: var(--bg-secondary) !important;
+}
+
+.theme-text-primary {
+  color: var(--text-primary) !important;
+}
+
+.theme-text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+.theme-border-primary {
+  border-color: var(--border-primary) !important;
+}
+
+.theme-brand-primary {
+  color: var(--brand-primary) !important;
+}
+
+.theme-brand-bg {
+  background-color: var(--brand-primary) !important;
+  color: var(--text-on-brand) !important;
+}
+
+/* Fix for any Tailwind overrides */
+.dark .bg-white {
+  background-color: var(--bg-primary) !important;
+}
+
+.dark .text-black {
+  color: var(--text-primary) !important;
+}
+
+/* Enhanced theme fixes for hover effects */
+.dark .hover\:bg-white:hover {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark .hover\:text-white:hover {
+  color: var(--text-primary) !important;
+}
+
+/* Fix for white backgrounds in dark mode that cause text invisibility */
+.dark .bg-white {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Fix for hover effects that turn white in dark mode */
+.theme-hover-fix:hover {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Toggle switch fixes */
+.dark .toggle-switch {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-primary);
+}
+
+.toggle-switch {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-primary);
+}
+
+/* Editable content fixes for dark mode */
+.dark [contenteditable="true"] {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-primary) !important;
+}
+
+[contenteditable="true"] {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+  padding: 4px;
+  border-radius: 4px;
+}
+
+/* Fix for any cards or panels with hover effects */
+.theme-card:hover {
+  background-color: var(--bg-secondary) !important;
+  box-shadow: var(--shadow-medium) !important;
+}
+
+/* Ensure proper text contrast on all hover states */
+.hover\:bg-gray-50:hover {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark .hover\:bg-gray-50:hover {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Fix for transparent hover effects */
+.hover\:bg-white\/80:hover {
+  background-color: color-mix(in srgb, var(--bg-primary) 80%, transparent) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark .hover\:bg-white\/80:hover {
+  background-color: color-mix(in srgb, var(--bg-secondary) 80%, transparent) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark .text-gray-900 {
+  color: var(--text-primary) !important;
+}
+
+.dark .text-gray-800 {
+  color: var(--text-primary) !important;
+}
+
+.dark .text-gray-700 {
+  color: var(--text-secondary) !important;
+}
+
+.dark .text-gray-600 {
+  color: var(--text-secondary) !important;
+}
+
+.dark .bg-gray-50 {
+  background-color: var(--bg-secondary) !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: var(--bg-secondary) !important;
+}
+
+.dark .border-gray-200 {
+  border-color: var(--border-primary) !important;
+}
+
+.dark .border-gray-300 {
+  border-color: var(--border-primary) !important;
+}
+
+/* Ensure admin panel elements are properly themed */
+.admin-layout * {
+  color: inherit;
+}
+
+.admin-layout .text-white {
+  color: var(--text-on-brand) !important;
+}
+
+.admin-layout .bg-white {
+  background-color: var(--bg-primary) !important;
+}
+
+.admin-layout .text-gray-900 {
+  color: var(--text-primary) !important;
+}
+
+.admin-layout .text-gray-800 {
+  color: var(--text-primary) !important;
+}
+
+/* Notification bar theme fixes */
+.notification-item {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border-color: var(--border-primary);
+}
+
+.notification-item:hover {
+  background-color: var(--bg-secondary);
+}
+
+/* Header theme fixes */
+.header-element {
+  color: var(--text-primary);
+}
+
+.header-element.on-brand {
+  color: var(--text-on-brand);
 }
 
 @layer utilities {
@@ -133,6 +360,21 @@ button:hover {
     }
   }
 
+  /* Analytics Dashboard Animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fadeInUp {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
 
   .custom-scrollbar::-webkit-scrollbar {
     width: 8px;
@@ -152,12 +394,10 @@ button:hover {
     background: #a8a8a8;
   }
 
-
   .custom-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: #c1c1c1 #f1f1f1;
   }
-
  
   .transition-standard {
     transition: all 0.2s ease-in-out;
@@ -171,7 +411,6 @@ button:hover {
     transition: background-color 0.2s ease-in-out;
   }
 
-
   .hover-opacity-90:hover {
     opacity: 0.9;
   }
@@ -183,184 +422,326 @@ button:hover {
   .hover-opacity-70:hover {
     opacity: 0.7;
   }
-}
 
-:root {
-  
-  --primary-color: #4f46e5; 
-  --secondary-color: #f59e0b; 
-  --success-color: #10b981; 
-  --error-color: #ef4444; 
-  --warning-color: #f59e0b; 
-  --info-color: #3b82f6; 
+  /* Report Cards Hover Effects */
+  .report-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
-  
-  --brand-primary: #f59e0b; 
-  --brand-primary-hover: #d97706; 
-  --brand-secondary: #4f46e5; 
+  .report-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
 
-  --text-on-brand: #ffffff; 
-  --text-on-brand-muted: rgba(
-    255,
-    255,
-    255,
-    0.8
-  ); 
-  --text-primary: #1f2937; 
-  --text-secondary: #6b7280; 
-  --text-accent: var(
-    --brand-primary
-  ); 
-  --text-on-dark-bg: #d1d5db; 
-  --text-on-light-bg: #1f2937; 
-  --text-error: var(--error-color); 
-  --text-success: var(--success-color); 
-  
+  /* Loading Pulse Animation */
+  .pulse-loading {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
 
-  --bg-primary: #ffffff; 
-  --bg-secondary: #f9fafb; 
-  --bg-accent-light: #fff7ed; 
-  --bg-dark: #1f2937; 
-  --bg-overlay: rgba(
-    0,
-    0,
-    0,
-    0.5
-  ); 
-  
-  --border-primary: #e5e7eb;
-  --border-secondary: #d1d5db; 
-  --border-dark: #374151; 
-  --border-accent: var(--brand-primary); 
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
 
-  
-  --shadow-small: 0 1px 2px 0 rgba(0, 0, 0, 0.05); 
-  --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06); 
-  --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05); 
+  /* Success/Error State Animations */
+  .slide-in-right {
+    animation: slideInRight 0.5s ease-out;
+  }
 
-  
-  --rounded-sm: 0.125rem; 
-  --rounded-md: 0.375rem; 
-  --rounded-xl: 0.75rem; 
-  --rounded-full: 9999px; 
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
 
-  
-  --font-primary: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  
-}
+  /* Chart Container Styles */
+  .chart-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
 
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-}
+  .chart-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.3;
+  }
 
-/* Admin Notification Bar Styles */
-.notification-badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  background: #dc2626;
-  color: white;
-  border-radius: 50%;
-  min-width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
-  animation: pulse 2s infinite;
-}
+  /* Enhanced Button Styles */
+  .btn-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
 
-.notification-dropdown {
-  transform: translateY(-8px);
-  opacity: 0;
-  animation: slideDown 0.2s ease-out forwards;
-}
+  .btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+  }
 
-@keyframes slideDown {
-  to {
+  .btn-gradient:active {
     transform: translateY(0);
-    opacity: 1;
+  }
+
+  /* Report Status Indicators */
+  .status-indicator {
+    position: relative;
+    display: inline-block;
+  }
+
+  .status-indicator::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #10b981;
+    border: 2px solid white;
+    animation: pulse 2s infinite;
+  }
+
+  .status-indicator.downloading::after {
+    background-color: #f59e0b;
+    animation: spin 1s linear infinite;
+  }
+
+  .status-indicator.error::after {
+    background-color: #ef4444;
+    animation: none;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
   }
 }
 
-.notification-item {
-  border-left: 3px solid transparent;
-  transition: all 0.2s ease;
+/* Enhanced theme hover fixes for dark mode visibility issues */
+.theme-hover-fix:hover {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
 }
 
-.notification-item:hover {
-  border-left-color: var(--brand-primary);
-  background-color: rgba(0, 0, 0, 0.02);
+/* Fix for white hover backgrounds in dark mode */
+.dark .hover\:bg-white:hover {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
 }
 
-.notification-item.unread {
-  border-left-color: var(--brand-primary);
-  background-color: rgba(59, 130, 246, 0.03);
+.dark .hover\:text-white:hover {
+  color: var(--text-primary) !important;
 }
 
-.notification-priority-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
+/* Fix for buttons that turn white on hover in dark mode */
+.dark button:hover {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
 }
 
-.notification-button {
-  position: relative;
-  transition: all 0.2s ease;
+/* Override specific hover classes that cause visibility issues */
+.dark .hover\:bg-gray-50:hover {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
 }
 
-.notification-button:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-small);
+.dark .hover\:bg-gray-100:hover {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
 }
 
-.notification-button.active {
+.dark .hover\:bg-gray-200:hover {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Fix for cards and interactive elements */
+.dark .hover\:bg-white\/80:hover {
+  background-color: rgba(var(--bg-secondary-rgb, 30, 41, 59), 0.8) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark .hover\:bg-white\/60:hover {
+  background-color: rgba(var(--bg-secondary-rgb, 30, 41, 59), 0.6) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark .hover\:bg-white\/40:hover {
+  background-color: rgba(var(--bg-secondary-rgb, 30, 41, 59), 0.4) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Fix for toggle switches and buttons that become invisible in light mode */
+.toggle-switch {
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--border-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark .toggle-switch {
+  background-color: var(--bg-tertiary) !important;
+  border: 1px solid var(--border-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Fix for editable content that becomes invisible in dark mode */
+.dark [contenteditable="true"] {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-primary) !important;
+  padding: 8px !important;
+  border-radius: 4px !important;
+}
+
+[contenteditable="true"] {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-primary) !important;
+  padding: 8px !important;
+  border-radius: 4px !important;
+}
+
+/* Fix for editable text areas and input fields in admin panel */
+.dark .admin-layout [contenteditable="true"] {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 2px solid var(--border-primary) !important;
+}
+
+.admin-layout [contenteditable="true"] {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  border: 2px solid var(--border-primary) !important;
+}
+
+/* Fix for text inputs that become invisible */
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="url"],
+.dark input[type="tel"],
+.dark textarea {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-primary) !important;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="url"]:focus,
+input[type="tel"]:focus,
+textarea:focus {
+  border-color: var(--brand-primary) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.2) !important;
+}
+
+/* Fix for admin toggle switches specifically */
+.admin-layout .toggle-switch {
+  background-color: var(--bg-secondary) !important;
+  border: 2px solid var(--border-primary) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.dark .admin-layout .toggle-switch {
+  background-color: var(--bg-tertiary) !important;
+  border: 2px solid var(--border-primary) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Ensure admin panel buttons remain visible */
+.admin-layout button {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-primary) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.admin-layout button:hover {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Fix for specific admin components */
+.admin-layout .bg-white {
+  background-color: var(--bg-primary) !important;
+}
+
+.dark .admin-layout .bg-white {
+  background-color: var(--bg-primary) !important;
+}
+
+.admin-layout .text-white {
+  color: var(--text-on-brand) !important;
+}
+
+.admin-layout .text-black {
+  color: var(--text-primary) !important;
+}
+
+.dark .admin-layout .text-black {
+  color: var(--text-primary) !important;
+}
+
+/* Theme-based utility classes */
+.bg-brand-primary {
   background-color: var(--brand-primary) !important;
-  color: white !important;
 }
 
-/* Live indicator animation */
-.live-indicator {
-  animation: livePulse 2s ease-in-out infinite;
+.bg-brand-primary-hover:hover {
+  background-color: var(--brand-primary-hover) !important;
 }
 
-@keyframes livePulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.7;
-    transform: scale(1.1);
-  }
+.text-brand-primary {
+  color: var(--brand-primary) !important;
 }
 
-/* Notification dropdown scrollbar */
-.notification-dropdown-content {
-  scrollbar-width: thin;
-  scrollbar-color: var(--brand-primary) transparent;
+.text-brand-primary-hover:hover {
+  color: var(--brand-primary-hover) !important;
 }
 
-.notification-dropdown-content::-webkit-scrollbar {
-  width: 6px;
+.border-brand-primary {
+  border-color: var(--brand-primary) !important;
 }
 
-.notification-dropdown-content::-webkit-scrollbar-track {
-  background: transparent;
+.ring-brand-primary {
+  --tw-ring-color: var(--brand-primary) !important;
 }
 
-.notification-dropdown-content::-webkit-scrollbar-thumb {
-  background-color: var(--brand-primary);
-  border-radius: 3px;
-  opacity: 0.7;
+.focus\:ring-brand-primary:focus {
+  --tw-ring-color: var(--brand-primary) !important;
 }
 
-.notification-dropdown-content::-webkit-scrollbar-thumb:hover {
-  opacity: 1;
+/* Ensure focus states work properly with theme */
+.focus\:border-transparent:focus {
+  border-color: transparent !important;
 }

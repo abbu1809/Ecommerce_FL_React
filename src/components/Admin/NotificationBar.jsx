@@ -31,11 +31,11 @@ const NotificationBar = () => {
     markAllAsRead,
     getUnreadCount,
     fetchNotifications,
-    refreshNotifications
+    refreshNotifications,
+    simulateNewNotification
   } = useNotificationStore();
 
   const dropdownRef = useRef(null);
-
   // Fetch notifications on component mount
   useEffect(() => {
     fetchNotifications();
@@ -44,9 +44,19 @@ const NotificationBar = () => {
     const interval = setInterval(() => {
       refreshNotifications();
     }, 30000);
-    
-    return () => clearInterval(interval);
-  }, [fetchNotifications, refreshNotifications]);
+
+    // Set up demo notification simulation every 45 seconds if in demo mode
+    const demoInterval = setInterval(() => {
+      if (error) {
+        useNotificationStore.getState().simulateNewNotification();
+      }
+    }, 45000); // Simulate new notifications every 45 seconds in demo mode
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(demoInterval);
+    };
+  }, [fetchNotifications, refreshNotifications, error]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -349,20 +359,48 @@ const NotificationBar = () => {
             className="text-sm"
             style={{ color: 'var(--text-secondary)' }}
           >
-            Last updated: {new Date().toLocaleTimeString()}
+            Last updated: {lastUpdated ? lastUpdated.toLocaleTimeString() : 'Never'}
           </span>
+          
+          {error && (
+            <span 
+              className="text-xs px-2 py-1 rounded flex items-center space-x-1"
+              style={{ 
+                backgroundColor: 'var(--warning-color)',
+                color: 'white'
+              }}
+              title={error}
+            >
+              <span>Demo Mode</span>
+            </span>
+          )}
           
           <div className="flex items-center space-x-2">
             <div
-              className="live-indicator w-2 h-2 rounded-full animate-pulse"
-              style={{ backgroundColor: 'var(--brand-primary)' }}
+              className={`live-indicator w-2 h-2 rounded-full ${loading ? 'animate-pulse' : ''}`}
+              style={{ backgroundColor: error ? 'var(--warning-color)' : loading ? 'var(--info-color)' : 'var(--success-color)' }}
             />
             <span 
               className="text-sm font-medium"
               style={{ color: 'var(--text-primary)' }}
             >
-              Live
+              {loading ? 'Updating...' : error ? 'Demo' : 'Live'}
             </span>
+            
+            {/* Demo mode: Add manual simulation button */}
+            {error && (
+              <button
+                onClick={simulateNewNotification}
+                className="text-xs px-2 py-1 rounded hover:opacity-80 transition-opacity ml-2"
+                style={{ 
+                  backgroundColor: 'var(--brand-primary)',
+                  color: 'white'
+                }}
+                title="Simulate new notification (Demo only)"
+              >
+                + New
+              </button>
+            )}
           </div>
         </div>
       </div>

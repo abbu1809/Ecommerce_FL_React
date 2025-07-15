@@ -20,18 +20,18 @@ import MostPopularProductsWidget from "../../components/Admin/Dashboard/MostPopu
 import TopSellingProductsWidget from "../../components/Admin/Dashboard/TopSellingProductsWidget";
 import TopDeliveryMenWidget from "../../components/Admin/Dashboard/TopDeliveryMenWidget";
 import TopCustomersWidget from "../../components/Admin/Dashboard/TopCustomersWidget";
-import ReportsPanel from "../../components/Admin/Dashboard/ReportsPanel";
+import ReportsPanel from "../../components/admin/ReportsPanel";
 import RecentOrders from "../../components/Admin/Dashboard/RecentOrders";
 import SalesChart from "../../components/Admin/Dashboard/SalesChart";
 import TopProducts from "../../components/Admin/Dashboard/TopProducts";
 import Button from "../../components/ui/Button";
 import useAdminStore from "../../store/Admin/useAdminStore";
-import useEnhancedDashboardStore from "../../store/Admin/useEnhancedDashboardStore";
+import useRealAnalyticsStore from "../../store/useRealAnalyticsStore";
 
 const AdminDashboard = () => {
   // Use both stores
   const { dashboard, fetchDashboardData } = useAdminStore();
-  const { analytics, loading: enhancedLoading, fetchAnalytics, selectedDateRange, updateDateRange } = useEnhancedDashboardStore();
+  const { analytics, loading: enhancedLoading, fetchAnalytics, selectedDateRange, updateDateRange } = useRealAnalyticsStore();
   const { stats, loading } = dashboard;
   
   // UI state
@@ -159,8 +159,8 @@ const AdminDashboard = () => {
         return (
           <div className="space-y-6">
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <MostPopularProductsWidget products={analytics.mostPopularProducts} />
-              <TopSellingProductsWidget products={analytics.topSellingProducts} />
+              <MostPopularProductsWidget products={analytics?.mostPopularProducts || []} />
+              <TopSellingProductsWidget products={analytics?.topSellingProducts || []} />
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
@@ -176,16 +176,16 @@ const AdminDashboard = () => {
       case 'customers':
         return (
           <div className="space-y-6">
-            <TopCustomersWidget customers={analytics.topCustomers} />
-            <UserOverviewWidget overview={analytics.userOverview} />
+            <TopCustomersWidget customers={analytics?.topCustomers || []} />
+            <UserOverviewWidget overview={analytics?.userOverview || null} />
           </div>
         );
       
       case 'delivery':
         return (
           <div className="space-y-6">
-            <TopDeliveryMenWidget deliveryMen={analytics.topDeliveryMen} />
-            <OrderStatisticsWidget statistics={analytics.orderStatistics} />
+            <TopDeliveryMenWidget deliveryMen={analytics?.topDeliveryMen || []} />
+            <OrderStatisticsWidget statistics={analytics?.orderStatistics || null} />
           </div>
         );
       
@@ -204,7 +204,7 @@ const AdminDashboard = () => {
                 </div>
               </div>
             ) : (
-              <BusinessAnalyticsWidget analytics={analytics.businessAnalytics} />
+              <BusinessAnalyticsWidget analytics={analytics?.businessAnalytics || null} />
             )}
 
             {/* Order Statistics & User Overview */}
@@ -219,13 +219,12 @@ const AdminDashboard = () => {
                     <div className="h-6 bg-gray-200 rounded w-1/3 mb-6"></div>
                     <div className="grid grid-cols-2 gap-4">{[...Array(4)].map((_, i) => (<div key={i} className="h-32 bg-gray-200 rounded"></div>))}</div>
                   </div>
-                </>
-              ) : (
-                <>
-                  <OrderStatisticsWidget statistics={analytics.orderStatistics} />
-                  <UserOverviewWidget overview={analytics.userOverview} />
-                </>
-              )}
+                </>                ) : (
+                  <>
+                    <OrderStatisticsWidget statistics={analytics?.orderStatistics || null} />
+                    <UserOverviewWidget overview={analytics?.userOverview || null} />
+                  </>
+                )}
             </div>
 
             {/* Charts and Analytics */}

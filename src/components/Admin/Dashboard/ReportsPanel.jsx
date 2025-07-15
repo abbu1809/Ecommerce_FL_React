@@ -12,13 +12,21 @@ import {
   FiPackage,
   FiGift,
   FiDollarSign,
-  FiEye
+  FiEye,
+  FiLoader
 } from 'react-icons/fi';
+import reportsService from '../../../services/reportsService';
 
 const ReportsPanel = () => {
   const [selectedReport, setSelectedReport] = useState(null);
   const [dateRange, setDateRange] = useState('last30days');
+  const [orderStatus, setOrderStatus] = useState('all');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedReports, setGeneratedReports] = useState({});
+
+  // Get available options from service
+  const dateRangeOptions = reportsService.getDateRanges();
+  const orderStatusOptions = reportsService.getOrderStatuses();
 
   const reportCategories = [
     {
@@ -27,20 +35,22 @@ const ReportsPanel = () => {
         {
           id: 'revenue',
           title: 'Revenue Report',
-          description: 'Provides a broad overview of the financial status of a store.',
+          description: 'Comprehensive financial overview with gross revenue, refunds, taxes, and net revenue.',
           details: 'Reports gross revenue, refunds, the value of coupons used, taxes collected, shipping costs, and net revenue for a selected date range',
           icon: <FiDollarSign size={20} />,
           color: '#10b981',
-          estimatedTime: '2-3 minutes'
+          estimatedTime: '2-3 minutes',
+          hasDateRange: true
         },
         {
           id: 'tax',
           title: 'Tax Report',
-          description: 'Compares tax report data by different tax codes',
+          description: 'Tax collection analysis and GST calculations',
           details: 'Compares multiple tax codes, and displays data on how much tax was collected for orders and shipping',
           icon: <FiFileText size={20} />,
           color: '#6b7280',
-          estimatedTime: '1-2 minutes'
+          estimatedTime: '1-2 minutes',
+          hasDateRange: true
         }
       ]
     },
@@ -50,20 +60,24 @@ const ReportsPanel = () => {
         {
           id: 'orders',
           title: 'Orders Report',
-          description: 'Reports the total number of orders, net revenue, the average order value.',
+          description: 'Detailed order analysis with revenue metrics and customer insights.',
           details: 'Reports the total number of orders, net revenue, the average order value, and the average number of items per order for a selected date range',
           icon: <FiShoppingBag size={20} />,
           color: '#3b82f6',
-          estimatedTime: '2-3 minutes'
+          estimatedTime: '2-3 minutes',
+          hasDateRange: true,
+          hasStatusFilter: true
         },
         {
           id: 'order-detailed',
           title: 'Detailed Order Report',
-          description: 'Filters order data for a given time period by order status.',
+          description: 'Advanced order filtering by status, products, and customer type.',
           details: 'Filters order data for a given time period by order status (i.e., pending and complete), product (orders with or without certain products), coupon codes (coupon codes were/were not used on orders), and new and returning customers.',
           icon: <FiBarChart2 size={20} />,
           color: '#8b5cf6',
-          estimatedTime: '3-4 minutes'
+          estimatedTime: '3-4 minutes',
+          hasDateRange: true,
+          hasStatusFilter: true
         }
       ]
     },
@@ -73,38 +87,42 @@ const ReportsPanel = () => {
         {
           id: 'product',
           title: 'Product Report',
-          description: 'Displays and compares sales information for a given time period by product',
-          details: 'Comprehensive product performance analysis including sales, revenue, and trends',
+          description: 'Product performance analysis with sales, revenue, and profit metrics',
+          details: 'Comprehensive product performance analysis including sales, revenue, profit margins, and trends',
           icon: <FiPackage size={20} />,
           color: '#f59e0b',
-          estimatedTime: '3-5 minutes'
+          estimatedTime: '3-5 minutes',
+          hasDateRange: true
         },
         {
           id: 'stock',
           title: 'Stock Report',
-          description: 'Displays the store\'s entire product catalog by stock status.',
+          description: 'Inventory status showing in-stock, low stock, and out-of-stock products.',
           details: 'Displays the store\'s entire product catalog by products that are in stock, low stock, and out of stock.',
           icon: <FiBarChart2 size={20} />,
           color: '#ef4444',
-          estimatedTime: '2-3 minutes'
+          estimatedTime: '2-3 minutes',
+          hasDateRange: false
         },
         {
           id: 'product-comparison',
           title: 'Product Comparison Report',
-          description: 'Performs highly customized analysis of sales data.',
+          description: 'Advanced product performance comparison and analysis.',
           details: 'Performs highly customized analysis of sales data by comparing the performance of different product/s and variation/s over a specified date range.',
           icon: <FiTrendingUp size={20} />,
           color: '#06b6d4',
-          estimatedTime: '4-6 minutes'
+          estimatedTime: '4-6 minutes',
+          hasDateRange: true
         },
         {
           id: 'category',
           title: 'Category Report',
-          description: 'Filters by all categories, single category, category comparison.',
+          description: 'Category-wise performance analysis and comparison.',
           details: 'Filters by all categories, a single category, category comparison, viewing top categories by items sold, and top categories by net revenue.',
           icon: <FiPieChart size={20} />,
           color: '#8b5cf6',
-          estimatedTime: '3-4 minutes'
+          estimatedTime: '3-4 minutes',
+          hasDateRange: true
         }
       ]
     },
@@ -114,11 +132,12 @@ const ReportsPanel = () => {
         {
           id: 'customers',
           title: 'Customers Report',
-          description: 'Displays Customer Data: Name, Sign Up date, Email, number of Orders.',
-          details: 'Displays Customer Data: Name, Sign Up date, Email, number of Orders, Lifetime Spend, Average Order Value, Last Purchase Date, and Country. Provides a look into all customer data for a store, listing all registered and unregistered customers along with pertinent data about each customer such as email address, number of orders, lifetime spend, and average order value.',
+          description: 'Complete customer analytics with lifetime value and behavior insights.',
+          details: 'Displays Customer Data: Name, Sign Up date, Email, number of Orders, Lifetime Spend, Average Order Value, Last Purchase Date, and Country. Provides comprehensive customer segmentation and analysis.',
           icon: <FiUsers size={20} />,
           color: '#10b981',
-          estimatedTime: '3-5 minutes'
+          estimatedTime: '3-5 minutes',
+          hasDateRange: true
         }
       ]
     },
@@ -128,11 +147,12 @@ const ReportsPanel = () => {
         {
           id: 'coupons',
           title: 'Coupons Report',
-          description: 'Compares multiple coupon codes to display usage and discounts.',
+          description: 'Coupon usage analysis and discount effectiveness.',
           details: 'Compares multiple coupon codes to display how many orders used coupons and the total amount discounted. Uses advanced filters to compare coupons, and a few preset filters to displays Top Coupons by Discounted Orders or Amount Discounted using preset filters',
           icon: <FiGift size={20} />,
           color: '#f59e0b',
-          estimatedTime: '2-3 minutes'
+          estimatedTime: '2-3 minutes',
+          hasDateRange: true
         }
       ]
     },
@@ -142,220 +162,333 @@ const ReportsPanel = () => {
         {
           id: 'downloads',
           title: 'Downloads Report',
-          description: 'Allows filtering of Downloads by product, username, order number.',
+          description: 'Download tracking and analysis.',
           details: 'Allows filtering of Downloads by product, username, order number, and IP address',
           icon: <FiDownload size={20} />,
           color: '#6b7280',
-          estimatedTime: '1-2 minutes'
+          estimatedTime: '1-2 minutes',
+          hasDateRange: true
         }
       ]
     }
   ];
 
-  const dateRangeOptions = [
-    { value: 'today', label: 'Today' },
-    { value: 'yesterday', label: 'Yesterday' },
-    { value: 'last7days', label: 'Last 7 Days' },
-    { value: 'last30days', label: 'Last 30 Days' },
-    { value: 'last90days', label: 'Last 90 Days' },
-    { value: 'thisMonth', label: 'This Month' },
-    { value: 'lastMonth', label: 'Last Month' },
-    { value: 'thisYear', label: 'This Year' },
-    { value: 'custom', label: 'Custom Range' }
-  ];
-
-  const handleGenerateReport = async (reportId) => {
+  const generateReport = async (reportId) => {
     setIsGenerating(true);
-    setSelectedReport(reportId);
-    
-    // Simulate report generation
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setIsGenerating(false);
-    
-    // In a real app, this would trigger the actual report generation and download
-    alert(`${reportCategories.flatMap(cat => cat.reports).find(r => r.id === reportId)?.title} has been generated and is ready for download!`);
+    try {
+      let reportData;
+      
+      switch (reportId) {
+        case 'revenue':
+          reportData = await reportsService.generateRevenueReport(dateRange);
+          break;
+        case 'orders':
+        case 'order-detailed':
+          reportData = await reportsService.generateOrdersReport(dateRange, orderStatus);
+          break;
+        case 'product':
+          reportData = await reportsService.generateProductsReport(dateRange);
+          break;
+        case 'customers':
+          reportData = await reportsService.generateCustomersReport(dateRange);
+          break;
+        case 'stock':
+          reportData = await reportsService.generateStockReport();
+          break;
+        default:
+          throw new Error('Report type not implemented yet');
+      }
+      
+      setGeneratedReports(prev => ({
+        ...prev,
+        [reportId]: reportData
+      }));
+      
+      setSelectedReport(reportId);
+    } catch (error) {
+      alert(`Error generating report: ${error.message}`);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const downloadReport = async (reportId) => {
+    setIsGenerating(true);
+    try {
+      switch (reportId) {
+        case 'revenue':
+          await reportsService.downloadRevenueReport(dateRange);
+          break;
+        case 'orders':
+        case 'order-detailed':
+          await reportsService.downloadOrdersReport(dateRange, orderStatus);
+          break;
+        case 'product':
+          await reportsService.downloadProductsReport(dateRange);
+          break;
+        case 'customers':
+          await reportsService.downloadCustomersReport(dateRange);
+          break;
+        case 'stock':
+          await reportsService.downloadStockReport();
+          break;
+        default:
+          throw new Error('Download not implemented for this report type');
+      }
+    } catch (error) {
+      alert(`Error downloading report: ${error.message}`);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const downloadAllReports = async () => {
+    setIsGenerating(true);
+    try {
+      await reportsService.downloadDashboardReport(dateRange);
+    } catch (error) {
+      alert(`Error downloading comprehensive report: ${error.message}`);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const ReportCard = ({ report }) => (
     <div 
-      className="bg-white p-6 rounded-lg border border-gray-200 hover:shadow-md transition-all duration-200 cursor-pointer group"
-      style={{
-        backgroundColor: 'var(--bg-primary)',
-        borderRadius: 'var(--rounded-lg)',
-        boxShadow: 'var(--shadow-small)'
+      className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+      style={{ 
+        borderColor: 'var(--border-primary)',
+        backgroundColor: 'var(--bg-primary)'
       }}
-      onClick={() => handleGenerateReport(report.id)}
     >
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex items-start justify-between mb-3">
         <div 
-          className="p-3 rounded-lg group-hover:scale-110 transition-transform duration-200"
-          style={{
-            backgroundColor: `${report.color}15`,
-            color: report.color
-          }}
+          className="w-10 h-10 rounded-lg flex items-center justify-center"
+          style={{ backgroundColor: `${report.color}20`, color: report.color }}
         >
           {report.icon}
         </div>
-        <div 
-          className="text-xs px-2 py-1 rounded-full bg-gray-100"
-          style={{ color: 'var(--text-secondary)' }}
-        >
-          {report.estimatedTime}
+        <div className="flex space-x-2">
+          <button
+            onClick={() => generateReport(report.id)}
+            disabled={isGenerating}
+            className="p-2 rounded-md border text-xs hover:bg-gray-50 transition-colors disabled:opacity-50"
+            style={{
+              borderColor: 'var(--border-primary)',
+              color: 'var(--text-primary)'
+            }}
+          >
+            {isGenerating ? <FiLoader className="animate-spin" size={14} /> : <FiEye size={14} />}
+          </button>
+          <button
+            onClick={() => downloadReport(report.id)}
+            disabled={isGenerating}
+            className="p-2 rounded-md border text-xs hover:bg-gray-50 transition-colors disabled:opacity-50"
+            style={{
+              borderColor: 'var(--border-primary)',
+              color: 'var(--text-primary)'
+            }}
+          >
+            {isGenerating ? <FiLoader className="animate-spin" size={14} /> : <FiDownload size={14} />}
+          </button>
         </div>
       </div>
-
+      
       <h3 
-        className="text-lg font-semibold mb-2 group-hover:text-blue-600 transition-colors"
+        className="font-semibold mb-2"
         style={{ color: 'var(--text-primary)' }}
       >
         {report.title}
       </h3>
       
       <p 
-        className="text-sm mb-3 line-clamp-2"
+        className="text-sm mb-3"
         style={{ color: 'var(--text-secondary)' }}
       >
         {report.description}
       </p>
       
-      <p 
-        className="text-xs mb-4 line-clamp-3"
-        style={{ color: 'var(--text-secondary)' }}
-      >
-        {report.details}
-      </p>
-
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
-          <FiEye size={12} />
-          <span>View Details</span>
-        </div>
-        
-        <button
-          className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-            isGenerating && selectedReport === report.id
-              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-              : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
-          }`}
-          disabled={isGenerating && selectedReport === report.id}
+      <div className="text-xs">
+        <div 
+          className="flex items-center justify-between mb-2"
+          style={{ color: 'var(--text-secondary)' }}
         >
-          {isGenerating && selectedReport === report.id ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-gray-600"></div>
-              <span>Generating...</span>
-            </>
-          ) : (
-            <>
-              <FiDownload size={14} />
-              <span>Generate</span>
-            </>
+          <span>Estimated time: {report.estimatedTime}</span>
+          {generatedReports[report.id] && (
+            <span className="text-green-600 font-medium">Generated ✓</span>
           )}
-        </button>
+        </div>
       </div>
     </div>
   );
 
   return (
-    <div 
-      className="bg-white p-6 rounded-lg shadow-md"
-      style={{
-        backgroundColor: 'var(--bg-primary)',
-        borderRadius: 'var(--rounded-lg)',
-        boxShadow: 'var(--shadow-medium)'
-      }}
-    >
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+      <div className="flex justify-between items-center">
         <div>
           <h2 
-            className="text-xl font-bold mb-1"
+            className="text-xl font-semibold mb-2"
             style={{ color: 'var(--text-primary)' }}
           >
-            Reports Dashboard
+            Business Reports
           </h2>
           <p 
             className="text-sm"
             style={{ color: 'var(--text-secondary)' }}
           >
-            Generate comprehensive business reports and analytics
+            Generate comprehensive business reports for analysis and compliance
           </p>
         </div>
+        <button
+          onClick={downloadAllReports}
+          disabled={isGenerating}
+          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+        >
+          {isGenerating ? (
+            <FiLoader className="animate-spin" size={16} />
+          ) : (
+            <FiDownload size={16} />
+          )}
+          <span>Download All Reports</span>
+        </button>
+      </div>
 
-        {/* Date Range Selector */}
-        <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-2">
-            <FiCalendar size={16} style={{ color: 'var(--text-secondary)' }} />
-            <select
-              value={dateRange}
-              onChange={(e) => setDateRange(e.target.value)}
-              className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              style={{
-                borderColor: 'var(--border-primary)',
-                backgroundColor: 'var(--bg-primary)',
-                color: 'var(--text-primary)'
-              }}
-            >
-              {dateRangeOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
+      {/* Filters */}
+      <div className="flex flex-wrap gap-4 p-4 bg-gray-50 rounded-lg border"
+           style={{ 
+             backgroundColor: 'var(--bg-secondary)',
+             borderColor: 'var(--border-primary)'
+           }}>
+        <div className="flex items-center space-x-2">
+          <FiCalendar size={16} style={{ color: 'var(--text-secondary)' }} />
+          <label 
+            className="text-sm font-medium"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            Date Range:
+          </label>
+          <select
+            value={dateRange}
+            onChange={(e) => setDateRange(e.target.value)}
+            className="border rounded px-3 py-1 text-sm"
+            style={{
+              borderColor: 'var(--border-primary)',
+              backgroundColor: 'var(--bg-primary)',
+              color: 'var(--text-primary)'
+            }}
+          >
+            {dateRangeOptions.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <FiFilter size={16} style={{ color: 'var(--text-secondary)' }} />
+          <label 
+            className="text-sm font-medium"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            Order Status:
+          </label>
+          <select
+            value={orderStatus}
+            onChange={(e) => setOrderStatus(e.target.value)}
+            className="border rounded px-3 py-1 text-sm"
+            style={{
+              borderColor: 'var(--border-primary)',
+              backgroundColor: 'var(--bg-primary)',
+              color: 'var(--text-primary)'
+            }}
+          >
+            {orderStatusOptions.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
       {/* Report Categories */}
-      <div className="space-y-8">
-        {reportCategories.map((category, categoryIndex) => (
-          <div key={categoryIndex}>
-            <h3 
-              className="text-lg font-semibold mb-4 flex items-center"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              <div 
-                className="w-1 h-6 rounded-full mr-3"
-                style={{ backgroundColor: 'var(--brand-primary)' }}
-              ></div>
-              {category.title}
-            </h3>
+      {reportCategories.map((category, index) => (
+        <div key={index} className="space-y-4">
+          <h3 
+            className="text-lg font-semibold border-b pb-2"
+            style={{ 
+              color: 'var(--text-primary)',
+              borderColor: 'var(--border-primary)'
+            }}
+          >
+            {category.title}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {category.reports.map((report) => (
+              <ReportCard key={report.id} report={report} />
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {/* Report Details Modal */}
+      {selectedReport && generatedReports[selectedReport] && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div 
+            className="bg-white rounded-lg p-6 max-w-4xl max-h-[80vh] overflow-y-auto"
+            style={{ 
+              backgroundColor: 'var(--bg-primary)',
+              color: 'var(--text-primary)'
+            }}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold">
+                {reportCategories
+                  .flatMap(cat => cat.reports)
+                  .find(r => r.id === selectedReport)?.title}
+              </h3>
+              <button
+                onClick={() => setSelectedReport(null)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {category.reports.map((report) => (
-                <ReportCard key={report.id} report={report} />
-              ))}
+            <div className="space-y-4">
+              <pre className="bg-gray-100 p-4 rounded text-sm overflow-x-auto"
+                   style={{ 
+                     backgroundColor: 'var(--bg-secondary)',
+                     color: 'var(--text-primary)'
+                   }}>
+                {JSON.stringify(generatedReports[selectedReport], null, 2)}
+              </pre>
+              
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => downloadReport(selectedReport)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                >
+                  <FiDownload size={16} />
+                  <span>Download CSV</span>
+                </button>
+                <button
+                  onClick={() => setSelectedReport(null)}
+                  className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                  style={{
+                    borderColor: 'var(--border-primary)',
+                    color: 'var(--text-primary)'
+                  }}
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
-        ))}
-      </div>
-
-      {/* Quick Actions */}
-      <div 
-        className="mt-8 p-4 bg-gray-50 rounded-lg"
-        style={{ backgroundColor: 'var(--bg-secondary)' }}
-      >
-        <h4 
-          className="font-semibold mb-3"
-          style={{ color: 'var(--text-primary)' }}
-        >
-          Quick Actions
-        </h4>
-        <div className="flex flex-wrap gap-2">
-          <button className="flex items-center space-x-2 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm">
-            <FiBarChart2 size={14} />
-            <span>Schedule Reports</span>
-          </button>
-          <button className="flex items-center space-x-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-sm">
-            <FiDownload size={14} />
-            <span>Export All Data</span>
-          </button>
-          <button className="flex items-center space-x-2 px-3 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm">
-            <FiFilter size={14} />
-            <span>Custom Report Builder</span>
-          </button>
         </div>
-      </div>
+      )}
     </div>
   );
 };

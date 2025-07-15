@@ -642,7 +642,7 @@ const ProductFilter = ({
                     {Array.from({ length: 5 }, (_, i) => (
                       <span key={i} className="text-lg">
                         {i < rating ? (
-                          <span style={{ color: "#FF9017" }}>★</span>
+                          <span style={{ color: "var(--warning-color)" }}>★</span>
                         ) : (
                           <span style={{ color: "#E4E5E8" }}>★</span>
                         )}

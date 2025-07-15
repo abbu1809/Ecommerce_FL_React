@@ -9,68 +9,93 @@ import {
 } from 'react-icons/fi';
 
 const BusinessAnalyticsWidget = ({ analytics }) => {
+  // Provide default values if analytics is null or undefined
+  const safeAnalytics = analytics || {
+    totalRevenue: 0,
+    totalRevenueChange: '+0.0%',
+    netRevenue: 0,
+    netRevenueChange: '+0.0%',
+    grossProfit: 0,
+    grossProfitChange: '+0.0%',
+    operatingCosts: 0,
+    operatingCostsChange: '+0.0%',
+    conversionRate: 0,
+    conversionRateChange: '+0.0%',
+    averageOrderValue: 0,
+    averageOrderValueChange: '+0.0%',
+    customersAcquired: 0,
+    customersAcquiredChange: '+0.0%',
+    customerRetentionRate: 0,
+    customerRetentionRateChange: '+0.0%',
+    returnRate: 0,
+    returnRateChange: '+0.0%',
+    customerAcquisitionCost: 0,
+    customerAcquisitionCostChange: '+0.0%'
+  };
+
   const metrics = [
     {
       title: 'Total Revenue',
-      value: `$${analytics.totalRevenue.toLocaleString()}`,
-      change: analytics.totalRevenueChange,
+      value: `$${safeAnalytics.totalRevenue.toLocaleString()}`,
+      change: safeAnalytics.totalRevenueChange,
       icon: <FiDollarSign size={24} />,
-      color: '#f59e0b'
+      color: 'var(--brand-primary)'
     },
     {
       title: 'Net Revenue',
-      value: `$${analytics.netRevenue.toLocaleString()}`,
-      change: analytics.netRevenueChange,
+      value: `$${safeAnalytics.netRevenue.toLocaleString()}`,
+      change: safeAnalytics.netRevenueChange,
       icon: <FiBarChart2 size={24} />,
       color: '#10b981'
     },
     {
       title: 'Gross Profit',
-      value: `$${analytics.grossProfit.toLocaleString()}`,
-      change: analytics.grossProfitChange,
+      value: `$${safeAnalytics.grossProfit.toLocaleString()}`,
+      change: safeAnalytics.grossProfitChange,
       icon: <FiTrendingUp size={24} />,
       color: '#3b82f6'
     },
     {
       title: 'Operating Costs',
-      value: `$${analytics.operatingCosts.toLocaleString()}`,
-      change: analytics.operatingCostsChange,
+      value: `$${safeAnalytics.operatingCosts.toLocaleString()}`,
+      change: safeAnalytics.operatingCostsChange,
       icon: <FiPieChart size={24} />,
       color: '#ef4444'
     },
     {
       title: 'Conversion Rate',
-      value: `${analytics.conversionRate}%`,
-      change: analytics.conversionRateChange,
+      value: `${safeAnalytics.conversionRate}%`,
+      change: safeAnalytics.conversionRateChange,
       icon: <FiPercent size={24} />,
       color: '#8b5cf6'
     },
     {
       title: 'Avg Order Value',
-      value: `$${analytics.averageOrderValue}`,
-      change: analytics.averageOrderValueChange,
+      value: `$${safeAnalytics.averageOrderValue}`,
+      change: safeAnalytics.averageOrderValueChange,
       icon: <FiDollarSign size={24} />,
-      color: '#f59e0b'
+      color: 'var(--brand-primary)'
     },
     {
       title: 'Return Rate',
-      value: `${analytics.returnRate}%`,
-      change: analytics.returnRateChange,
+      value: `${safeAnalytics.returnRate || 0}%`,
+      change: safeAnalytics.returnRateChange || 0,
       icon: <FiTrendingDown size={24} />,
       color: '#ef4444'
     },
     {
       title: 'Customer Acq. Cost',
-      value: `$${analytics.customerAcquisitionCost}`,
-      change: analytics.customerAcquisitionCostChange,
+      value: `$${safeAnalytics.customerAcquisitionCost || 0}`,
+      change: safeAnalytics.customerAcquisitionCostChange || '+0.0%',
       icon: <FiDollarSign size={24} />,
       color: '#06b6d4'
     }
   ];
 
   const MetricCard = ({ title, value, change, icon, color }) => {
-    const isPositive = change.startsWith('+');
-    const isNegative = change.startsWith('-');
+    const safeChange = change || '+0.0%';
+    const isPositive = safeChange.toString().startsWith('+');
+    const isNegative = safeChange.toString().startsWith('-');
     const isGoodChange = (title.includes('Cost') || title.includes('Return')) ? isNegative : isPositive;
 
     return (
@@ -97,7 +122,7 @@ const BusinessAnalyticsWidget = ({ analytics }) => {
               isGoodChange ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
             }`}
           >
-            {change}
+            {safeChange}
           </div>
         </div>
         <div>

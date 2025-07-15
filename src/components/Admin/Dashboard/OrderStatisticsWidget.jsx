@@ -11,69 +11,89 @@ import {
 } from 'react-icons/fi';
 
 const OrderStatisticsWidget = ({ statistics }) => {
+  // Add null safety with comprehensive default values
+  const safeStatistics = statistics || {
+    totalOrders: 0,
+    totalOrdersChange: '+0.0%',
+    pendingOrders: 0,
+    pendingOrdersChange: '+0.0%',
+    processingOrders: 0,
+    processingOrdersChange: '+0.0%',
+    shippedOrders: 0,
+    shippedOrdersChange: '+0.0%',
+    deliveredOrders: 0,
+    deliveredOrdersChange: '+0.0%',
+    cancelledOrders: 0,
+    cancelledOrdersChange: '+0.0%',
+    returnedOrders: 0,
+    returnedOrdersChange: '+0.0%',
+    refundedOrders: 0,
+    refundedOrdersChange: '+0.0%'
+  };
+
   const orderMetrics = [
     {
       title: 'Total Orders',
-      value: statistics.totalOrders.toLocaleString(),
-      change: statistics.totalOrdersChange,
+      value: (safeStatistics.totalOrders || 0).toLocaleString(),
+      change: safeStatistics.totalOrdersChange || '+0.0%',
       icon: <FiShoppingBag size={20} />,
-      color: '#f59e0b',
+      color: 'var(--brand-primary)',
       description: 'All orders placed'
     },
     {
       title: 'Pending',
-      value: statistics.pendingOrders.toString(),
-      change: statistics.pendingOrdersChange,
+      value: (safeStatistics.pendingOrders || 0).toString(),
+      change: safeStatistics.pendingOrdersChange || '+0.0%',
       icon: <FiClock size={20} />,
-      color: '#f59e0b',
+      color: 'var(--warning-color)',
       description: 'Awaiting processing'
     },
     {
       title: 'Processing',
-      value: statistics.processingOrders.toString(),
-      change: statistics.processingOrdersChange,
+      value: (safeStatistics.processingOrders || 0).toString(),
+      change: safeStatistics.processingOrdersChange || '+0.0%',
       icon: <FiRefreshCw size={20} />,
-      color: '#3b82f6',
+      color: 'var(--brand-secondary)',
       description: 'Being prepared'
     },
     {
       title: 'Shipped',
-      value: statistics.shippedOrders.toString(),
-      change: statistics.shippedOrdersChange,
+      value: (safeStatistics.shippedOrders || 0).toString(),
+      change: safeStatistics.shippedOrdersChange || '+0.0%',
       icon: <FiTruck size={20} />,
-      color: '#8b5cf6',
+      color: 'var(--accent-color)',
       description: 'On the way'
     },
     {
       title: 'Delivered',
-      value: statistics.deliveredOrders.toString(),
-      change: statistics.deliveredOrdersChange,
+      value: (safeStatistics.deliveredOrders || 0).toString(),
+      change: safeStatistics.deliveredOrdersChange || '+0.0%',
       icon: <FiCheckCircle size={20} />,
-      color: '#10b981',
+      color: 'var(--success-color)',
       description: 'Successfully delivered'
     },
     {
       title: 'Cancelled',
-      value: statistics.cancelledOrders.toString(),
-      change: statistics.cancelledOrdersChange,
+      value: (safeStatistics.cancelledOrders || 0).toString(),
+      change: safeStatistics.cancelledOrdersChange || '+0.0%',
       icon: <FiXCircle size={20} />,
-      color: '#ef4444',
+      color: 'var(--error-color)',
       description: 'Cancelled by customer'
     },
     {
       title: 'Returned',
-      value: statistics.returnedOrders.toString(),
-      change: statistics.returnedOrdersChange,
+      value: (safeStatistics.returnedOrders || 0).toString(),
+      change: safeStatistics.returnedOrdersChange || '+0.0%',
       icon: <FiRotateCcw size={20} />,
-      color: '#f59e0b',
+      color: 'var(--warning-color)',
       description: 'Returned items'
     },
     {
       title: 'Refunded',
-      value: statistics.refundedOrders.toString(),
-      change: statistics.refundedOrdersChange,
+      value: (safeStatistics.refundedOrders || 0).toString(),
+      change: safeStatistics.refundedOrdersChange || '+0.0%',
       icon: <FiPackage size={20} />,
-      color: '#6b7280',
+      color: 'var(--text-secondary)',
       description: 'Refund processed'
     }
   ];
@@ -139,8 +159,11 @@ const OrderStatisticsWidget = ({ statistics }) => {
   };
 
   // Calculate percentages for the summary
-  const totalOrders = statistics.totalOrders;
-  const getPercentage = (value) => ((value / totalOrders) * 100).toFixed(1);
+  const totalOrders = safeStatistics.totalOrders || 1; // Avoid division by zero
+  const getPercentage = (value) => {
+    const safeValue = value || 0;
+    return ((safeValue / totalOrders) * 100).toFixed(1);
+  };
 
   return (
     <div 
@@ -172,7 +195,7 @@ const OrderStatisticsWidget = ({ statistics }) => {
         >
           <div className="text-xs">Success Rate</div>
           <div className="text-lg font-bold" style={{ color: 'var(--success-color)' }}>
-            {getPercentage(statistics.deliveredOrders)}%
+            {getPercentage(safeStatistics.deliveredOrders)}%
           </div>
         </div>
       </div>
@@ -193,19 +216,19 @@ const OrderStatisticsWidget = ({ statistics }) => {
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-green-500 rounded-full"></div>
               <span style={{ color: 'var(--text-secondary)' }}>
-                Completed: {getPercentage(statistics.deliveredOrders)}%
+                Completed: {getPercentage(safeStatistics.deliveredOrders)}%
               </span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
               <span style={{ color: 'var(--text-secondary)' }}>
-                In Progress: {getPercentage(statistics.processingOrders + statistics.shippedOrders)}%
+                In Progress: {getPercentage((safeStatistics.processingOrders || 0) + (safeStatistics.shippedOrders || 0))}%
               </span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-red-500 rounded-full"></div>
               <span style={{ color: 'var(--text-secondary)' }}>
-                Issues: {getPercentage(statistics.cancelledOrders + statistics.returnedOrders)}%
+                Issues: {getPercentage((safeStatistics.cancelledOrders || 0) + (safeStatistics.returnedOrders || 0))}%
               </span>
             </div>
           </div>

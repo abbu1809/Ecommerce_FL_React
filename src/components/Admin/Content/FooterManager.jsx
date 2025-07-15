@@ -277,7 +277,11 @@ const FooterManager = () => {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => handleLinkToggle(section, linkIndex)}
-              className="p-1 rounded-full hover:bg-gray-100"
+              className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 theme-hover-fix"
+              style={{
+                backgroundColor: 'transparent',
+                transition: 'background-color 0.2s ease'
+              }}
             >
               {link.enabled ? (
                 <FiToggleRight className="text-green-500" size={20} />
@@ -287,13 +291,13 @@ const FooterManager = () => {
             </button>
             <button
               onClick={() => handleEditLink(section, linkIndex)}
-              className="p-1 rounded-full hover:bg-gray-100 text-blue-600"
+              className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 theme-hover-fix text-blue-600"
             >
               <FiEdit2 size={16} />
             </button>
             <button
               onClick={() => handleDeleteLink(section, linkIndex)}
-              className="p-1 rounded-full hover:bg-gray-100 text-red-600"
+              className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 theme-hover-fix text-red-600"
             >
               <FiTrash2 size={16} />
             </button>
@@ -643,9 +647,11 @@ const FooterManager = () => {
               </div>
             </div>
             <div className="space-y-3">
-              {links.map((link, index) =>
-                renderLinkEditor(sectionKey, index, link)
-              )}
+              {links.map((link, index) => (
+                <div key={`${sectionKey}-${index}`}>
+                  {renderLinkEditor(sectionKey, index, link)}
+                </div>
+              ))}
               {links.length === 0 && (
                 <p className="text-gray-500 text-center py-8">
                   No links in this section. Add some links to get started.
@@ -796,7 +802,7 @@ const AddLinkModal = ({
           <h3 className="text-lg font-medium">Add New Link</h3>
           <button
             onClick={onClose}
-            className="p-1 rounded-full hover:bg-gray-100"
+            className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 theme-hover-fix"
           >
             <FiX size={20} />
           </button>

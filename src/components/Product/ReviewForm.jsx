@@ -54,7 +54,7 @@ const ReviewForm = ({ productId, onReviewSubmitted }) => {
     return (
       <div className="bg-gray-50 p-6 rounded-lg text-center">
         <p className="text-gray-600 mb-4">Please log in to write a review</p>
-        <button className="text-orange-500 hover:text-orange-600 font-medium">
+        <button className="text-brand-primary hover:text-brand-primary-hover font-medium">
           Log In
         </button>
       </div>
@@ -111,7 +111,7 @@ const ReviewForm = ({ productId, onReviewSubmitted }) => {
           onChange={(e) => setComment(e.target.value)}
           placeholder="Share your thoughts about this product..."
           rows={4}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
           maxLength={1000}
         />
         <p className="text-sm text-gray-500 mt-1">
@@ -123,7 +123,7 @@ const ReviewForm = ({ productId, onReviewSubmitted }) => {
       <button
         type="submit"
         disabled={reviewLoading || rating === 0}
-        className="w-full bg-orange-500 text-white py-2 px-4 rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-brand-primary text-white py-2 px-4 rounded-md hover:bg-brand-primary-hover focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {reviewLoading ? (
           <div className="flex items-center justify-center">

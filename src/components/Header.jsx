@@ -922,9 +922,21 @@ const Header = () => {
                 <button
                   onClick={() => handleDropdownClick(category.id)}
                   onKeyDown={(e) => handleDropdownKeyDown(e, category.id)}
-                  className="text-sm font-semibold transition-all duration-300 relative group py-2 px-3 hover:text-orange-600 flex items-center rounded-lg hover:bg-gradient-to-r hover:from-orange-50 hover:to-red-50 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
+                  className="text-sm font-semibold transition-all duration-300 relative group py-2 px-3 flex items-center rounded-lg transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-opacity-50"
                   style={{
                     color: "var(--text-primary)",
+                    ":hover": {
+                      color: "var(--brand-primary)",
+                      backgroundColor: "var(--bg-accent-light)"
+                    }
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.color = 'var(--brand-primary)';
+                    e.target.style.backgroundColor = 'var(--bg-accent-light)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.color = 'var(--text-primary)';
+                    e.target.style.backgroundColor = 'transparent';
                   }}
                   aria-expanded={activeDropdown === category.id}
                   aria-haspopup="true"
@@ -948,7 +960,7 @@ const Header = () => {
                     />
                   </svg>
                   <span
-                    className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-1 bg-gradient-to-r from-orange-500 to-red-500 transition-all duration-300 group-hover:w-3/4 rounded-full shadow-lg"
+                    className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-1 transition-all duration-300 group-hover:w-3/4 rounded-full shadow-lg"
                     style={{
                       backgroundColor: "var(--brand-primary)",
                     }}
@@ -961,14 +973,22 @@ const Header = () => {
             <li className="whitespace-nowrap px-3">
               <Link
                 to="/products"
-                className="text-sm font-semibold transition-all duration-300 relative group py-2 px-3 hover:text-orange-600 rounded-lg hover:bg-gradient-to-r hover:from-orange-50 hover:to-red-50 transform hover:scale-105"
+                className="text-sm font-semibold transition-all duration-300 relative group py-2 px-3 rounded-lg transform hover:scale-105"
                 style={{
                   color: "var(--text-primary)",
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.color = 'var(--brand-primary)';
+                  e.target.style.backgroundColor = 'var(--bg-accent-light)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.color = 'var(--text-primary)';
+                  e.target.style.backgroundColor = 'transparent';
                 }}
               >
                 <span className="relative z-10">Browse All</span>
                 <span
-                  className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-1 bg-gradient-to-r from-orange-500 to-red-500 transition-all duration-300 group-hover:w-3/4 rounded-full shadow-lg"
+                  className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-1 transition-all duration-300 group-hover:w-3/4 rounded-full shadow-lg"
                   style={{
                     backgroundColor: "var(--brand-primary)",
                   }}
@@ -981,7 +1001,7 @@ const Header = () => {
             <div
               className="absolute bg-white shadow-lg border-t-2"
               style={{
-                backgroundColor: "#ffffff",
+                backgroundColor: "var(--bg-primary)",
                 borderTopColor: "var(--brand-primary)",
                 borderTopWidth: "2px",
                 boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)",
@@ -993,7 +1013,7 @@ const Header = () => {
                 maxWidth: "1200px",
                 marginTop: "-1px",
                 borderRadius: "0 0 8px 8px",
-                border: "1px solid #e5e7eb",
+                border: "1px solid var(--border-primary)",
               }}
               onMouseEnter={() => handleDropdownEnter(activeDropdown)}
               onMouseLeave={handleDropdownLeave}
@@ -1027,16 +1047,16 @@ const Header = () => {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-12 gap-6 h-full min-h-[340px]">
-                        {/* Left side - Categories like Poorvika (8 columns) */}
-                        <div className="col-span-8 grid grid-cols-3 gap-6">
+                      <div className="grid grid-cols-12 gap-4 h-full min-h-[340px]">
+                        {/* Left side - Categories with reduced spacing (8 columns) */}
+                        <div className="col-span-8 grid grid-cols-3 gap-4 pr-2">
                           {activeCategory.subcategories.map((subcategory, index) => (
-                            <div key={index} className="space-y-3">
+                            <div key={index} className="space-y-2">
                               <h3 
-                                className="font-semibold text-sm mb-3 pb-2"
+                                className="font-semibold text-sm mb-2 pb-1 border-b"
                                 style={{ 
                                   color: "var(--text-primary)",
-                                  borderBottom: "1px solid var(--border-primary)"
+                                  borderColor: "var(--border-primary)"
                                 }}
                               >
                                 {subcategory.title}
@@ -1046,13 +1066,13 @@ const Header = () => {
                                   <li key={itemIndex}>
                                     <Link
                                       to={item.path}
-                                      className="text-sm transition-colors block py-1 rounded px-2"
+                                      className="text-sm transition-colors block py-1 px-2 rounded hover:bg-opacity-50"
                                       style={{ 
                                         color: "var(--text-secondary)"
                                       }}
                                       onMouseEnter={(e) => {
                                         e.target.style.color = 'var(--brand-primary)';
-                                        e.target.style.backgroundColor = 'var(--bg-secondary)';
+                                        e.target.style.backgroundColor = 'var(--bg-accent-light)';
                                       }}
                                       onMouseLeave={(e) => {
                                         e.target.style.color = 'var(--text-secondary)';
@@ -1069,8 +1089,8 @@ const Header = () => {
                           ))}
                         </div>
                         
-                        {/* Right side - Two banners stacked vertically like Poorvika (4 columns) */}
-                        <div className="col-span-4 pl-6" style={{ borderLeft: "1px solid var(--border-primary)" }}>
+                        {/* Right side - Banners with reduced spacing (4 columns) */}
+                        <div className="col-span-4 pl-4 border-l" style={{ borderColor: "var(--border-primary)" }}>
                           {(() => {
                             // Get admin-managed banners for this category
                             const adminBanners = getDropdownBanners(activeCategory.name);
@@ -1085,8 +1105,8 @@ const Header = () => {
                             }
                             
                             return (
-                              <div className="space-y-3">
-                                {/* Two banners stacked vertically like Poorvika */}
+                              <div className="space-y-4">
+                                {/* Two banners stacked vertically with proper aspect ratio */}
                                 {banners.slice(0, 2).map((banner, bannerIndex) => (
                                   <Link
                                     key={bannerIndex}
@@ -1094,7 +1114,9 @@ const Header = () => {
                                     className="block relative rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
                                     onClick={() => setActiveDropdown(null)}
                                   >
-                                    <div className="aspect-[16/9] w-full bg-gradient-to-br from-orange-500 to-red-500 relative">
+                                    <div className="aspect-[16/10] w-full relative" style={{
+                                      background: `linear-gradient(to bottom right, var(--brand-primary), var(--brand-primary-hover))`
+                                    }}>
                                       <img
                                         src={banner.image || banner.imageUrl}
                                         alt={banner.title}
@@ -1104,7 +1126,12 @@ const Header = () => {
                                         }}
                                       />
                                       {/* Enhanced fallback with banner-like design */}
-                                      <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white">
+                                      <div 
+                                        className="absolute inset-0 flex items-center justify-center text-white"
+                                        style={{
+                                          background: `linear-gradient(to bottom right, var(--brand-primary), var(--brand-primary-hover))`
+                                        }}
+                                      >
                                         <div className="text-center p-4">
                                           <div className="text-lg font-bold mb-2">
                                             {banner.title || 'Smart TVs'}

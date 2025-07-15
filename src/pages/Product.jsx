@@ -81,7 +81,7 @@ const Product = () => {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary mx-auto mb-4"></div>
               <p className="text-gray-600">Loading product...</p>
             </div>
           </div>
@@ -100,7 +100,7 @@ const Product = () => {
               <p className="text-red-600 mb-4">{error}</p>
               <button
                 onClick={() => fetchProduct(id)}
-                className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600"
+                className="bg-brand-primary text-white px-4 py-2 rounded-lg hover:bg-brand-primary-hover"
               >
                 Retry
               </button>
@@ -121,7 +121,7 @@ const Product = () => {
               <p className="text-gray-600 mb-4">Product not found</p>
               <Link
                 to={ROUTES.PRODUCTS}
-                className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600"
+                className="bg-brand-primary text-white px-4 py-2 rounded-lg hover:bg-brand-primary-hover"
               >
                 Back to Products
               </Link>
@@ -336,7 +336,7 @@ const Product = () => {
 
         <Link
           to={ROUTES.PRODUCTS}
-          className="inline-flex items-center text-orange-500 mb-6"
+          className="inline-flex items-center text-brand-primary mb-6"
         >
           <FiArrowLeft className="mr-2" /> Back to Products
         </Link>
