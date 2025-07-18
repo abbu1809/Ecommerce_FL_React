@@ -12,7 +12,7 @@ import {
   FiMapPin
 } from 'react-icons/fi';
 
-const TopDeliveryMenWidget = ({ deliveryMen }) => {
+const TopDeliveryMenWidget = ({ deliveryMen = [] }) => {
   const [showAll, setShowAll] = useState(false);
   const [sortBy, setSortBy] = useState('totalDeliveries');
   
@@ -24,12 +24,12 @@ const TopDeliveryMenWidget = ({ deliveryMen }) => {
     { value: 'onTimeDeliveryRate', label: 'On-Time Rate' }
   ];
 
-  const sortedDeliveryMen = [...deliveryMen].sort((a, b) => {
+  const sortedDeliveryMen = deliveryMen && deliveryMen.length > 0 ? [...deliveryMen].sort((a, b) => {
     if (sortBy === 'totalEarnings') {
-      return b.totalEarnings - a.totalEarnings;
+      return (b.totalEarnings || b.total_earnings || 0) - (a.totalEarnings || a.total_earnings || 0);
     }
-    return b[sortBy] - a[sortBy];
-  });
+    return (b[sortBy] || b[sortBy.replace(/([A-Z])/g, '_$1').toLowerCase()] || 0) - (a[sortBy] || a[sortBy.replace(/([A-Z])/g, '_$1').toLowerCase()] || 0);
+  }) : [];
 
   const displayDeliveryMen = showAll ? sortedDeliveryMen : sortedDeliveryMen.slice(0, 5);
 
@@ -96,13 +96,13 @@ const TopDeliveryMenWidget = ({ deliveryMen }) => {
                   className="text-xs font-medium"
                   style={{ color: 'var(--text-primary)' }}
                 >
-                  {deliveryMan.averageRating}
+                  {deliveryMan.averageRating || deliveryMan.average_rating || '0.0'}
                 </span>
                 <span 
                   className="text-xs"
                   style={{ color: 'var(--text-secondary)' }}
                 >
-                  ({deliveryMan.totalDeliveries})
+                  ({deliveryMan.totalDeliveries || deliveryMan.total_deliveries || 0})
                 </span>
               </div>
             </div>
@@ -123,7 +123,7 @@ const TopDeliveryMenWidget = ({ deliveryMen }) => {
               className="text-lg font-bold"
               style={{ color: 'var(--text-primary)' }}
             >
-              {deliveryMan.thisMonthDeliveries}
+              {deliveryMan.thisMonthDeliveries || deliveryMan.this_month_deliveries || 0}
             </div>
             <div 
               className="text-xs"
@@ -136,9 +136,9 @@ const TopDeliveryMenWidget = ({ deliveryMen }) => {
           <div className="text-center">
             <div 
               className="text-lg font-bold"
-              style={{ color: getPerformanceColor(deliveryMan.successRate) }}
+              style={{ color: getPerformanceColor(deliveryMan.successRate || deliveryMan.success_rate || 0) }}
             >
-              {deliveryMan.successRate}%
+              {deliveryMan.successRate || deliveryMan.success_rate || 0}%
             </div>
             <div 
               className="text-xs"
@@ -155,9 +155,9 @@ const TopDeliveryMenWidget = ({ deliveryMen }) => {
             <span style={{ color: 'var(--text-secondary)' }}>On-Time Delivery</span>
             <span 
               className="font-medium"
-              style={{ color: getPerformanceColor(deliveryMan.onTimeDeliveryRate) }}
+              style={{ color: getPerformanceColor(deliveryMan.onTimeDeliveryRate || deliveryMan.on_time_delivery_rate || 0) }}
             >
-              {deliveryMan.onTimeDeliveryRate}%
+              {deliveryMan.onTimeDeliveryRate || deliveryMan.on_time_delivery_rate || 0}%
             </span>
           </div>
           
@@ -169,7 +169,7 @@ const TopDeliveryMenWidget = ({ deliveryMen }) => {
                 className="font-medium"
                 style={{ color: 'var(--text-primary)' }}
               >
-                {deliveryMan.customerFeedback}
+                {deliveryMan.customerFeedback || deliveryMan.customer_feedback || '0.0'}
               </span>
             </div>
           </div>
@@ -179,7 +179,7 @@ const TopDeliveryMenWidget = ({ deliveryMen }) => {
             <span 
               className="font-medium text-green-600"
             >
-              ${deliveryMan.totalEarnings.toLocaleString()}
+              ₹{(deliveryMan.totalEarnings || deliveryMan.total_earnings || 0).toLocaleString()}
             </span>
           </div>
           
@@ -189,7 +189,7 @@ const TopDeliveryMenWidget = ({ deliveryMen }) => {
               className="font-medium"
               style={{ color: 'var(--text-primary)' }}
             >
-              {deliveryMan.activeHours}h
+              {deliveryMan.activeHours || deliveryMan.active_hours || 8}h
             </span>
           </div>
         </div>
@@ -263,13 +263,18 @@ const TopDeliveryMenWidget = ({ deliveryMen }) => {
 
       {/* Delivery Men List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {displayDeliveryMen.map((deliveryMan, index) => (
-          <DeliveryManCard key={deliveryMan.id} deliveryMan={deliveryMan} index={index} />
-        ))}
+        {deliveryMen && deliveryMen.length > 0 ? displayDeliveryMen.map((deliveryMan, index) => (
+          <DeliveryManCard key={deliveryMan.id || deliveryMan.delivery_man_id || deliveryMan.partner_id || index} deliveryMan={deliveryMan} index={index} />
+        )) : (
+          <div className="text-center py-8 text-gray-500 col-span-full">
+            <FiTruck size={48} className="mx-auto mb-4 opacity-50" />
+            <p>No delivery personnel data available</p>
+          </div>
+        )}
       </div>
 
       {/* Show More/Less Button */}
-      {deliveryMen.length > 5 && (
+      {deliveryMen && deliveryMen.length > 5 && (
         <div className="mt-6 text-center">
           <button 
             onClick={() => setShowAll(!showAll)}
@@ -292,7 +297,10 @@ const TopDeliveryMenWidget = ({ deliveryMen }) => {
               className="text-lg font-bold"
               style={{ color: 'var(--text-primary)' }}
             >
-              {deliveryMen.reduce((sum, dm) => sum + dm.totalDeliveries, 0).toLocaleString()}
+              {deliveryMen && deliveryMen.length > 0 ? 
+                deliveryMen.reduce((sum, dm) => sum + (dm.totalDeliveries || dm.total_deliveries || 0), 0).toLocaleString()
+                : '0'
+              }
             </div>
             <div 
               className="text-xs"
@@ -305,7 +313,10 @@ const TopDeliveryMenWidget = ({ deliveryMen }) => {
             <div 
               className="text-lg font-bold text-green-600"
             >
-              {(deliveryMen.reduce((sum, dm) => sum + dm.successRate, 0) / deliveryMen.length).toFixed(1)}%
+              {deliveryMen && deliveryMen.length > 0 ? 
+                (deliveryMen.reduce((sum, dm) => sum + (dm.successRate || dm.success_rate || 0), 0) / deliveryMen.length).toFixed(1)
+                : '0.0'
+              }%
             </div>
             <div 
               className="text-xs"
@@ -319,7 +330,10 @@ const TopDeliveryMenWidget = ({ deliveryMen }) => {
               className="text-lg font-bold"
               style={{ color: 'var(--text-primary)' }}
             >
-              {(deliveryMen.reduce((sum, dm) => sum + dm.averageRating, 0) / deliveryMen.length).toFixed(1)}
+              {deliveryMen && deliveryMen.length > 0 ? 
+                (deliveryMen.reduce((sum, dm) => sum + (dm.averageRating || dm.average_rating || 0), 0) / deliveryMen.length).toFixed(1)
+                : '0.0'
+              }
             </div>
             <div 
               className="text-xs"
@@ -332,7 +346,10 @@ const TopDeliveryMenWidget = ({ deliveryMen }) => {
             <div 
               className="text-lg font-bold text-green-600"
             >
-              ${(deliveryMen.reduce((sum, dm) => sum + dm.totalEarnings, 0)).toLocaleString()}
+              ₹{deliveryMen && deliveryMen.length > 0 ? 
+                (deliveryMen.reduce((sum, dm) => sum + (dm.totalEarnings || dm.total_earnings || 0), 0)).toLocaleString()
+                : '0'
+              }
             </div>
             <div 
               className="text-xs"

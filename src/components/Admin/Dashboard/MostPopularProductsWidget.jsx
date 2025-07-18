@@ -6,10 +6,11 @@ import {
   FiTrendingUp,
   FiStar,
   FiMoreVertical,
-  FiExternalLink
+  FiExternalLink,
+  FiPackage
 } from 'react-icons/fi';
 
-const MostPopularProductsWidget = ({ products }) => {
+const MostPopularProductsWidget = ({ products = [] }) => {
   const [showAll, setShowAll] = useState(false);
   const displayProducts = showAll ? products : products.slice(0, 5);
 
@@ -73,24 +74,24 @@ const MostPopularProductsWidget = ({ products }) => {
             <div className="flex items-center space-x-3 text-xs" style={{ color: 'var(--text-secondary)' }}>
               <div className="flex items-center space-x-1">
                 <FiEye size={12} />
-                <span>{product.views.toLocaleString()}</span>
+                <span>{((product.views || product.sales || product.total_sales || 0)).toLocaleString()}</span>
               </div>
               <div className="flex items-center space-x-1">
                 <FiHeart size={12} />
-                <span>{product.wishlistCount}</span>
+                <span>{product.wishlistCount || product.wishlist_count || 0}</span>
               </div>
               <div className="flex items-center space-x-1">
                 <FiShare2 size={12} />
-                <span>{product.shareCount}</span>
+                <span>{product.shareCount || product.share_count || 0}</span>
               </div>
             </div>
             
             <div 
               className={`text-xs font-medium px-2 py-1 rounded-full ${
-                product.viewsChange.startsWith('+') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                (product.viewsChange || product.views_change || '+0%').startsWith('+') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
               }`}
             >
-              {product.viewsChange}
+              {product.viewsChange || product.views_change || '+0%'}
             </div>
           </div>
         </div>
@@ -141,14 +142,17 @@ const MostPopularProductsWidget = ({ products }) => {
       </div>
 
       {/* Products List */}
-      <div className="space-y-3">
-        {displayProducts.map((product, index) => (
-          <ProductCard key={product.id} product={product} index={index} />
-        ))}
-      </div>
-
-      {/* Show More/Less Button */}
-      {products.length > 5 && (
+        <div className="space-y-3">
+        {products && products.length > 0 ? displayProducts.map((product, index) => (
+          <ProductCard key={product.id || product.product_id || index} product={product} index={index} />
+        )) : (
+          <div className="text-center py-8 text-gray-500">
+            <FiPackage size={48} className="mx-auto mb-4 opacity-50" />
+            <p>No popular products data available</p>
+          </div>
+        )}
+      </div>      {/* Show More/Less Button */}
+      {products && products.length > 5 && (
         <div className="mt-4 text-center">
           <button 
             onClick={() => setShowAll(!showAll)}
@@ -171,13 +175,16 @@ const MostPopularProductsWidget = ({ products }) => {
               className="text-lg font-bold"
               style={{ color: 'var(--text-primary)' }}
             >
-              {products.reduce((sum, p) => sum + p.views, 0).toLocaleString()}
+              {products && products.length > 0 ? 
+                products.reduce((sum, p) => sum + (p.views || p.sales || p.total_sales || 0), 0).toLocaleString() 
+                : '0'
+              }
             </div>
             <div 
               className="text-xs"
               style={{ color: 'var(--text-secondary)' }}
             >
-              Total Views
+              Total Views/Sales
             </div>
           </div>
           <div>
@@ -185,7 +192,10 @@ const MostPopularProductsWidget = ({ products }) => {
               className="text-lg font-bold"
               style={{ color: 'var(--text-primary)' }}
             >
-              {products.reduce((sum, p) => sum + p.wishlistCount, 0).toLocaleString()}
+              {products && products.length > 0 ? 
+                products.reduce((sum, p) => sum + (p.wishlistCount || p.wishlist_count || 0), 0).toLocaleString()
+                : '0'
+              }
             </div>
             <div 
               className="text-xs"
@@ -199,7 +209,10 @@ const MostPopularProductsWidget = ({ products }) => {
               className="text-lg font-bold"
               style={{ color: 'var(--text-primary)' }}
             >
-              {products.reduce((sum, p) => sum + p.shareCount, 0)}
+              {products && products.length > 0 ? 
+                products.reduce((sum, p) => sum + (p.shareCount || p.share_count || 0), 0)
+                : '0'
+              }
             </div>
             <div 
               className="text-xs"

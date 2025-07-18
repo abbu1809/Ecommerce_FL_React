@@ -6,7 +6,7 @@ const API_BASE_URL = 'http://127.0.0.1:8000/api/admin';
 
 // Create axios instance with auth token
 const createAxiosInstance = () => {
-  const token = localStorage.getItem('admin_auth_token');
+  const token = localStorage.getItem('admin_token');
   return axios.create({
     baseURL: API_BASE_URL,
     headers: {
@@ -99,7 +99,48 @@ const useRealAnalyticsStore = create()(
           }
         } catch (error) {
           console.error('Error fetching analytics:', error);
+          
+          // Set default/mock analytics data on error
+          const fallbackAnalytics = {
+            businessAnalytics: {
+              total_revenue: 0,
+              total_orders: 0,
+              total_revenue_change: '+0%',
+              total_orders_change: '+0%',
+              average_order_value: 0,
+              conversion_rate: 0,
+              return_rate: 0
+            },
+            orderStatistics: {
+              pending: 0,
+              processing: 0,
+              shipped: 0,
+              delivered: 0,
+              cancelled: 0
+            },
+            userOverview: {
+              total_customers: 0,
+              total_customers_change: '+0%',
+              active_customers: 0,
+              active_customers_change: '+0%',
+              total_delivery_men: 0,
+              total_delivery_men_change: '+0%',
+              active_delivery_men: 0,
+              active_delivery_men_change: '+0%',
+              new_customers_today: 0,
+              new_customers_this_week: 0,
+              new_customers_this_month: 0,
+              average_customer_lifetime_value: 0,
+              customer_retention_rate: 0
+            },
+            mostPopularProducts: [],
+            topSellingProducts: [],
+            topCustomers: [],
+            topDeliveryMen: []
+          };
+          
           set({ 
+            analytics: fallbackAnalytics,
             error: error.response?.data?.error || error.message || 'Failed to fetch analytics',
             loading: false 
           });
@@ -109,7 +150,7 @@ const useRealAnalyticsStore = create()(
       downloadReport: async (reportType, format = 'csv') => {
         try {
           const api = createAxiosInstance();
-          const response = await api.get(`/analytics/download-report/`, {
+          const response = await api.get(`/reports/download/`, {
             params: {
               type: reportType,
               range: get().dateRange,

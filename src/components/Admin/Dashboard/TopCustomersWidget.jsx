@@ -13,7 +13,7 @@ import {
   FiTrendingUp
 } from 'react-icons/fi';
 
-const TopCustomersWidget = ({ customers }) => {
+const TopCustomersWidget = ({ customers = [] }) => {
   const [showAll, setShowAll] = useState(false);
   const [sortBy, setSortBy] = useState('totalSpent');
   
@@ -24,17 +24,18 @@ const TopCustomersWidget = ({ customers }) => {
     { value: 'lastOrderDate', label: 'Recent Activity' }
   ];
 
-  const sortedCustomers = [...customers].sort((a, b) => {
+  const sortedCustomers = customers && customers.length > 0 ? [...customers].sort((a, b) => {
     if (sortBy === 'lastOrderDate') {
-      return new Date(b.lastOrderDate) - new Date(a.lastOrderDate);
+      return new Date(b.lastOrderDate || b.last_order_date || 0) - new Date(a.lastOrderDate || a.last_order_date || 0);
     }
-    return b[sortBy] - a[sortBy];
-  });
+    return (b[sortBy] || b[sortBy.replace(/([A-Z])/g, '_$1').toLowerCase()] || 0) - (a[sortBy] || a[sortBy.replace(/([A-Z])/g, '_$1').toLowerCase()] || 0);
+  }) : [];
 
   const displayCustomers = showAll ? sortedCustomers : sortedCustomers.slice(0, 5);
 
   const getLoyaltyBadge = (level) => {
-    switch (level.toLowerCase()) {
+    const levelStr = level && typeof level === 'string' ? level.toLowerCase() : 'bronze';
+    switch (levelStr) {
       case 'platinum':
         return { bg: '#E5E7EB', text: '#374151', icon: '💎', color: '#6B7280' };
       case 'gold':
@@ -60,8 +61,8 @@ const TopCustomersWidget = ({ customers }) => {
   };
 
   const CustomerCard = ({ customer, index }) => {
-    const loyaltyBadge = getLoyaltyBadge(customer.loyaltyLevel);
-    const isVIP = customer.totalSpent > 5000;
+    const loyaltyBadge = getLoyaltyBadge(customer.loyaltyLevel || customer.loyalty_level);
+    const isVIP = (customer.totalSpent || customer.total_spent || 0) > 5000;
 
     return (
       <div 
@@ -108,7 +109,7 @@ const TopCustomersWidget = ({ customers }) => {
                   className="font-semibold text-sm"
                   style={{ color: 'var(--text-primary)' }}
                 >
-                  {customer.name}
+                  {customer.name || 'Unknown Customer'}
                 </h4>
                 {isVIP && <FiStar className="text-yellow-500" size={14} />}
               </div>
@@ -116,7 +117,7 @@ const TopCustomersWidget = ({ customers }) => {
                 className="text-xs"
                 style={{ color: 'var(--text-secondary)' }}
               >
-                {customer.email}
+                {customer.email || 'No email'}
               </p>
             </div>
           </div>
@@ -130,7 +131,7 @@ const TopCustomersWidget = ({ customers }) => {
             }}
           >
             <span>{loyaltyBadge.icon}</span>
-            <span>{customer.loyaltyLevel}</span>
+            <span>{customer.loyaltyLevel || customer.loyalty_level || 'Bronze'}</span>
           </div>
         </div>
 
@@ -140,7 +141,7 @@ const TopCustomersWidget = ({ customers }) => {
             <div 
               className="text-xl font-bold text-green-600"
             >
-              ${customer.totalSpent.toLocaleString()}
+              ₹{(customer.totalSpent || customer.total_spent || 0).toLocaleString()}
             </div>
             <div 
               className="text-xs"
@@ -155,7 +156,7 @@ const TopCustomersWidget = ({ customers }) => {
               className="text-xl font-bold"
               style={{ color: 'var(--text-primary)' }}
             >
-              {customer.totalOrders}
+              {customer.totalOrders || customer.total_orders || 0}
             </div>
             <div 
               className="text-xs"
@@ -174,7 +175,7 @@ const TopCustomersWidget = ({ customers }) => {
               className="font-medium"
               style={{ color: 'var(--text-primary)' }}
             >
-              ${customer.averageOrderValue.toFixed(2)}
+              ₹{(customer.averageOrderValue || customer.average_order_value || 0).toFixed(2)}
             </span>
           </div>
           
@@ -184,7 +185,7 @@ const TopCustomersWidget = ({ customers }) => {
               className="font-medium"
               style={{ color: 'var(--text-primary)' }}
             >
-              {formatTimeAgo(customer.lastOrderDate)}
+              {formatTimeAgo(customer.lastOrderDate || customer.last_order_date || new Date())}
             </span>
           </div>
           
@@ -286,13 +287,18 @@ const TopCustomersWidget = ({ customers }) => {
 
       {/* Customers List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {displayCustomers.map((customer, index) => (
-          <CustomerCard key={customer.id} customer={customer} index={index} />
-        ))}
+        {customers && customers.length > 0 ? displayCustomers.map((customer, index) => (
+          <CustomerCard key={customer.id || customer.customer_id || customer.user_id || index} customer={customer} index={index} />
+        )) : (
+          <div className="text-center py-8 text-gray-500 col-span-full">
+            <FiUsers size={48} className="mx-auto mb-4 opacity-50" />
+            <p>No customer data available</p>
+          </div>
+        )}
       </div>
 
       {/* Show More/Less Button */}
-      {customers.length > 5 && (
+      {customers && customers.length > 5 && (
         <div className="mt-6 text-center">
           <button 
             onClick={() => setShowAll(!showAll)}
@@ -314,7 +320,10 @@ const TopCustomersWidget = ({ customers }) => {
             <div 
               className="text-lg font-bold text-green-600"
             >
-              ${customers.reduce((sum, c) => sum + c.totalSpent, 0).toLocaleString()}
+              ₹{customers && customers.length > 0 ? 
+                customers.reduce((sum, c) => sum + (c.totalSpent || c.total_spent || 0), 0).toLocaleString()
+                : '0'
+              }
             </div>
             <div 
               className="text-xs"
@@ -328,7 +337,10 @@ const TopCustomersWidget = ({ customers }) => {
               className="text-lg font-bold"
               style={{ color: 'var(--text-primary)' }}
             >
-              {customers.reduce((sum, c) => sum + c.totalOrders, 0)}
+              {customers && customers.length > 0 ? 
+                customers.reduce((sum, c) => sum + (c.totalOrders || c.total_orders || 0), 0)
+                : '0'
+              }
             </div>
             <div 
               className="text-xs"
@@ -342,7 +354,10 @@ const TopCustomersWidget = ({ customers }) => {
               className="text-lg font-bold"
               style={{ color: 'var(--text-primary)' }}
             >
-              ${(customers.reduce((sum, c) => sum + c.averageOrderValue, 0) / customers.length).toFixed(2)}
+              ₹{customers && customers.length > 0 ? 
+                (customers.reduce((sum, c) => sum + (c.averageOrderValue || c.average_order_value || 0), 0) / Math.max(customers.length, 1)).toFixed(2)
+                : '0.00'
+              }
             </div>
             <div 
               className="text-xs"
@@ -355,7 +370,10 @@ const TopCustomersWidget = ({ customers }) => {
             <div 
               className="text-lg font-bold text-purple-600"
             >
-              {customers.filter(c => c.loyaltyLevel === 'Platinum').length}
+              {customers && customers.length > 0 ? 
+                customers.filter(c => (c.loyaltyLevel || c.loyalty_level || '').toLowerCase() === 'platinum').length
+                : '0'
+              }
             </div>
             <div 
               className="text-xs"

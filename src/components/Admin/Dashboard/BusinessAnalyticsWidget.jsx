@@ -10,83 +10,100 @@ import {
 
 const BusinessAnalyticsWidget = ({ analytics }) => {
   // Provide default values if analytics is null or undefined
-  const safeAnalytics = analytics || {
-    totalRevenue: 0,
-    totalRevenueChange: '+0.0%',
-    netRevenue: 0,
-    netRevenueChange: '+0.0%',
-    grossProfit: 0,
-    grossProfitChange: '+0.0%',
-    operatingCosts: 0,
-    operatingCostsChange: '+0.0%',
-    conversionRate: 0,
-    conversionRateChange: '+0.0%',
-    averageOrderValue: 0,
-    averageOrderValueChange: '+0.0%',
-    customersAcquired: 0,
-    customersAcquiredChange: '+0.0%',
-    customerRetentionRate: 0,
-    customerRetentionRateChange: '+0.0%',
-    returnRate: 0,
-    returnRateChange: '+0.0%',
-    customerAcquisitionCost: 0,
-    customerAcquisitionCostChange: '+0.0%'
-  };
+  const safeAnalytics = analytics || {};
+  
+  // Extract values with comprehensive fallbacks for both camelCase and snake_case
+  // Ensure all values are numbers with proper fallbacks
+  const totalRevenue = Number(safeAnalytics.totalRevenue || safeAnalytics.total_revenue || 0);
+  const totalRevenueChange = safeAnalytics.totalRevenueChange || safeAnalytics.total_revenue_change || '+0.0%';
+  const netRevenue = Number(safeAnalytics.netRevenue || safeAnalytics.net_revenue || 0);
+  const netRevenueChange = safeAnalytics.netRevenueChange || safeAnalytics.net_revenue_change || '+0.0%';
+  const grossProfit = Number(safeAnalytics.grossProfit || safeAnalytics.gross_profit || 0);
+  const grossProfitChange = safeAnalytics.grossProfitChange || safeAnalytics.gross_profit_change || '+0.0%';
+  const operatingCosts = Number(safeAnalytics.operatingCosts || safeAnalytics.operating_costs || 0);
+  const operatingCostsChange = safeAnalytics.operatingCostsChange || safeAnalytics.operating_costs_change || '+0.0%';
+  const conversionRate = Number(safeAnalytics.conversionRate || safeAnalytics.conversion_rate || 0);
+  const conversionRateChange = safeAnalytics.conversionRateChange || safeAnalytics.conversion_rate_change || '+0.0%';
+  const averageOrderValue = Number(safeAnalytics.averageOrderValue || safeAnalytics.average_order_value || 0);
+  const averageOrderValueChange = safeAnalytics.averageOrderValueChange || safeAnalytics.average_order_value_change || '+0.0%';
+  const customersAcquired = Number(safeAnalytics.customersAcquired || safeAnalytics.customers_acquired || 0);
+  const customersAcquiredChange = safeAnalytics.customersAcquiredChange || safeAnalytics.customers_acquired_change || '+0.0%';
+  const customerRetentionRate = Number(safeAnalytics.customerRetentionRate || safeAnalytics.customer_retention_rate || 0);
+  const customerRetentionRateChange = safeAnalytics.customerRetentionRateChange || safeAnalytics.customer_retention_rate_change || '+0.0%';
+  const returnRate = Number(safeAnalytics.returnRate || safeAnalytics.return_rate || 0);
+  const returnRateChange = safeAnalytics.returnRateChange || safeAnalytics.return_rate_change || '+0.0%';
+  const customerAcquisitionCost = Number(safeAnalytics.customerAcquisitionCost || safeAnalytics.customer_acquisition_cost || 0);
+  const customerAcquisitionCostChange = safeAnalytics.customerAcquisitionCostChange || safeAnalytics.customer_acquisition_cost_change || '+0.0%';
 
   const metrics = [
     {
       title: 'Total Revenue',
-      value: `$${safeAnalytics.totalRevenue.toLocaleString()}`,
-      change: safeAnalytics.totalRevenueChange,
+      value: `$${totalRevenue.toLocaleString()}`,
+      change: totalRevenueChange,
       icon: <FiDollarSign size={24} />,
       color: 'var(--brand-primary)'
     },
     {
       title: 'Net Revenue',
-      value: `$${safeAnalytics.netRevenue.toLocaleString()}`,
-      change: safeAnalytics.netRevenueChange,
+      value: `$${netRevenue.toLocaleString()}`,
+      change: netRevenueChange,
       icon: <FiBarChart2 size={24} />,
       color: '#10b981'
     },
     {
       title: 'Gross Profit',
-      value: `$${safeAnalytics.grossProfit.toLocaleString()}`,
-      change: safeAnalytics.grossProfitChange,
+      value: `$${grossProfit.toLocaleString()}`,
+      change: grossProfitChange,
       icon: <FiTrendingUp size={24} />,
       color: '#3b82f6'
     },
     {
       title: 'Operating Costs',
-      value: `$${safeAnalytics.operatingCosts.toLocaleString()}`,
-      change: safeAnalytics.operatingCostsChange,
+      value: `$${operatingCosts.toLocaleString()}`,
+      change: operatingCostsChange,
       icon: <FiPieChart size={24} />,
       color: '#ef4444'
     },
     {
       title: 'Conversion Rate',
-      value: `${safeAnalytics.conversionRate}%`,
-      change: safeAnalytics.conversionRateChange,
+      value: `${conversionRate}%`,
+      change: conversionRateChange,
       icon: <FiPercent size={24} />,
       color: '#8b5cf6'
     },
     {
       title: 'Avg Order Value',
-      value: `$${safeAnalytics.averageOrderValue}`,
-      change: safeAnalytics.averageOrderValueChange,
+      value: `$${averageOrderValue}`,
+      change: averageOrderValueChange,
       icon: <FiDollarSign size={24} />,
       color: 'var(--brand-primary)'
     },
     {
       title: 'Return Rate',
-      value: `${safeAnalytics.returnRate || 0}%`,
-      change: safeAnalytics.returnRateChange || 0,
+      value: `${returnRate}%`,
+      change: returnRateChange,
       icon: <FiTrendingDown size={24} />,
       color: '#ef4444'
     },
+
+    {
+      title: 'Customers Acquired',
+      value: customersAcquired.toLocaleString(),
+      change: customersAcquiredChange,
+      icon: <FiTrendingUp size={24} />,
+      color: '#10b981'
+    },
+    {
+      title: 'Customer Retention Rate',
+      value: `${customerRetentionRate}%`,
+      change: customerRetentionRateChange,
+      icon: <FiTrendingUp size={24} />,
+      color: '#3b82f6'
+    },
     {
       title: 'Customer Acq. Cost',
-      value: `$${safeAnalytics.customerAcquisitionCost || 0}`,
-      change: safeAnalytics.customerAcquisitionCostChange || '+0.0%',
+      value: `$${customerAcquisitionCost}`,
+      change: customerAcquisitionCostChange,
       icon: <FiDollarSign size={24} />,
       color: '#06b6d4'
     }

@@ -4,7 +4,7 @@ export const reportsService = {
   // Generate Revenue Report
   generateRevenueReport: async (dateRange = 'last30days', format = 'json') => {
     try {
-      const response = await adminApi.get(`/api/admin/reports/revenue/?range=${dateRange}&format=${format}`);
+      const response = await adminApi.get(`/reports/revenue/?range=${dateRange}&format=${format}`);
       return response.data;
     } catch (error) {
       console.error('Error generating revenue report:', error);
@@ -15,7 +15,7 @@ export const reportsService = {
   // Download Revenue Report as CSV
   downloadRevenueReport: async (dateRange = 'last30days') => {
     try {
-      const response = await adminApi.get(`/api/admin/reports/revenue/?range=${dateRange}&format=csv`, {
+      const response = await adminApi.get(`/reports/revenue/?range=${dateRange}&format=csv`, {
         responseType: 'blob'
       });
       
@@ -38,7 +38,7 @@ export const reportsService = {
   // Generate Orders Report
   generateOrdersReport: async (dateRange = 'last30days', status = 'all', format = 'json') => {
     try {
-      const response = await adminApi.get(`/api/admin/reports/orders/?range=${dateRange}&status=${status}&format=${format}`);
+      const response = await adminApi.get(`/reports/orders/?range=${dateRange}&status=${status}&format=${format}`);
       return response.data;
     } catch (error) {
       console.error('Error generating orders report:', error);
@@ -49,7 +49,7 @@ export const reportsService = {
   // Download Orders Report as CSV
   downloadOrdersReport: async (dateRange = 'last30days', status = 'all') => {
     try {
-      const response = await adminApi.get(`/api/admin/reports/orders/?range=${dateRange}&status=${status}&format=csv`, {
+      const response = await adminApi.get(`/reports/orders/?range=${dateRange}&status=${status}&format=csv`, {
         responseType: 'blob'
       });
       
@@ -71,7 +71,7 @@ export const reportsService = {
   // Generate Products Report
   generateProductsReport: async (dateRange = 'last30days', format = 'json') => {
     try {
-      const response = await adminApi.get(`/api/admin/reports/products/?range=${dateRange}&format=${format}`);
+      const response = await adminApi.get(`/reports/products/?range=${dateRange}&format=${format}`);
       return response.data;
     } catch (error) {
       console.error('Error generating products report:', error);
@@ -82,7 +82,7 @@ export const reportsService = {
   // Download Products Report as CSV
   downloadProductsReport: async (dateRange = 'last30days') => {
     try {
-      const response = await adminApi.get(`/api/admin/reports/products/?range=${dateRange}&format=csv`, {
+      const response = await adminApi.get(`/reports/products/?range=${dateRange}&format=csv`, {
         responseType: 'blob'
       });
       
@@ -104,7 +104,7 @@ export const reportsService = {
   // Generate Customers Report
   generateCustomersReport: async (dateRange = 'last30days', format = 'json') => {
     try {
-      const response = await adminApi.get(`/api/admin/reports/customers/?range=${dateRange}&format=${format}`);
+      const response = await adminApi.get(`/reports/customers/?range=${dateRange}&format=${format}`);
       return response.data;
     } catch (error) {
       console.error('Error generating customers report:', error);
@@ -115,7 +115,7 @@ export const reportsService = {
   // Download Customers Report as CSV
   downloadCustomersReport: async (dateRange = 'last30days') => {
     try {
-      const response = await adminApi.get(`/api/admin/reports/customers/?range=${dateRange}&format=csv`, {
+      const response = await adminApi.get(`/reports/customers/?range=${dateRange}&format=csv`, {
         responseType: 'blob'
       });
       
@@ -137,7 +137,7 @@ export const reportsService = {
   // Generate Stock Report
   generateStockReport: async (format = 'json') => {
     try {
-      const response = await adminApi.get(`/api/admin/reports/stock/?format=${format}`);
+      const response = await adminApi.get(`/reports/stock/?format=${format}`);
       return response.data;
     } catch (error) {
       console.error('Error generating stock report:', error);
@@ -148,7 +148,7 @@ export const reportsService = {
   // Download Stock Report as CSV
   downloadStockReport: async () => {
     try {
-      const response = await adminApi.get(`/api/admin/reports/stock/?format=csv`, {
+      const response = await adminApi.get(`/reports/stock/?format=csv`, {
         responseType: 'blob'
       });
       

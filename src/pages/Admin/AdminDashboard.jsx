@@ -20,6 +20,7 @@ import MostPopularProductsWidget from "../../components/Admin/Dashboard/MostPopu
 import TopSellingProductsWidget from "../../components/Admin/Dashboard/TopSellingProductsWidget";
 import TopDeliveryMenWidget from "../../components/Admin/Dashboard/TopDeliveryMenWidget";
 import TopCustomersWidget from "../../components/Admin/Dashboard/TopCustomersWidget";
+import AdminAuthDebugger from "../../components/Admin/AdminAuthDebugger";
 import ReportsPanel from "../../components/admin/ReportsPanel";
 import RecentOrders from "../../components/Admin/Dashboard/RecentOrders";
 import SalesChart from "../../components/Admin/Dashboard/SalesChart";
@@ -31,7 +32,7 @@ import useRealAnalyticsStore from "../../store/useRealAnalyticsStore";
 const AdminDashboard = () => {
   // Use both stores
   const { dashboard, fetchDashboardData } = useAdminStore();
-  const { analytics, loading: enhancedLoading, fetchAnalytics, selectedDateRange, updateDateRange } = useRealAnalyticsStore();
+  const { analytics, loading: enhancedLoading, fetchAnalytics, selectedDateRange, setDateRange } = useRealAnalyticsStore();
   const { stats, loading } = dashboard;
   
   // UI state
@@ -293,7 +294,7 @@ const AdminDashboard = () => {
             <FiCalendar size={16} style={{ color: "var(--text-secondary)" }} />
             <select
               value={selectedDateRange}
-              onChange={(e) => updateDateRange(e.target.value)}
+              onChange={(e) => setDateRange(e.target.value)}
               className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               style={{
                 borderColor: "var(--border-primary)",
@@ -392,6 +393,9 @@ const AdminDashboard = () => {
 
       {/* Dynamic Content Based on Active View */}
       {renderContent()}
+      
+      {/* Temporary debug component */}
+      <AdminAuthDebugger />
     </div>
   );
 };

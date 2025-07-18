@@ -48,7 +48,13 @@ const SimpleThemeManager = () => {
         saveCustomColors(colors);
         setOriginalColors(colors);
         applyColorsToDocument(colors);
-        toast.success('Theme saved successfully!');
+        
+        // Handle warnings (when Firebase is unavailable)
+        if (response.data.warning) {
+          toast.warning(`Theme saved locally: ${response.data.warning}`);
+        } else {
+          toast.success('Theme saved successfully!');
+        }
       }
     } catch (error) {
       console.error('Failed to save theme:', error);

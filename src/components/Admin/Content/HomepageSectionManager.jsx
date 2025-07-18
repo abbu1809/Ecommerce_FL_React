@@ -584,7 +584,7 @@ const HomepageSectionManager = () => {
                 </label>
                 <select
                   className="w-full p-2 border border-gray-300 rounded-md"
-                  value={newSection.section_type}
+                  value={newSection?.section_type || ''}
                   onChange={(e) => handleSectionTypeChange(e.target.value)}
                 >
                   <option value="">Select section type</option>
@@ -603,7 +603,7 @@ const HomepageSectionManager = () => {
                 <input
                   type="text"
                   className="w-full p-2 border border-gray-300 rounded-md"
-                  value={newSection.title}
+                  value={newSection?.title || ''}
                   onChange={(e) => setNewSection({ ...newSection, title: e.target.value })}
                   placeholder="Enter section title"
                 />
@@ -616,7 +616,7 @@ const HomepageSectionManager = () => {
                   </label>
                   <select
                     className="w-full p-2 border border-gray-300 rounded-md"
-                    value={newSection.design_template}
+                    value={newSection?.design_template || ''}
                     onChange={(e) => setNewSection({ ...newSection, design_template: e.target.value })}
                   >
                     {availableTemplates.map(template => (
@@ -635,7 +635,7 @@ const HomepageSectionManager = () => {
                 <input
                   type="number"
                   className="w-full p-2 border border-gray-300 rounded-md"
-                  value={newSection.order}
+                  value={newSection?.order || 0}
                   onChange={(e) => setNewSection({ ...newSection, order: parseInt(e.target.value) || 0 })}
                   min="0"
                 />
@@ -690,7 +690,7 @@ const HomepageSectionManager = () => {
                 </label>
                 <select
                   className="w-full p-2 border border-gray-300 rounded-md"
-                  value={editingSection.section_type}
+                  value={editingSection?.section_type || ''}
                   onChange={(e) => handleSectionTypeChange(e.target.value, true)}
                 >
                   {h15SectionTypes.map(type => (
@@ -708,7 +708,7 @@ const HomepageSectionManager = () => {
                 <input
                   type="text"
                   className="w-full p-2 border border-gray-300 rounded-md"
-                  value={editingSection.title}
+                  value={editingSection?.title || ''}
                   onChange={(e) => setEditingSection({ ...editingSection, title: e.target.value })}
                   placeholder="Enter section title"
                 />
@@ -721,7 +721,7 @@ const HomepageSectionManager = () => {
                   </label>
                   <select
                     className="w-full p-2 border border-gray-300 rounded-md"
-                    value={editingSection.design_template}
+                    value={editingSection?.design_template || ''}
                     onChange={(e) => setEditingSection({ ...editingSection, design_template: e.target.value })}
                   >
                     {availableTemplates.map(template => (
@@ -740,7 +740,7 @@ const HomepageSectionManager = () => {
                 <input
                   type="number"
                   className="w-full p-2 border border-gray-300 rounded-md"
-                  value={editingSection.order}
+                  value={editingSection?.order || 0}
                   onChange={(e) => setEditingSection({ ...editingSection, order: parseInt(e.target.value) || 0 })}
                   min="0"
                 />

@@ -11,35 +11,53 @@ import {
 } from 'react-icons/fi';
 
 const UserOverviewWidget = ({ overview }) => {
+  // Handle null/undefined overview data with comprehensive fallbacks
+  const safeOverview = overview || {};
+  
+  // Extract data with fallbacks for all possible null/undefined values
+  const totalCustomers = safeOverview.totalCustomers || safeOverview.total_customers || 0;
+  const totalCustomersChange = safeOverview.totalCustomersChange || safeOverview.total_customers_change || '+0%';
+  const activeCustomers = safeOverview.activeCustomers || safeOverview.active_customers || 0;
+  const activeCustomersChange = safeOverview.activeCustomersChange || safeOverview.active_customers_change || '+0%';
+  const totalDeliveryMen = safeOverview.totalDeliveryMen || safeOverview.total_delivery_men || 0;
+  const totalDeliveryMenChange = safeOverview.totalDeliveryMenChange || safeOverview.total_delivery_men_change || '+0%';
+  const activeDeliveryMen = safeOverview.activeDeliveryMen || safeOverview.active_delivery_men || 0;
+  const activeDeliveryMenChange = safeOverview.activeDeliveryMenChange || safeOverview.active_delivery_men_change || '+0%';
+  const newCustomersToday = safeOverview.newCustomersToday || safeOverview.new_customers_today || 0;
+  const newCustomersThisWeek = safeOverview.newCustomersThisWeek || safeOverview.new_customers_this_week || 0;
+  const newCustomersThisMonth = safeOverview.newCustomersThisMonth || safeOverview.new_customers_this_month || 0;
+  const averageCustomerLifetimeValue = safeOverview.averageCustomerLifetimeValue || safeOverview.average_customer_lifetime_value || '0';
+  const customerRetentionRate = safeOverview.customerRetentionRate || safeOverview.customer_retention_rate || '0';
+
   const customerMetrics = [
     {
       title: 'Total Customers',
-      value: overview.totalCustomers.toLocaleString(),
-      change: overview.totalCustomersChange,
+      value: totalCustomers.toLocaleString(),
+      change: totalCustomersChange,
       icon: <FiUsers size={24} />,
       color: '#3b82f6',
       subtitle: 'Registered users'
     },
     {
       title: 'Active Customers',
-      value: overview.activeCustomers.toLocaleString(),
-      change: overview.activeCustomersChange,
+      value: activeCustomers.toLocaleString(),
+      change: activeCustomersChange,
       icon: <FiActivity size={24} />,
       color: '#10b981',
       subtitle: 'Active this month'
     },
     {
       title: 'Total Delivery Men',
-      value: overview.totalDeliveryMen.toString(),
-      change: overview.totalDeliveryMenChange,
+      value: totalDeliveryMen.toString(),
+      change: totalDeliveryMenChange,
       icon: <FiTruck size={24} />,
       color: '#f59e0b',
       subtitle: 'In our network'
     },
     {
       title: 'Active Delivery Men',
-      value: overview.activeDeliveryMen.toString(),
-      change: overview.activeDeliveryMenChange,
+      value: activeDeliveryMen.toString(),
+      change: activeDeliveryMenChange,
       icon: <FiActivity size={24} />,
       color: '#8b5cf6',
       subtitle: 'Currently active'
@@ -49,19 +67,19 @@ const UserOverviewWidget = ({ overview }) => {
   const growthMetrics = [
     {
       label: 'New Today',
-      value: overview.newCustomersToday,
+      value: newCustomersToday,
       icon: <FiUserPlus size={16} />,
       color: '#10b981'
     },
     {
       label: 'This Week',
-      value: overview.newCustomersThisWeek,
+      value: newCustomersThisWeek,
       icon: <FiCalendar size={16} />,
       color: '#3b82f6'
     },
     {
       label: 'This Month',
-      value: overview.newCustomersThisMonth,
+      value: newCustomersThisMonth,
       icon: <FiTrendingUp size={16} />,
       color: '#f59e0b'
     }
@@ -222,7 +240,7 @@ const UserOverviewWidget = ({ overview }) => {
                 className="font-bold"
                 style={{ color: 'var(--text-primary)' }}
               >
-                ${overview.averageCustomerLifetimeValue}
+                ${averageCustomerLifetimeValue}
               </span>
             </div>
             <div className="flex items-center justify-between">
@@ -235,7 +253,7 @@ const UserOverviewWidget = ({ overview }) => {
               <span 
                 className="font-bold text-green-600"
               >
-                {overview.customerRetentionRate}%
+                {customerRetentionRate}%
               </span>
             </div>
             <div className="flex items-center justify-between">
@@ -248,7 +266,7 @@ const UserOverviewWidget = ({ overview }) => {
               <span 
                 className="font-bold text-blue-600"
               >
-                {Math.round((overview.activeDeliveryMen / overview.totalDeliveryMen) * 100)}%
+                {Math.round((activeDeliveryMen / Math.max(totalDeliveryMen, 1)) * 100)}%
               </span>
             </div>
           </div>
