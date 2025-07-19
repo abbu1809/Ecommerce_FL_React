@@ -33,7 +33,7 @@ import Button from '../../ui/Button';
 import ConfirmModal from '../../ui/ConfirmModal';
 import useHomepageSectionStore from '../../../store/Admin/useHomepageSectionStore';
 import toast from 'react-hot-toast';
-import api from '../../../services/api';
+import { adminApi } from '../../../services/api';
 
 const HomepageSectionManager = () => {
   // Enhanced state and store setup for H-15
@@ -123,7 +123,7 @@ const HomepageSectionManager = () => {
       // Update display orders
       const sectionOrders = newSections.map((section, index) => ({
         section_id: section.section_id,
-        display_order: index + 1
+        order: index + 1
       }));
 
       try {
@@ -235,7 +235,7 @@ const HomepageSectionManager = () => {
   const initializeH15Sections = async () => {
     try {
       setSaving(true);
-      const response = await api.post('/admin/homepage/h15/initialize/');
+      const response = await adminApi.post('/admin/homepage/h15/initialize/');
       toast.success(response.data.message);
       await fetchSections();
       setIsInitialized(true);
@@ -254,7 +254,7 @@ const HomepageSectionManager = () => {
 
     try {
       setSaving(true);
-      const response = await api.post('/admin/homepage/h15/reset/');
+      const response = await adminApi.post('/admin/homepage/h15/reset/');
       toast.success(response.data.message);
       await fetchSections();
     } catch (error) {
@@ -322,12 +322,20 @@ const HomepageSectionManager = () => {
 
   const handleEditSection = async () => {
     try {
-      if (!editingSection.title) {
+      if (!editingSection?.title) {
         toast.error('Title is required');
         return;
       }
 
-      await editSection(editingSection.section_id, editingSection);
+      // Ensure we have a valid section ID
+      const sectionId = editingSection.section_id || editingSection.id;
+      if (!sectionId) {
+        toast.error('Section ID is missing');
+        console.error('EditingSection object:', editingSection);
+        return;
+      }
+
+      await editSection(sectionId, editingSection);
       setShowEditForm(false);
       setEditingSection(null);
     } catch (error) {
@@ -604,7 +612,7 @@ const HomepageSectionManager = () => {
                   type="text"
                   className="w-full p-2 border border-gray-300 rounded-md"
                   value={newSection?.title || ''}
-                  onChange={(e) => setNewSection({ ...newSection, title: e.target.value })}
+                  onChange={(e) => setNewSection(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="Enter section title"
                 />
               </div>
@@ -617,7 +625,7 @@ const HomepageSectionManager = () => {
                   <select
                     className="w-full p-2 border border-gray-300 rounded-md"
                     value={newSection?.design_template || ''}
-                    onChange={(e) => setNewSection({ ...newSection, design_template: e.target.value })}
+                    onChange={(e) => setNewSection(prev => ({ ...prev, design_template: e.target.value }))}
                   >
                     {availableTemplates.map(template => (
                       <option key={template} value={template}>
@@ -636,7 +644,7 @@ const HomepageSectionManager = () => {
                   type="number"
                   className="w-full p-2 border border-gray-300 rounded-md"
                   value={newSection?.order || 0}
-                  onChange={(e) => setNewSection({ ...newSection, order: parseInt(e.target.value) || 0 })}
+                  onChange={(e) => setNewSection(prev => ({ ...prev, order: parseInt(e.target.value) || 0 }))}
                   min="0"
                 />
               </div>
@@ -646,7 +654,7 @@ const HomepageSectionManager = () => {
                   type="checkbox"
                   id="enabled"
                   checked={newSection.enabled}
-                  onChange={(e) => setNewSection({ ...newSection, enabled: e.target.checked })}
+                  onChange={(e) => setNewSection(prev => ({ ...prev, enabled: e.target.checked }))}
                   className="mr-2"
                 />
                 <label htmlFor="enabled" className="text-sm text-gray-700">
@@ -709,7 +717,7 @@ const HomepageSectionManager = () => {
                   type="text"
                   className="w-full p-2 border border-gray-300 rounded-md"
                   value={editingSection?.title || ''}
-                  onChange={(e) => setEditingSection({ ...editingSection, title: e.target.value })}
+                  onChange={(e) => setEditingSection(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="Enter section title"
                 />
               </div>
@@ -722,7 +730,7 @@ const HomepageSectionManager = () => {
                   <select
                     className="w-full p-2 border border-gray-300 rounded-md"
                     value={editingSection?.design_template || ''}
-                    onChange={(e) => setEditingSection({ ...editingSection, design_template: e.target.value })}
+                    onChange={(e) => setEditingSection(prev => ({ ...prev, design_template: e.target.value }))}
                   >
                     {availableTemplates.map(template => (
                       <option key={template} value={template}>
@@ -740,8 +748,8 @@ const HomepageSectionManager = () => {
                 <input
                   type="number"
                   className="w-full p-2 border border-gray-300 rounded-md"
-                  value={editingSection?.order || 0}
-                  onChange={(e) => setEditingSection({ ...editingSection, order: parseInt(e.target.value) || 0 })}
+                  value={editingSection?.order?.toString() || '0'}
+                  onChange={(e) => setEditingSection(prev => ({ ...prev, order: parseInt(e.target.value) || 0 }))}
                   min="0"
                 />
               </div>
@@ -750,8 +758,8 @@ const HomepageSectionManager = () => {
                 <input
                   type="checkbox"
                   id="editEnabled"
-                  checked={editingSection.enabled}
-                  onChange={(e) => setEditingSection({ ...editingSection, enabled: e.target.checked })}
+                  checked={editingSection?.enabled || false}
+                  onChange={(e) => setEditingSection(prev => ({ ...prev, enabled: e.target.checked }))}
                   className="mr-2"
                 />
                 <label htmlFor="editEnabled" className="text-sm text-gray-700">

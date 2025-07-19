@@ -4,7 +4,7 @@ import { FiSun, FiMoon, FiMonitor, FiChevronDown } from 'react-icons/fi';
 import useThemeStore from '../../store/useTheme';
 
 const ThemeToggle = () => {
-  const { theme, setTheme, isDarkMode } = useThemeStore();
+  const { theme, setTheme } = useThemeStore();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -44,10 +44,12 @@ const ThemeToggle = () => {
       
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+        className="flex items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 border"
         style={{ 
-          color: "var(--text-on-brand)",
-          backgroundColor: isOpen ? "rgba(255, 255, 255, 0.1)" : "transparent"
+          color: "var(--text-primary)",
+          backgroundColor: isOpen ? "var(--bg-secondary)" : "var(--bg-primary)",
+          borderColor: "var(--border-primary)",
+          boxShadow: "var(--shadow-medium)"
         }}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}

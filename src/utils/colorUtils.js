@@ -1,4 +1,29 @@
 // Color Theme Utilities
+
+// Helper function to adjust color brightness
+const adjustColorBrightness = (hex, percent) => {
+  // Remove # if present
+  hex = hex.replace('#', '');
+  
+  // Parse r, g, b values
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  
+  // Adjust brightness
+  const newR = Math.max(0, Math.min(255, r + (r * percent / 100)));
+  const newG = Math.max(0, Math.min(255, g + (g * percent / 100)));
+  const newB = Math.max(0, Math.min(255, b + (b * percent / 100)));
+  
+  // Convert back to hex
+  const toHex = (c) => {
+    const hex = Math.round(c).toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  };
+  
+  return `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`;
+};
+
 export const loadCustomColors = () => {
   try {
     const savedColors = localStorage.getItem('customColors');
@@ -16,6 +41,8 @@ export const loadCustomColors = () => {
 export const applyColorsToDocument = (colors) => {
   try {
     const root = document.documentElement;
+    
+    // Apply colors to root variables (for light mode)
     if (colors.primary) root.style.setProperty('--brand-primary', colors.primary);
     if (colors.secondary) root.style.setProperty('--brand-secondary', colors.secondary);
     if (colors.success) root.style.setProperty('--success-color', colors.success);
@@ -23,7 +50,90 @@ export const applyColorsToDocument = (colors) => {
     if (colors.warning) root.style.setProperty('--warning-color', colors.warning);
     if (colors.info) root.style.setProperty('--accent-color', colors.info);
     
-    console.log('Colors applied to document:', colors);
+    // Also apply to theme.css variables for consistency
+    if (colors.primary) {
+      root.style.setProperty('--color-primary', colors.primary);
+      // Generate hover color (slightly darker)
+      const primaryHover = adjustColorBrightness(colors.primary, -10);
+      root.style.setProperty('--color-primary-hover', primaryHover);
+      root.style.setProperty('--brand-primary-hover', primaryHover);
+    }
+    if (colors.secondary) root.style.setProperty('--color-secondary', colors.secondary);
+    if (colors.success) root.style.setProperty('--color-success', colors.success);
+    if (colors.error) root.style.setProperty('--color-error', colors.error);
+    if (colors.warning) root.style.setProperty('--color-warning', colors.warning);
+    if (colors.info) root.style.setProperty('--color-info', colors.info);
+    
+    // Update gradients to use custom primary color
+    if (colors.primary) {
+      const primaryHover = adjustColorBrightness(colors.primary, -10);
+      const primaryGradient = `linear-gradient(135deg, ${colors.primary} 0%, ${primaryHover} 100%)`;
+      const heroGradient = `linear-gradient(135deg, ${colors.primary} 0%, ${primaryHover} 50%, ${adjustColorBrightness(colors.primary, -20)} 100%)`;
+      
+      root.style.setProperty('--gradient-primary', primaryGradient);
+      root.style.setProperty('--color-primary-gradient', primaryGradient);
+      root.style.setProperty('--gradient-hero', heroGradient);
+    }
+    
+    // Create dynamic CSS rule to override dark mode variables
+    // This ensures custom theme colors work in dark mode too
+    let styleElement = document.getElementById('custom-theme-override');
+    if (!styleElement) {
+      styleElement = document.createElement('style');
+      styleElement.id = 'custom-theme-override';
+      document.head.appendChild(styleElement);
+    }
+    
+    // Build CSS to override both light and dark mode variables
+    let darkModeOverrides = [];
+    
+    if (colors.primary) {
+      const primaryHover = adjustColorBrightness(colors.primary, -10);
+      darkModeOverrides.push(`
+        --brand-primary: ${colors.primary} !important;
+        --brand-primary-hover: ${primaryHover} !important;
+        --color-primary: ${colors.primary} !important;
+        --color-primary-hover: ${primaryHover} !important;
+      `);
+    }
+    if (colors.secondary) {
+      darkModeOverrides.push(`
+        --brand-secondary: ${colors.secondary} !important;
+        --color-secondary: ${colors.secondary} !important;
+      `);
+    }
+    if (colors.success) {
+      darkModeOverrides.push(`
+        --success-color: ${colors.success} !important;
+        --color-success: ${colors.success} !important;
+      `);
+    }
+    if (colors.error) {
+      darkModeOverrides.push(`
+        --error-color: ${colors.error} !important;
+        --color-error: ${colors.error} !important;
+      `);
+    }
+    if (colors.warning) {
+      darkModeOverrides.push(`
+        --warning-color: ${colors.warning} !important;
+        --color-warning: ${colors.warning} !important;
+      `);
+    }
+    if (colors.info) {
+      darkModeOverrides.push(`
+        --accent-color: ${colors.info} !important;
+        --color-info: ${colors.info} !important;
+      `);
+    }
+    
+    const cssContent = darkModeOverrides.length > 0 
+      ? `.dark { ${darkModeOverrides.join('')} }` 
+      : '';
+    
+    styleElement.textContent = cssContent;
+    
+    console.log('Colors applied to document (light and dark mode):', colors);
   } catch (error) {
     console.error('Error applying colors to document:', error);
   }
