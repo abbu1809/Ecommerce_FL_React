@@ -3,7 +3,7 @@ import { devtools, persist } from "zustand/middleware";
 import { adminApi } from "../../services/api";
 
 // Default logo fallback
-const DEFAULT_LOGO = '/src/assets/logo.png'; // Adjust path as needed
+const DEFAULT_LOGO = '/logo.jpg'; // Points to public/logo.jpg
 
 export const useLogoStore = create(
   devtools(

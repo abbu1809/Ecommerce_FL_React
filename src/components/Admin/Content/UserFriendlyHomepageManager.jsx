@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -44,8 +44,6 @@ import Button from '../../ui/Button';
 import ConfirmModal from '../../ui/ConfirmModal';
 import useHomepageSectionStore from '../../../store/Admin/useHomepageSectionStore';
 import toast from 'react-hot-toast';
-import { adminApi } from '../../../services/api';
-import ImageCropModal from '../Content/ImageCropModal'; // Assuming this exists from banner section
 
 // Enhanced section types with icons and descriptions
 const ENHANCED_SECTION_TYPES = [
@@ -192,7 +190,7 @@ const SortableItem = ({ section, onEdit, onDelete, onToggle, onViewContent }) =>
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: section.section_id || section.id });
+  } = useSortable({ id: section?.section_id || section?.id || 'unknown' });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -200,9 +198,14 @@ const SortableItem = ({ section, onEdit, onDelete, onToggle, onViewContent }) =>
     opacity: isDragging ? 0.5 : 1,
   };
 
+  // Null check for section
+  if (!section) {
+    return null;
+  }
+
   const getSectionTypeInfo = (sectionType) => {
     return ENHANCED_SECTION_TYPES.find(type => type.type === sectionType) || 
-           { label: sectionType, icon: <FiGrid />, description: 'Homepage section', category: 'other' };
+           { label: sectionType || 'Unknown Section', icon: <FiGrid />, description: 'Homepage section', category: 'other' };
   };
 
   const sectionInfo = getSectionTypeInfo(section.section_type);
@@ -234,7 +237,7 @@ const SortableItem = ({ section, onEdit, onDelete, onToggle, onViewContent }) =>
             <div className="flex-1 min-w-0">
               <div className="flex items-center space-x-2">
                 <h3 className="text-lg font-semibold text-gray-900 truncate">
-                  {section.title}
+                  {section.title || 'Untitled Section'}
                 </h3>
                 <span className={`text-xs px-2 py-1 rounded-full ${
                   sectionInfo.category === 'promotional' ? 'bg-blue-100 text-blue-600' :
@@ -258,15 +261,15 @@ const SortableItem = ({ section, onEdit, onDelete, onToggle, onViewContent }) =>
 
         <div className="flex items-center space-x-2">
           <button
-            onClick={() => onViewContent(section)}
+            onClick={() => onViewContent && onViewContent(section)}
             className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-            title="View/Edit Content"
+            title="Manage Content"
           >
             <FiFileText size={16} />
           </button>
           
           <button
-            onClick={() => onToggle(section.section_id || section.id)}
+            onClick={() => onToggle && onToggle(section.section_id || section.id)}
             className={`p-2 rounded-md transition-colors ${
               section.enabled
                 ? 'text-green-600 hover:bg-green-50'
@@ -278,7 +281,7 @@ const SortableItem = ({ section, onEdit, onDelete, onToggle, onViewContent }) =>
           </button>
 
           <button
-            onClick={() => onEdit(section)}
+            onClick={() => onEdit && onEdit(section)}
             className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
             title="Edit section"
           >
@@ -286,7 +289,7 @@ const SortableItem = ({ section, onEdit, onDelete, onToggle, onViewContent }) =>
           </button>
 
           <button
-            onClick={() => onDelete(section.section_id || section.id)}
+            onClick={() => onDelete && onDelete(section.section_id || section.id)}
             className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
             title="Delete section"
           >
@@ -310,421 +313,7 @@ const SortableItem = ({ section, onEdit, onDelete, onToggle, onViewContent }) =>
   );
 };
 
-// Enhanced Content Management Modal
-const ContentManagementModal = ({ section, isOpen, onClose, onSave }) => {
-  const [contentData, setContentData] = useState({
-    title: '',
-    description: '',
-    items: [],
-    images: [],
-    settings: {}
-  });
-  const [activeTab, setActiveTab] = useState('basic');
-  const [showImageCrop, setShowImageCrop] = useState(false);
-  const [cropImage, setCropImage] = useState(null);
-
-  const loadSectionContent = useCallback(async () => {
-    try {
-      // This would fetch existing content from your database
-      const response = await adminApi.get(`/admin/homepage/sections/${section.section_id}/content/`);
-      setContentData(response.data.content || {
-        title: section.title || '',
-        description: '',
-        items: [],
-        images: [],
-        settings: section.config || {}
-      });
-    } catch (error) {
-      console.log('No existing content, starting fresh:', error.message);
-      setContentData({
-        title: section.title || '',
-        description: '',
-        items: [],
-        images: [],
-        settings: section.config || {}
-      });
-    }
-  }, [section]);
-
-  useEffect(() => {
-    if (section && isOpen) {
-      // Load existing content for the section
-      loadSectionContent();
-    }
-  }, [section, isOpen, loadSectionContent]);
-
-  const handleSaveContent = async () => {
-    try {
-      await onSave(section.section_id, contentData);
-      onClose();
-      toast.success('Section content saved successfully');
-    } catch (error) {
-      console.error('Failed to save section content:', error.message);
-      toast.error('Failed to save section content');
-    }
-  };
-
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setCropImage(file);
-      setShowImageCrop(true);
-    }
-  };
-
-  const handleCroppedImage = (croppedImageBlob) => {
-    // Add cropped image to content
-    const imageUrl = URL.createObjectURL(croppedImageBlob);
-    setContentData(prev => ({
-      ...prev,
-      images: [...prev.images, { url: imageUrl, alt: '', caption: '' }]
-    }));
-    setShowImageCrop(false);
-  };
-
-  if (!isOpen || !section) return null;
-
-  return (
-    <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-          <div className="flex items-center justify-between p-6 border-b">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">
-                Manage Content: {section.title}
-              </h2>
-              <p className="text-sm text-gray-500 mt-1">
-                Configure content and media for this section
-              </p>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-2 text-gray-400 hover:text-gray-600 rounded-md"
-            >
-              ✕
-            </button>
-          </div>
-
-          <div className="flex">
-            {/* Sidebar tabs */}
-            <div className="w-48 bg-gray-50 border-r">
-              <div className="p-4 space-y-1">
-                <button
-                  onClick={() => setActiveTab('basic')}
-                  className={`w-full text-left px-3 py-2 rounded-md text-sm ${
-                    activeTab === 'basic' 
-                      ? 'bg-blue-100 text-blue-700' 
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
-                  <FiType className="inline mr-2" />
-                  Basic Info
-                </button>
-                <button
-                  onClick={() => setActiveTab('content')}
-                  className={`w-full text-left px-3 py-2 rounded-md text-sm ${
-                    activeTab === 'content' 
-                      ? 'bg-blue-100 text-blue-700' 
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
-                  <FiDatabase className="inline mr-2" />
-                  Content Items
-                </button>
-                <button
-                  onClick={() => setActiveTab('media')}
-                  className={`w-full text-left px-3 py-2 rounded-md text-sm ${
-                    activeTab === 'media' 
-                      ? 'bg-blue-100 text-blue-700' 
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
-                  <FiImage className="inline mr-2" />
-                  Media & Images
-                </button>
-                <button
-                  onClick={() => setActiveTab('settings')}
-                  className={`w-full text-left px-3 py-2 rounded-md text-sm ${
-                    activeTab === 'settings' 
-                      ? 'bg-blue-100 text-blue-700' 
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
-                  <FiSettings className="inline mr-2" />
-                  Settings
-                </button>
-              </div>
-            </div>
-
-            {/* Content area */}
-            <div className="flex-1 p-6 overflow-y-auto max-h-[70vh]">
-              {activeTab === 'basic' && (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Section Title
-                    </label>
-                    <input
-                      type="text"
-                      value={contentData.title || ''}
-                      onChange={(e) => setContentData(prev => ({ ...prev, title: e.target.value }))}
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter section title..."
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Description
-                    </label>
-                    <textarea
-                      value={contentData.description || ''}
-                      onChange={(e) => setContentData(prev => ({ ...prev, description: e.target.value }))}
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                      rows={4}
-                      placeholder="Enter section description..."
-                    />
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'content' && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-medium text-gray-900">Content Items</h3>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        // Add new content item
-                        setContentData(prev => ({
-                          ...prev,
-                          items: [...prev.items, { 
-                            id: Date.now(), 
-                            title: '', 
-                            description: '', 
-                            image: '', 
-                            link: '' 
-                          }]
-                        }));
-                      }}
-                    >
-                      <FiPlus className="mr-1" />
-                      Add Item
-                    </Button>
-                  </div>
-
-                  <div className="space-y-3">
-                    {contentData.items.map((item, index) => (
-                      <div key={item.id || index} className="p-4 border border-gray-200 rounded-lg">
-                        <div className="grid grid-cols-2 gap-4">
-                          <input
-                            type="text"
-                            placeholder="Item title"
-                            value={item.title || ''}
-                            onChange={(e) => {
-                              const newItems = [...contentData.items];
-                              newItems[index] = { ...item, title: e.target.value };
-                              setContentData(prev => ({ ...prev, items: newItems }));
-                            }}
-                            className="p-2 border border-gray-300 rounded-md"
-                          />
-                          <input
-                            type="text"
-                            placeholder="Link URL"
-                            value={item.link || ''}
-                            onChange={(e) => {
-                              const newItems = [...contentData.items];
-                              newItems[index] = { ...item, link: e.target.value };
-                              setContentData(prev => ({ ...prev, items: newItems }));
-                            }}
-                            className="p-2 border border-gray-300 rounded-md"
-                          />
-                        </div>
-                        <textarea
-                          placeholder="Item description"
-                          value={item.description || ''}
-                          onChange={(e) => {
-                            const newItems = [...contentData.items];
-                            newItems[index] = { ...item, description: e.target.value };
-                            setContentData(prev => ({ ...prev, items: newItems }));
-                          }}
-                          className="w-full mt-2 p-2 border border-gray-300 rounded-md"
-                          rows={2}
-                        />
-                        <button
-                          onClick={() => {
-                            const newItems = contentData.items.filter((_, i) => i !== index);
-                            setContentData(prev => ({ ...prev, items: newItems }));
-                          }}
-                          className="mt-2 text-red-600 text-sm hover:text-red-800"
-                        >
-                          Remove Item
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'media' && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-medium text-gray-900">Images & Media</h3>
-                    <label className="cursor-pointer">
-                      <Button variant="outline" size="sm">
-                        <FiImage className="mr-1" />
-                        Upload Image
-                      </Button>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    {contentData.images.map((image, index) => (
-                      <div key={index} className="border border-gray-200 rounded-lg p-3">
-                        <img
-                          src={image.url}
-                          alt={image.alt || `Image ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-md mb-2"
-                        />
-                        <input
-                          type="text"
-                          placeholder="Alt text"
-                          value={image.alt || ''}
-                          onChange={(e) => {
-                            const newImages = [...contentData.images];
-                            newImages[index] = { ...image, alt: e.target.value };
-                            setContentData(prev => ({ ...prev, images: newImages }));
-                          }}
-                          className="w-full p-2 text-sm border border-gray-300 rounded-md"
-                        />
-                        <button
-                          onClick={() => {
-                            const newImages = contentData.images.filter((_, i) => i !== index);
-                            setContentData(prev => ({ ...prev, images: newImages }));
-                          }}
-                          className="mt-2 text-red-600 text-sm hover:text-red-800"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'settings' && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900">Section Settings</h3>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Items per row
-                      </label>
-                      <select
-                        value={contentData.settings.itemsPerRow || '4'}
-                        onChange={(e) => setContentData(prev => ({
-                          ...prev,
-                          settings: { ...prev.settings, itemsPerRow: e.target.value }
-                        }))}
-                        className="w-full p-2 border border-gray-300 rounded-md"
-                      >
-                        <option value="2">2 items</option>
-                        <option value="3">3 items</option>
-                        <option value="4">4 items</option>
-                        <option value="6">6 items</option>
-                      </select>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Display style
-                      </label>
-                      <select
-                        value={contentData.settings.displayStyle || 'grid'}
-                        onChange={(e) => setContentData(prev => ({
-                          ...prev,
-                          settings: { ...prev.settings, displayStyle: e.target.value }
-                        }))}
-                        className="w-full p-2 border border-gray-300 rounded-md"
-                      >
-                        <option value="grid">Grid</option>
-                        <option value="carousel">Carousel</option>
-                        <option value="list">List</option>
-                        <option value="masonry">Masonry</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-4">
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={contentData.settings.showPrices || false}
-                        onChange={(e) => setContentData(prev => ({
-                          ...prev,
-                          settings: { ...prev.settings, showPrices: e.target.checked }
-                        }))}
-                        className="mr-2"
-                      />
-                      Show prices
-                    </label>
-                    
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={contentData.settings.showRatings || false}
-                        onChange={(e) => setContentData(prev => ({
-                          ...prev,
-                          settings: { ...prev.settings, showRatings: e.target.checked }
-                        }))}
-                        className="mr-2"
-                      />
-                      Show ratings
-                    </label>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-center justify-end space-x-3 p-6 border-t bg-gray-50">
-            <Button
-              variant="outline"
-              onClick={onClose}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="primary"
-              onClick={handleSaveContent}
-            >
-              Save Content
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {showImageCrop && (
-        <ImageCropModal
-          image={cropImage}
-          onCrop={handleCroppedImage}
-          onClose={() => setShowImageCrop(false)}
-          aspectRatio={16 / 9} // Default aspect ratio, could be configurable
-        />
-      )}
-    </>
-  );
-};
-
-const EnhancedHomepageSectionManager = () => {
+const UserFriendlyHomepageManager = () => {
   // Enhanced state and store setup
   const {
     sections,
@@ -737,14 +326,13 @@ const EnhancedHomepageSectionManager = () => {
     toggleSection,
     reorderSections,
     clearError,
+    initializeSections: initializeDefaultSections,
   } = useHomepageSectionStore();
 
   // Component state
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingSection, setEditingSection] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [showContentModal, setShowContentModal] = useState(false);
-  const [contentSection, setContentSection] = useState(null);
   const [confirmModal, setConfirmModal] = useState({ show: false, section: null });
   const [filterCategory, setFilterCategory] = useState('all');
   const [isInitialized, setIsInitialized] = useState(false);
@@ -791,28 +379,49 @@ const EnhancedHomepageSectionManager = () => {
     }
   }, [error, clearError]);
 
-  // Enhanced drag end handler
+  // Enhanced drag end handler with better error handling
   const handleDragEnd = async (event) => {
     const { active, over } = event;
 
-    if (active.id !== over.id) {
-      const oldIndex = sections.findIndex((item) => (item.section_id || item.id) === active.id);
-      const newIndex = sections.findIndex((item) => (item.section_id || item.id) === over.id);
+    if (!active || !over || active.id === over.id) {
+      return;
+    }
+
+    // Ensure sections is an array and has valid data
+    if (!Array.isArray(sections) || sections.length === 0) {
+      toast.error('No sections available to reorder');
+      return;
+    }
+
+    try {
+      const oldIndex = sections.findIndex((item) => (item?.section_id || item?.id) === active.id);
+      const newIndex = sections.findIndex((item) => (item?.section_id || item?.id) === over.id);
+
+      if (oldIndex === -1 || newIndex === -1) {
+        toast.error('Invalid section selection for reordering');
+        return;
+      }
 
       const newSections = arrayMove(sections, oldIndex, newIndex);
       
-      // Update order values
-      const sectionOrders = newSections.map((section, index) => ({
-        section_id: section.section_id || section.id,
-        order: index + 1
-      }));
+      // Update order values with proper validation
+      const sectionOrders = newSections
+        .filter(section => section && (section.section_id || section.id))
+        .map((section, index) => ({
+          section_id: section.section_id || section.id,
+          order: index + 1
+        }));
 
-      try {
-        await reorderSections(sectionOrders);
-      } catch (error) {
-        console.error('Error in drag end:', error);
-        toast.error('Failed to reorder sections');
+      if (sectionOrders.length === 0) {
+        toast.error('No valid sections to reorder');
+        return;
       }
+
+      await reorderSections(sectionOrders);
+      toast.success('Sections reordered successfully');
+    } catch (error) {
+      console.error('Error in drag end:', error);
+      toast.error('Failed to reorder sections');
     }
   };
 
@@ -820,8 +429,8 @@ const EnhancedHomepageSectionManager = () => {
   const initializeSections = async () => {
     try {
       setSaving(true);
-      const response = await adminApi.post('/admin/homepage/sections/initialize/');
-      toast.success(response.data.message);
+      await initializeDefaultSections();
+      toast.success('Default sections created successfully');
       await fetchSections();
       setIsInitialized(true);
     } catch (error) {
@@ -832,29 +441,23 @@ const EnhancedHomepageSectionManager = () => {
     }
   };
 
-  // Add section with content management
+  // Add section with enhanced validation
   const handleAddSection = async () => {
     try {
-      if (!newSection.section_type || !newSection.title) {
+      if (!newSection.section_type || !newSection.title.trim()) {
         toast.error('Section type and title are required');
         return;
       }
 
       const sectionData = {
         ...newSection,
-        order: sections.length + 1
+        order: sections.length + 1,
+        title: newSection.title.trim()
       };
 
-      const addedSection = await addSection(sectionData);
+      await addSection(sectionData);
       setShowAddForm(false);
       resetNewSectionForm();
-      
-      // Automatically open content manager for the new section
-      if (addedSection) {
-        setContentSection(addedSection);
-        setShowContentModal(true);
-      }
-      
       toast.success('Section added successfully');
     } catch (error) {
       console.error('Error adding section:', error);
@@ -879,7 +482,7 @@ const EnhancedHomepageSectionManager = () => {
   // Handle edit section
   const handleEditSection = async () => {
     try {
-      if (!editingSection?.title) {
+      if (!editingSection?.title?.trim()) {
         toast.error('Title is required');
         return;
       }
@@ -891,7 +494,10 @@ const EnhancedHomepageSectionManager = () => {
         return;
       }
 
-      await updateSection(sectionId, editingSection);
+      await updateSection(sectionId, { 
+        ...editingSection, 
+        title: editingSection.title.trim() 
+      });
       setEditingSection(null);
       toast.success('Section updated successfully');
     } catch (error) {
@@ -902,26 +508,21 @@ const EnhancedHomepageSectionManager = () => {
 
   // Handle content management
   const handleViewContent = (section) => {
-    setContentSection(section);
-    setShowContentModal(true);
+    console.log('Content management for section:', section);
+    toast('Content management coming soon!', {
+      icon: '🚀',
+      duration: 2000,
+    });
   };
 
-  // Save section content
-  const handleSaveContent = async (sectionId, contentData) => {
-    try {
-      await adminApi.put(`/admin/homepage/sections/${sectionId}/content/`, {
-        content: contentData
-      });
-      toast.success('Content saved successfully');
-    } catch (error) {
-      console.error('Error saving content:', error);
-      throw error;
-    }
-  };
-
-  // Delete section
+  // Delete section with validation
   const handleDeleteSection = async (sectionId) => {
     try {
+      if (!sectionId) {
+        toast.error('Invalid section ID');
+        return;
+      }
+
       await deleteSection(sectionId);
       setConfirmModal({ show: false, section: null });
       toast.success('Section deleted successfully');
@@ -931,12 +532,29 @@ const EnhancedHomepageSectionManager = () => {
     }
   };
 
-  // Filter sections by category
-  const filteredSections = sections.filter(section => {
+  // Enhanced toggle handler
+  const handleToggleSection = async (sectionId) => {
+    try {
+      if (!sectionId) {
+        toast.error('Invalid section ID');
+        return;
+      }
+
+      await toggleSection(sectionId);
+      toast.success('Section status updated');
+    } catch (error) {
+      console.error('Error toggling section:', error);
+      toast.error('Failed to update section status');
+    }
+  };
+
+  // Filter sections by category with null checking
+  const filteredSections = Array.isArray(sections) ? sections.filter(section => {
+    if (!section) return false;
     if (filterCategory === 'all') return true;
     const sectionInfo = ENHANCED_SECTION_TYPES.find(type => type.type === section.section_type);
     return sectionInfo?.category === filterCategory;
-  });
+  }) : [];
 
   // Get available categories
   const categories = ['all', ...new Set(ENHANCED_SECTION_TYPES.map(type => type.category))];
@@ -957,10 +575,10 @@ const EnhancedHomepageSectionManager = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              Enhanced Homepage Section Manager
+              Homepage Section Manager
             </h1>
             <p className="text-gray-600 mt-1">
-              Manage and customize your homepage sections with advanced content management
+              Manage and customize your homepage sections
             </p>
           </div>
           
@@ -972,7 +590,7 @@ const EnhancedHomepageSectionManager = () => {
                 className="bg-orange-600 hover:bg-orange-700"
               >
                 <FiRefreshCw className="mr-2" />
-                Initialize Sections
+                Setup Default Sections
               </Button>
             )}
             
@@ -990,16 +608,16 @@ const EnhancedHomepageSectionManager = () => {
         <div className="mt-6 flex items-center justify-between">
           <div className="flex items-center space-x-6">
             <div className="text-sm text-gray-500">
-              Total Sections: <span className="font-medium text-gray-900">{sections.length}</span>
+              Total Sections: <span className="font-medium text-gray-900">{sections?.length || 0}</span>
             </div>
             <div className="text-sm text-gray-500">
               Active: <span className="font-medium text-green-600">
-                {sections.filter(s => s.enabled).length}
+                {sections?.filter(s => s?.enabled).length || 0}
               </span>
             </div>
             <div className="text-sm text-gray-500">
               Inactive: <span className="font-medium text-red-600">
-                {sections.filter(s => !s.enabled).length}
+                {sections?.filter(s => s && !s.enabled).length || 0}
               </span>
             </div>
           </div>
@@ -1029,14 +647,21 @@ const EnhancedHomepageSectionManager = () => {
             <h3 className="text-lg font-medium text-gray-900 mb-2">No sections found</h3>
             <p className="text-gray-500 mb-4">
               {filterCategory === 'all' 
-                ? "Get started by adding your first homepage section"
+                ? "Get started by setting up your default homepage sections"
                 : `No sections found in the ${filterCategory} category`
               }
             </p>
-            <Button onClick={() => setShowAddForm(true)}>
-              <FiPlus className="mr-2" />
-              Add Section
-            </Button>
+            {!isInitialized ? (
+              <Button onClick={initializeSections}>
+                <FiRefreshCw className="mr-2" />
+                Setup Default Sections
+              </Button>
+            ) : (
+              <Button onClick={() => setShowAddForm(true)}>
+                <FiPlus className="mr-2" />
+                Add Section
+              </Button>
+            )}
           </div>
         ) : (
           <DndContext
@@ -1045,16 +670,16 @@ const EnhancedHomepageSectionManager = () => {
             onDragEnd={handleDragEnd}
           >
             <SortableContext
-              items={filteredSections.map(section => section.section_id || section.id)}
+              items={filteredSections.map(section => section?.section_id || section?.id || 'unknown')}
               strategy={verticalListSortingStrategy}
             >
               {filteredSections.map((section) => (
                 <SortableItem
-                  key={section.section_id || section.id}
+                  key={section?.section_id || section?.id || Math.random()}
                   section={section}
                   onEdit={setEditingSection}
                   onDelete={(id) => setConfirmModal({ show: true, section: { id } })}
-                  onToggle={toggleSection}
+                  onToggle={handleToggleSection}
                   onViewContent={handleViewContent}
                 />
               ))}
@@ -1080,7 +705,7 @@ const EnhancedHomepageSectionManager = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-3">
                   Section Type
                 </label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-3 max-h-40 overflow-y-auto">
                   {ENHANCED_SECTION_TYPES.map((type) => (
                     <button
                       key={type.type}
@@ -1181,7 +806,7 @@ const EnhancedHomepageSectionManager = () => {
               <Button
                 variant="primary"
                 onClick={handleAddSection}
-                disabled={!newSection.section_type || !newSection.title}
+                disabled={!newSection.section_type || !newSection.title.trim()}
               >
                 Create Section
               </Button>
@@ -1274,17 +899,6 @@ const EnhancedHomepageSectionManager = () => {
         </div>
       )}
 
-      {/* Content Management Modal */}
-      <ContentManagementModal
-        section={contentSection}
-        isOpen={showContentModal}
-        onClose={() => {
-          setShowContentModal(false);
-          setContentSection(null);
-        }}
-        onSave={handleSaveContent}
-      />
-
       {/* Confirm Delete Modal */}
       <ConfirmModal
         isOpen={confirmModal.show}
@@ -1299,4 +913,4 @@ const EnhancedHomepageSectionManager = () => {
   );
 };
 
-export default EnhancedHomepageSectionManager;
+export default UserFriendlyHomepageManager;

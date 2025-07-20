@@ -58,8 +58,8 @@ const AdminDeliveryPartners = () => {
     }
   };
 
-  // Filter partners based on search term and filter status
-  const filteredPartners = deliveryPartners.list.filter((partner) => {
+  // Filter partners based on search term and filter status with null safety
+  const filteredPartners = (deliveryPartners?.list || []).filter((partner) => {
     const matchesSearch =
       partner.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       partner.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -121,7 +121,7 @@ const AdminDeliveryPartners = () => {
             <div>
               <p className="text-sm text-gray-500">Total Partners</p>
               <p className="text-2xl font-bold">
-                {deliveryPartners.list.length}
+                {deliveryPartners?.list?.length || 0}
               </p>
             </div>
           </div>
@@ -137,7 +137,7 @@ const AdminDeliveryPartners = () => {
               <p className="text-sm text-gray-500">Verified Partners</p>
               <p className="text-2xl font-bold">
                 {
-                  deliveryPartners.list.filter((partner) => partner.is_verified)
+                  (deliveryPartners?.list || []).filter((partner) => partner.is_verified)
                     .length
                 }
               </p>
@@ -155,7 +155,7 @@ const AdminDeliveryPartners = () => {
               <p className="text-sm text-gray-500">Pending Verification</p>
               <p className="text-2xl font-bold">
                 {
-                  deliveryPartners.list.filter(
+                  (deliveryPartners?.list || []).filter(
                     (partner) => !partner.is_verified
                   ).length
                 }
@@ -195,11 +195,11 @@ const AdminDeliveryPartners = () => {
         </div>
       </div>
 
-      {deliveryPartners.loading ? (
+      {deliveryPartners?.loading ? (
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
         </div>
-      ) : deliveryPartners.error ? (
+      ) : deliveryPartners?.error ? (
         <div className="bg-red-50 p-4 rounded-md text-red-500 flex items-center">
           <FiAlertTriangle className="mr-2" size={20} />
           <span>{deliveryPartners.error}</span>

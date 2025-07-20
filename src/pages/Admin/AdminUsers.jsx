@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   FiSearch,
   FiDownload,
@@ -11,23 +11,40 @@ import UserTable from "../../components/Admin/Users/UserTable";
 import UserDetail from "../../components/Admin/Users/UserDetail";
 import Button from "../../components/ui/Button";
 import Pagination from "../../components/common/Pagination";
-import useAdminStore from "../../store/Admin/useAdminStore";
+import { useOptimizedAdminStore } from "../../store/Admin/useOptimizedAdminStore";
 
 const AdminUsers = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [view, setView] = useState("all"); // all, customers, banned
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Pagination states
+  // Pagination states - OPTIMIZED: Use server-side pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 25; // Increased from 10 to reduce queries
 
-  const { users, fetchUsers } = useAdminStore();
+  const { 
+    users, 
+    pagination,
+    fetchUsers, 
+    loadMoreUsers 
+  } = useOptimizedAdminStore();
   const { list: userList, loading } = users;
-  // Fetch users on component mount
+
+  // OPTIMIZATION: Memoized fetch function to prevent unnecessary calls
+  const loadUsers = useCallback(async (page = 1, forceRefresh = false) => {
+    try {
+      await fetchUsers(page, forceRefresh);
+    } catch (error) {
+      console.error("Failed to load users:", error);
+    }
+  }, [fetchUsers]);
+
+  // OPTIMIZATION: Only fetch if we don't have cached data
   useEffect(() => {
-    fetchUsers();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (userList.length === 0 || loading) {
+      loadUsers(1, false);
+    }
+  }, [loadUsers, userList.length, loading]);
 
   // Filter users based on view and search query
   const filteredUsers = userList.filter((user) => {
@@ -173,7 +190,7 @@ const AdminUsers = () => {
             variant="secondary"
             size="sm"
             fullWidth={false}
-            onClick={fetchUsers}
+            onClick={() => loadUsers(1, true)}
             isLoading={loading}
             icon={<FiRefreshCw size={16} />}
           >

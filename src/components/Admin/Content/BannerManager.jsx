@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Button from "../../ui/Button";
 import ImageCropper from "../../ui/ImageCropper";
-import { useBannerStore } from "../../../store/Admin/useBannerStore";
+import  {useBannerStore}  from "../../../store/Admin/useBannerStore";
 import ConfirmModal from "../../ui/ConfirmModal";
 import toast from "react-hot-toast";
 import { navigationCategories } from "../../../constants/bannerOptions";

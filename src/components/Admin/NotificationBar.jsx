@@ -36,24 +36,47 @@ const NotificationBar = () => {
   } = useNotificationStore();
 
   const dropdownRef = useRef(null);
-  // Fetch notifications on component mount
-  useEffect(() => {
-    fetchNotifications();
-    
-    // Set up auto-refresh every 30 seconds
-    const interval = setInterval(() => {
-      refreshNotifications();
-    }, 30000);
+  
+  // Check if admin is authenticated
+  const isAdminAuthenticated = () => {
+    const adminToken = localStorage.getItem('admin_token');
+    return adminToken && adminToken.length > 0;
+  };
 
-    // Set up demo notification simulation every 45 seconds if in demo mode
+  // Fetch notifications on component mount (only if authenticated)
+  useEffect(() => {
+    // Only fetch notifications if admin is authenticated
+    if (isAdminAuthenticated()) {
+      fetchNotifications();
+      
+      // Set up optimized polling with longer intervals (5 minutes)
+      const interval = setInterval(() => {
+        // Double-check authentication before each poll
+        if (isAdminAuthenticated()) {
+          refreshNotifications();
+        } else {
+          console.log('Admin session expired, stopping notification polling');
+        }
+      }, 300000); // 5 minutes (300,000ms) - much more reasonable
+
+      return () => {
+        clearInterval(interval);
+      };
+    } else {
+      console.log('Admin not authenticated, skipping notification polling');
+      
+      // Load sample data for demo purposes if not authenticated
+      useNotificationStore.getState().loadSampleData();
+    }
+
+    // Demo simulation (only in demo mode, much less frequent)
     const demoInterval = setInterval(() => {
-      if (error) {
+      if (error && !isAdminAuthenticated()) {
         useNotificationStore.getState().simulateNewNotification();
       }
-    }, 45000); // Simulate new notifications every 45 seconds in demo mode
+    }, 600000); // 10 minutes for demo simulation
 
     return () => {
-      clearInterval(interval);
       clearInterval(demoInterval);
     };
   }, [fetchNotifications, refreshNotifications, error]);

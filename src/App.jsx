@@ -64,8 +64,18 @@ import {
   AdminContent,
   AdminDeliveryPartners,
 } from "./pages/Admin";
+
+// 🔐 NEW: Unified RBAC System Components
+import UnifiedRegistration from "./components/auth/UnifiedRegistration";
+import UnifiedLogin from "./pages/UnifiedLogin";
+import UnifiedDashboardRouter from "./components/UnifiedDashboardRouter";
+import ProtectedRoute, { UnauthorizedPage, RoleBasedRedirect } from "./components/ProtectedRoute";
+
 import AdminSellPhone from "./pages/Admin/AdminSellPhone";
+import FirebaseOptimizationTest from "./components/FirebaseOptimizationTest";
+import FirebaseOptimizationMonitor from "./components/FirebaseOptimizationMonitor";
 import FirebaseSetup from "./components/FirebaseSetup";
+import AdminAuthDebugger from "./components/AdminAuthDebugger";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 // Layout component that will be used across all pages
@@ -153,7 +163,18 @@ const App = () => {
             }}
           />
           <Routes>
-        {/* Auth Routes */}
+        {/* 🔐 NEW: Unified RBAC Authentication Routes */}
+        <Route path="/unified-signup" element={<UnifiedRegistration />} />
+        <Route path="/unified-login" element={<UnifiedLogin />} />
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <UnifiedDashboardRouter />
+          </ProtectedRoute>
+        } />
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
+        <Route path="/rbac-redirect" element={<RoleBasedRedirect />} />
+
+        {/* 🔄 LEGACY: Backward Compatibility Auth Routes */}
         <Route
           path="/signup"
           element={!isAuthenticated ? <SignUp /> : <Navigate to="/" />}
@@ -311,6 +332,30 @@ const App = () => {
                 <Navigate to="/admin/login" />
               )
             }
+          />
+          <Route
+            path="/admin/firebase-test"
+            element={
+              isAdminAuthenticated ? (
+                <FirebaseOptimizationTest />
+              ) : (
+                <Navigate to="/admin/login" />
+              )
+            }
+          />
+          <Route
+            path="/admin/firebase-monitor"
+            element={
+              isAdminAuthenticated ? (
+                <FirebaseOptimizationMonitor />
+              ) : (
+                <Navigate to="/admin/login" />
+              )
+            }
+          />
+          <Route
+            path="/admin/auth-debug"
+            element={<AdminAuthDebugger />}
           />
           <Route
             path="/admin/products"

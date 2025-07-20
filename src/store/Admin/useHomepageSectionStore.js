@@ -256,11 +256,25 @@ const useHomepageSectionStore = create(
       toggleSection: async (sectionId) => {
         set({ loading: true, error: null });
         try {
+          // First validate the section exists
+          const { sections } = get();
+          const existingSection = sections.find(s => s && s.section_id === sectionId);
+          
+          if (!existingSection) {
+            console.error('Available sections:', sections);
+            throw new Error(`Section with ID ${sectionId} not found`);
+          }
+
+          // Ensure enabled property exists and has a default value
+          if (typeof existingSection.enabled === 'undefined') {
+            existingSection.enabled = true; // Default to enabled
+            console.warn(`Section ${sectionId} had undefined enabled property, defaulting to true`);
+          }
+
           const response = await adminApi.post(`/admin/homepage/sections/${sectionId}/toggle/`);
           
           if (response.status === 200) {
             const updatedSection = response.data.section;
-            const { sections } = get();
             const updatedSections = sections.map(section => 
               section.section_id === sectionId ? updatedSection : section
             );
@@ -274,21 +288,40 @@ const useHomepageSectionStore = create(
         } catch (error) {
           console.error('Error toggling homepage section:', error);
           
-          // Fallback: Toggle mock section locally
+          // Fallback: Toggle mock section locally with validation
           const { sections } = get();
-          const updatedSections = sections.map(section => 
-            section.section_id === sectionId 
-              ? { ...section, enabled: !section.enabled, updated_at: new Date().toISOString() }
+          const existingSection = sections.find(s => s && s.section_id === sectionId);
+          
+          if (!existingSection) {
+            set({ 
+              loading: false,
+              error: `Section with ID ${sectionId} not found`
+            });
+            toast.error(`Section not found: ${sectionId}`);
+            throw error;
+          }
+
+          // Ensure enabled property exists
+          if (typeof existingSection.enabled === 'undefined') {
+            existingSection.enabled = true;
+          }
+
+          // Ensure enabled property exists
+          const currentEnabled = existingSection.enabled || false;
+          
+          const fallbackUpdatedSections = sections.map(section => 
+            section && section.section_id === sectionId 
+              ? { ...section, enabled: !currentEnabled, updated_at: new Date().toISOString() }
               : section
-          );
+          ).filter(Boolean); // Remove any null/undefined sections
           
           set({ 
-            sections: updatedSections,
+            sections: fallbackUpdatedSections,
             loading: false,
             error: 'Toggled locally - changes not saved to server'
           });
           
-          const toggledSection = updatedSections.find(s => s.section_id === sectionId);
+          const toggledSection = fallbackUpdatedSections.find(s => s.section_id === sectionId);
           toast.success(`Section ${toggledSection.enabled ? 'enabled' : 'disabled'} locally (demo mode)`);
           return toggledSection;
         }
@@ -342,7 +375,7 @@ const useHomepageSectionStore = create(
       initializeDefaultSections: async () => {
         set({ loading: true, error: null });
         try {
-          const response = await adminApi.post('/admin/homepage/initialize/');
+          const response = await adminApi.post('/admin/homepage/h15/initialize/');
           
           if (response.status === 201) {
             set({ 
@@ -355,18 +388,37 @@ const useHomepageSectionStore = create(
             // Sections already exist
             toast.info('Homepage sections already exist');
             await get().fetchSections();
-            return response.data.sections;
+            return get().sections;
           }
         } catch (error) {
           console.error('Error initializing default sections:', error);
-          const errorMessage = error.response?.data?.error || 'Failed to initialize default sections';
           set({ 
-            error: errorMessage,
-            loading: false 
+            loading: false,
+            error: error.response?.data?.error || error.message 
           });
-          toast.error(errorMessage);
-          throw error;
+          
+          // Handle authentication errors specifically
+          if (error.response?.status === 401 || error.response?.status === 403) {
+            toast.error('Authentication required. Please login as admin first.');
+            return false;
+          }
+          
+          // Fallback: Create mock sections for development
+          console.log('API failed, creating mock sections for development...');
+          const mockSections = get().getMockSections();
+          set({ 
+            sections: mockSections,
+            loading: false,
+            error: 'Using mock data - API authentication failed'
+          });
+          toast.warning('Using mock data - Please ensure backend is running and you are logged in as admin');
+          return mockSections;
         }
+      },
+
+      // MISSING METHOD - Add alias for initializeSections
+      initializeSections: async () => {
+        return get().initializeDefaultSections();
       },
 
       // Get section type display name
@@ -431,3 +483,6 @@ const useHomepageSectionStore = create(
 );
 
 export default useHomepageSectionStore;
+
+// Also export as named export for compatibility
+export { useHomepageSectionStore };

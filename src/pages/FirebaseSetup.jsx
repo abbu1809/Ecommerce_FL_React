@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { migrateProductsToFirebase, createCategories } from '../services/dataMigration';
-import { authService } from '../services/firebaseService';
+import { authService } from '../services/optimizedFirebaseService';
 
 const FirebaseSetup = () => {
   const [migrationStatus, setMigrationStatus] = useState('');

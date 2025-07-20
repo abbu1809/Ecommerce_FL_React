@@ -19,7 +19,7 @@ import {
   FiDroplet
 } from 'react-icons/fi';
 import { HexColorPicker } from 'react-colorful';
-import useThemeStore from '../../../store/Admin/useThemeStore';
+import {useThemeStore} from '../../../store/Admin/useThemeStore';
 import { adminApi } from '../../../services/api';
 import { loadCustomColors, applyColorsToDocument, getDefaultColors, saveCustomColors } from '../../../utils/colorUtils';
 import toast from 'react-hot-toast';

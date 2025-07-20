@@ -46,9 +46,25 @@ const useNotificationStore = create((set, get) => ({
   
   // Fetch notifications from backend
   fetchNotifications: async () => {
+    const { loading } = get();
+    
+    // Prevent multiple simultaneous requests
+    if (loading) {
+      console.log('Already loading notifications, skipping...');
+      return;
+    }
+
     set({ loading: true, error: null });
     
     try {
+      // Check authentication before making API call
+      const adminToken = localStorage.getItem('admin_token');
+      if (!adminToken) {
+        console.log('No admin token found, using sample data');
+        get().loadSampleData();
+        return;
+      }
+
       console.log('Fetching notifications from backend...');
       const response = await adminApi.get('/admin/notifications/');
       console.log('Notifications response:', response);
@@ -74,19 +90,21 @@ const useNotificationStore = create((set, get) => ({
       }
     } catch (error) {
       console.error('Error fetching notifications:', error);
-      console.error('Error response:', error.response);
       
-      // Only use sample data if backend is completely unavailable
-      const errorMessage = error.response?.status === 401 
-        ? 'Authentication required - please login again'
-        : error.response?.status >= 500
-        ? 'Backend server error - using demo data'
-        : 'Network error - using demo data';
+      // Handle specific error cases
+      if (error.response?.status === 401) {
+        console.log('Authentication failed, clearing admin token and using sample data');
+        localStorage.removeItem('admin_token');
+      } else if (error.response?.status >= 500) {
+        console.log('Server error detected, using sample data');
+      }
       
-      console.warn('Using sample notifications due to:', errorMessage);
+      get().loadSampleData();
     }
-    
-    // Fallback to realistic sample data that simulates real admin notifications
+  },
+
+  // Load sample data (separated for reusability)
+  loadSampleData: () => {
     const sampleNotifications = {
         orders: [
           {
@@ -207,18 +225,7 @@ const useNotificationStore = create((set, get) => ({
         error: 'Sample notifications loaded as fallback'
       });
       console.log('Sample notifications loaded as fallback');
-    
   },
-  
-  // Refresh notifications (called by interval)
-  // refreshNotifications: async () => {
-  //   const { lastUpdated } = get();
-  //   // Only refresh if it's been more than 10 seconds since last update
-  //   if (lastUpdated && Date.now() - lastUpdated.getTime() < 10000) {
-  //     return;
-  //   }
-  //   await get().fetchNotifications();
-  // },
   
   // Mark notification as read
   markAsRead: async (category, id) => {
@@ -286,8 +293,24 @@ const useNotificationStore = create((set, get) => ({
   
   // Refresh notifications (reload from backend)
   refreshNotifications: async () => {
-    const { fetchNotifications } = get();
-    await fetchNotifications();
+    // Prevent excessive calls - only refresh if it's been at least 30 seconds since last update
+    const { lastUpdated, loading } = get();
+    const now = new Date();
+    
+    // Skip if already loading or updated recently (within 30 seconds)
+    if (loading || (lastUpdated && now - lastUpdated < 30000)) {
+      console.log('Skipping notification refresh - too recent or already loading');
+      return;
+    }
+
+    // Check authentication before making API call
+    const adminToken = localStorage.getItem('admin_token');
+    if (!adminToken) {
+      console.log('Skipping notification refresh - no admin authentication');
+      return;
+    }
+
+    await get().fetchNotifications();
   },
   
   // Add new notification (for real-time updates)

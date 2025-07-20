@@ -1,4 +1,4 @@
-import { productService } from './firebaseService';
+import { productService } from './optimizedFirebaseService';
 import productsData from '../utils/Products_firebase_data.json';
 
 /**

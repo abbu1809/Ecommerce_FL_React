@@ -15,7 +15,7 @@ import {
   FiCalendar,
   FiPackage,
 } from "react-icons/fi";
-import useAdminStore from "../../../store/Admin/useAdminStore";
+import {useAdminStore} from "../../../store/Admin/useAdminStore";
 
 // Order Details Modal Component
 const OrderDetailsModal = ({ isOpen, onClose, order }) => {

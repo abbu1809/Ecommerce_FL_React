@@ -21,7 +21,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { toast } from 'react-hot-toast';
-import useBrandsStore from '../../../store/Admin/useBrandsStore';
+import {useBrandsStore} from '../../../store/Admin/useBrandsStore';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
 
@@ -97,14 +97,14 @@ const BrandsManager = () => {
     return (
       <div
         ref={setNodeRef}
-        style={style}
-        className={`rounded-lg border shadow-sm p-4 transition-all ${
-          isDragging ? 'shadow-lg' : ''
-        } ${!brand.active ? 'opacity-60' : ''}`}
         style={{
+          ...style,
           backgroundColor: "var(--bg-primary)",
           borderColor: "var(--border-primary)"
         }}
+        className={`rounded-lg border shadow-sm p-4 transition-all ${
+          isDragging ? 'shadow-lg' : ''
+        } ${!brand.active ? 'opacity-60' : ''}`}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">

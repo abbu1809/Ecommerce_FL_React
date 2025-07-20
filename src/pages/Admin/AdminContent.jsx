@@ -6,7 +6,7 @@ import FooterManager from "../../components/Admin/Content/FooterManager";
 import PageManager from "../../components/Admin/Content/PageManager";
 import ColorManager from "../../components/Admin/Content/ColorManager";
 import ThemeManager from "../../components/Admin/Content/SimpleThemeManager";
-import HomepageSectionManager from "../../components/Admin/Content/HomepageSectionManager";
+import UserFriendlyHomepageManager from "../../components/Admin/Content/UserFriendlyHomepageManager";
 import { bannerPositionOptions } from "../../constants/bannerOptions";
 
 const AdminContent = () => {
@@ -149,7 +149,7 @@ const AdminContent = () => {
           {activeTab === "footer" && <FooterManager />}
           {activeTab === "pages" && <PageManager />}
           {activeTab === "theme" && <ThemeManager />}
-          {activeTab === "homepage" && <HomepageSectionManager />}
+          {activeTab === "homepage" && <UserFriendlyHomepageManager />}
         </div>
       </div>
     </div>
