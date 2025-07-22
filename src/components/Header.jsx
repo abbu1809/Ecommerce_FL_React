@@ -768,7 +768,7 @@ const Header = () => {
                 </p>
               </Link>
               <Link
-                to={isAuthenticated ? "/profile" : ROUTES.LOGIN}
+                to={isAuthenticated ? "/profile" : "/unified-login"}
                 className="flex flex-col items-center transition-all duration-300 hover:translate-y-[-2px] group"
               >
                 <div className="relative">

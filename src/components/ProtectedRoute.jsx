@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useUnifiedAuthStore } from '../store/unifiedAuthStore';
+import { useUnifiedAuthStoreImproved } from '../store/unifiedAuthStoreImproved';
 
 /**
  * 🛡️ Protected Route Component for Unified RBAC System
@@ -17,10 +17,13 @@ const ProtectedRoute = ({
     isAuthenticated, 
     user, 
     userRole, 
-    permissions,
-    hasPermission,
-    hasRole 
-  } = useUnifiedAuthStore();
+    hasPermission 
+  } = useUnifiedAuthStoreImproved();
+
+  // Helper function to check if user has a specific role
+  const hasRole = (role) => {
+    return userRole === role;
+  };
 
   // Check if user is authenticated
   if (!isAuthenticated || !user) {
@@ -53,7 +56,7 @@ const ProtectedRoute = ({
  * 🚫 Unauthorized Access Component
  */
 export const UnauthorizedPage = () => {
-  const { user, userRole, permissions } = useUnifiedAuthStore();
+  const { user, userRole, permissions } = useUnifiedAuthStoreImproved();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -96,7 +99,7 @@ export const UnauthorizedPage = () => {
  * Automatically redirects users to their appropriate dashboard
  */
 export const RoleBasedRedirect = () => {
-  const { userRole, isAuthenticated } = useUnifiedAuthStore();
+  const { userRole, isAuthenticated } = useUnifiedAuthStoreImproved();
 
   if (!isAuthenticated) {
     return <Navigate to="/unified-login" replace />;

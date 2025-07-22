@@ -66,8 +66,8 @@ import {
 } from "./pages/Admin";
 
 // 🔐 NEW: Unified RBAC System Components
-import UnifiedRegistration from "./components/auth/UnifiedRegistration";
-import UnifiedLogin from "./pages/UnifiedLogin";
+import UnifiedRegistrationImproved from "./pages/UnifiedRegistrationImproved";
+import UnifiedLoginImproved from "./pages/UnifiedLoginImproved";
 import UnifiedDashboardRouter from "./components/UnifiedDashboardRouter";
 import ProtectedRoute, { UnauthorizedPage, RoleBasedRedirect } from "./components/ProtectedRoute";
 
@@ -163,9 +163,9 @@ const App = () => {
             }}
           />
           <Routes>
-        {/* 🔐 NEW: Unified RBAC Authentication Routes */}
-        <Route path="/unified-signup" element={<UnifiedRegistration />} />
-        <Route path="/unified-login" element={<UnifiedLogin />} />
+        {/* 🔐 NEW: Improved Unified RBAC Authentication Routes */}
+        <Route path="/unified-signup" element={<UnifiedRegistrationImproved />} />
+        <Route path="/unified-login" element={<UnifiedLoginImproved />} />
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <UnifiedDashboardRouter />

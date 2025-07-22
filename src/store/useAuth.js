@@ -72,7 +72,7 @@ export const useAuthStore = create((set) => ({
       set({ isLoading: true, error: null });
 
       // Direct API call to login endpoint
-      const response = await api.post("/users/login", {
+      const response = await api.post("/auth/login", {
         email: credentials.email,
         password: credentials.password,
       });
@@ -116,7 +116,7 @@ export const useAuthStore = create((set) => ({
 
       // Handle Google ID token signup
       if (userData.idToken) {
-        const response = await api.post("/users/signup", {
+        const response = await api.post("/auth/register", {
           idToken: userData.idToken,
         });
 
@@ -159,7 +159,7 @@ export const useAuthStore = create((set) => ({
       }
 
       // Direct API call to signup endpoint
-      const response = await api.post("/users/signup", requestData);
+      const response = await api.post("/auth/register", requestData);
       const data = response.data;
 
       // Prepare user data for consistent structure
