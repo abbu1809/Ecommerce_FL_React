@@ -11,13 +11,14 @@ import { persist } from 'zustand/middleware';
  * - Error handling improvements
  */
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = window.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
 
 class ApiClient {
   constructor() {
     this.csrfToken = null;
     this.authCache = new Map();
     this.requestQueue = new Map();
+    this.REQUEST_QUEUE_MAX_SIZE = 100; // Set a reasonable max size for the queue
   }
 
   async getCsrfToken() {
@@ -50,6 +51,11 @@ class ApiClient {
     }
 
     const requestPromise = this._performRequest(endpoint, options);
+    // Enforce max size: remove oldest if over limit
+    if (this.requestQueue.size >= this.REQUEST_QUEUE_MAX_SIZE) {
+      const oldestKey = this.requestQueue.keys().next().value;
+      this.requestQueue.delete(oldestKey);
+    }
     this.requestQueue.set(requestKey, requestPromise);
     
     try {
@@ -275,9 +281,9 @@ const useUnifiedAuthStoreImproved = create(
 
       // Google OAuth with improved error handling
       googleLogin: async () => {
-        set({ isLoading: true, error: null });
         
         try {
+          set({ isLoading: true, error: null });
           // Note: This would integrate with your existing Google OAuth setup
           const response = await apiClient.makeRequest('/users/google-auth/', {
             method: 'POST',

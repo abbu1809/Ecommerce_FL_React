@@ -51,7 +51,8 @@ const UnifiedRegistrationImproved = () => {
   useEffect(() => {
     const getCsrfToken = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/auth/csrf-token/', {
+        const apiBaseUrl = window.REACT_APP_API_BASE_URL || 'http://localhost:8000';
+        const response = await fetch(`${apiBaseUrl}/api/auth/csrf-token/`, {
           method: 'GET',
           credentials: 'include',
         });
@@ -307,7 +308,7 @@ const UnifiedRegistrationImproved = () => {
         } else {
           // Fallback routing
           const dashboardRoutes = {
-            'customer': '/dashboard',
+            'customer': '/',
             'admin': '/admin/dashboard',
             'delivery_partner': '/delivery/dashboard',
             'vendor': '/vendor/dashboard',

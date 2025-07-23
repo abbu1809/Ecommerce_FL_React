@@ -103,12 +103,13 @@ export const deleteCompleteUserData = async (userEmail, includeAuthUser = false)
             deletedItems.other++;
             console.log(`   ✅ Marked subcollection document for deletion: ${subCol}/${doc.id}`);
           });
-        } catch {
+        } catch (error) {
           console.log(`   ⚠️ Subcollection ${subCol} not found or empty`);
+          console.log('Subcollection access error:', error);
         }
-      }
+        }
     }
-    
+
     // 5. Commit all Firestore deletions
     console.log('🔥 Executing Firestore deletions...');
     await batch.commit();
@@ -274,23 +275,8 @@ export const deleteUserDataByUID = async (userId) => {
     };
   }
 };
+// (Browser-specific initialization moved to a separate file for better separation of concerns)
 
-// Export utility functions for browser console usage
-if (typeof window !== 'undefined') {
-  window.firebaseUserDeletion = {
-    deleteCompleteUserData,
-    deleteFirestoreUserData,
-    deleteEverything,
-    previewUserData,
-    deleteUserDataByUID
-  };
-  
-  console.log('🗑️ Firebase User Deletion Utilities loaded');
-  console.log('Usage examples:');
-  console.log('  window.firebaseUserDeletion.previewUserData("user@example.com")');
-  console.log('  window.firebaseUserDeletion.deleteFirestoreUserData("user@example.com")');
-  console.log('  window.firebaseUserDeletion.deleteEverything("user@example.com")');
-}
 
 export default {
   deleteCompleteUserData,
