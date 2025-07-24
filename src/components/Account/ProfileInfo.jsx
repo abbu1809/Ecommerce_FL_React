@@ -1,6 +1,6 @@
 import React from "react";
 import { FiLoader } from "react-icons/fi";
-import { useAuthStore } from "../../store/useAuth";
+import { useUnifiedAuthStoreImproved } from "../../store/unifiedAuthStoreImproved";
 import { useConfirmModal } from "../../hooks/useConfirmModal";
 import ConfirmModal from "../ui/ConfirmModal";
 import toast from "react-hot-toast";
@@ -13,7 +13,7 @@ const ProfileInfo = () => {
     fetchUserProfile,
     updateUserProfileAPI,
     clearError,
-  } = useAuthStore();
+    } = useUnifiedAuthStoreImproved();
 
   const {
     isOpen: confirmModalIsOpen,

@@ -165,7 +165,7 @@ const UnifiedLoginImproved = () => {
       console.log("Google login successful:", response);
       
       if (response.success) {
-        const dashboardUrl = response.data.dashboard_url || '/dashboard';
+        const dashboardUrl = response.data.dashboard_url || '/';
         navigate(dashboardUrl);
       }
     } catch (err) {

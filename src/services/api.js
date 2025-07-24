@@ -18,8 +18,19 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem(TOKEN_KEY);
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const authToken = localStorage.getItem('auth_token'); // Also check the new token key
+    const availableToken = token || authToken;
+    
+    console.log('🔑 API Request Debug:', {
+      endpoint: config.url,
+      method: config.method,
+      legacyToken: token ? `${token.substring(0, 10)}...` : 'not found',
+      authToken: authToken ? `${authToken.substring(0, 10)}...` : 'not found',
+      usingToken: availableToken ? `${availableToken.substring(0, 10)}...` : 'none'
+    });
+    
+    if (availableToken) {
+      config.headers.Authorization = `Bearer ${availableToken}`;
     }
     return config;
   },
@@ -30,12 +41,28 @@ api.interceptors.request.use(
 
 // Add a response interceptor to handle common response issues
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log('✅ API Response Success:', {
+      endpoint: response.config.url,
+      status: response.status,
+      dataKeys: Object.keys(response.data || {})
+    });
+    return response;
+  },
   (error) => {
+    console.error('❌ API Response Error:', {
+      endpoint: error.config?.url,
+      status: error.response?.status,
+      message: error.response?.data?.error || error.message,
+      hasAuthHeader: !!error.config?.headers?.Authorization
+    });
+    
     if (error.response?.status === 401) {
+      console.log('🚨 401 Unauthorized - clearing tokens');
       // Handle unauthorized - could clear auth state and redirect to login
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
+      localStorage.removeItem('auth_token'); // Also clear the new token key
     }
     return Promise.reject(error);
   }

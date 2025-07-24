@@ -3,13 +3,13 @@ import { useNavigate, Link } from "react-router-dom";
 import FormWrapper from "../components/ui/FormWrapper";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
-import { useAuthStore } from "../store/useAuth";
+import { useUnifiedAuthStoreImproved } from "../store/unifiedAuthStoreImproved";
 import { FiMail, FiLock, FiAlertCircle } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, googleSignup, error, clearError, isLoading } = useAuthStore();
+  const { login, googleSignup, error, clearError, isLoading } = useUnifiedAuthStoreImproved();
   const [formData, setFormData] = useState({
     email: "",
     password: "",

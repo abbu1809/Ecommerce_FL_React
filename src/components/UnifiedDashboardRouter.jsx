@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUnifiedAuthStore } from '../store/unifiedAuthStore';
+import { useUnifiedAuthStoreImproved } from '../store/unifiedAuthStoreImproved';
 
 // Import dashboard components
 import Account from '../pages/Account'; // Customer Dashboard
@@ -15,16 +15,17 @@ import DeliveryDashboard from '../pages/Delivery/DeliveryDashboard';
  */
 const UnifiedDashboardRouter = () => {
   const navigate = useNavigate();
-  const { user, userRole, isAuthenticated, permissions } = useUnifiedAuthStore();
+  const { user, userRole, isAuthenticated, permissions } = useUnifiedAuthStoreImproved();
 
-  // Redirect to login if not authenticated
-  if (!isAuthenticated || !user) {
-    navigate('/unified-login');
-    return null;
-  }
+  // Redirect to login if not authenticated - use useEffect to prevent navigation during render
+  useEffect(() => {
+    if (!isAuthenticated || !user) {
+      navigate('/unified-login', { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
 
-  // Loading state while user data is being fetched
-  if (!userRole) {
+  // Show loading state while redirecting or waiting for user data
+  if (!isAuthenticated || !user || !userRole) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">

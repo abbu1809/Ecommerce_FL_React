@@ -33,7 +33,7 @@ import {
   ShippingDeliveryPolicy,
   WarrantyPolicy,
 } from "./pages/Policy";
-import { useAuthStore } from "./store/useAuth";
+import { useUnifiedAuthStoreImproved } from "./store/unifiedAuthStoreImproved";
 import { useAdminAuthStore } from "./store/Admin/useAdminAuth";
 import useThemeStore from "./store/useTheme";
 import { loadCustomColors } from "./utils/colorUtils";
@@ -68,7 +68,6 @@ import {
 // 🔐 NEW: Unified RBAC System Components
 import UnifiedRegistrationImproved from "./pages/UnifiedRegistrationImproved";
 import UnifiedLoginImproved from "./pages/UnifiedLoginImproved";
-import UnifiedDashboardRouter from "./components/UnifiedDashboardRouter";
 import ProtectedRoute, { UnauthorizedPage, RoleBasedRedirect } from "./components/ProtectedRoute";
 
 import AdminSellPhone from "./pages/Admin/AdminSellPhone";
@@ -99,7 +98,7 @@ const Layout = () => {
 };
 
 const App = () => {
-  const { isAuthenticated, checkAuthStatus } = useAuthStore();
+  const { isAuthenticated, checkAuthStatus } = useUnifiedAuthStoreImproved();
   const { isAuthenticated: isAdminAuthenticated, checkAdminAuthStatus } =
     useAdminAuthStore();
   const { initializeTheme } = useThemeStore();
@@ -166,11 +165,6 @@ const App = () => {
         {/* 🔐 NEW: Improved Unified RBAC Authentication Routes */}
         <Route path="/unified-signup" element={<UnifiedRegistrationImproved />} />
         <Route path="/unified-login" element={<UnifiedLoginImproved />} />
-        <Route path="/dashboard" element={
-          <ProtectedRoute>
-            <UnifiedDashboardRouter />
-          </ProtectedRoute>
-        } />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
         <Route path="/rbac-redirect" element={<RoleBasedRedirect />} />
 

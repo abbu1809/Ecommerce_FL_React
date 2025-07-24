@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import api from "../services/api";
-import { useAuthStore } from "./useAuth";
+import { useUnifiedAuthStoreImproved } from "./unifiedAuthStoreImproved";
 import toast from "react-hot-toast";
 
 export const useCartStore = create(
@@ -19,7 +19,7 @@ export const useCartStore = create(
           set({ isLoading: true, error: null });
 
           // Check if user is authenticated
-          const isAuthenticated = useAuthStore.getState().isAuthenticated;
+          const isAuthenticated = useUnifiedAuthStoreImproved.getState().isAuthenticated;
 
           if (isAuthenticated) {
             const response = await api.get("/users/cart/");
@@ -64,7 +64,7 @@ export const useCartStore = create(
       addItem: async (product, quantity = 1) => {
         try {
           set({ isLoading: true, error: null });
-          const isAuthenticated = useAuthStore.getState().isAuthenticated;
+          const isAuthenticated = useUnifiedAuthStoreImproved.getState().isAuthenticated;
           if (isAuthenticated) {
             // Send to server first
             await api.post(`/users/cart/add/${product.id}/`, {
@@ -122,7 +122,7 @@ export const useCartStore = create(
       removeItem: async (itemId) => {
         try {
           set({ isLoading: true, error: null });
-          const isAuthenticated = useAuthStore.getState().isAuthenticated;
+          const isAuthenticated = useUnifiedAuthStoreImproved.getState().isAuthenticated;
 
           if (isAuthenticated) {
             // Remove from server first using item_id
@@ -170,7 +170,7 @@ export const useCartStore = create(
       updateQuantity: async (itemId, quantity) => {
         try {
           set({ isLoading: true, error: null });
-          const isAuthenticated = useAuthStore.getState().isAuthenticated;
+          const isAuthenticated = useUnifiedAuthStoreImproved.getState().isAuthenticated;
 
           if (quantity <= 0) {
             // Call removeItem if quantity is zero or negative
@@ -217,7 +217,7 @@ export const useCartStore = create(
       clearCart: async () => {
         try {
           set({ isLoading: true, error: null });
-          const isAuthenticated = useAuthStore.getState().isAuthenticated;
+          const isAuthenticated = useUnifiedAuthStoreImproved.getState().isAuthenticated;
           if (isAuthenticated) {
             // Clear server cart by removing each item using item_id
             const { items } = get();

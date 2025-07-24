@@ -137,7 +137,34 @@ export const useOrderStore = create((set) => ({
     );
   },
 
-  // Fetch all orders for the current user
+  // Fetch all orders for the current user (renamed from fetchOrders)
+  getAllOrders: async () => {
+    try {
+      set({ isLoading: true, error: null });
+
+      const response = await api.get("/users/orders/");
+      const orders = response.data.orders || [];
+
+      set({
+        orders,
+        isLoading: false,
+      });
+
+      return orders;
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      set({
+        isLoading: false,
+        error:
+          error.response?.data?.detail ||
+          error.response?.data?.error ||
+          "Authorization header required",
+      });
+      return [];
+    }
+  },
+
+  // Fetch all orders for the current user (keep both method names for compatibility)
   fetchOrders: async () => {
     try {
       set({ isLoading: true, error: null });

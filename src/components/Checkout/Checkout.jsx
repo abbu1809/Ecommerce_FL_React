@@ -18,15 +18,16 @@ import {
 } from "react-icons/fi";
 import useAddressStore from "../../store/useAddress";
 import { useCartStore } from "../../store/useCart";
-import { useOrderStore } from "../../store/useOrder";
-import { useAuthStore } from "../../store/useAuth";
+//import { useOrderStore } from "../../store/useOrder";
+import { useUnifiedAuthStoreImproved } from "../../store/unifiedAuthStoreImproved";
 import Button from "../ui/Button";
 import Modal from "../ui/Modal";
 import toast from "react-hot-toast";
+import useOrderStore from "../../store/useOrder";
 
 const Checkout = ({ isOpen, onClose, product = null, quantity = 1 }) => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useUnifiedAuthStoreImproved();
   const { items: cartItems, totalAmount: cartTotal } = useCartStore();
   const {
     placeOrderFromCart,

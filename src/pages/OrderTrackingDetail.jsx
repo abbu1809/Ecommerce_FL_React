@@ -36,7 +36,7 @@ import OrderTrackingTimeline from "../components/OrderTracking/OrderTrackingTime
 import useOrderStore from "../store/useOrder";
 import toast from "react-hot-toast";
 import { useProductStore } from "../store/useProduct";
-import { useAuthStore } from "../store/useAuth";
+import { useUnifiedAuthStoreImproved } from "../store/unifiedAuthStoreImproved";
 
 // This page is for /order-tracking/:orderId
 const OrderTrackingDetail = () => {
@@ -60,7 +60,7 @@ const OrderTrackingDetail = () => {
     clearReviewError,
     checkExistingReview,
   } = useProductStore();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user } = useUnifiedAuthStoreImproved();
 
   useEffect(() => {
     const fetchOrderDetails = async () => {

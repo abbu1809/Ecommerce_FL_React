@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import api from "../services/api";
-import { useAuthStore } from "./useAuth";
+import { useUnifiedAuthStoreImproved } from "./unifiedAuthStoreImproved";
 import toast from "react-hot-toast";
 
 export const useWishlistStore = create(
@@ -17,7 +17,7 @@ export const useWishlistStore = create(
           set({ isLoading: true, error: null });
 
           // Check if user is authenticated
-          const isAuthenticated = useAuthStore.getState().isAuthenticated;
+          const isAuthenticated = useUnifiedAuthStoreImproved.getState().isAuthenticated;
 
           if (isAuthenticated) {
             const response = await api.get("/users/wishlist/");
@@ -58,7 +58,7 @@ export const useWishlistStore = create(
       addItem: async (product) => {
         try {
           set({ isLoading: true, error: null });
-          const isAuthenticated = useAuthStore.getState().isAuthenticated;
+          const isAuthenticated = useUnifiedAuthStoreImproved.getState().isAuthenticated;
 
           // Check if item already exists to prevent redundant API calls
           const { items } = get();
@@ -96,7 +96,7 @@ export const useWishlistStore = create(
       removeItem: async (itemId) => {
         try {
           set({ isLoading: true, error: null });
-          const isAuthenticated = useAuthStore.getState().isAuthenticated;
+          const isAuthenticated = useUnifiedAuthStoreImproved.getState().isAuthenticated;
 
           if (isAuthenticated) {
             // Remove from server first using item_id
@@ -150,7 +150,7 @@ export const useWishlistStore = create(
       clearWishlist: async () => {
         try {
           set({ isLoading: true, error: null });
-          const isAuthenticated = useAuthStore.getState().isAuthenticated;
+          const isAuthenticated = useUnifiedAuthStoreImproved.getState().isAuthenticated;
           if (isAuthenticated) {
             // Clear server wishlist by removing each item using item_id
             const { items } = get();

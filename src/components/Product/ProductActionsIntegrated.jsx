@@ -11,7 +11,7 @@ import {
 import Button from "../ui/Button";
 import { useCartStore } from "../../store/useCart";
 import { useWishlistStore } from "../../store/useWishlist";
-import { useAuthStore } from "../../store/useAuth";
+import { useUnifiedAuthStoreImproved } from "../../store/unifiedAuthStoreImproved";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../utils/constants";
 import {
@@ -29,7 +29,7 @@ const ProductActionsIntegrated = ({ product, quantity = 1 }) => {
     isInWishlist,
     error: wishlistError,
   } = useWishlistStore();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useUnifiedAuthStoreImproved();
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
 

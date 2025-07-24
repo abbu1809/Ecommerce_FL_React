@@ -319,6 +319,8 @@ const UnifiedRegistrationImproved = () => {
       }
     } catch (err) {
       console.error('Registration error:', err);
+      // The error should be handled by the registerUser function and displayed in the UI
+      // No need to set local error state since the store manages it
     }
   };
 

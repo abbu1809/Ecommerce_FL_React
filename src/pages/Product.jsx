@@ -5,7 +5,7 @@ import { ROUTES } from "../utils/constants";
 import { useProductStore } from "../store/useProduct";
 import { useCartStore } from "../store/useCart";
 import { useWishlistStore } from "../store/useWishlist";
-import { useAuthStore } from "../store/useAuth";
+import { useUnifiedAuthStoreImproved } from "../store/unifiedAuthStoreImproved";
 import { showAddToCartToast, showCartErrorToast } from "../utils/toast";
 import Breadcrumb from "../components/Breadcrumb/Breadcrumb";
 import ProductImageGallery from "../components/Product/ProductImageGallery";
@@ -33,7 +33,7 @@ const Product = () => {
   } = useProductStore();
   const { addItem: addToCartStore } = useCartStore();
   const { addItem: addToWishlistStore } = useWishlistStore();
-  const { user } = useAuthStore();
+  const { user } = useUnifiedAuthStoreImproved();
 
   // Define handleVariantChange early to avoid conditional hooks
   const handleVariantChange = useCallback((option) => {

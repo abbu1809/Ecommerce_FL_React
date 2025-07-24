@@ -9,12 +9,12 @@ import {
   FiSettings,
   FiLogOut,
 } from "react-icons/fi";
-import { useAuthStore } from "../../store/useAuth";
+import { useUnifiedAuthStoreImproved } from "../../store/unifiedAuthStoreImproved";
 
 const AccountSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useAuthStore();
+  const { logout } = useUnifiedAuthStoreImproved();
 
   const menuItems = [
     {

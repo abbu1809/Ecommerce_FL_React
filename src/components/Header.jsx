@@ -12,7 +12,7 @@ import {
 import { ROUTES } from "../utils/constants";
 import Logo from "./ui/Logo";
 import ThemeToggle from "./ui/ThemeToggle";
-import { useAuthStore } from "../store/useAuth";
+import { useUnifiedAuthStoreImproved } from "../store/unifiedAuthStoreImproved";
 import { useCartStore } from "../store/useCart";
 import { useWishlistStore } from "../store/useWishlist";
 import { Link, useNavigate } from "react-router-dom";
@@ -27,7 +27,7 @@ const Header = () => {
   const desktopSuggestionsRef = useRef(null);
   const mobileSuggestionsRef = useRef(null);
   const cartWishlistInitialized = useRef(false);
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user, logout } = useUnifiedAuthStoreImproved();
   const { itemCount: cartItemCount, totalAmount, fetchCart } = useCartStore();
   const { items: wishlistItems, fetchWishlist } = useWishlistStore();
   const productsInitialized = useRef(false);
@@ -693,53 +693,6 @@ const Header = () => {
                 </div>
               </div>
               <Link
-                to={ROUTES.WISHLIST}
-                className="hidden sm:flex flex-col items-center transition-all duration-300 hover:translate-y-[-2px] group"
-              >
-                <div className="relative">
-                  <div className="absolute -inset-1.5 bg-white/10 rounded-full blur-md group-hover:bg-white/20 transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
-                  <FiHeart
-                    className="text-xl relative z-10"
-                    style={{ color: "var(--text-on-brand)" }}
-                  />
-                  <span
-                    className="absolute -top-2 -right-2 z-20 text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold shadow-lg animate-pulse"
-                    style={{
-                      backgroundColor: "var(--bg-primary)",
-                      color: "var(--brand-primary)",
-                      boxShadow: "0 0 10px rgba(255,255,255,0.3)",
-                    }}
-                  >
-                    {wishlistItems.length}
-                  </span>
-                </div>
-                <p
-                  className="text-xs font-semibold mt-1"
-                  style={{ color: "var(--text-on-brand)" }}
-                >
-                  Wishlist
-                </p>
-              </Link>
-              <Link
-                to={ROUTES.ORDERS}
-                className="hidden sm:flex flex-col items-center transition-all duration-300 hover:translate-y-[-2px] group"
-              >
-                <div className="relative">
-                  <div className="absolute -inset-1.5 bg-white/10 rounded-full blur-md group-hover:bg-white/20 transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
-                  <FiCalendar
-                    className="text-xl relative z-10"
-                    style={{ color: "var(--text-on-brand)" }}
-                  />
-                  {/* Orders don't need a count badge */}
-                </div>
-                <p
-                  className="text-xs font-semibold mt-1"
-                  style={{ color: "var(--text-on-brand)" }}
-                >
-                  Orders
-                </p>
-              </Link>
-              <Link
                 to={ROUTES.CART}
                 className="flex flex-col items-center transition-all duration-300 hover:translate-y-[-2px] group"
               >
@@ -767,26 +720,246 @@ const Header = () => {
                   ₹ {totalAmount.toFixed(2)}
                 </p>
               </Link>
-              <Link
-                to={isAuthenticated ? "/profile" : "/unified-login"}
-                className="flex flex-col items-center transition-all duration-300 hover:translate-y-[-2px] group"
-              >
-                <div className="relative">
-                  <div className="absolute -inset-1.5 bg-white/10 rounded-full blur-md group-hover:bg-white/20 transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
-                  <FiUser
-                    className="text-xl relative z-10"
-                    style={{ color: "var(--text-on-brand)" }}
-                  />
-                </div>
-                <div className="text-xs mt-1">
-                  <p
-                    className="font-semibold"
-                    style={{ color: "var(--text-on-brand)" }}
+              {/* Enhanced User Authentication Button */}
+              {isAuthenticated ? (
+                <div className="relative group dropdown-container">
+                  {/* Authenticated User Button - Enhanced */}
+                  <button
+                    onClick={() => setActiveDropdown(activeDropdown === 'user' ? null : 'user')}
+                    className="flex flex-col items-center transition-all duration-300 hover:translate-y-[-2px] group relative"
+                    aria-haspopup="true"
+                    aria-expanded={activeDropdown === 'user'}
                   >
-                    {isAuthenticated ? "My Account" : "Sign In"}
-                  </p>
+                    {/* Enhanced Avatar with Glow Effect */}
+                    <div className="relative">
+                      <div className="absolute -inset-2 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 rounded-full blur-md group-hover:blur-lg transition-all duration-300 opacity-20 group-hover:opacity-40 animate-pulse"></div>
+                      <div 
+                        className="w-9 h-9 rounded-full flex items-center justify-center relative z-10 border-2 shadow-lg group-hover:shadow-xl transition-all duration-300 font-bold text-sm"
+                        style={{ 
+                          backgroundColor: 'var(--brand-primary)',
+                          borderColor: 'var(--text-on-brand)',
+                          color: 'var(--text-on-brand)',
+                          boxShadow: '0 4px 20px rgba(0,0,0,0.15), 0 0 0 2px rgba(255,255,255,0.1)'
+                        }}
+                      >
+                        {user?.first_name ? user.first_name.charAt(0).toUpperCase() : <FiUser className="text-base" />}
+                      </div>
+                      {/* Enhanced Online Indicator */}
+                      <div 
+                        className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 shadow-sm animate-pulse"
+                        style={{ 
+                          backgroundColor: '#10B981',
+                          borderColor: 'var(--bg-primary)',
+                          boxShadow: '0 0 8px rgba(16, 185, 129, 0.4)'
+                        }}
+                      ></div>
+                    </div>
+                    <div className="text-xs mt-1.5">
+                      <p
+                        className="font-semibold max-w-16 truncate group-hover:text-blue-200 transition-colors duration-300"
+                        style={{ color: "var(--text-on-brand)" }}
+                      >
+                        {user?.first_name || "Account"}
+                      </p>
+                      {/* User Type Badge */}
+                      <p className="text-xs opacity-80 capitalize" style={{ color: "var(--text-on-brand)" }}>
+                        {user?.user_type?.replace('_', ' ') || 'User'}
+                      </p>
+                    </div>
+                  </button>
+
+                  {/* Enhanced User Dropdown Menu */}
+                  {activeDropdown === 'user' && (
+                    <div className="dropdown-container absolute right-0 top-full mt-2 w-72 rounded-xl shadow-2xl border z-50 backdrop-blur-sm animate-fadeIn"
+                         style={{ 
+                           backgroundColor: 'var(--bg-primary)',
+                           borderColor: 'var(--border-primary)',
+                           boxShadow: '0 20px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.05)',
+                         }}>
+                      {/* Enhanced User Info Header */}
+                      <div className="px-5 py-4 border-b"
+                           style={{ borderColor: 'var(--border-primary)' }}>
+                        <div className="flex items-center space-x-3">
+                          <div 
+                            className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg shadow-lg"
+                            style={{ 
+                              backgroundColor: 'var(--brand-primary)',
+                              color: 'var(--text-on-brand)',
+                              background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))'
+                            }}
+                          >
+                            {user?.first_name ? user.first_name.charAt(0).toUpperCase() : <FiUser />}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>
+                              {user?.first_name} {user?.last_name}
+                            </p>
+                            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                              {user?.email}
+                            </p>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold shadow-sm"
+                                    style={{ 
+                                      backgroundColor: 'var(--brand-secondary)',
+                                      color: 'var(--text-on-brand)'
+                                    }}>
+                                {user?.user_type?.replace('_', ' ').toUpperCase() || 'USER'}
+                              </span>
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                                    style={{ 
+                                      backgroundColor: '#10B981',
+                                      color: 'white'
+                                    }}>
+                                ● Online
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Enhanced Menu Items */}
+                      <div className="py-2">
+                        <Link
+                          to="/profile"
+                          onClick={() => setActiveDropdown(null)}
+                          className="flex items-center px-5 py-3 text-sm hover:bg-opacity-50 transition-all duration-200 group"
+                          style={{ color: 'var(--text-primary)' }}
+                        >
+                          <div className="w-8 h-8 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-200"
+                               style={{ backgroundColor: 'var(--brand-primary)20' }}>
+                            <FiUser className="text-brand-primary" style={{ color: 'var(--brand-primary)' }} />
+                          </div>
+                          <div>
+                            <p className="font-medium">My Profile</p>
+                            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>View and edit your information</p>
+                          </div>
+                        </Link>
+
+                        <Link
+                          to="/profile/addresses"
+                          onClick={() => setActiveDropdown(null)}
+                          className="flex items-center px-5 py-3 text-sm hover:bg-opacity-50 transition-all duration-200 group"
+                          style={{ color: 'var(--text-primary)' }}
+                        >
+                          <div className="w-8 h-8 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-200"
+                               style={{ backgroundColor: 'var(--brand-primary)20' }}>
+                            <FiMapPin className="text-brand-primary" style={{ color: 'var(--brand-primary)' }} />
+                          </div>
+                          <div>
+                            <p className="font-medium">My Addresses</p>
+                            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Manage delivery addresses</p>
+                          </div>
+                        </Link>
+                        
+                        {user?.user_type === 'admin' && (
+                          <Link
+                            to="/admin/dashboard"
+                            onClick={() => setActiveDropdown(null)}
+                            className="flex items-center px-5 py-3 text-sm hover:bg-opacity-50 transition-all duration-200 group"
+                            style={{ color: 'var(--text-primary)' }}
+                          >
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-200"
+                                 style={{ backgroundColor: '#EF444420' }}>
+                              <div className="w-5 h-5 rounded bg-red-500 flex items-center justify-center text-white text-xs font-bold">A</div>
+                            </div>
+                            <div>
+                              <p className="font-medium">Admin Dashboard</p>
+                              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Manage system and users</p>
+                            </div>
+                          </Link>
+                        )}
+                        
+                        {user?.user_type === 'delivery_partner' && (
+                          <Link
+                            to="/delivery/dashboard"
+                            onClick={() => setActiveDropdown(null)}
+                            className="flex items-center px-5 py-3 text-sm hover:bg-opacity-50 transition-all duration-200 group"
+                            style={{ color: 'var(--text-primary)' }}
+                          >
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-200"
+                                 style={{ backgroundColor: '#3B82F620' }}>
+                              <div className="w-5 h-5 rounded bg-blue-500 flex items-center justify-center text-white text-xs font-bold">D</div>
+                            </div>
+                            <div>
+                              <p className="font-medium">Delivery Dashboard</p>
+                              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Manage your deliveries</p>
+                            </div>
+                          </Link>
+                        )}
+
+                        <Link
+                          to="/orders"
+                          onClick={() => setActiveDropdown(null)}
+                          className="flex items-center px-5 py-3 text-sm hover:bg-opacity-50 transition-all duration-200 group"
+                          style={{ color: 'var(--text-primary)' }}
+                        >
+                          <div className="w-8 h-8 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-200"
+                               style={{ backgroundColor: 'var(--brand-secondary)20' }}>
+                            <FiCalendar className="text-brand-secondary" style={{ color: 'var(--brand-secondary)' }} />
+                          </div>
+                          <div>
+                            <p className="font-medium">Order History</p>
+                            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Track your purchases</p>
+                          </div>
+                        </Link>
+
+                        <div className="border-t my-2" style={{ borderColor: 'var(--border-primary)' }}></div>
+                        
+                        <button
+                          onClick={() => {
+                            logout();
+                            setActiveDropdown(null);
+                            navigate('/');
+                          }}
+                          className="flex items-center w-full px-5 py-3 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 group"
+                        >
+                          <div className="w-8 h-8 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-200"
+                               style={{ backgroundColor: '#EF444420' }}>
+                            <FiX className="text-red-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium">Sign Out</p>
+                            <p className="text-xs opacity-80">Logout from your account</p>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </Link>
+              ) : (
+                /* Enhanced Unauthenticated User Button */
+                <Link
+                  to="/unified-login"
+                  className="flex flex-col items-center transition-all duration-300 hover:translate-y-[-2px] group relative"
+                >
+                  <div className="relative">
+                    <div className="absolute -inset-1.5 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full blur-md group-hover:blur-lg transition-all duration-300 opacity-0 group-hover:opacity-30"></div>
+                    <div
+                      className="w-9 h-9 rounded-full flex items-center justify-center relative z-10 border-2 group-hover:border-blue-300 transition-all duration-300 shadow-lg group-hover:shadow-xl"
+                      style={{ 
+                        backgroundColor: 'var(--bg-primary)',
+                        borderColor: 'var(--text-on-brand)',
+                        color: 'var(--text-on-brand)'
+                      }}
+                    >
+                      <FiUser
+                        className="text-xl transition-transform duration-300 group-hover:scale-110"
+                      />
+                    </div>
+                  </div>
+                  <div className="text-xs mt-1.5 text-center">
+                    <p
+                      className="font-semibold group-hover:text-blue-200 transition-colors duration-300"
+                      style={{ color: "var(--text-on-brand)" }}
+                    >
+                      Sign In
+                    </p>
+                    <p className="text-xs opacity-80" style={{ color: "var(--text-on-brand)" }}>
+                      Login / Register
+                    </p>
+                  </div>
+                </Link>
+              )}
               
               {/* Theme Toggle */}
               <div className="flex flex-col items-center justify-center">

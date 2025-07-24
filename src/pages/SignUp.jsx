@@ -6,13 +6,13 @@ import Input from "../components/ui/Input";
 
 import Button from "../components/ui/Button";
 
-import { useAuthStore } from "../store/useAuth";
+import { useUnifiedAuthStoreImproved } from "../store/unifiedAuthStoreImproved";
 import { FiUser, FiMail, FiPhone, FiLock, FiAlertCircle } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
 
 const SignUp = () => {
   const navigate = useNavigate();
-  const { signup, googleSignup, error, clearError, isLoading } = useAuthStore();
+  const { signup, googleSignup, error, clearError, isLoading } = useUnifiedAuthStoreImproved();
 
   const [formData, setFormData] = useState({
     firstName: "",

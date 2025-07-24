@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FiX, FiStar, FiPackage } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { useProductStore } from "../../store/useProduct";
-import { useAuthStore } from "../../store/useAuth";
+import { useUnifiedAuthStoreImproved } from "../../store/unifiedAuthStoreImproved";
 
 const ReviewModal = ({ isOpen, onClose, product }) => {
   const [rating, setRating] = useState(0);
@@ -11,7 +11,7 @@ const ReviewModal = ({ isOpen, onClose, product }) => {
 
   const { addReview, reviewLoading, reviewError, clearReviewError } =
     useProductStore();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user } = useUnifiedAuthStoreImproved();
 
   // Handle escape key press
   useEffect(() => {

@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import ReviewList from "../../components/Reviews/ReviewList";
 // Removed ReviewForm import as reviews are now written from order history
 import useReviewStore from "../../store/useReviewStore";
-import { useAuthStore } from "../../store/useAuth";
+import { useUnifiedAuthStoreImproved } from "../../store/unifiedAuthStoreImproved";
 import { useProductStore } from "../../store/useProduct";
 import { toast } from "../../utils/toast";
 import ConfirmModal from "../ui/ConfirmModal";
@@ -10,7 +10,7 @@ import { useConfirmModal } from "../../hooks/useConfirmModal";
 
 const ProductReviews = ({ productId, product }) => {
   const { reviews, productReviews, addReview, fetchReviews } = useReviewStore();
-  const { user } = useAuthStore();
+  const { user } = useUnifiedAuthStoreImproved();
   const { markReviewHelpful, reportReview } = useProductStore();
   const {
     isOpen: confirmOpen,

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { FiStar } from "react-icons/fi";
 import { useProductStore } from "../../store/useProduct";
-import { useAuthStore } from "../../store/useAuth";
+import { useUnifiedAuthStoreImproved } from "../../store/unifiedAuthStoreImproved";
 
 const ReviewForm = ({ productId, onReviewSubmitted }) => {
   const [rating, setRating] = useState(0);
@@ -11,7 +11,7 @@ const ReviewForm = ({ productId, onReviewSubmitted }) => {
 
   const { addReview, reviewLoading, reviewError, clearReviewError } =
     useProductStore();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useUnifiedAuthStoreImproved();
   const handleSubmit = async (e) => {
     e.preventDefault();
 

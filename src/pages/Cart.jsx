@@ -6,7 +6,7 @@ import CartItemList from "../components/Cart/CartItemList";
 import CartSummary from "../components/Cart/CartSummary";
 import Checkout from "../components/Checkout/Checkout";
 import { useCartStore } from "../store/useCart";
-import { useAuthStore } from "../store/useAuth";
+import { useUnifiedAuthStoreImproved } from "../store/unifiedAuthStoreImproved";
 import { useOrderStore } from "../store/useOrder";
 
 const Cart = () => {
@@ -17,7 +17,7 @@ const Cart = () => {
     updateQuantity,
     removeItem,
   } = useCartStore();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useUnifiedAuthStoreImproved();
   const { paymentSuccessful } = useOrderStore();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   useEffect(() => {

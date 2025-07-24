@@ -11,7 +11,7 @@ import {
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useProductStore } from "../store/useProduct";
-import { useAuthStore } from "../store/useAuth";
+import { useUnifiedAuthStoreImproved } from "../store/unifiedAuthStoreImproved";
 
 const OrderTracking = () => {
   // State for review functionality
@@ -26,7 +26,7 @@ const OrderTracking = () => {
   // Store hooks
   const { addReview, reviewLoading, reviewError, clearReviewError } =
     useProductStore();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user } = useUnifiedAuthStoreImproved();
 
   // Example order status data (replace with real data from backend/store)
   const order = {

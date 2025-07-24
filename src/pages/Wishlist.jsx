@@ -5,7 +5,7 @@ import Button from "../components/ui/Button";
 import { ROUTES } from "../utils/constants";
 import { useWishlistStore } from "../store/useWishlist";
 import { useCartStore } from "../store/useCart";
-import { useAuthStore } from "../store/useAuth";
+import { useUnifiedAuthStoreImproved } from "../store/unifiedAuthStoreImproved";
 import {
   showAddToCartToast,
   showRemoveFromWishlistToast,
@@ -18,7 +18,7 @@ const Wishlist = () => {
     removeItem,
   } = useWishlistStore();
   const { addItem: addToCart } = useCartStore();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useUnifiedAuthStoreImproved();
 
   useEffect(() => {
     // Load wishlist data when component mounts

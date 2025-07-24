@@ -48,11 +48,14 @@ const Orders = () => {
       try {
         await getAllOrders();
       } catch (error) {
-        console.error("Error fetching orders:", error);
+        console.error('Error fetching orders:', error);
       }
     };
+
     fetchOrders();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps // Get current delivery status from tracking history
+  }, [getAllOrders]);
+
+  // Get current delivery status from tracking history
   const getCurrentDeliveryStatus = (order) => {
     console.log("Getting status for order:", order.order_id, order);
 

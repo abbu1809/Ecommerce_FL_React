@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { API_URL } from '../utils/constants';
 
 /**
  * 🔐 Improved Unified Authentication Store
@@ -11,7 +12,7 @@ import { persist } from 'zustand/middleware';
  * - Error handling improvements
  */
 
-const API_BASE_URL = window.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
+const API_BASE_URL = API_URL;
 
 class ApiClient {
   constructor() {
@@ -25,7 +26,7 @@ class ApiClient {
     if (this.csrfToken) return this.csrfToken;
     
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/csrf-token/`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/csrf-token/`, {
         method: 'GET',
         credentials: 'include',
       });
@@ -148,7 +149,12 @@ const useUnifiedAuthStoreImproved = create(
         }
 
         try {
-          const userData = await apiClient.makeRequest(`/auth/user/${userId}/`);
+          const userData = await apiClient.makeRequest('/api/auth/profile/', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem(TOKEN_KEY)}`,
+            },
+          });
           
           // Update cache
           set({
@@ -187,7 +193,7 @@ const useUnifiedAuthStoreImproved = create(
             });
           }
           
-          const response = await apiClient.makeRequest('/auth/login/', {
+          const response = await apiClient.makeRequest('/api/auth/login/', {
             method: 'POST',
             body: requestBody,
           });
@@ -210,9 +216,14 @@ const useUnifiedAuthStoreImproved = create(
             }
           });
 
-          // Store token for API calls
+          // Store token for API calls with proper key
           if (token) {
             localStorage.setItem('auth_token', token);
+            localStorage.setItem('anand_mobiles_token', token); // Also store with legacy key for compatibility
+            console.log('🔑 Tokens stored successfully:', {
+              authToken: `${token.substring(0, 10)}...`,
+              legacyToken: `${token.substring(0, 10)}...`
+            });
           }
 
           return {
@@ -237,7 +248,7 @@ const useUnifiedAuthStoreImproved = create(
         set({ isLoading: true, error: null });
         
         try {
-          const response = await apiClient.makeRequest('/auth/register/', {
+          const response = await apiClient.makeRequest('/api/auth/register/', {
             method: 'POST',
             body: JSON.stringify(registrationData),
           });
@@ -257,6 +268,11 @@ const useUnifiedAuthStoreImproved = create(
 
             if (token) {
               localStorage.setItem('auth_token', token);
+              localStorage.setItem('anand_mobiles_token', token); // Also store with legacy key for compatibility
+              console.log('🔑 Registration tokens stored successfully:', {
+                authToken: `${token.substring(0, 10)}...`,
+                legacyToken: `${token.substring(0, 10)}...`
+              });
             }
           } else {
             set({ isLoading: false });
@@ -285,10 +301,12 @@ const useUnifiedAuthStoreImproved = create(
         try {
           set({ isLoading: true, error: null });
           // Note: This would integrate with your existing Google OAuth setup
-          const response = await apiClient.makeRequest('/users/google-auth/', {
+          // Google OAuth is handled through the unified login endpoint with idToken
+          const response = await apiClient.makeRequest('/api/auth/login/', {
             method: 'POST',
             body: JSON.stringify({
-              // Google OAuth token would be passed here
+              // Google OAuth token would be passed here as idToken
+              // idToken: googleIdToken
             }),
           });
 
@@ -306,6 +324,7 @@ const useUnifiedAuthStoreImproved = create(
 
             if (token) {
               localStorage.setItem('auth_token', token);
+              localStorage.setItem('anand_mobiles_token', token); // Also store with legacy key for compatibility
             }
 
             return {
@@ -326,6 +345,7 @@ const useUnifiedAuthStoreImproved = create(
       // Logout with cache cleanup
       logout: () => {
         localStorage.removeItem('auth_token');
+        localStorage.removeItem('anand_mobiles_token'); // Also remove legacy token
         apiClient.csrfToken = null;
         apiClient.authCache.clear();
         
@@ -344,33 +364,100 @@ const useUnifiedAuthStoreImproved = create(
         });
       },
 
+      // Check authentication status from localStorage on app startup
+      checkAuthStatus: () => {
+        console.log('🔍 Checking auth status...');
+        const token = localStorage.getItem('auth_token');
+        const legacyToken = localStorage.getItem('anand_mobiles_token');
+        
+        console.log('🔑 Token status:', {
+          authToken: token ? `${token.substring(0, 10)}...` : 'not found',
+          legacyToken: legacyToken ? `${legacyToken.substring(0, 10)}...` : 'not found'
+        });
+        
+        // Use either token if available
+        const availableToken = token || legacyToken;
+        
+        if (availableToken) {
+          console.log('✅ Token found, attempting validation...');
+          // If we have a token, validate it
+          get().validateSession();
+        } else {
+          console.log('❌ No token found, logging out...');
+          // No token found, ensure user is logged out
+          get().logout();
+        }
+      },
+
       // Session validation (reduce API calls)
       validateSession: async () => {
         const token = localStorage.getItem('auth_token');
-        if (!token) {
+        const legacyToken = localStorage.getItem('anand_mobiles_token');
+        const availableToken = token || legacyToken;
+        
+        console.log('🔍 Validating session...', {
+          hasAuthToken: !!token,
+          hasLegacyToken: !!legacyToken,
+          usingToken: availableToken ? `${availableToken.substring(0, 10)}...` : 'none'
+        });
+        
+        if (!availableToken) {
+          console.log('❌ No token available, logging out...');
           get().logout();
           return false;
         }
 
         try {
-          const response = await apiClient.makeRequest('/auth/validate/', {
-            method: 'POST',
+          // Use the correct unified auth endpoint that exists in the backend
+          const response = await apiClient.makeRequest('/api/auth/profile/', {
+            method: 'GET',
             headers: {
-              'Authorization': `Bearer ${token}`,
+              'Authorization': `Bearer ${availableToken}`,
             },
           });
 
-          if (response.success) {
+          console.log('✅ Session validation response:', response);
+
+          // Check if we got valid user data back
+          if (response && (response.email || response.user_id)) {
+            // Transform the response to match our user structure
+            const userData = {
+              uid: response.user_id || response.uid,
+              email: response.email,
+              first_name: response.first_name,
+              last_name: response.last_name,
+              phone: response.phone_number || response.phone || "",
+              user_type: response.user_type || 'customer'
+            };
+
+            // Update store with validated user data
             set({
+              user: userData,
+              userRole: userData.user_type,
+              isAuthenticated: true,
               lastActivity: Date.now(),
             });
+            
+            // Ensure both tokens are set for compatibility
+            if (token && !legacyToken) {
+              localStorage.setItem('anand_mobiles_token', token);
+            } else if (legacyToken && !token) {
+              localStorage.setItem('auth_token', legacyToken);
+            }
+            
+            console.log('✅ Session validated successfully');
             return true;
           } else {
+            console.log('❌ Session validation failed, logging out...');
             get().logout();
             return false;
           }
         } catch (error) {
-          get().logout();
+          console.error('❌ Session validation error:', error);
+          // Only logout on certain errors to avoid infinite loops
+          if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+            get().logout();
+          }
           return false;
         }
       },

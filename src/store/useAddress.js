@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import api from "../services/api";
-import { useAuthStore } from "./useAuth";
+import { useUnifiedAuthStoreImproved } from "./unifiedAuthStoreImproved";
 import toast from "react-hot-toast";
 
 const useAddressStore = create((set, get) => ({
@@ -10,7 +10,7 @@ const useAddressStore = create((set, get) => ({
   error: null,
   // Fetch all addresses for the current user
   fetchAddresses: async () => {
-    const { isAuthenticated } = useAuthStore.getState();
+    const { isAuthenticated } = useUnifiedAuthStoreImproved.getState();
 
     if (!isAuthenticated) {
       set({ addresses: [], error: "User not authenticated" });
@@ -59,7 +59,7 @@ const useAddressStore = create((set, get) => ({
   },
   // Add a new address
   addAddress: async (addressData) => {
-    const { isAuthenticated } = useAuthStore.getState();
+    const { isAuthenticated } = useUnifiedAuthStoreImproved.getState();
 
     if (!isAuthenticated) {
       toast.error("Please login to add an address");
@@ -114,7 +114,7 @@ const useAddressStore = create((set, get) => ({
   },
   // Update an existing address
   updateAddress: async (id, addressData) => {
-    const { isAuthenticated } = useAuthStore.getState();
+    const { isAuthenticated } = useUnifiedAuthStoreImproved.getState();
 
     if (!isAuthenticated) {
       toast.error("Please login to update an address");
@@ -178,7 +178,7 @@ const useAddressStore = create((set, get) => ({
   },
   // Delete an address
   deleteAddress: async (id) => {
-    const { isAuthenticated } = useAuthStore.getState();
+    const { isAuthenticated } = useUnifiedAuthStoreImproved.getState();
 
     if (!isAuthenticated) {
       toast.error("Please login to delete an address");
@@ -209,7 +209,7 @@ const useAddressStore = create((set, get) => ({
   },
   // Set an address as default
   setDefaultAddress: async (id) => {
-    const { isAuthenticated } = useAuthStore.getState();
+    const { isAuthenticated } = useUnifiedAuthStoreImproved.getState();
 
     if (!isAuthenticated) {
       toast.error("Please login to set default address");
