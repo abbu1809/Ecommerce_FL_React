@@ -96,7 +96,42 @@ const BestSellingSection = ({ products, title = "Best Selling Smartphones", desc
     }
   ];
 
-  const displayProducts = products && products.length > 0 ? products : sampleProducts;
+  const displayProducts = products && products.length > 0 ? products : [];
+
+  // If no products to display, show a message instead of hardcoded data
+  if (displayProducts.length === 0) {
+    return (
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h2
+                className="text-3xl font-bold mb-3"
+                style={{ color: "var(--text-primary)" }}
+              >
+                {title}
+              </h2>
+              <div
+                className="h-1 w-24 rounded-full mb-2"
+                style={{ backgroundColor: "var(--brand-primary)" }}
+              ></div>
+              <p
+                className="text-lg"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                {description}
+              </p>
+            </div>
+          </div>
+          <div className="text-center py-12">
+            <p style={{ color: "var(--text-secondary)" }}>
+              No best selling products available at the moment. Please check back later!
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-12">
@@ -121,7 +156,7 @@ const BestSellingSection = ({ products, title = "Best Selling Smartphones", desc
             </p>
           </div>
           <Link
-            to="/products/smartphones"
+            to="/category/smartphones"
             className="text-lg font-semibold hover:underline transition-all duration-300"
             style={{ color: "var(--brand-primary)" }}
           >

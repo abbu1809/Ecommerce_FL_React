@@ -240,7 +240,7 @@ const BrandsSection = () => {
         {/* View All Brands Link */}
         <div className="text-center mt-8">
           <Link 
-            to="/brands"
+            to="/products"
             className="inline-flex items-center px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
             style={{ 
               backgroundColor: "var(--brand-primary)",

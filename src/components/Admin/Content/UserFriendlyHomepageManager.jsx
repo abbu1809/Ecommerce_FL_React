@@ -509,10 +509,36 @@ const UserFriendlyHomepageManager = () => {
   // Handle content management
   const handleViewContent = (section) => {
     console.log('Content management for section:', section);
-    toast('Content management coming soon!', {
-      icon: '🚀',
-      duration: 2000,
-    });
+    
+    // Check if section has specific content management functionality
+    const sectionId = section.section_id || section.id;
+    if (!sectionId) {
+      toast.error('Invalid section ID');
+      return;
+    }
+
+    // For now, redirect to section-specific content management
+    if (section.section_type === 'best_selling') {
+      // For best selling, we could manage which products are featured
+      toast.success('Opening product management for Best Selling section...');
+      // Could redirect to a specific product management page
+      window.open('/admin/products?section=best_selling', '_blank');
+    } else if (section.section_type === 'featured_products') {
+      toast.success('Opening product management for Featured Products...');
+      window.open('/admin/products?section=featured', '_blank');
+    } else if (section.section_type === 'banner_carousel') {
+      toast.success('Opening banner management...');
+      window.open('/admin/content/banners', '_blank');
+    } else if (section.section_type === 'blog_section') {
+      toast.success('Opening blog management...');
+      // Will implement blog management
+      window.open('/admin/content/blogs', '_blank');
+    } else {
+      // Generic content management
+      toast.info(`Content management for ${section.section_type} - Feature coming soon!`, {
+        duration: 3000,
+      });
+    }
   };
 
   // Delete section with validation

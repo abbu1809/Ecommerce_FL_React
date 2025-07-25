@@ -108,7 +108,7 @@ const useHomepageSectionStore = create(
           console.log('Homepage sections response:', response.data);
           
           if (response.status === 200) {
-            const sections = response.data.sections || [];
+            const sections = (response.data.sections || []).filter(Boolean); // Filter out null/undefined values
             console.log(`Successfully loaded ${sections.length} homepage sections`);
             set({ 
               sections: sections,
@@ -187,8 +187,8 @@ const useHomepageSectionStore = create(
             const updatedSection = response.data.section;
             const { sections } = get();
             const updatedSections = sections.map(section => 
-              section.section_id === sectionId ? updatedSection : section
-            );
+              section && section.section_id === sectionId ? updatedSection : section
+            ).filter(Boolean); // Remove any null/undefined sections
             set({ 
               sections: updatedSections,
               loading: false 
@@ -202,10 +202,10 @@ const useHomepageSectionStore = create(
           // Fallback: Update mock section locally
           const { sections } = get();
           const updatedSections = sections.map(section => 
-            section.section_id === sectionId 
+            section && section.section_id === sectionId 
               ? { ...section, ...sectionData, updated_at: new Date().toISOString() }
               : section
-          );
+          ).filter(Boolean); // Remove any null/undefined sections
           
           set({ 
             sections: updatedSections,
@@ -276,8 +276,8 @@ const useHomepageSectionStore = create(
           if (response.status === 200) {
             const updatedSection = response.data.section;
             const updatedSections = sections.map(section => 
-              section.section_id === sectionId ? updatedSection : section
-            );
+              section && section.section_id === sectionId ? updatedSection : section
+            ).filter(Boolean); // Remove any null/undefined sections
             set({ 
               sections: updatedSections,
               loading: false 
@@ -469,10 +469,10 @@ const useHomepageSectionStore = create(
       updateSectionOrderLocally: (sectionId, newOrder) => {
         const { sections } = get();
         const updatedSections = sections.map(section => 
-          section.section_id === sectionId 
+          section && section.section_id === sectionId 
             ? { ...section, order: newOrder }
             : section
-        );
+        ).filter(Boolean); // Remove any null/undefined sections
         set({ sections: updatedSections });
       }
     }),

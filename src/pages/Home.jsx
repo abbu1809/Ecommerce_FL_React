@@ -69,7 +69,8 @@ const Home = () => {
 
   // Render homepage sections dynamically based on admin configuration
   const renderHomepageSection = (section) => {
-    if (!section.enabled) return null;
+    // Safety check for undefined section
+    if (!section || !section.enabled) return null;
 
     const sectionStyle = {
       backgroundColor: "var(--bg-primary)",
@@ -298,8 +299,8 @@ const Home = () => {
   };
 
   // Filter and sort enabled sections by display order
-  const enabledSections = sections
-    .filter(section => section.enabled)
+  const enabledSections = (sections || []) // Ensure sections is always an array
+    .filter(section => section && section.enabled) // Add null/undefined check
     .sort((a, b) => (a.display_order || a.order || 0) - (b.display_order || b.order || 0));
   
   console.log('Homepage sections to render:', enabledSections); // We don't need mock data anymore as CategoryList will fetch from backend
