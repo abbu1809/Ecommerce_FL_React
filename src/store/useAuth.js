@@ -100,11 +100,28 @@ export const useAuthStore = create((set) => ({
 
       return data;
     } catch (error) {
+      let errorMessage = "Login failed. Please check your credentials.";
+      
+      if (error.response?.data?.error) {
+        const serverError = error.response.data.error;
+        const errorCode = error.response.data.code;
+        
+        // Handle specific error codes from backend
+        if (errorCode === 'CLOCK_SKEW_ERROR') {
+          errorMessage = "Clock synchronization issue detected. Please ensure your device clock is set to the correct time and try again.";
+        } else if (errorCode === 'TOKEN_EXPIRED') {
+          errorMessage = "Authentication session expired. Please try logging in again.";
+        } else if (errorCode === 'INVALID_TOKEN') {
+          errorMessage = "Invalid authentication. Please try logging in again.";
+        } else {
+          errorMessage = serverError;
+        }
+      } else if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      }
+      
       set({
-        error:
-          error.response?.data?.detail ||
-          error.response?.data?.error ||
-          "Login failed. Please check your credentials.",
+        error: errorMessage,
         isLoading: false,
       });
       throw error;
@@ -183,11 +200,28 @@ export const useAuthStore = create((set) => ({
 
       return data;
     } catch (error) {
+      let errorMessage = "Signup failed. Please try again.";
+      
+      if (error.response?.data?.error) {
+        const serverError = error.response.data.error;
+        const errorCode = error.response.data.code;
+        
+        // Handle specific error codes from backend
+        if (errorCode === 'CLOCK_SKEW_ERROR') {
+          errorMessage = "Clock synchronization issue detected. Please ensure your device clock is set to the correct time and try again.";
+        } else if (errorCode === 'TOKEN_EXPIRED') {
+          errorMessage = "Authentication session expired. Please try signing up again.";
+        } else if (errorCode === 'INVALID_TOKEN') {
+          errorMessage = "Invalid authentication. Please try signing up again.";
+        } else {
+          errorMessage = serverError;
+        }
+      } else if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      }
+      
       set({
-        error:
-          error.response?.data?.detail ||
-          error.response?.data?.error ||
-          "Signup failed. Please try again.",
+        error: errorMessage,
         isLoading: false,
       });
       throw error;
@@ -197,19 +231,92 @@ export const useAuthStore = create((set) => ({
     try {
       set({ isLoading: true, error: null });
 
-      // Sign in with Google popup
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      const idToken = await user.getIdToken();
+      console.log("Starting Google authentication...");
 
-      // Use the regular signup function with idToken
-      return await useAuthStore.getState().signup({ idToken });
-    } catch (error) {
+      // Configure popup options for better compatibility
+      const result = await signInWithPopup(auth, provider).catch((error) => {
+        console.error("Google popup error:", error);
+        if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
+          throw new Error("Popup blocked or closed. Please allow popups and try again.");
+        }
+        throw error;
+      });
+
+      const user = result.user;
+      console.log("Google authentication successful:", user.email);
+
+      // Get ID token
+      const idToken = await user.getIdToken();
+      console.log("ID token obtained successfully");
+
+      // Prepare comprehensive user data for backend
+      const userData = {
+        idToken: idToken,
+        email: user.email,
+        firstName: user.displayName?.split(' ')[0] || '',
+        lastName: user.displayName?.split(' ').slice(1).join(' ') || '',
+        photoURL: user.photoURL,
+        uid: user.uid,
+        authProvider: 'google'
+      };
+
+      console.log("Sending data to backend:", { ...userData, idToken: '[REDACTED]' });
+
+      // Direct API call with better error handling
+      const response = await api.post("/users/signup", userData);
+      console.log("Backend response:", response.data);
+
+      const data = response.data;
+
+      // Prepare user data for consistent structure
+      const userInfo = {
+        uid: data.user_id || user.uid,
+        email: data.email || user.email,
+        first_name: data.first_name || userData.firstName,
+        last_name: data.last_name || userData.lastName,
+        phone: data.phone_number || "",
+        auth_provider: 'google',
+        photoURL: user.photoURL
+      };
+
+      // Persist authentication data
+      persistAuthData(data.token, userInfo);
+
+      // Update store state
       set({
-        error:
-          error.response?.data?.detail ||
-          error.response?.data?.error ||
-          "Google signup failed. Please try again.",
+        user: userInfo,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      return data;
+    } catch (error) {
+      console.error("Google signup/login error:", error);
+      
+      let errorMessage = "Google authentication failed. Please try again.";
+      
+      if (error.response?.data?.error) {
+        const serverError = error.response.data.error;
+        const errorCode = error.response.data.code;
+        
+        // Handle specific error codes from backend
+        if (errorCode === 'CLOCK_SKEW_ERROR') {
+          errorMessage = "Clock synchronization issue detected. Please ensure your device clock is set to the correct time and try again.";
+        } else if (errorCode === 'TOKEN_EXPIRED') {
+          errorMessage = "Authentication session expired. Please try logging in again.";
+        } else if (errorCode === 'INVALID_TOKEN') {
+          errorMessage = "Invalid authentication. Please try logging in again.";
+        } else {
+          errorMessage = serverError;
+        }
+      } else if (error.message.includes("popup")) {
+        errorMessage = "Popup blocked or closed. Please allow popups and try again.";
+      } else if (error.code === 'auth/network-request-failed') {
+        errorMessage = "Network error. Please check your connection and try again.";
+      }
+
+      set({
+        error: errorMessage,
         isLoading: false,
       });
       throw error;

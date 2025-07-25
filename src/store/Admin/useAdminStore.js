@@ -149,7 +149,7 @@ export const useAdminStore = create((set, get) => {
     assignOrderToDeliveryPartner: async (userId, orderId, partnerId) => {
       try {
         const response = await adminApi.post(
-          `/admin/orders/${userId}/${orderId}/assign_delivery_partner/`,
+          `/admin/users/${userId}/orders/${orderId}/assign-partner/`,
           { partner_id: partnerId }
         );
         return response.data;

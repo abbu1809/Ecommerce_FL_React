@@ -20,11 +20,11 @@ const useCategory = create((set) => ({
 
     try {
       const response = await adminApi.get("/admin/categories/");
-      const categories = response.data.categories;
+      const categories = response.data.categories || [];
 
       set({
         categories: {
-          list: categories,
+          list: Array.isArray(categories) ? categories : [],
           loading: false,
           error: null,
         },
@@ -36,6 +36,7 @@ const useCategory = create((set) => ({
       set((state) => ({
         categories: {
           ...state.categories,
+          list: [], // Ensure list is always an array
           loading: false,
           error: errorMessage,
         },

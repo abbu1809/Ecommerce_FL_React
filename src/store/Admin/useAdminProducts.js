@@ -361,6 +361,15 @@ export const useAdminProducts = create((set, get) => ({
   // Upload product image
   uploadProductImage: async (imageFile) => {
     try {
+      // Check if admin is authenticated
+      const adminToken = localStorage.getItem("admin_token");
+      if (!adminToken) {
+        return {
+          success: false,
+          message: "Admin authentication required. Please log in as admin first.",
+        };
+      }
+
       const formData = new FormData();
       formData.append("image", imageFile);
 
@@ -387,12 +396,21 @@ export const useAdminProducts = create((set, get) => ({
         };
       }
     } catch (error) {
+      let errorMessage = "Failed to upload image";
+      
+      if (error.response?.status === 401) {
+        errorMessage = "Authentication failed. Please log in as admin and try again.";
+      } else if (error.response?.status === 400) {
+        errorMessage = error.response?.data?.error || "Invalid image file or request.";
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       return {
         success: false,
-        message:
-          error.response?.data?.error ||
-          error.message ||
-          "Failed to upload image",
+        message: errorMessage,
       };
     }
   },

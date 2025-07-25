@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useLogoStore } from "../../store/Admin/useLogoStore";
 
-const Logo = ({ size = "medium", linkWrapper = true, titleColor }) => {
+const Logo = ({ size = "medium", linkWrapper = true }) => {
   const { logo, loading, fetchLogo } = useLogoStore();
   const hasInitialized = useRef(false);
 
@@ -14,14 +14,12 @@ const Logo = ({ size = "medium", linkWrapper = true, titleColor }) => {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const sizes = {
-    small: "h-8 w-auto",
-    medium: "h-12 w-auto",
-    large: "h-16 w-auto",
+  // Expanded horizontal logo sizes for better header presence
+  const logoSizes = {
+    small: "h-8 w-24",
+    medium: "h-12 w-36", 
+    large: "h-16 w-48",
   };
-
-  // Use provided titleColor or default to brand primary color
-  const textColor = titleColor || "var(--brand-primary)";
 
   const content = (
     <>
@@ -29,19 +27,14 @@ const Logo = ({ size = "medium", linkWrapper = true, titleColor }) => {
         <img
           src={logo || "/logo.jpg"}
           alt="Anand Mobiles"
-          className={`${sizes[size]} rounded-md transition-transform duration-300 hover:scale-105`}
+          className={`${logoSizes[size]} object-contain rounded-md transition-transform duration-300 hover:scale-105`}
           style={{
             borderRadius: "var(--rounded-md)",
             boxShadow: "var(--shadow-small)",
           }}
         />
       </div>
-      <span
-        className="ml-2.5 text-xl font-bold hidden sm:inline-block transition-colors duration-300"
-        style={{ color: textColor }}
-      >
-        <span>Anand</span> Mobiles
-      </span>
+      {/* Removed text, keeping only logo image */}
     </>
   );
 

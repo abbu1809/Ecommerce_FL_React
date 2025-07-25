@@ -526,10 +526,11 @@ const Header = () => {
             "linear-gradient(to right, var(--brand-primary), var(--brand-primary-hover))",
         }}
       >
-        <div className="container mx-auto px-2 sm:px-3">
-          <div className="flex items-center justify-between py-4">
+        <div className="container mx-auto px-2 sm:px-4">
+          <div className="flex items-center justify-between py-4 gap-4">
+            {/* Mobile Menu Button */}
             <button
-              className="lg:hidden p-2 rounded-full hover:bg-white/10 transition-colors"
+              className="lg:hidden p-2 rounded-full hover:bg-white/10 transition-colors flex-shrink-0"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
             >
@@ -545,17 +546,21 @@ const Header = () => {
                 />
               )}
             </button>
-            {/* Logo with enhanced animation */}
-            <Link
-              to={ROUTES.HOME}
-              className="flex items-center transform hover:scale-105 transition duration-300 ease-in-out"
-            >
-              <Logo linkWrapper={false} titleColor="white" />
-            </Link>
-            {/* Enhanced Search Bar with animated focus state */}
-            <div className="hidden md:block flex-1 max-w-2xl mx-6">
+            
+            {/* Enhanced Logo Section with better spacing */}
+            <div className="flex-shrink-0">
+              <Link
+                to={ROUTES.HOME}
+                className="flex items-center transform hover:scale-105 transition duration-300 ease-in-out"
+              >
+                <Logo linkWrapper={false} />
+              </Link>
+            </div>
+            
+            {/* Enhanced Search Bar with better flex distribution */}
+            <div className="hidden md:flex flex-1 max-w-3xl mx-8">
               <div
-                className={`relative group ${
+                className={`relative group w-full ${
                   isSearchFocused ? "ring-4 ring-white/20 rounded-full" : ""
                 }`}
               >
@@ -661,8 +666,9 @@ const Header = () => {
                 )}
               </div>
             </div>
-            {/* Right Header Menu with enhanced animations */}
-            <div className="flex items-center gap-4 md:gap-6">
+            {/* Enhanced Right Header Menu with improved spacing */}
+            <div className="flex items-center gap-3 md:gap-5 lg:gap-6 flex-shrink-0">
+              {/* Location */}
               <div className="group flex flex-col items-center cursor-pointer transition-all duration-300 hover:translate-y-[-2px] relative">
                 <div className="relative">
                   <div className="absolute -inset-1.5 bg-white/10 rounded-full blur-md group-hover:bg-white/20 transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
@@ -671,27 +677,29 @@ const Header = () => {
                     style={{ color: "var(--text-on-brand)" }}
                   />
                 </div>
-                <div className="text-xs mt-1">
+                <div className="text-xs mt-1 text-center">
                   <p
-                    className="text-white/80 text-center"
+                    className="text-white/80"
                     style={{ color: "var(--text-on-brand-muted)" }}
                   >
                     Delivery to
                   </p>
                   <p
-                    className="font-semibold"
+                    className="font-semibold truncate max-w-20"
                     style={{ color: "var(--text-on-brand)" }}
                   >
                     {location.loading ? (
                       <span className="inline-block w-16 h-3 bg-white/20 rounded-full animate-pulse"></span>
                     ) : location.error ? (
-                      "Error fetching location"
+                      "Error"
                     ) : (
                       location.city
                     )}
                   </p>
                 </div>
               </div>
+              
+              {/* Wishlist */}
               <Link
                 to={ROUTES.WISHLIST}
                 className="hidden sm:flex flex-col items-center transition-all duration-300 hover:translate-y-[-2px] group"
@@ -720,6 +728,8 @@ const Header = () => {
                   Wishlist
                 </p>
               </Link>
+              
+              {/* Orders */}
               <Link
                 to={ROUTES.ORDERS}
                 className="hidden sm:flex flex-col items-center transition-all duration-300 hover:translate-y-[-2px] group"
@@ -730,7 +740,6 @@ const Header = () => {
                     className="text-xl relative z-10"
                     style={{ color: "var(--text-on-brand)" }}
                   />
-                  {/* Orders don't need a count badge */}
                 </div>
                 <p
                   className="text-xs font-semibold mt-1"
@@ -739,6 +748,8 @@ const Header = () => {
                   Orders
                 </p>
               </Link>
+              
+              {/* Cart */}
               <Link
                 to={ROUTES.CART}
                 className="flex flex-col items-center transition-all duration-300 hover:translate-y-[-2px] group"
@@ -767,6 +778,8 @@ const Header = () => {
                   ₹ {totalAmount.toFixed(2)}
                 </p>
               </Link>
+              
+              {/* User Profile */}
               <Link
                 to={isAuthenticated ? "/profile" : ROUTES.LOGIN}
                 className="flex flex-col items-center transition-all duration-300 hover:translate-y-[-2px] group"
@@ -778,18 +791,24 @@ const Header = () => {
                     style={{ color: "var(--text-on-brand)" }}
                   />
                 </div>
-                <div className="text-xs mt-1">
+                <div className="text-xs mt-1 text-center">
                   <p
-                    className="font-semibold"
+                    className="font-semibold truncate max-w-20"
                     style={{ color: "var(--text-on-brand)" }}
                   >
-                    {isAuthenticated ? "My Account" : "Sign In"}
+                    {isAuthenticated ? "Account" : "Sign In"}
                   </p>
                 </div>
               </Link>
               
-              {/* Theme Toggle */}
-              <div className="flex flex-col items-center justify-center">
+              {/* Divider */}
+              <div
+                className="hidden md:block w-px h-8 mx-2"
+                style={{ backgroundColor: "var(--text-on-brand-muted)" }}
+              ></div>
+              
+              {/* Enhanced Theme Toggle */}
+              <div className="flex flex-col items-center justify-center transition-all duration-300 hover:translate-y-[-2px]">
                 <ThemeToggle />
               </div>
             </div>
@@ -1199,7 +1218,6 @@ const Header = () => {
             <Logo
               size="small"
               linkWrapper={false}
-              titleColor="var(--text-primary)"
             />
             <button
               className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100"

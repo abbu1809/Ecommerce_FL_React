@@ -1,12 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { FiX, FiUpload, FiPlus, FiTrash2, FiCamera } from "react-icons/fi";
 import useAdminProducts from "../../../store/Admin/useAdminProducts";
+import useCategory from "../../../store/useCategory";
 import { toast } from "../../../utils/toast";
 
 const AddProductForm = ({ onClose, onSave }) => {
   const [step, setStep] = useState(1);
   const [uploadingImage, setUploadingImage] = useState(false);
   const { uploadProductImage } = useAdminProducts();
+  const { categories: categoriesStore, fetchCategories } = useCategory();
+  const categories = useMemo(() => 
+    Array.isArray(categoriesStore?.list) ? categoriesStore.list : [],
+    [categoriesStore?.list]
+  );
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -26,6 +32,11 @@ const AddProductForm = ({ onClose, onSave }) => {
     rating: 0,
     reviews: 0,
   });
+
+  // Fetch categories when component mounts
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   // Handle image upload
   const handleImageUpload = async (e) => {
@@ -451,14 +462,15 @@ const AddProductForm = ({ onClose, onSave }) => {
                     }}
                   >
                     <option value="">Select a category</option>
-                    <option value="Smartphone">Smartphone</option>
-                    <option value="Laptop">Laptop</option>
-                    <option value="Tablet">Tablet</option>
-                    <option value="TV">TV</option>
-                    <option value="Accessories">Accessories</option>
-                    <option value="Audio">Audio</option>
-                    <option value="Wearables">Wearables</option>
-                    <option value="Gaming">Gaming</option>
+                    {categories && categories.length > 0 ? (
+                      categories.map((category) => (
+                        <option key={category.id || category.name} value={category.name}>
+                          {category.name}
+                        </option>
+                      ))
+                    ) : (
+                      <option value="" disabled>No categories available</option>
+                    )}
                   </select>
                 </div>
 

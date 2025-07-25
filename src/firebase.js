@@ -13,11 +13,20 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
+
+// Configure Google Auth Provider for better COOP compatibility
+provider.setCustomParameters({
+  prompt: 'select_account'
+});
+
+// Add scopes for user info
+provider.addScope('email');
+provider.addScope('profile');
+
 const db = getFirestore(app);
 const storage = getStorage(app);
 
