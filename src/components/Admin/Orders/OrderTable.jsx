@@ -117,9 +117,30 @@ const CustomerName = ({ userId }) => {
   );
 };
 
-// Helper function to get customer name from user_id (fallback)
-const getCustomerName = (userId) => {
-  return `User-${userId.substring(0, 8)}`;
+// Helper function to get customer name from order data
+const getCustomerName = (order) => {
+  // Use the user details from the order data if available
+  if (order.user_name && order.user_name !== 'Unknown') {
+    return order.user_name;
+  }
+  if (order.customer_name) {
+    return order.customer_name;
+  }
+  if (order.user_email && order.user_email !== 'Unknown') {
+    return order.user_email;
+  }
+  // Fallback to user ID
+  return `User-${order.user_id.substring(0, 8)}`;
+};
+
+// Helper function to get customer email
+const getCustomerEmail = (order) => {
+  return order.user_email && order.user_email !== 'Unknown' ? order.user_email : 'No email';
+};
+
+// Helper function to get customer phone
+const getCustomerPhone = (order) => {
+  return order.user_phone && order.user_phone !== 'Unknown' ? order.user_phone : 'No phone';
 };
 
 // Helper function to format date
@@ -144,11 +165,13 @@ const OrderTable = ({ onSelectOrder, statusFilter, searchQuery }) => {
     return orderList.filter((order) => {
       const matchesStatus =
         statusFilter === "all" || order.status === statusFilter;
-      const customerName = getCustomerName(order.user_id);
+      const customerName = getCustomerName(order);
+      const customerEmail = getCustomerEmail(order);
       const matchesSearch =
         !searchQuery ||
         order.order_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
         customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        customerEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
         order.user_id.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesStatus && matchesSearch;
     });

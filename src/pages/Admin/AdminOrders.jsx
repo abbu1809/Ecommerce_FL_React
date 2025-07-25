@@ -16,6 +16,7 @@ const AdminOrders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("newest"); // Add sorting state
   const [showOrderDetailModal, setShowOrderDetailModal] = useState(false);
 
   // Pagination states
@@ -28,18 +29,37 @@ const AdminOrders = () => {
     fetchOrders();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Filter orders based on status and search query
-  const filteredOrders = orders.list.filter((order) => {
-    const matchesSearch =
-      order.order_id?.toString().includes(searchQuery) ||
-      order.user_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.invoice_id?.toLowerCase().includes(searchQuery.toLowerCase());
+  // Filter and sort orders based on status, search query, and sort option
+  const filteredOrders = orders.list
+    .filter((order) => {
+      const matchesSearch =
+        order.order_id?.toString().includes(searchQuery) ||
+        order.user_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        order.invoice_id?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesStatus =
-      statusFilter === "all" || order.status === statusFilter;
+      const matchesStatus =
+        statusFilter === "all" || order.status === statusFilter;
 
-    return matchesSearch && matchesStatus;
-  });
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "newest":
+          return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+        case "oldest":
+          return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+        case "amount-high":
+          return (b.total_amount || 0) - (a.total_amount || 0);
+        case "amount-low":
+          return (a.total_amount || 0) - (b.total_amount || 0);
+        case "status":
+          return (a.status || "").localeCompare(b.status || "");
+        case "order-id":
+          return (a.order_id || "").localeCompare(b.order_id || "");
+        default:
+          return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+      }
+    });
 
   // Pagination calculations
   const totalItems = filteredOrders.length;
@@ -57,7 +77,7 @@ const AdminOrders = () => {
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [statusFilter, searchQuery]);
+  }, [statusFilter, searchQuery, sortBy]);
 
   // Helper function to export orders to CSV
   const exportOrdersToCSV = () => {
@@ -242,6 +262,58 @@ const AdminOrders = () => {
             />
           </div>
         </div>
+
+        {/* Sort by dropdown */}
+        <div className="min-w-[180px]">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FiFilter
+                className="h-4 w-4"
+                style={{ color: "var(--text-secondary)" }}
+              />
+            </div>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="block w-full pl-10 pr-8 py-2 border rounded-md text-sm appearance-none bg-no-repeat bg-right"
+              style={{
+                backgroundColor: "var(--bg-primary)",
+                color: "var(--text-primary)",
+                borderColor: "var(--border-primary)",
+                borderRadius: "var(--rounded-md)",
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: 'right 0.5rem center',
+                backgroundSize: '1.5em 1.5em'
+              }}
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="amount-high">Amount: High to Low</option>
+              <option value="amount-low">Amount: Low to High</option>
+              <option value="status">Status A-Z</option>
+              <option value="order-id">Order ID</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Clear filters button */}
+        {(searchQuery || sortBy !== "newest") && (
+          <button
+            onClick={() => {
+              setSearchQuery("");
+              setSortBy("newest");
+            }}
+            className="flex items-center px-3 py-2 text-sm font-medium rounded-md border transition-colors"
+            style={{
+              backgroundColor: "var(--bg-secondary)",
+              color: "var(--text-secondary)",
+              borderColor: "var(--border-primary)",
+            }}
+          >
+            <FiX className="mr-1" size={14} />
+            Clear
+          </button>
+        )}
       </div>
       {/* Order table - now full width */}
       <div className="w-full">
