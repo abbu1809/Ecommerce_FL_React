@@ -139,9 +139,9 @@ const getCustomerEmail = (order) => {
 };
 
 // Helper function to get customer phone
-const getCustomerPhone = (order) => {
+/* const getCustomerPhone = (order) => {
   return order.user_phone && order.user_phone !== 'Unknown' ? order.user_phone : 'No phone';
-};
+}; */
 
 // Helper function to format date
 const formatDate = (dateString) => {

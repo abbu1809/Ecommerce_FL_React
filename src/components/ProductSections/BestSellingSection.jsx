@@ -21,7 +21,7 @@ const BestSellingSection = ({ products, title = "Best Selling Smartphones", desc
   };
 
   // Sample data if no products provided
-  const sampleProducts = [
+ /* const sampleProducts = [
     {
       id: 1,
       name: "Apple iPhone 15 Pro Max",
@@ -94,7 +94,7 @@ const BestSellingSection = ({ products, title = "Best Selling Smartphones", desc
       brand: "Nothing",
       category: "Smartphones"
     }
-  ];
+  ]; */
 
   const displayProducts = products && products.length > 0 ? products : [];
 
