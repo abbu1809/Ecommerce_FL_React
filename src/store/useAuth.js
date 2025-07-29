@@ -4,7 +4,16 @@ import { TOKEN_KEY, USER_KEY } from "../utils/constants";
 import { auth, provider } from "../firebase";
 import { signInWithPopup } from "firebase/auth";
 
-// Helper function to safely parse JSON from localStorage
+// Helper function to safely parse JSON from localStorag      // Prepare user data for consistent structure
+      // const userInfo = {
+      //   uid: data.user_id || user?.uid,
+      //   email: data.email || user?.email,
+      //   first_name: data.first_name || userData.first_name,
+      //   last_name: data.last_name || userData.last_name,
+      //   phone: data.phone_number || userData.phone_number || "",
+      //   auth_provider: 'google',
+      //   photoURL: user?.photoURL
+      // };
 const getStoredData = (key) => {
   try {
     const data = localStorage.getItem(key);
@@ -227,56 +236,79 @@ export const useAuthStore = create((set) => ({
       throw error;
     }
   },
-  googleSignup: async () => {
+  googleSignup: async (customUserData = null) => {
     try {
       set({ isLoading: true, error: null });
 
-      console.log("Starting Google authentication...");
+      let userData, user, idToken;
 
-      // Configure popup options for better compatibility
-      const result = await signInWithPopup(auth, provider).catch((error) => {
-        console.error("Google popup error:", error);
-        if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
-          throw new Error("Popup blocked or closed. Please allow popups and try again.");
-        }
-        throw error;
-      });
+      if (customUserData) {
+        // Use provided custom data (for OTP-verified Google users)
+        userData = {
+          ...customUserData,
+          // Ensure the field names match what the backend expects for idToken flow
+          firstName: customUserData.first_name || customUserData.firstName,
+          lastName: customUserData.last_name || customUserData.lastName
+        };
+        console.log("Using custom Google user data:", { ...userData, idToken: '[REDACTED]' });
+        console.log("Full custom data structure:", JSON.stringify(customUserData, null, 2));
+      } else {
+        // Standard Google authentication flow
+        console.log("Starting Google authentication...");
 
-      const user = result.user;
-      console.log("Google authentication successful:", user.email);
+        // Configure popup options for better compatibility
+        const result = await signInWithPopup(auth, provider).catch((error) => {
+          console.error("Google popup error:", error);
+          if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
+            throw new Error("Popup blocked or closed. Please allow popups and try again.");
+          }
+          throw error;
+        });
 
-      // Get ID token
-      const idToken = await user.getIdToken();
-      console.log("ID token obtained successfully");
+        user = result.user;
+        console.log("Google authentication successful:", user.email);
 
-      // Prepare comprehensive user data for backend
-      const userData = {
-        idToken: idToken,
-        email: user.email,
-        firstName: user.displayName?.split(' ')[0] || '',
-        lastName: user.displayName?.split(' ').slice(1).join(' ') || '',
-        photoURL: user.photoURL,
-        uid: user.uid,
-        authProvider: 'google'
-      };
+        // Get ID token
+        idToken = await user.getIdToken();
+        console.log("ID token obtained successfully");
 
-      console.log("Sending data to backend:", { ...userData, idToken: '[REDACTED]' });
+        // Prepare comprehensive user data for backend
+        userData = {
+          idToken: idToken,
+          email: user.email,
+          firstName: user.displayName?.split(' ')[0] || '',    // Regular signup expects firstName
+          lastName: user.displayName?.split(' ').slice(1).join(' ') || '',  // Regular signup expects lastName
+          phone_number: '',  // Add phone_number field for consistency
+          photoURL: user.photoURL,
+          uid: user.uid,
+          authProvider: 'google'
+        };
+
+        console.log("Sending data to backend:", { ...userData, idToken: '[REDACTED]' });
+      }
+
+      // For Google users, always use the regular signup endpoint
+      // The backend handles OTP verification through the otp_verified flag
+      let endpoint = "/users/signup";
+      console.log("Using Google signup endpoint:", endpoint);
 
       // Direct API call with better error handling
-      const response = await api.post("/users/signup", userData);
+      console.log("About to send request to:", endpoint);
+      console.log("Request payload:", JSON.stringify(userData, null, 2));
+      const response = await api.post(endpoint, userData);
       console.log("Backend response:", response.data);
 
       const data = response.data;
 
       // Prepare user data for consistent structure
       const userInfo = {
-        uid: data.user_id || user.uid,
-        email: data.email || user.email,
-        first_name: data.first_name || userData.firstName,
-        last_name: data.last_name || userData.lastName,
-        phone: data.phone_number || "",
+        uid: data.user_id || user?.uid,
+        email: data.email || user?.email,
+        first_name: data.first_name || userData.firstName || userData.first_name,
+        last_name: data.last_name || userData.lastName || userData.last_name,
+        phone: data.phone_number || userData.phone_number || "",
         auth_provider: 'google',
-        photoURL: user.photoURL
+        photoURL: user?.photoURL
       };
 
       // Persist authentication data
@@ -292,6 +324,8 @@ export const useAuthStore = create((set) => ({
       return data;
     } catch (error) {
       console.error("Google signup/login error:", error);
+      console.error("Error response:", error.response?.data);
+      console.error("Error status:", error.response?.status);
       
       let errorMessage = "Google authentication failed. Please try again.";
       
