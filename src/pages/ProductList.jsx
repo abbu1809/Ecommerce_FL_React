@@ -11,9 +11,18 @@ import { useProductStore } from "../store/useProduct";
 
 const ProductList = () => {
   let { category } = useParams();
-  category = category
-    ? category.charAt(0).toUpperCase() + category.slice(1).replace(/s$/, "")
-    : null;
+  // Normalize category to lowercase and handle common variations
+  if (category) {
+    category = category.toLowerCase();
+    // Handle common variations and normalize them
+    if (category === 'mobile' || category === 'mobiles') {
+      category = 'smartphones';
+    } else if (category === 'laptop') {
+      category = 'laptops';
+    } else if (category === 'laptop-accessories') {
+      category = 'laptop-accessories';
+    }
+  }
   const [showFilters, setShowFilters] = useState(false);
   // Filter states
   const [selectedBrands, setSelectedBrands] = useState([]);
@@ -72,12 +81,9 @@ const ProductList = () => {
 
     // Apply category filter from URL if present
     if (category) {
-      // This would use a more sophisticated matching in a real app
-      // (e.g. converting URL-friendly format to display format)
-      const formattedCategory = category.replace("-", " ");
       filteredProducts = filteredProducts.filter(
         (product) =>
-          product.category.toLowerCase() === formattedCategory.toLowerCase()
+          product.category?.toLowerCase() === category.toLowerCase()
       );
     }
 

@@ -10,11 +10,26 @@ import Pagination from "../components/common/Pagination";
 import ProductService from "../services/productService";
 import { FiFilter } from "react-icons/fi";
 
+// Helper function to normalize category names
+const normalizeCategory = (cat) => {
+  if (!cat) return cat;
+  
+  const lowerCat = cat.toLowerCase();
+  // Handle common variations and normalize them
+  if (lowerCat === 'mobile' || lowerCat === 'mobiles') {
+    return 'smartphones';
+  } else if (lowerCat === 'laptop') {
+    return 'laptops';
+  } else if (lowerCat === 'laptop-accessories') {
+    return 'laptop-accessories';
+  }
+  return lowerCat;
+};
+
 const EnhancedProductList = () => {
   let { category } = useParams();
-  category = category
-    ? category.charAt(0).toUpperCase() + category.slice(1).replace(/s$/, "")
-    : null;
+  // Normalize category to lowercase and handle common variations
+  category = normalizeCategory(category);
 
   const [showFilters, setShowFilters] = useState(false);
   const [products, setProducts] = useState([]);
@@ -90,6 +105,7 @@ const EnhancedProductList = () => {
     try {
       let productData;
       if (category && category.toLowerCase() !== 'all') {
+        // Category is already normalized at the top of the component
         productData = await ProductService.getProductsByCategory(category);
       } else {
         productData = await ProductService.getAllProducts();
