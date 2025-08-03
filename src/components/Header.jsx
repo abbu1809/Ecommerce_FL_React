@@ -1068,7 +1068,7 @@ const Header = () => {
 
                       <div className="grid grid-cols-12 gap-4 h-full min-h-[340px]">
                         {/* Left side - Categories with reduced spacing (8 columns) */}
-                        <div className="col-span-8 grid grid-cols-3 gap-4 pr-2">
+                        <div className="col-span-8 grid grid-cols-4 gap-4 pr-2">
                           {activeCategory.subcategories.map((subcategory, index) => (
                             <div key={index} className="space-y-2">
                               <h3 
@@ -1109,7 +1109,7 @@ const Header = () => {
                         </div>
                         
                         {/* Right side - Banners with reduced spacing (4 columns) */}
-                        <div className="col-span-4 pl-4 border-l" style={{ borderColor: "var(--border-primary)" }}>
+                        <div className="col-span-4 pl-4 border-l hidden md:flex md:flex-col" style={{ borderColor: "var(--border-primary)" }}>
                           {(() => {
                             // Get admin-managed banners for this category
                             const adminBanners = getDropdownBanners(activeCategory.name);
@@ -1124,7 +1124,7 @@ const Header = () => {
                             }
                             
                             return (
-                              <div className="space-y-4">
+                              <div className="flex gap-4">
                                 {/* Two banners stacked vertically with proper aspect ratio */}
                                 {banners.slice(0, 2).map((banner, bannerIndex) => (
                                   <Link
@@ -1133,7 +1133,7 @@ const Header = () => {
                                     className="block relative rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
                                     onClick={() => setActiveDropdown(null)}
                                   >
-                                    <div className="aspect-[16/10] w-full relative" style={{
+                                    <div className="aspect-[16/10] w-full h-[400px] relative" style={{
                                       background: `linear-gradient(to bottom right, var(--brand-primary), var(--brand-primary-hover))`
                                     }}>
                                       <img
