@@ -52,7 +52,9 @@ const Orders = () => {
       }
     };
     fetchOrders();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps // Get current delivery status from tracking history
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  
+  // Get current delivery status from tracking history
   const getCurrentDeliveryStatus = (order) => {
     console.log("Getting status for order:", order.order_id, order);
 

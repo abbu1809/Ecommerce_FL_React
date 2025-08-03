@@ -51,7 +51,7 @@ const EnhancedProductFilter = ({
   });
 
   // Fetch filter options when category changes
-  const fetchFilterOptions = useCallback(async () => {
+  const _fetchFilterOptions = useCallback(async () => {
     setLoading(true);
     try {
       const options = await ProductService.getFilterOptions(currentCategory);

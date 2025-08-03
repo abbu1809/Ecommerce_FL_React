@@ -16,8 +16,8 @@ const ProtectedRoute = ({
   const { 
     isAuthenticated, 
     user, 
-    userRole, 
-    permissions,
+    userRole: _userRole, 
+    permissions: _permissions,
     hasPermission,
     hasRole 
   } = useUnifiedAuthStore();

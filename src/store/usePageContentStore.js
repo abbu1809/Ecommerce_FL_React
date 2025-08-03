@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import api, { adminApi } from "../services/api";
+// import api from "../services/api"; // Removed unused import
+import { adminApi } from "../services/api";
 
 export const usePageContentStore = create((set, get) => ({
   // State

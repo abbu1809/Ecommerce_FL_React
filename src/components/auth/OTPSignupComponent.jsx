@@ -16,7 +16,8 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion'; // Used for JSX motion elements
 import { 
   FiMail, 
   FiUser, 

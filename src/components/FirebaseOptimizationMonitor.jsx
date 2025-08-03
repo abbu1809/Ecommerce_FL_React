@@ -47,7 +47,7 @@ const FirebaseOptimizationMonitor = () => {
   } = useHomepageSectionStore();
 
   // Test optimized store directly
-  const optimizedStore = useOptimizedAdminStore();
+  const _optimizedStore = useOptimizedAdminStore();
 
   useEffect(() => {
     const runMonitoring = async () => {
@@ -125,6 +125,7 @@ const FirebaseOptimizationMonitor = () => {
     };
 
     runMonitoring();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Utility functions

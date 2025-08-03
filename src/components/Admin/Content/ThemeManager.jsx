@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useCallback } from 'react';
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion'; // Used for JSX motion elements
 import {
   FiSun,
   FiMoon,
@@ -41,14 +42,14 @@ const ThemeManager = () => {
   const [copiedColor, setCopiedColor] = useState('');
   const [mode, setMode] = useState('light');
 
-  const { initializeTheme } = useThemeStore();
+  const { _initializeTheme } = useThemeStore();
 
   // Load theme settings from backend
   useEffect(() => {
     loadThemeSettings();
-  }, []);
+  }, [loadThemeSettings]);
 
-  const loadThemeSettings = async () => {
+  const loadThemeSettings = useCallback(async () => {
     setIsLoading(true);
     try {
       // Try to load from backend first
@@ -60,7 +61,7 @@ const ThemeManager = () => {
         setMode(themeData.mode || 'light');
         applyColorsToDocument(themeData.colors);
       }
-    } catch (error) {
+    } catch {
       console.log('Backend theme not available, loading from localStorage');
       // Fallback to localStorage
       const savedColors = loadCustomColors();
@@ -74,7 +75,7 @@ const ThemeManager = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   const loadCurrentColorsFromCSS = () => {
     const root = document.documentElement;

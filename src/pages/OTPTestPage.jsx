@@ -7,7 +7,8 @@
  */
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+// eslint-disable-next-line no-unused-vars
+import { motion } from 'framer-motion'; // Used for JSX motion elements
 import { FiMail, FiCheck, FiAlertCircle, FiRefreshCw } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';

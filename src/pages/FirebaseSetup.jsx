@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { migrateProductsToFirebase, createCategories } from '../services/dataMigration';
+import { migrateProductsToFirebase, createCategories as _createCategories } from '../services/dataMigration';
 import { authService } from '../services/optimizedFirebaseService';
 
 const FirebaseSetup = () => {

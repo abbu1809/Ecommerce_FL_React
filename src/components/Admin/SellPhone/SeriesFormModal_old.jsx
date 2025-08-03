@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { FaTimes } from 'react-icons/fa';
-import useAdminSellPhone from '../../../store/Admin/useAdminSellPhone';
 import { FaTimes, FaSpinner } from 'react-icons/fa';
+import useAdminSellPhone from '../../../store/Admin/useAdminSellPhone';
 
 const SeriesFormModal = ({ open, onClose, seriesToEdit, brandId }) => {
   const { addSeries, updateSeries } = useAdminSellPhone();
@@ -185,7 +184,6 @@ const SeriesFormModal = ({ open, onClose, seriesToEdit, brandId }) => {
       </div>
     </div>
   );
-};
 };
 
 SeriesFormModal.propTypes = {

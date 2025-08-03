@@ -60,8 +60,8 @@ const updateDocumentClass = (isDark) => {
 
 if (typeof window !== 'undefined') {
   const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-  mediaQuery.addEventListener('change', (e) => {
-    const { theme, setTheme } = useThemeStore.getState();
+  mediaQuery.addEventListener('change', (_e) => {
+    const { theme } = useThemeStore.getState();
     if (theme === 'system') {
       useThemeStore.getState().setTheme('system');
     }

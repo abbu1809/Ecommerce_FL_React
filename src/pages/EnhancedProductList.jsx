@@ -88,7 +88,7 @@ const EnhancedProductList = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, [category]);
+  }, [fetchProducts, category]);
 
   // Apply filters when currentFilters change
   useEffect(() => {
@@ -100,7 +100,7 @@ const EnhancedProductList = () => {
     setCurrentPage(1);
   }, [currentFilters, searchQuery, category]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
       let productData;
@@ -128,7 +128,7 @@ const EnhancedProductList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [category]);
 
   const applyFiltersAndSearch = useCallback(() => {
     let filtered = [...products];

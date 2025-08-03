@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion'; // Used for JSX motion elements
 import { useNavigate, Link } from "react-router-dom";
 import Button from "./ui/Button";
 import { useBannerStore } from "../store/Admin/useBannerStore";

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   FiTrendingUp,
   FiUsers,
@@ -25,9 +25,9 @@ const OptimizedAdminDashboard = () => {
     if (!dashboard.loading && dashboard.stats.length === 0) {
       loadDashboardData(false);
     }
-  }, []);
+  }, [dashboard.loading, dashboard.stats.length, loadDashboardData]);
 
-  const loadDashboardData = async (forceRefresh = false) => {
+  const loadDashboardData = useCallback(async (forceRefresh = false) => {
     setRefreshing(true);
     try {
       await fetchDashboardData(forceRefresh);
@@ -37,7 +37,7 @@ const OptimizedAdminDashboard = () => {
     } finally {
       setRefreshing(false);
     }
-  };
+  }, [fetchDashboardData]);
 
   // OPTIMIZATION: Memoized stats calculation
   const dashboardStats = useMemo(() => {
