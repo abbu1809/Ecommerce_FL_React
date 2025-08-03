@@ -21,7 +21,7 @@ import TopSellingProductsWidget from "../../components/Admin/Dashboard/TopSellin
 import TopDeliveryMenWidget from "../../components/Admin/Dashboard/TopDeliveryMenWidget";
 import TopCustomersWidget from "../../components/Admin/Dashboard/TopCustomersWidget";
 import AdminAuthDebugger from "../../components/Admin/AdminAuthDebugger";
-import ReportsPanel from "../../components/admin/ReportsPanel";
+import ReportsPanel from "../../components/Admin/ReportsPanel";
 import RecentOrders from "../../components/Admin/Dashboard/RecentOrders";
 import SalesChart from "../../components/Admin/Dashboard/SalesChart";
 import TopProducts from "../../components/Admin/Dashboard/TopProducts";
