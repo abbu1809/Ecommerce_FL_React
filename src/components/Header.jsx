@@ -808,7 +808,7 @@ const Header = () => {
               ></div>
               
               {/* Enhanced Theme Toggle */}
-              <div className="flex flex-col items-center justify-center transition-all duration-300 hover:translate-y-[-2px]">
+              <div className="flex flex-col items-center justify-center transition-all duration-300 hover:translate-y-[-2px] relative z-50">
                 <ThemeToggle />
               </div>
             </div>
