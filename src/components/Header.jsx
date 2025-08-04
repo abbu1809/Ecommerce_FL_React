@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   FiSearch,
   FiShoppingCart,
@@ -18,6 +18,32 @@ import { useWishlistStore } from "../store/useWishlist";
 import { Link, useNavigate } from "react-router-dom";
 import { useProductStore } from "../store/useProduct";
 import { useBannerStore } from "../store/Admin/useBannerStore";
+
+// FIX 1: Add a reusable 'useOutsideClick' hook for clean "click-outside" logic
+const useOutsideClick = (callback) => {
+  const ref = useRef();
+
+  useEffect(() => {
+    const handleClick = (event) => {
+      // Improved outside click detection
+      if (ref.current && !ref.current.contains(event.target)) {
+        // Check if click is on a navigation link - if so, delay the callback
+        if (event.target.closest('a[href]')) {
+          setTimeout(callback, 150);
+        } else {
+          callback();
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClick);
+    return () => {
+      document.removeEventListener('mousedown', handleClick);
+    };
+  }, [ref, callback]);
+
+  return ref;
+};
 
 
 const Header = () => {
@@ -41,7 +67,56 @@ const Header = () => {
   });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  
+  // FIX 2: Refactored state and handlers for a robust Mega Menu
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [closeTimer, setCloseTimer] = useState(null);
+
+  const closeDropdown = useCallback(() => {
+    setActiveDropdown(null);
+  }, []);
+
+  const megaMenuRef = useOutsideClick(closeDropdown);
+
+  const handleDropdownEnter = () => {
+    if (closeTimer) {
+      clearTimeout(closeTimer);
+      setCloseTimer(null);
+    }
+  };
+
+  const handleDropdownLeave = () => {
+    // Longer delay to allow users to navigate to dropdown content
+    const timer = setTimeout(() => {
+      closeDropdown();
+    }, 300);
+    setCloseTimer(timer);
+  };
+
+  const handleDropdownToggle = (categoryId) => {
+    if (activeDropdown === categoryId) {
+      closeDropdown();
+    } else {
+      setActiveDropdown(categoryId);
+    }
+  };
+
+  const handleDropdownKeyDown = (e, categoryId) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleDropdownToggle(categoryId);
+    } else if (e.key === 'Escape') {
+      closeDropdown();
+    }
+  };
+  
+  // FIX 3: Enhanced link click handler that delays dropdown closing to allow navigation
+  const handleLinkClick = () => {
+    // Add small delay to ensure navigation happens before dropdown closes
+    setTimeout(() => {
+      closeDropdown();
+    }, 100);
+  };
 
   // Enhanced mega menu structure matching Poorvika's comprehensive layout
   const megaMenuCategories = [
@@ -323,44 +398,6 @@ const Header = () => {
     },
   ];
 
-  // Enhanced dropdown interactions with keyboard support
-  const handleDropdownClick = (categoryId) => {
-    if (activeDropdown === categoryId) {
-      setActiveDropdown(null); // Close if same dropdown is clicked
-    } else {
-      setActiveDropdown(categoryId); // Open new dropdown
-    }
-  };
-
-  // Enhanced keyboard navigation support
-  const handleDropdownKeyDown = (event, categoryId) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      handleDropdownClick(categoryId);
-    } else if (event.key === 'Escape') {
-      setActiveDropdown(null);
-    }
-  };
-
-  // Optional: Handle dropdown mouse enter/leave for enhanced UX
-  const handleDropdownEnter = (categoryId) => {
-    // Keep dropdown open on mouse enter (prevents accidental closes)
-    if (activeDropdown === categoryId) {
-      // Optional: You can add any hover enhancement logic here
-    }
-  };
-
-  const handleDropdownLeave = () => {
-    // Optional: Add a slight delay before closing to prevent flickering
-    // For now, we'll keep it simple since we're using click-based dropdowns
-    // You can uncomment the timeout below if you want delayed closing
-    // setTimeout(() => {
-    //   if (activeDropdown) {
-    //     setActiveDropdown(null);
-    //   }
-    // }, 200);
-  };
-
   // Fetch product to get categories when component mounts
   useEffect(() => {
     if (!productsInitialized.current) {
@@ -369,7 +406,7 @@ const Header = () => {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Enhanced close suggestions and dropdown when clicking outside
+  // FIX 4: Simplified useEffect with proper dropdown closing
   useEffect(() => {
     const handleClickOutside = (event) => {
       const isClickOutsideDesktop =
@@ -384,16 +421,27 @@ const Header = () => {
         setShowSuggestions(false);
       }
 
-      // Enhanced dropdown closing with better targeting
-      if (!event.target.closest('.dropdown-container') && !event.target.closest('[aria-haspopup="true"]')) {
-        setActiveDropdown(null);
+      // Enhanced dropdown closing with better targeting and navigation link detection
+      const isDropdownArea = event.target.closest('.dropdown-container') || 
+                             event.target.closest('[aria-haspopup="true"]') ||
+                             event.target.closest('.mega-dropdown');
+      
+      const isNavigationLink = event.target.closest('a[href]');
+      
+      if (!isDropdownArea) {
+        if (isNavigationLink) {
+          // Delay closing when clicking navigation links to allow navigation
+          setTimeout(() => closeDropdown(), 100);
+        } else {
+          closeDropdown();
+        }
       }
     };
 
     const handleKeyDown = (event) => {
       // Close dropdown on Escape key
       if (event.key === 'Escape') {
-        setActiveDropdown(null);
+        closeDropdown();
         setShowSuggestions(false);
       }
     };
@@ -405,7 +453,7 @@ const Header = () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [closeDropdown]);
 
   // Update search suggestions when query changes
   useEffect(() => {
@@ -940,7 +988,7 @@ const Header = () => {
                 style={{ position: "relative" }}
               >
                 <button
-                  onClick={() => handleDropdownClick(category.id)}
+                  onClick={() => handleDropdownToggle(category.id)}
                   onKeyDown={(e) => handleDropdownKeyDown(e, category.id)}
                   className="text-sm font-semibold transition-all duration-300 relative group py-2 px-3 flex items-center rounded-lg transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-opacity-50"
                   style={{
@@ -992,7 +1040,7 @@ const Header = () => {
             {/* Browse All Categories Link */}
             <li className="whitespace-nowrap px-3">
               <Link
-                to="/products"
+                to="/category"
                 className="text-sm font-semibold transition-all duration-300 relative group py-2 px-3 rounded-lg transform hover:scale-105"
                 style={{
                   color: "var(--text-primary)",
@@ -1019,7 +1067,8 @@ const Header = () => {
           {/* Premium Poorvika-Style Mega Dropdown Menu - Ultra-Modern Enhanced UI */}
           {activeDropdown && (
             <div
-              className="absolute bg-white shadow-lg border-t-2"
+              ref={megaMenuRef}
+              className="absolute bg-white shadow-lg border-t-2 mega-dropdown"
               style={{
                 backgroundColor: "var(--bg-primary)",
                 borderTopColor: "var(--brand-primary)",
@@ -1035,7 +1084,7 @@ const Header = () => {
                 borderRadius: "0 0 8px 8px",
                 border: "1px solid var(--border-primary)",
               }}
-              onMouseEnter={() => handleDropdownEnter(activeDropdown)}
+              onMouseEnter={handleDropdownEnter}
               onMouseLeave={handleDropdownLeave}
             >
               <div className="px-8 py-6">
@@ -1060,7 +1109,7 @@ const Header = () => {
                             to={activeCategory.path}
                             className="hover:opacity-80 text-sm font-medium transition-opacity"
                             style={{ color: "var(--brand-primary)" }}
-                            onClick={() => setActiveDropdown(null)}
+                            onClick={handleLinkClick}
                           >
                             View All →
                           </Link>
@@ -1098,7 +1147,7 @@ const Header = () => {
                                         e.target.style.color = 'var(--text-secondary)';
                                         e.target.style.backgroundColor = '';
                                       }}
-                                      onClick={() => setActiveDropdown(null)}
+                                      onClick={handleLinkClick}
                                     >
                                       {item.name}
                                     </Link>
@@ -1132,7 +1181,7 @@ const Header = () => {
                                     key={bannerIndex}
                                     to={banner.link || banner.buttonLink || activeCategory.path}
                                     className="block relative rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
-                                    onClick={() => setActiveDropdown(null)}
+                                    onClick={handleLinkClick}
                                   >
                                     <div className="aspect-[16/10] w-full h-[400px] relative" style={{
                                       background: `linear-gradient(to bottom right, var(--brand-primary), var(--brand-primary-hover))`
