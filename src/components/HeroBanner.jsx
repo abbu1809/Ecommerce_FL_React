@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate, Link } from "react-router-dom";
-import Button from "./ui/Button";
+import { useNavigate } from "react-router-dom";
 import { useBannerStore } from "../store/Admin/useBannerStore";
 
 // Fallback images from public folder (used if no banners from database)
@@ -36,58 +35,52 @@ const HeroBanner = () => {
   const { getHeroBanners } = useBannerStore();
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [[page, direction], setPage] = useState([0, 0]);
+  const [direction, setDirection] = useState(1);
 
   // Get hero banners from store or use fallback
   const heroBanners = getHeroBanners();
-  console.log("Hero Banners:", heroBanners);
   const images = heroBanners.length > 0 ? heroBanners : fallbackImages;
+
   // Auto-advance the slider
   useEffect(() => {
-    if (images.length === 0) return; // Don't auto-advance if no images
-
+    if (images.length === 0) return;
     const timer = setTimeout(() => {
-      const newIndex = (currentIndex + 1) % images.length;
-      setPage([newIndex, 1]); // 1 for forward direction
-      setCurrentIndex(newIndex);
+      setDirection(1);
+      setCurrentIndex((prev) => (prev + 1) % images.length);
     }, 5000);
-
     return () => clearTimeout(timer);
   }, [currentIndex, images.length]);
 
   // Handle manual navigation
   const handlePrevious = () => {
-    const newIndex = (currentIndex - 1 + images.length) % images.length;
-    setPage([newIndex, -1]); // -1 for backward direction
-    setCurrentIndex(newIndex);
+    setDirection(-1);
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
   const handleNext = () => {
-    const newIndex = (currentIndex + 1) % images.length;
-    setPage([newIndex, 1]); // 1 for forward direction
-    setCurrentIndex(newIndex);
+    setDirection(1);
+    setCurrentIndex((prev) => (prev + 1) % images.length);
   };
 
   // Handle button click navigation
   const handleButtonClick = (link) => {
     if (link) {
-      // Navigate to the category page or specific route
       navigate(`/category/${link}`);
     }
   };
 
   // Variants for Framer Motion
   const slideVariants = {
-    enter: (direction) => ({
-      x: direction > 0 ? 1000 : -1000,
+    enter: (dir) => ({
+      x: dir > 0 ? 1000 : -1000,
       opacity: 0,
     }),
     center: {
       x: 0,
       opacity: 1,
     },
-    exit: (direction) => ({
-      x: direction < 0 ? 1000 : -1000,
+    exit: (dir) => ({
+      x: dir < 0 ? 1000 : -1000,
       opacity: 0,
     }),
   };
@@ -106,7 +99,7 @@ const HeroBanner = () => {
           style={{
             boxShadow:
               "var(--shadow-large), 0 15px 30px -10px rgba(245, 158, 11, 0.2)",
-            height: "clamp(250px, 40vh, 500px)", // More responsive height for mobile
+            height: "clamp(250px, 40vh, 500px)",
             width: "100%",
             maxHeight: "500px",
             minHeight: "250px",
@@ -115,7 +108,7 @@ const HeroBanner = () => {
           {/* Slider with Framer Motion */}
           <AnimatePresence initial={false} custom={direction}>
             <motion.div
-              key={page}
+              key={currentIndex}
               custom={direction}
               variants={slideVariants}
               initial="enter"
@@ -131,7 +124,7 @@ const HeroBanner = () => {
                 className="w-full h-full object-cover object-center"
                 style={{
                   backgroundColor: images[currentIndex].backgroundColor,
-                  objectFit: "cover", // Ensure proper fitting
+                  objectFit: "cover",
                   objectPosition: "center center",
                 }}
                 loading="eager"
@@ -240,13 +233,13 @@ const HeroBanner = () => {
             </motion.div>
           </AnimatePresence>
           {/* Slider navigation buttons */}
-          <div className="absolute inset-y-0 left-0 flex items-center">
+          <div className="absolute inset-y-0 left-0 flex items-center z-10">
             <motion.button
               initial={{ opacity: 0.6 }}
               whileHover={{ opacity: 1, scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={handlePrevious}
-              className="bg-black/30 hover:bg-black/50 text-white p-2 rounded-r-lg ml-2"
+              className="bg-black/30 hover:bg-black/50 text-white p-2 rounded-r-lg ml-2 z-10"
               aria-label="Previous slide"
             >
               <svg
@@ -265,13 +258,13 @@ const HeroBanner = () => {
               </svg>
             </motion.button>
           </div>
-          <div className="absolute inset-y-0 right-0 flex items-center">
+          <div className="absolute inset-y-0 right-0 flex items-center z-10">
             <motion.button
               initial={{ opacity: 0.6 }}
               whileHover={{ opacity: 1, scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleNext}
-              className="bg-black/30 hover:bg-black/50 text-white p-2 rounded-l-lg mr-2"
+              className="bg-black/30 hover:bg-black/50 text-white p-2 rounded-l-lg mr-2 z-10"
               aria-label="Next slide"
             >
               <svg
@@ -291,13 +284,12 @@ const HeroBanner = () => {
             </motion.button>
           </div>
           {/* Slide indicators */}
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
             {images.map((_, index) => (
               <motion.button
                 key={index}
                 onClick={() => {
-                  const direction = index > currentIndex ? 1 : -1;
-                  setPage([index, direction]);
+                  setDirection(index > currentIndex ? 1 : -1);
                   setCurrentIndex(index);
                 }}
                 className={`h-2.5 rounded-full ${
@@ -310,7 +302,7 @@ const HeroBanner = () => {
               />
             ))}
           </div>
-          {/* Keep the decorative elements */}
+          {/* Decorative elements */}
           <div
             className="absolute top-0 right-0 w-64 h-64 opacity-20 rotate-45 translate-x-20 -translate-y-20 animate-pulse"
             style={{ animationDuration: "5s" }}

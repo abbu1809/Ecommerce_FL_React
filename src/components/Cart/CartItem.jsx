@@ -43,7 +43,7 @@ const CartItem = ({ item, updateQuantity, removeItem }) => {
       <td className="py-6 px-4">
         <div className="flex items-center justify-center">
           <button
-            onClick={() => updateQuantity(item.item_id, -1)}
+            onClick={() => updateQuantity(item.item_id, item.quantity-1)}
             className="flex items-center justify-center w-8 h-8 rounded-md focus:outline-none transition-all duration-200"
             style={{
               backgroundColor: "var(--bg-accent-light)",
@@ -60,7 +60,7 @@ const CartItem = ({ item, updateQuantity, removeItem }) => {
             {item.quantity}
           </span>
           <button
-            onClick={() => updateQuantity(item.item_id, 1)}
+            onClick={() => updateQuantity(item.item_id, item.quantity +1)}
             className="flex items-center justify-center w-8 h-8 rounded-md focus:outline-none transition-all duration-200"
             style={{
               backgroundColor: "var(--bg-accent-light)",

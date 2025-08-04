@@ -19,6 +19,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useProductStore } from "../store/useProduct";
 import { useBannerStore } from "../store/Admin/useBannerStore";
 
+
 const Header = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
@@ -47,68 +48,68 @@ const Header = () => {
     {
       id: 1,
       name: "Mobiles & Accessories",
-      path: "/products/smartphones",
+      path: "/category/smartphones",
       banners: [
         {
           image: "/mobile1.png",
           title: "Latest iPhones",
           subtitle: "Up to 25% OFF",
           buttonText: "Shop Now",
-          link: "/products/smartphones?brand=Apple"
+          link: "/category/smartphones?brand=Apple"
         },
         {
           image: "/accessories.png",
           title: "Mobile Accessories",
           subtitle: "Starting ₹99",
           buttonText: "Explore",
-          link: "/products/accessories"
+          link: "/category/accessories"
         }
       ],
       subcategories: [
         {
           title: "Smartphones",
           items: [
-            { name: "Apple iPhone", path: "/products/smartphones?brand=Apple", hot: true },
-            { name: "Samsung Galaxy", path: "/products/smartphones?brand=Samsung", popular: true },
-            { name: "Xiaomi Redmi", path: "/products/smartphones?brand=MI" },
-            { name: "OnePlus", path: "/products/smartphones?brand=Oneplus" },
-            { name: "Oppo", path: "/products/smartphones?brand=Oppo" },
-            { name: "Vivo", path: "/products/smartphones?brand=Vivo" },
-            { name: "Nothing Phone", path: "/products/smartphones?brand=Nothing", new: true },
-            { name: "Motorola", path: "/products/smartphones?brand=Motorola" },
+            { name: "Apple iPhone", path: "/category/smartphones?brand=Apple", hot: true },
+            { name: "Samsung Galaxy", path: "/category/smartphones?brand=Samsung", popular: true },
+            { name: "Xiaomi Redmi", path: "/category/smartphones?brand=MI" },
+            { name: "OnePlus", path: "/category/smartphones?brand=Oneplus" },
+            { name: "Oppo", path: "/category/smartphones?brand=Oppo" },
+            { name: "Vivo", path: "/category/smartphones?brand=Vivo" },
+            { name: "Nothing Phone", path: "/category/smartphones?brand=Nothing", new: true },
+            { name: "Motorola", path: "/category/smartphones?brand=Motorola" },
           ],
         },
         {
           title: "Mobile Accessories", 
           items: [
-            { name: "Cases & Covers", path: "/products/accessories?type=cases", popular: true },
-            { name: "Screen Protectors", path: "/products/accessories?type=screen-guards" },
-            { name: "Chargers & Cables", path: "/products/accessories?type=chargers" },
-            { name: "Power Banks", path: "/products/accessories?type=powerbanks" },
-            { name: "Mobile Holders", path: "/products/accessories?type=holders" },
-            { name: "Headphones", path: "/products/accessories?type=headphones" },
-            { name: "Memory Cards", path: "/products/accessories?type=memory" },
-            { name: "Bluetooth Speakers", path: "/products/accessories?type=speakers" },
+            { name: "Cases & Covers", path: "/category/accessories?type=cases", popular: true },
+            { name: "Screen Protectors", path: "/category/accessories?type=screen-guards" },
+            { name: "Chargers & Cables", path: "/category/accessories?type=chargers" },
+            { name: "Power Banks", path: "/category/accessories?type=powerbanks" },
+            { name: "Mobile Holders", path: "/category/accessories?type=holders" },
+            { name: "Headphones", path: "/category/accessories?type=headphones" },
+            { name: "Memory Cards", path: "/category/accessories?type=memory" },
+            { name: "Bluetooth Speakers", path: "/category/accessories?type=speakers" },
           ],
         },
         {
           title: "By Price Range",
           items: [
-            { name: "Under ₹15,000", path: "/products/smartphones?price_max=15000" },
-            { name: "₹15,000 - ₹25,000", path: "/products/smartphones?price_min=15000&price_max=25000" },
-            { name: "₹25,000 - ₹50,000", path: "/products/smartphones?price_min=25000&price_max=50000" },
-            { name: "Above ₹50,000", path: "/products/smartphones?price_min=50000", premium: true },
+            { name: "Under ₹15,000", path: "/category/smartphones?price_max=15000" },
+            { name: "₹15,000 - ₹25,000", path: "/category/smartphones?price_min=15000&price_max=25000" },
+            { name: "₹25,000 - ₹50,000", path: "/category/smartphones?price_min=25000&price_max=50000" },
+            { name: "Above ₹50,000", path: "/category/smartphones?price_min=50000", premium: true },
           ],
         },
         {
           title: "Popular Brands",
           items: [
-            { name: "Apple Store", path: "/products/smartphones?brand=Apple", premium: true },
-            { name: "Samsung", path: "/products/smartphones?brand=Samsung" },
-            { name: "Xiaomi", path: "/products/smartphones?brand=MI" },
-            { name: "OnePlus", path: "/products/smartphones?brand=Oneplus" },
-            { name: "Realme", path: "/products/smartphones?brand=Realme" },
-            { name: "iQOO", path: "/products/smartphones?brand=iQOO", hot: true },
+            { name: "Apple Store", path: "/category/smartphones?brand=Apple", premium: true },
+            { name: "Samsung", path: "/category/smartphones?brand=Samsung" },
+            { name: "Xiaomi", path: "/category/smartphones?brand=MI" },
+            { name: "OnePlus", path: "/category/smartphones?brand=Oneplus" },
+            { name: "Realme", path: "/category/smartphones?brand=Realme" },
+            { name: "iQOO", path: "/category/smartphones?brand=iQOO", hot: true },
           ],
         },
       ],
@@ -116,67 +117,67 @@ const Header = () => {
     {
       id: 2,
       name: "Computers & Tablets",
-      path: "/products/laptops",
+      path: "/category/laptops",
       banners: [
         {
           image: "/laptops.png",
           title: "Gaming Laptops",
           subtitle: "Up to 30% OFF",
           buttonText: "Shop Now",
-          link: "/products/laptops?type=gaming"
+          link: "/category/laptops?type=gaming"
         },
         {
           image: "/tablets1.png",
           title: "Premium Tablets", 
           subtitle: "Starting ₹15,999",
           buttonText: "Explore",
-          link: "/products/tablets"
+          link: "/category/tablets"
         }
       ],
       subcategories: [
         {
           title: "Laptops",
           items: [
-            { name: "MacBooks", path: "/products/laptops?brand=Apple", premium: true },
-            { name: "Gaming Laptops", path: "/products/laptops?type=gaming", hot: true },
-            { name: "Business Laptops", path: "/products/laptops?type=business" },
-            { name: "Student Laptops", path: "/products/laptops?type=student" },
-            { name: "2-in-1 Laptops", path: "/products/laptops?type=convertible" },
-            { name: "Ultrabooks", path: "/products/laptops?type=ultrabook" },
-            { name: "Workstations", path: "/products/laptops?type=workstation" },
+            { name: "MacBooks", path: "/category/laptops?brand=Apple", premium: true },
+            { name: "Gaming Laptops", path: "/category/laptops?type=gaming", hot: true },
+            { name: "Business Laptops", path: "/category/laptops?type=business" },
+            { name: "Student Laptops", path: "/category/laptops?type=student" },
+            { name: "2-in-1 Laptops", path: "/category/laptops?type=convertible" },
+            { name: "Ultrabooks", path: "/category/laptops?type=ultrabook" },
+            { name: "Workstations", path: "/category/laptops?type=workstation" },
           ],
         },
         {
           title: "Tablets & iPads",
           items: [
-            { name: "Apple iPad", path: "/products/tablets?brand=Apple", premium: true },
-            { name: "Samsung Galaxy Tab", path: "/products/tablets?brand=Samsung", popular: true },
-            { name: "Xiaomi Pad", path: "/products/tablets?brand=MI" },
-            { name: "OnePlus Pad", path: "/products/tablets?brand=Oneplus", new: true },
-            { name: "Realme Pad", path: "/products/tablets?brand=Realme" },
-            { name: "Lenovo Tab", path: "/products/tablets?brand=Lenovo" },
+            { name: "Apple iPad", path: "/category/tablets?brand=Apple", premium: true },
+            { name: "Samsung Galaxy Tab", path: "/category/tablets?brand=Samsung", popular: true },
+            { name: "Xiaomi Pad", path: "/category/tablets?brand=MI" },
+            { name: "OnePlus Pad", path: "/category/tablets?brand=Oneplus", new: true },
+            { name: "Realme Pad", path: "/category/tablets?brand=Realme" },
+            { name: "Lenovo Tab", path: "/category/tablets?brand=Lenovo" },
           ],
         },
         {
           title: "Computer Accessories",
           items: [
-            { name: "Wireless Mouse", path: "/products/accessories?type=mouse" },
-            { name: "Mechanical Keyboards", path: "/products/accessories?type=keyboards", popular: true },
-            { name: "Laptop Bags", path: "/products/accessories?type=bags" },
-            { name: "Laptop Stands", path: "/products/accessories?type=stands" },
-            { name: "Webcams", path: "/products/accessories?type=webcams" },
-            { name: "USB Hubs", path: "/products/accessories?type=hubs" },
+            { name: "Wireless Mouse", path: "/category/accessories?type=mouse" },
+            { name: "Mechanical Keyboards", path: "/category/accessories?type=keyboards", popular: true },
+            { name: "Laptop Bags", path: "/category/accessories?type=bags" },
+            { name: "Laptop Stands", path: "/category/accessories?type=stands" },
+            { name: "Webcams", path: "/category/accessories?type=webcams" },
+            { name: "USB Hubs", path: "/category/accessories?type=hubs" },
           ],
         },
         {
           title: "By Brand",
           items: [
-            { name: "Apple", path: "/products/laptops?brand=Apple", premium: true },
-            { name: "HP", path: "/products/laptops?brand=HP" },
-            { name: "Dell", path: "/products/laptops?brand=Dell" },
-            { name: "Lenovo", path: "/products/laptops?brand=Lenovo" },
-            { name: "Asus", path: "/products/laptops?brand=Asus" },
-            { name: "Acer", path: "/products/laptops?brand=Acer" },
+            { name: "Apple", path: "/category/laptops?brand=Apple", premium: true },
+            { name: "HP", path: "/category/laptops?brand=HP" },
+            { name: "Dell", path: "/category/laptops?brand=Dell" },
+            { name: "Lenovo", path: "/category/laptops?brand=Lenovo" },
+            { name: "Asus", path: "/category/laptops?brand=Asus" },
+            { name: "Acer", path: "/category/laptops?brand=Acer" },
           ],
         },
       ],
@@ -184,19 +185,19 @@ const Header = () => {
     {
       id: 3,
       name: "TV & Audio",
-      path: "/products/televisions",
+      path: "/category/televisions",
       banners: [
         {
           image: "/tv1.png",
           title: "Smart TVs",
           subtitle: "Up to 40% OFF",
-          link: "/products/televisions"
+          link: "/category/televisions"
         },
         {
           image: "/accessories.png",
           title: "Audio Devices",
           subtitle: "Premium Sound",
-          link: "/products/audio"
+          link: "/category/audio"
         }
       ],
       subcategories: [
@@ -205,25 +206,25 @@ const Header = () => {
           items: [
             {
               name: "Xiaomi Smart TV",
-              path: "/products/televisions?brand=Xiaomi",
+              path: "/category/televisions?brand=Xiaomi",
               brands: ["Xiaomi"],
             },
             {
               name: "Mi TV",
-              path: "/products/televisions?brand=Mi",
+              path: "/category/televisions?brand=Mi",
               brands: ["Mi"],
             },
             {
               name: "Cellecor TV",
-              path: "/products/televisions?brand=Cellecor",
+              path: "/category/televisions?brand=Cellecor",
               brands: ["Cellecor"],
             },
-            { name: "4K TVs", path: "/products/televisions?resolution=4K" },
+            { name: "4K TVs", path: "/category/televisions?resolution=4K" },
             {
               name: "Full HD TVs",
-              path: "/products/televisions?resolution=Full HD",
+              path: "/category/televisions?resolution=Full HD",
             },
-            { name: "Android TVs", path: "/products/televisions?os=Android" },
+            { name: "Android TVs", path: "/category/televisions?os=Android" },
           ],
         },
         {
@@ -231,17 +232,17 @@ const Header = () => {
           items: [
             {
               name: "Bluetooth Speakers",
-              path: "/products/speakers?type=bluetooth",
+              path: "/category/speakers?type=bluetooth",
             },
             {
               name: "Wireless Speakers",
-              path: "/products/speakers?type=wireless",
+              path: "/category/speakers?type=wireless",
             },
             {
               name: "Portable Speakers",
-              path: "/products/speakers?type=portable",
+              path: "/category/speakers?type=portable",
             },
-            { name: "Home Audio", path: "/products/speakers?type=home-audio" },
+            { name: "Home Audio", path: "/category/speakers?type=home-audio" },
           ],
         },
         {
@@ -249,32 +250,32 @@ const Header = () => {
           items: [
             {
               name: "JBL",
-              path: "/products/speakers?brand=JBL",
+              path: "/category/speakers?brand=JBL",
               brands: ["JBL"],
             },
             {
               name: "boAt",
-              path: "/products/speakers?brand=Boat",
+              path: "/category/speakers?brand=Boat",
               brands: ["Boat"],
             },
             {
               name: "Zebronics",
-              path: "/products/speakers?brand=Zebronics",
+              path: "/category/speakers?brand=Zebronics",
               brands: ["Zebronics"],
             },
             {
               name: "Digitek",
-              path: "/products/speakers?brand=Digiteck",
+              path: "/category/speakers?brand=Digiteck",
               brands: ["Digiteck"],
             },
             {
               name: "Edifier",
-              path: "/products/speakers?brand=Edifier",
+              path: "/category/speakers?brand=Edifier",
               brands: ["Edifier"],
             },
             {
               name: "Ultra Prolink",
-              path: "/products/speakers?brand=Ultra Prolink",
+              path: "/category/speakers?brand=Ultra Prolink",
               brands: ["Ultra Prolink"],
             },
           ],
@@ -284,38 +285,38 @@ const Header = () => {
     {
       id: 4,
       name: "Smart Technology",
-      path: "/products/smartwatches",
+      path: "/category/Smart Technology",
       banners: [
         {
           image: "/accessories.png",
           title: "Smart Watches",
           subtitle: "Latest Collection",
-          link: "/products/smartwatches"
+          link: "/category/smartwatches"
         },
         {
           image: "/mobile1.png",
           title: "Wireless Earbuds",
           subtitle: "Premium Audio",
-          link: "/products/earbuds"
+          link: "/category/earbuds"
         }
       ],
       subcategories: [
         {
           title: "Wearables",
           items: [
-            { name: "Smartwatches", path: "/products/smartwatches" },
-            { name: "Fitness Bands", path: "/products/fitness-bands" },
-            { name: "Wireless Earbuds", path: "/products/earbuds" },
-            { name: "Smart Rings", path: "/products/smart-rings" },
+            { name: "Smartwatches", path: "/category/smartwatches" },
+            { name: "Fitness Bands", path: "/category/fitness-bands" },
+            { name: "Wireless Earbuds", path: "/category/earbuds" },
+            { name: "Smart Rings", path: "/category/smart-rings" },
           ],
         },
         {
           title: "Smart Home",
           items: [
-            { name: "Smart Speakers", path: "/products/smart-speakers" },
-            { name: "Smart Lights", path: "/products/smart-lights" },
-            { name: "Smart Plugs", path: "/products/smart-plugs" },
-            { name: "Security Cameras", path: "/products/security-cameras" },
+            { name: "Smart Speakers", path: "/category/smart-speakers" },
+            { name: "Smart Lights", path: "/category/smart-lights" },
+            { name: "Smart Plugs", path: "/category/smart-plugs" },
+            { name: "Security Cameras", path: "/category/security-cameras" },
           ],
         },
       ],
@@ -360,7 +361,7 @@ const Header = () => {
     // }, 200);
   };
 
-  // Fetch products to get categories when component mounts
+  // Fetch product to get categories when component mounts
   useEffect(() => {
     if (!productsInitialized.current) {
       productsInitialized.current = true;
@@ -808,7 +809,7 @@ const Header = () => {
               ></div>
               
               {/* Enhanced Theme Toggle */}
-              <div className="flex flex-col items-center justify-center transition-all duration-300 hover:translate-y-[-2px]">
+              <div className="flex flex-col items-center justify-center transition-all duration-300 hover:translate-y-[-2px]  ">
                 <ThemeToggle />
               </div>
             </div>
