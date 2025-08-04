@@ -92,7 +92,7 @@ const ThemeToggle = () => {
               boxShadow: "var(--shadow-large)"
             }}
           >
-            {themes.map(({ value, icon: _Icon, label }) => (
+            {themes.map(({ value, icon: Icon, label }) => (
               <motion.button
                 key={value}
                 onClick={() => handleThemeSelect(value)}
