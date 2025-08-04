@@ -19,6 +19,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useProductStore } from "../store/useProduct";
 import { useBannerStore } from "../store/Admin/useBannerStore";
 
+
 const Header = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
@@ -360,7 +361,7 @@ const Header = () => {
     // }, 200);
   };
 
-  // Fetch products to get categories when component mounts
+  // Fetch product to get categories when component mounts
   useEffect(() => {
     if (!productsInitialized.current) {
       productsInitialized.current = true;
