@@ -476,8 +476,7 @@ const ImageCropper = ({
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
                     <label 
-                      className="block text-sm font-medium mb-2 flex items-center gap-1"
-                      style={{ color: 'var(--text-primary)' }}
+                      className="text-sm font-medium mb-2 flex items-center gap-1 text-gray-700"
                     >
                       <FiMove size={14} />
                       X Position ({Math.round(Math.max(0, Math.min(crop.x, 100 - crop.width)))}%)
@@ -500,8 +499,7 @@ const ImageCropper = ({
                   </div>
                   <div>
                     <label 
-                      className="block text-sm font-medium mb-2 flex items-center gap-1"
-                      style={{ color: 'var(--text-primary)' }}
+                      className="text-sm font-medium mb-2 flex items-center gap-1 text-gray-700"
                     >
                       <FiMove size={14} />
                       Y Position ({Math.round(Math.max(0, Math.min(crop.y, 100 - crop.height)))}%)
@@ -524,8 +522,7 @@ const ImageCropper = ({
                   </div>
                   <div>
                     <label 
-                      className="block text-sm font-medium mb-2 flex items-center gap-1"
-                      style={{ color: 'var(--text-primary)' }}
+                      className="text-sm font-medium mb-2 flex items-center gap-1 text-gray-700"
                     >
                       <FiMaximize size={14} />
                       Width ({Math.round(Math.max(10, Math.min(crop.width, 100 - crop.x)))}%)
@@ -548,8 +545,7 @@ const ImageCropper = ({
                   </div>
                   <div>
                     <label 
-                      className="block text-sm font-medium mb-2 flex items-center gap-1"
-                      style={{ color: 'var(--text-primary)' }}
+                      className="text-sm font-medium mb-2 flex items-center gap-1 text-gray-700"
                     >
                       <FiMaximize size={14} />
                       Height ({Math.round(Math.max(10, Math.min(crop.height, 100 - crop.y)))}%)

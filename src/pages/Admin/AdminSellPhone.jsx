@@ -21,7 +21,7 @@ const AdminSellPhone = () => {
   // Navigation state for catalog management
   const [selectedBrandId, setSelectedBrandId] = useState(null);
   const [selectedSeriesId, setSelectedSeriesId] = useState(null);
-  const [selectedModel, setSelectedModel] = useState(null);
+  const [_selectedModel, setSelectedModel] = useState(null);
     // Modal states
   const [showBrandModal, setShowBrandModal] = useState(false);
   const [showSeriesModal, setShowSeriesModal] = useState(false);
@@ -43,17 +43,17 @@ const AdminSellPhone = () => {
     fetchFaq,
     updateInquiryStatus,
     deleteInquiry,
-    addBrand,
-    updateBrand,
+    addBrand: _addBrand,
+    updateBrand: _updateBrand,
     deleteBrand,
-    addSeries,
-    updateSeries,
+    addSeries: _addSeries,
+    updateSeries: _updateSeries,
     deleteSeries,
-    addModel,
-    updateModel,
+    addModel: _addModel,
+    updateModel: _updateModel,
     deleteModel,
-    addFaq,
-    updateFaq,
+    addFaq: _addFaq,
+    updateFaq: _updateFaq,
     deleteFaq,
   } = useAdminSellPhone();
 

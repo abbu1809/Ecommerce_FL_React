@@ -24,9 +24,9 @@ const AdminUsers = () => {
 
   const { 
     users, 
-    pagination,
+    pagination: _pagination,
     fetchUsers, 
-    loadMoreUsers 
+    loadMoreUsers: _loadMoreUsers 
   } = useOptimizedAdminStore();
   const { list: userList, loading } = users;
 

@@ -108,7 +108,7 @@ const DeliveryAssignmentList = () => {
       assignments,
       filteredAssignments
     );
-  }, [assignedDeliveries, formatAddress]);
+  }, [assignedDeliveries, formatAddress, assignments, filteredAssignments]);
 
   const getPriority = (delivery) => {
     // Determine priority based on delivery data - can be customized

@@ -85,7 +85,7 @@ const VariantStockModal = ({ isOpen, onClose, product }) => {
     return variants.reduce((total, variant) => total + (variant.stock || 0), 0);
   };
 
-  const getVariantDisplayName = (variant) => {
+  const _getVariantDisplayName = (variant) => {
     const attributes = [];
 
     // Common variant attributes to display

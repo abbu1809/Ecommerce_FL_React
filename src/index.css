@@ -222,13 +222,27 @@ button:hover {
 
 /* Fix for transparent hover effects */
 .hover\:bg-white\/80:hover {
-  background-color: color-mix(in srgb, var(--bg-primary) 80%, transparent) !important;
+  background-color: rgba(255, 255, 255, 0.8) !important;
   color: var(--text-primary) !important;
 }
 
+/* Modern browsers with color-mix support */
+@supports (background-color: color-mix(in srgb, white 80%, transparent)) {
+  .hover\:bg-white\/80:hover {
+    background-color: color-mix(in srgb, var(--bg-primary) 80%, transparent) !important;
+  }
+}
+
 .dark .hover\:bg-white\/80:hover {
-  background-color: color-mix(in srgb, var(--bg-secondary) 80%, transparent) !important;
+  background-color: rgba(30, 41, 59, 0.8) !important;
   color: var(--text-primary) !important;
+}
+
+/* Modern browsers with color-mix support */
+@supports (background-color: color-mix(in srgb, white 80%, transparent)) {
+  .dark .hover\:bg-white\/80:hover {
+    background-color: color-mix(in srgb, var(--bg-secondary) 80%, transparent) !important;
+  }
 }
 
 .dark .text-gray-900 {
@@ -311,7 +325,20 @@ button:hover {
 
   .no-scrollbar {
     -ms-overflow-style: none; 
-    scrollbar-width: none; 
+  }
+  
+  /* Modern browsers with scrollbar-width support */
+  @supports (scrollbar-width: none) {
+    .no-scrollbar {
+      scrollbar-width: none; 
+    }
+  }
+  
+  /* Fallback for browsers that don't support scrollbar-width */
+  @supports not (scrollbar-width: none) {
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
   }
   
   .line-clamp-2 {
@@ -394,9 +421,32 @@ button:hover {
     background: #a8a8a8;
   }
 
-  .custom-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: #c1c1c1 #f1f1f1;
+  /* Modern browsers with scrollbar properties support */
+  @supports (scrollbar-width: thin) {
+    .custom-scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: #c1c1c1 #f1f1f1;
+    }
+  }
+  
+  /* Fallback for browsers that don't support scrollbar properties */
+  @supports not (scrollbar-width: thin) {
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
   }
  
   .transition-standard {

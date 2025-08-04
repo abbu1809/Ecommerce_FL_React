@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion'; // Used for JSX motion elements
+import { useNavigate, Link } from "react-router-dom";
+import Button from "./ui/Button";
 import { useBannerStore } from "../store/Admin/useBannerStore";
 
 // Fallback images from public folder (used if no banners from database)

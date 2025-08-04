@@ -48,7 +48,7 @@ const SearchResults = () => {
   };
 
   // Toggle storage filter
-  const toggleStorageFilter = (storage) => {
+  const _toggleStorageFilter = (storage) => {
     if (selectedStorage.includes(storage)) {
       setSelectedStorage(selectedStorage.filter((item) => item !== storage));
     } else {
@@ -57,7 +57,7 @@ const SearchResults = () => {
   };
 
   // Toggle RAM filter
-  const toggleRAMFilter = (ram) => {
+  const _toggleRAMFilter = (ram) => {
     if (selectedRAM.includes(ram)) {
       setSelectedRAM(selectedRAM.filter((item) => item !== ram));
     } else {
@@ -66,7 +66,7 @@ const SearchResults = () => {
   };
 
   // Toggle color filter
-  const toggleColorFilter = (color) => {
+  const _toggleColorFilter = (color) => {
     if (selectedColors.includes(color)) {
       setSelectedColors(selectedColors.filter((item) => item !== color));
     } else {
@@ -75,7 +75,7 @@ const SearchResults = () => {
   };
 
   // Toggle category filter
-  const toggleCategoryFilter = (category) => {
+  const _toggleCategoryFilter = (category) => {
     if (selectedCategories.includes(category)) {
       setSelectedCategories(
         selectedCategories.filter((item) => item !== category)

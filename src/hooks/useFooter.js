@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import api, { adminApi } from "../services/api";
+// import api from "../services/api"; // Removed unused import
+import { adminApi } from "../services/api";
 import { usePageContentStore } from "../store/usePageContentStore";
 
 const useFooter = () => {

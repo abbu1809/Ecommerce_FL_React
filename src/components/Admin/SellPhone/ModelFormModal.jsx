@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { FiPlus, FiTrash2, FiX, FiLoader } from 'react-icons/fi';
 import useAdminSellPhoneStore from '../../../store/Admin/useAdminSellPhone';
 
-const ModelFormModal = ({ open, onClose, brandId, seriesId, modelToEdit }) => {
+const ModelFormModal = ({ open, onClose, _brandId, seriesId, modelToEdit }) => {
   const { addModel, updateModel } = useAdminSellPhoneStore();
   
   const [formData, setFormData] = useState({

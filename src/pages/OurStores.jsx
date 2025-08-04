@@ -14,7 +14,7 @@ const OurStores = () => {
   const [selectedCity, setSelectedCity] = useState("all");
   const [stores, setStores] = useState([]);
   const [cities, setCities] = useState(["all"]);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
 
   const breadcrumbs = [
     { label: "Home", link: ROUTES.HOME },

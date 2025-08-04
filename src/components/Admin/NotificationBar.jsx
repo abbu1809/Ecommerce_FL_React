@@ -185,7 +185,7 @@ const NotificationBar = () => {
   );
 
   // Dropdown component
-  const NotificationDropdown = ({ notifications, category, isOpen, onMarkAsRead, onMarkAllAsRead, onViewAll }) => {
+  const NotificationDropdown = ({ notifications, category, isOpen, _onMarkAsRead, onMarkAllAsRead, onViewAll }) => {
     if (!isOpen) return null;
 
     return (
@@ -343,7 +343,7 @@ const NotificationBar = () => {
   return (
     <div 
       ref={dropdownRef}
-      className="relative sticky top-0 z-40 border-b"
+      className="sticky top-0 z-40 border-b"
       style={{
         backgroundColor: 'var(--bg-primary)',
         borderColor: 'var(--border-light)',

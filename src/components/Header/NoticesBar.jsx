@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import {/* motion,*/ AnimatePresence } from 'framer-motion';
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion'; // Used for JSX motion elements
 import { FiX, FiExternalLink, FiInfo } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 

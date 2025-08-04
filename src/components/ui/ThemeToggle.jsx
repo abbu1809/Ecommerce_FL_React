@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion'; // Used for JSX motion elements
 import { FiSun, FiMoon, FiMonitor, FiChevronDown } from 'react-icons/fi';
 import useThemeStore from '../../store/useTheme';
 
@@ -91,7 +92,7 @@ const ThemeToggle = () => {
               boxShadow: "var(--shadow-large)"
             }}
           >
-            {themes.map(({ value, icon: Icon, label }) => (
+            {themes.map(({ value, icon: _Icon, label }) => (
               <motion.button
                 key={value}
                 onClick={() => handleThemeSelect(value)}

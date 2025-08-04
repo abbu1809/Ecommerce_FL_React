@@ -134,7 +134,7 @@ const Footer = () => {
       ]);
       
   // Include both standard footer policy links and any custom pages that might be legal documents
-  const footerPolicyLinks = [
+  const _footerPolicyLinks = [
     ...(footerData && Array.isArray(footerData.footer_policy_links)
       ? footerData.footer_policy_links.filter((link) => link && link.enabled)
       : [

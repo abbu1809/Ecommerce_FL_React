@@ -75,7 +75,7 @@ const useUnifiedAuthStore = create((set, get) => ({
         });
         return { success: false, error: response.error };
       }
-    } catch (error) {
+    } catch {
       const errorMsg = 'Login failed. Please try again.';
       set({ 
         isLoading: false, 
@@ -120,7 +120,7 @@ const useUnifiedAuthStore = create((set, get) => ({
         });
         return { success: false, error: response.error };
       }
-    } catch (error) {
+    } catch {
       const errorMsg = 'Registration failed. Please try again.';
       set({ 
         isLoading: false, 
@@ -179,7 +179,7 @@ const useUnifiedAuthStore = create((set, get) => ({
         
         return { success: false, error: response.error };
       }
-    } catch (error) {
+    } catch {
       const errorMsg = 'Failed to refresh profile';
       set({ isLoading: false, error: errorMsg });
       return { success: false, error: errorMsg };
