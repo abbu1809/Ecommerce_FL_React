@@ -88,7 +88,9 @@ const ThemeToggle = () => {
               boxShadow: "var(--shadow-large)"
             }}
           >
+
             {/* FIX: Changed 'icon: _Icon' to 'icon: Icon' to match the usage below */}
+
             {themes.map(({ value, icon: Icon, label }) => (
               <motion.button
                 key={value}
